@@ -71,6 +71,3 @@ elif platform == "darwin":
 
 #Build lib
 env.SharedLibrary(lib_name, source_files, LIBS=libs_name,LIBPATH=libs_path)
-
-#ecad test
-SConscript('test/SConscript', exports='env')

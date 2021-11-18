@@ -30,7 +30,7 @@ main_env.Append(CPPPATH=[
 # SCONS scripts to build
 build_scripts = [
     'src/SConscript',  
-    'src/test/SConscript'
+    'test/SConscript'
 ]
 
 for script in build_scripts:

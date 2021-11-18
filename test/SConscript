@@ -3,7 +3,7 @@ import sys
 from sys import platform
 Import('env')
 
-program_name ='../../../build/ECadTest.exe'
+program_name ='../build/ECadTest.exe'
 
 source_files = [
     'UnitTest.cpp'
@@ -17,7 +17,7 @@ libs_name = [
 
 libs_path = [
     '/usr/local/lib',
-    '../../../build',
+    '../build',
 ]
 
 if platform == "linux" or platform == "linux2" :

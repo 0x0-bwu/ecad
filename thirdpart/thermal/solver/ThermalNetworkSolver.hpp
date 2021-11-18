@@ -1,8 +1,8 @@
 #ifndef THERMAL_SOLVER_THERMALNETWORKSOLVER_HPP
 #define THERMAL_SOLVER_THERMALNETWORKSOLVER_HPP
+#include "thermal/model/ThermalNetwork.hpp"
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
-#include "model/ThermalNetwork.hpp"
 #include <memory>
 
 //#define MFSOLVER_SUPPORT

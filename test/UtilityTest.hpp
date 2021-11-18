@@ -59,8 +59,8 @@ test_suite * create_ecad_utility_test_suite()
 {
     test_suite * utility_suite = BOOST_TEST_SUITE("s_utility_test");
     //
-    //utility_suite->add(BOOST_TEST_CASE(&t_flatten_utility));//wbtest
-    //utility_suite->add(BOOST_TEST_CASE(&t_connectivity_extraction));//wbtest
+    utility_suite->add(BOOST_TEST_CASE(&t_flatten_utility));
+    utility_suite->add(BOOST_TEST_CASE(&t_connectivity_extraction));
     //
     return utility_suite;
 }
