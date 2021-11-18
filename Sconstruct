@@ -23,8 +23,8 @@ main_env.Append(CXXFLAGS=[
 main_env.Append(CPPPATH=[
     '/usr/include',
     cwd + '/src',
-    cwd + '/thirdparty',
-    cwd + '/thirdparty/eigen3',
+    cwd + '/thirdpart',
+    cwd + '/thirdpart/eigen3',
 ])
 
 # SCONS scripts to build

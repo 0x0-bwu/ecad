@@ -1,6 +1,6 @@
 #ifndef ECAD_EDATAMGR_H
 #define ECAD_EDATAMGR_H
-#include "geometry/Geometries.hpp"
+#include "generic/geometry/Geometries.hpp"
 #include "ECadCommon.h"
 #include "ETransform.h"
 #include "ECadDef.h"
