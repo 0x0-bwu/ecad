@@ -1,0 +1,30 @@
+import os
+import sys
+from sys import platform
+Import('env')
+
+program_name ='../../../build/ECadTest.exe'
+
+source_files = [
+    'UnitTest.cpp'
+]
+
+libs_name = [
+    'Ecad',
+    'boost_serialization',
+    'pthread'
+]
+
+libs_path = [
+    '/usr/local/lib',
+    '../../../build',
+]
+
+if platform == "linux" or platform == "linux2" :
+    libs_path.append('/usr/lib/x86_64-linux-gnu')
+    libs_name.append('png')
+elif platform == "darwin":
+    libs_name.append('png')
+#elif platform == "win32" :
+
+env.Program(program_name,source_files,LIBS=libs_name,LIBPATH=libs_path)

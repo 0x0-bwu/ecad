@@ -1,0 +1,40 @@
+#ifndef ECAD_EUIDGENERATOR_H
+#define ECAD_EUIDGENERATOR_H
+#include "ECadCommon.h"
+#include <atomic>
+namespace ecad {
+
+using EUid = int32_t;
+class ECAD_API EUidGenerator
+{
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    
+    template <typename Archive>
+    void save(Archive & ar, const unsigned int version) const
+    {
+        ECAD_UNUSED(version)
+        EUid uid = m_uid.load();
+        ar & boost::serialization::make_nvp("uid", uid);
+    }
+
+    template <typename Archive>
+    void load(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        EUid uid;
+        ar & boost::serialization::make_nvp("uid", uid);
+        m_uid.store(uid);
+    }
+
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+public:
+    EUid GetNextUid() { return m_uid++; }
+    void Reset() { m_uid.store(0); }
+private:
+    std::atomic_int32_t m_uid = 0;
+};
+
+}//namespace ecad
+#endif//ECAD_EUIDGENERATOR_H

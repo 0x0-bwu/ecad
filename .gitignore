@@ -1,0 +1,8 @@
+#ignore files
+*.o
+*.os
+*.a
+*.so
+*.exe
+build
+.sconsign.dblite

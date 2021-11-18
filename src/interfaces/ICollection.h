@@ -1,0 +1,15 @@
+#ifndef ECAD_ICOLLECTION_H
+#define ECAD_ICOLLECTION_H
+#include "ECadCommon.h"
+#include "Protocol.h"
+namespace ecad {
+class ECAD_API ICollection : public Clonable<ICollection>
+{
+    ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
+public:
+    virtual ~ICollection() = default;
+    virtual size_t Size() const = 0;
+};
+}//namespace ecad
+ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ICollection)
+#endif//ECAD_ICOLLECTION_H

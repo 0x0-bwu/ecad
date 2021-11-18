@@ -1,0 +1,38 @@
+
+import os
+import sys
+from sys import platform
+
+cwd = os.getcwd()
+
+#Environment
+main_env = Environment()
+
+# Compile flags
+main_env.Append(CXXFLAGS=[
+    "-g",
+    "-Wall",
+    "-w",
+    "-Wl,-rpath,\$$ORIGIN",
+    "-std=c++17",
+    "-fopenmp",
+    "-lpthread"
+])
+
+# Include dirs
+main_env.Append(CPPPATH=[
+    '/usr/include',
+    cwd + '/src',
+    cwd + '/thirdparty',
+    cwd + '/thirdparty/eigen3',
+])
+
+# SCONS scripts to build
+build_scripts = [
+    'src/SConscript',  
+    'src/test/SConscript'
+]
+
+for script in build_scripts:
+    env = main_env.Clone()
+    SConscript(script, exports='env')
