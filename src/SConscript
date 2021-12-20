@@ -3,7 +3,8 @@ import os
 import sys
 from sys import platform
 
-lib_name='../build/Ecad'
+build_dir = env['BUILDPATH']
+lib_name= build_dir + '/Ecad'
 
 #Source to generate lib
 source_files = [

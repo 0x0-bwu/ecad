@@ -2,3 +2,6 @@
 	path = thirdpart/generic
 	url = git@github.com:Draaaaaaven/generic.git
 	branch = dev
+[submodule "thirdpart/internal"]
+	path = thirdpart/internal
+	url = git@github.com:Draaaaaaven/internal.git

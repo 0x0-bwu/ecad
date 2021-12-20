@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <list>
-namespace generic { namespace thread { class TaskNode; class TaskFlow; } }
+namespace generic { namespace thread { namespace taskflow { class TaskNode; class TaskFlow; } } }
 namespace ecad {
 class ICell;
 class IDatabase;
@@ -22,8 +22,8 @@ public:
 using ECellNodeMap = std::unordered_map<Ptr<ICell>, UPtr<ECellNode> >;
 class ECAD_API EFlattenUtility
 {
-    using FlattenNode = generic::thread::TaskNode;
-    using FlattenFlow = generic::thread::TaskFlow;
+    using FlattenNode = generic::thread::taskflow::TaskNode;
+    using FlattenFlow = generic::thread::taskflow::TaskFlow;
 public:
     virtual ~EFlattenUtility() = default;
     bool Flatten(Ptr<IDatabase> database, Ptr<ICell> cell, size_t threads = 1);

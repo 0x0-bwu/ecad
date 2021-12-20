@@ -31,7 +31,7 @@ ECAD_INLINE bool EFlattenUtility::Flatten(Ptr<IDatabase> database, Ptr<ICell> ce
     //     out.close();
     // }
 
-    Executor executor(threads);
+    taskflow::Executor executor(threads);
     return executor.Run(*flattenFlow);
 }
 

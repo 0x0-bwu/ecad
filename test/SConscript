@@ -3,7 +3,8 @@ import sys
 from sys import platform
 Import('env')
 
-program_name ='../build/ECadTest.exe'
+build_dir = env['BUILDPATH']
+program_name = build_dir + '/ECadTest.exe'
 
 source_files = [
     'UnitTest.cpp'
@@ -17,8 +18,11 @@ libs_name = [
 
 libs_path = [
     '/usr/local/lib',
-    '../build',
 ]
+
+libs_path.append(build_dir)
+
+rpath = build_dir
 
 if platform == "linux" or platform == "linux2" :
     libs_path.append('/usr/lib/x86_64-linux-gnu')
@@ -27,4 +31,4 @@ elif platform == "darwin":
     libs_name.append('png')
 #elif platform == "win32" :
 
-env.Program(program_name,source_files,LIBS=libs_name,LIBPATH=libs_path)
+env.Program(program_name,source_files,LIBS=libs_name,LIBPATH=libs_path, RPATH=rpath)

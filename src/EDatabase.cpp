@@ -3,6 +3,7 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 #endif
 
+#include "generic/tools/FileSystem.hpp"
 #include "utility/EFlattenUtility.h"
 #include "EPadstackDefCollection.h"
 #include "ELayerMapCollection.h"
@@ -80,6 +81,10 @@ ECAD_INLINE EDatabase & EDatabase::operator= (const EDatabase & other)
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt) const
 {
+    auto dir = generic::filesystem::DirName(archive);
+    if(!generic::filesystem::PathExists(dir))
+        generic::filesystem::CreateDir(dir);
+
     std::ofstream ofs(archive);
     if(!ofs.is_open()) return false;
     
