@@ -2,5 +2,10 @@
 #define ECAD_TEST_TESTDATA_HPP
 #include "generic/tools/FileSystem.hpp"
 #include <string>
-const std::string testDataPath = generic::filesystem::CurrentPath() + "/test/data";
+namespace ecad_test{
+inline std::string GetTestDataPath()
+{
+    return generic::filesystem::CurrentPath() + "/test/data";;
+}
+}//namespace ecad_test
 #endif//ECAD_TEST_TESTDATA_HPP

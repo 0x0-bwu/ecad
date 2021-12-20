@@ -4,18 +4,17 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
 #include "extension/ECadExtension.h"
+#include "TestData.hpp"
 #include "Interface.h"
 #include "EDataMgr.h"
 using namespace boost::unit_test;
 using namespace ecad;
 
-extern const std::string testDataPath;
-
 void t_extension_dmcdom()
 {
     std::string err;
-    std::string dmc = testDataPath + "/extension/dmcdom/import.dmc";
-    std::string dom = testDataPath + "/extension/dmcdom/import.dom";
+    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
+    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
     auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -38,7 +37,7 @@ void t_extension_dmcdom()
 void t_extension_gds()
 {
     std::string err;
-    std::string gds = testDataPath + "/extension/gdsii/ringo.gds";
+    std::string gds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
     auto database = ext::CreateDatabaseFromGds("test_gds", gds, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);

@@ -12,7 +12,7 @@ namespace euti {
 
 ECAD_INLINE bool EFlattenUtility::Flatten(Ptr<IDatabase> database, Ptr<ICell> cell, size_t threads)
 {
-    ECAD_EFFICIENCY_TRACK("flatten");
+    ECAD_EFFICIENCY_TRACK("flatten")
 
     using namespace ::generic::thread;
     if(nullptr == cell || nullptr == database) return false;

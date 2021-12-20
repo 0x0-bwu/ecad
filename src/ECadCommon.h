@@ -15,9 +15,11 @@
 
 #ifdef ECAD_EFFICIENCY_TRACK_MODE
     #include "generic/tools/Tools.hpp"
+    #define COMBINER(a, b) a ## b
+    #define COMBINE(a, b) COMBINER(a, b)
     #define ECAD_EFFICIENCY_TRACK(task)                                              \
     std::cout << "progress name: " << task << std::endl;                             \
-    generic::tools::ProgressTimer ecadProgressTrackTimer;                            \
+    generic::tools::ProgressTimer COMBINE(__ECADTIMER__,__LINE__);                   \
     /**/
 #else
     #define ECAD_EFFICIENCY_TRACK(task)

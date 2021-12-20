@@ -9,7 +9,7 @@ namespace euti {
 
 ECAD_INLINE void ELayoutConnectivity::ConnectivityExtraction(Ptr<ILayoutView> layout)
 {
-    ECAD_EFFICIENCY_TRACK("layout connectivity extraction");
+    ECAD_EFFICIENCY_TRACK("layout connectivity extraction")
     generic::geometry::ConnectivityExtractor<ECoord> extractor;
 
     //add layers connection

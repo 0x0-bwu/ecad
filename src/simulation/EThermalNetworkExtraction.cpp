@@ -11,6 +11,8 @@ namespace esim {
 
 ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutView> layout)
 {
+    ECAD_EFFICIENCY_TRACK("generate thermal network")
+
     std::string currentPath = generic::filesystem::CurrentPath();
 
     esim::EMetalFractionMappingSettings settings;
@@ -208,7 +210,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
         }
     }
 
-    ECAD_EFFICIENCY_TRACK("thermal network solve");
+    ECAD_EFFICIENCY_TRACK("thermal network solve")
     thermal::solver::ThermalNetworkSolver solver(*m_network);
     auto results = solver.Solve(20);
 

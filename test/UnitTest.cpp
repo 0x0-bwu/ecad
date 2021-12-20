@@ -1,6 +1,5 @@
 #define ECAD_UNIT_TEST
 #include <boost/test/included/unit_test.hpp>
-#include "TestData.hpp"
 #include "ExtensionTest.hpp"
 #include "FunctionTest.hpp"
 #include "SerializationTest.hpp"

@@ -5,18 +5,17 @@
 #include <boost/test/test_tools.hpp>
 #include "generic/geometry/Utility.hpp"
 #include "extension/ECadExtension.h"
+#include "TestData.hpp"
 #include "Interface.h"
 #include "EDataMgr.h"
 using namespace boost::unit_test;
 using namespace ecad;
 
-extern const std::string testDataPath;
-
 void t_flatten_utility()
 {
     std::string err;
     std::string name = "ringo";
-    std::string gds = testDataPath + "/extension/gdsii/ringo.gds";
+    std::string gds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
     auto database = ext::CreateDatabaseFromGds(name, gds, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -39,8 +38,8 @@ void t_flatten_utility()
 void t_connectivity_extraction()
 {
     std::string err;
-    std::string dmc = testDataPath + "/extension/dmcdom/import.dmc";
-    std::string dom = testDataPath + "/extension/dmcdom/import.dom";
+    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
+    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
     auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);

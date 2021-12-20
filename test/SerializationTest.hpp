@@ -3,14 +3,12 @@
 #define BOOST_TEST_INCLUDED
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
-#include "generic/tools/FileSystem.hpp"
 #include "extension/ECadExtension.h"
+#include "TestData.hpp"
 #include "Interface.h"
 #include "EDataMgr.h"
 using namespace boost::unit_test;
 using namespace ecad;
-
-extern const std::string testDataPath;
 
 bool f_serialization_database_varify(SPtr<IDatabase> database)
 {
@@ -37,8 +35,8 @@ void t_boost_serialization()
     using namespace generic::filesystem;
 
     std::string err;
-    std::string dmc = testDataPath + "/extension/dmcdom/import.dmc";
-    std::string dom = testDataPath + "/extension/dmcdom/import.dom";
+    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
+    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
     auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -46,9 +44,9 @@ void t_boost_serialization()
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     BOOST_TEST_MESSAGE("boost serialization supported!"); 
 
-    std::string archive_txt = testDataPath + "/serialization/archive.txt";
-    std::string archive_xml = testDataPath + "/serialization/archive.xml";
-    std::string archive_bin = testDataPath + "/serialization/archive.bin";
+    std::string archive_txt = ecad_test::GetTestDataPath() + "/serialization/archive.txt";
+    std::string archive_xml = ecad_test::GetTestDataPath() + "/serialization/archive.xml";
+    std::string archive_bin = ecad_test::GetTestDataPath() + "/serialization/archive.bin";
 
     if(FileExists(archive_txt)) RemoveFile(archive_txt);
     if(FileExists(archive_xml)) RemoveFile(archive_xml);
