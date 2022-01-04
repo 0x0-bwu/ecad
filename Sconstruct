@@ -4,12 +4,10 @@ import sys
 from sys import platform
 
 cwd = os.getcwd()
-
-#Environment
-main_env = Environment()
+debug_mode = True
 
 # Compile flags
-main_env.Append(CXXFLAGS=[
+cxx_flags = [
     "-g",
     "-Wall",
     "-w",
@@ -17,31 +15,48 @@ main_env.Append(CXXFLAGS=[
     "-std=c++17",
     "-fopenmp",
     "-lpthread"
-])
+]
 
-debug_mode = True
 if debug_mode :
-    main_env.Append(CXXFLAGS=[
+    cxx_flags.append([
         "-g",
         "-O0"
     ])
 else :
-    main_env.Append(CXXFLAGS=[
+    cxx_flags.append([
         "-s",
         "-O0",
         "-DNDEBUG"
     ])
 
 # Include dirs
-main_env.Append(CPPPATH=[
+cpp_path = [
     '/usr/include',
     cwd + '/src',
     cwd + '/thirdpart',
     cwd + '/thirdpart/eigen3',
-])
+]
+
+# Thirdpart
+mfsolver_support = False
+mfsolver_path = os.path.abspath(cwd + '/thirdpart/internal/mfsolver')
+
+if mfsolver_support :
+    cpp_path.append(mfsolver_path + "/mf2/include")
+    cpp_path.append(mfsolver_path + "/mf2/include/core")
 
 # Build dir
-main_env.Append(BUILDPATH=os.path.abspath(cwd + '/build'))
+build_path = os.path.abspath(cwd + '/build')
+
+#Environment
+main_env = Environment()
+main_env.Append(CXXFLAGS=cxx_flags)
+main_env.Append(CPPPATH=cpp_path)
+main_env.Append(BUILDPATH=build_path)
+
+if mfsolver_support :
+    main_env.Append(MFSOLVERSUPPORT=mfsolver_support)
+    main_env.Append(MFSOLVERPATH=mfsolver_path)
 
 # SCONS scripts to build
 build_scripts = [

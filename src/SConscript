@@ -61,6 +61,31 @@ libs_path = [
     '/usr/local/lib',
 ]
 
+# mfsolver
+mfsolver_support = env['MFSOLVERSUPPORT']
+if mfsolver_support :
+    mfsolver_path = env['MFSOLVERPATH']
+    libs_path.append(mfsolver_path + '/mf2/lib')
+    libs_path.append(mfsolver_path + '/mkl/lib')
+
+    libs_name += [
+        'mkl_intel_lp64',
+        'mkl_sequential',
+        'mkl_core',
+        'ifcoremt',
+        'imf',
+        'iomp5',
+        'irc',
+        'intlc',
+        'svml',
+        'cublas',
+        'cublasLt',
+        'cudart',
+        'ansmf',
+        'ngcore'    
+    ]   
+
+
 if platform == "linux" or platform == "linux2" :
     libs_path.append('/usr/lib/x86_64-linux-gnu')
     libs_name.append('png')
@@ -68,7 +93,6 @@ if platform == "linux" or platform == "linux2" :
     libs_name.append('iomp5')
 elif platform == "darwin":
     libs_name.append('png')
-#elif platform == "win32" :
 
 #Build lib
 env.SharedLibrary(lib_name, source_files, LIBS=libs_name,LIBPATH=libs_path)
