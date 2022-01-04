@@ -53,9 +53,9 @@ main_env = Environment()
 main_env.Append(CXXFLAGS=cxx_flags)
 main_env.Append(CPPPATH=cpp_path)
 main_env.Append(BUILDPATH=build_path)
+main_env.Append(MFSOLVERSUPPORT=mfsolver_support)
 
 if mfsolver_support :
-    main_env.Append(MFSOLVERSUPPORT=mfsolver_support)
     main_env.Append(MFSOLVERPATH=mfsolver_path)
 
 # SCONS scripts to build
