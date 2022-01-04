@@ -33,7 +33,7 @@ void t_metal_fraction_mapping()
 
     esim::EMetalFractionMappingSettings settings;
     settings.threads = 16;
-    settings.resolution = 10;//um
+    settings.grid = {50, 50};
     settings.coordUnits = database->GetCoordUnits();
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
 
@@ -62,7 +62,7 @@ void t_metal_fraction_mapping_select_nets()
 
     esim::EMetalFractionMappingSettings settings;
     settings.threads = 16;
-    settings.resolution = 1000;//um
+    settings.grid = {50, 50};
     settings.coordUnits = database->GetCoordUnits();
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
     settings.selectNets.insert(1);

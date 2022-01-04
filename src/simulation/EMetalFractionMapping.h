@@ -52,9 +52,9 @@ struct MetalFractionInfo
 {
     EBox2D origin;
     EBox2D extension;
-    ECoord resolution;
     ECoordUnits coordUnits;
-    std::pair<size_t, size_t> tiles;
+    std::array<size_t, 2> grid;
+    std::array<ECoord, 2> stride;
     std::vector<StackupLayerInfo> layers;
 };
 

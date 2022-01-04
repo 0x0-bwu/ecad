@@ -4,5 +4,7 @@
 *.a
 *.so
 *.exe
+*.png
+*.txt
 build
 .sconsign.dblite

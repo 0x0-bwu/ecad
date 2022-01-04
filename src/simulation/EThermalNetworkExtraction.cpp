@@ -17,7 +17,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
 
     esim::EMetalFractionMappingSettings settings;
     settings.threads = 16;
-    settings.resolution = 200;//um
+    settings.grid = {50, 50};
     settings.regionExtTop = 470;//um
     settings.regionExtBot = 470;//um
     settings.regionExtLeft = 470;//um
@@ -46,7 +46,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     thickness[5] = 0.00020320 * 1e9;
     thickness[6] = 0.00003048 * 1e9;
 
-    auto [nx, ny] = mfInfo->tiles;
+    auto [nx, ny] = mfInfo->grid;
     std::cout << "x: " << nx << ", y: " << ny << std::endl;//wbtest
     size_t nz = (mfInfo->layers).size();
 
@@ -67,8 +67,9 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     double k = 0;
     double area = 0;
     size_t count = 0;
-    double scale = settings.coordUnits.Scale2Unit();
-    double xyLen = settings.resolution * 1e-6;//um2m, wbtest
+    auto m = generic::unit::Length::Meter;
+    double xLen = settings.coordUnits.toUnit(mfInfo->stride[0], m);
+    double yLen = settings.coordUnits.toUnit(mfInfo->stride[1], m);
     for(size_t i = 0; i < size; ++i){
 
         auto modelIndex = GetModelIndex(i);
@@ -89,30 +90,30 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
         if(invalidIndex != xNb){
             if(mfIdx1.isValid()){
                 k += equivK(blockF(mfIdx1));
-                auto zLen = thickness.at(nz - modelIndex.z - 1) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                area += 0.25 * zLen * yLen;
                 count++;
             }
             if(mfIdx4.isValid()){
                 k += equivK(blockF(mfIdx4));
-                auto zLen = thickness.at(nz - modelIndex.z) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                area += 0.25 * zLen * yLen;
                 count++;
             }
             if(mfIdx5.isValid()){
                 k += equivK(blockF(mfIdx5));
-                auto zLen = thickness.at(nz - modelIndex.z - 1) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                area += 0.25 * zLen * yLen;
                 count++;
             }
             if(mfIdx8.isValid()){
                 k += equivK(blockF(mfIdx8));
-                auto zLen = thickness.at(nz - modelIndex.z) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                area += 0.25 * zLen * yLen;
                 count++;
             }
             if(count != 0){
-                k = k / count * xyLen / area;
+                k = k / count * xLen / area;
                 m_network->SetR(i, xNb, k);
             }
         }
@@ -125,30 +126,30 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
         if(invalidIndex != yNb){
             if(mfIdx1.isValid()){
                 k += equivK(blockF(mfIdx1));
-                auto zLen = thickness.at(nz - modelIndex.z - 1) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                area += 0.25 * zLen * xLen;
                 count++;
             }
             if(mfIdx2.isValid()){
                 k += equivK(blockF(mfIdx2));
-                auto zLen = thickness.at(nz - modelIndex.z - 1) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                area += 0.25 * zLen * xLen;
                 count++;
             }
             if(mfIdx3.isValid()){
                 k += equivK(blockF(mfIdx3));
-                auto zLen = thickness.at(nz - modelIndex.z) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                area += 0.25 * zLen * xLen;
                 count++;
             }
             if(mfIdx4.isValid()){
                 k += equivK(blockF(mfIdx4));
-                auto zLen = thickness.at(nz - modelIndex.z) * scale * 1e-6;//um2m,wbtest
-                area += 0.25 * zLen * xyLen;
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                area += 0.25 * zLen * xLen;
                 count++;
             }
             if(count != 0){
-                k = k / count * xyLen / area;
+                k = k / count * yLen / area;
                 m_network->SetR(i, yNb, k);
             }
         }
@@ -161,26 +162,26 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
         if(invalidIndex != zNb){
             if(mfIdx1.isValid()){
                 k += equivK(blockF(mfIdx1));
-                area += 0.25 * xyLen * xyLen;
+                area += 0.25 * xLen * yLen;
                 count++;
             }
             if(mfIdx2.isValid()){
                 k += equivK(blockF(mfIdx2));
-                area += 0.25 * xyLen * xyLen;
+                area += 0.25 * xLen * yLen;
                 count++;
             }
             if(mfIdx6.isValid()){
                 k += equivK(blockF(mfIdx6));
-                area += 0.25 * xyLen * xyLen;
+                area += 0.25 * xLen * yLen;
                 count++;
             }
             if(mfIdx5.isValid()){
                 k += equivK(blockF(mfIdx5));
-                area += 0.25 * xyLen * xyLen;
+                area += 0.25 * xLen * yLen;
                 count++;
             }
             if(count != 0){
-                auto zLen = thickness.at(nz - modelIndex.z - 1) * scale * 1e-6;//um2m,wbtest
+                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
                 k = k / count * zLen / area;
                 m_network->SetR(i, zNb, k);
             }
@@ -194,14 +195,13 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
             m_network->SetHTC(i, htc * m_network->NodeFreedom(i));
     }
 
-
     //heat flux, wbtest
     double totalP = 0.1;//W
     size_t sx = 0.3 * m_modelSize.x, ex = 0.7 * m_modelSize.x;
     size_t sy = 0.3 * m_modelSize.y, ey = 0.7 * m_modelSize.y;
     size_t total = (ex - sx + 1) * (ey - sy + 1);
     double aveP = totalP / total;
-    double aveHF = aveP / (xyLen * xyLen);
+    double aveHF = aveP / (xLen * yLen);
     for(size_t i = sx; i <= ex; ++i){
         for(size_t j = sy; j <= ey; ++j){
             ModelIndex modelIndex{i, j, m_modelSize.z - 1};
@@ -227,14 +227,14 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     auto delta = max - min;
     for(size_t i = 0; i < m_network->Size(); ++i){
         auto modelIndex = GetModelIndex(i);
-        (*htMap)(modelIndex.x, modelIndex.y)[m_modelSize.z - modelIndex.z - 1] = results[i];
-        //(*htMap)(modelIndex.x, modelIndex.y)[modelIndex.z] = (results[i] - min) / delta;//to 0~1
+        // (*htMap)(modelIndex.x, modelIndex.y)[m_modelSize.z - modelIndex.z - 1] = results[i];
+        (*htMap)(modelIndex.x, modelIndex.y)[modelIndex.z] = (results[i] - min) / delta;//to 0~1
     }
 
     auto htMapInfo = *mfInfo;
-    htMapInfo.tiles.first += 1;
-    htMapInfo.tiles.second += 1;
-    std::string resultFile = currentPath + "/test/ecad/testdata/simulation/temperature.txt";
+    htMapInfo.grid[0] += 1;
+    htMapInfo.grid[1] += 1;
+    std::string resultFile = currentPath + "/test/data/simulation/temperature.txt";
     WriteThermalProfile(htMapInfo, *htMap, resultFile);
 
 #if defined(ECAD_DEBUG_MODE) && defined(BOOST_GIL_IO_PNG_SUPPORT)

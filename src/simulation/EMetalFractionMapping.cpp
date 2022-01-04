@@ -8,6 +8,7 @@
 
 #include "generic/geometry/Transform.hpp"
 #include "generic/tools/StringHelper.hpp"
+#include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"
 #include "Interface.h"
 namespace ecad {
@@ -139,21 +140,25 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
     ECAD_EFFICIENCY_TRACK("metal fraction mapping");
     
     m_mfInfo.reset(new MetalFractionInfo);
+    m_mfInfo->grid = m_settings.grid;
     m_mfInfo->coordUnits = m_settings.coordUnits;
-    m_mfInfo->resolution = m_settings.coordUnits.toCoord(m_settings.resolution);
     
     auto boundary = layout->GetBoundary();
     auto bbox = boundary->GetBBox();
 
+    m_mfInfo->origin = bbox;
     bbox[0][0] -= m_settings.coordUnits.toCoord(m_settings.regionExtLeft);
     bbox[0][1] -= m_settings.coordUnits.toCoord(m_settings.regionExtBot);
     bbox[1][0] += m_settings.coordUnits.toCoord(m_settings.regionExtRight);
     bbox[1][1] += m_settings.coordUnits.toCoord(m_settings.regionExtTop);
+    m_mfInfo->stride[0] = std::round(FCoord(bbox.Length()) / m_settings.grid[0]);
+    m_mfInfo->stride[1] = std::round(FCoord(bbox.Width())  / m_settings.grid[1]);
+
+    //update UR bounds
+    bbox[1][0] = bbox[0][0] + m_mfInfo->stride[0] * m_mfInfo->grid[0];
+    bbox[1][1] = bbox[0][1] + m_mfInfo->stride[1] * m_mfInfo->grid[1];
     m_mfInfo->extension = bbox;
-    ECoord stride = m_settings.coordUnits.toCoord(m_settings.resolution);
-    auto [width, height] = LayereMetalFractionMapper::Factory::GetGridMapSize(bbox, stride);
-    m_result.reset(new LayoutMetalFraction(width, height));
-    m_mfInfo->tiles = std::make_pair(width, height);
+    m_result.reset(new LayoutMetalFraction(m_mfInfo->grid[0], m_mfInfo->grid[1]));
 
     auto layerCollection = layout->GetLayerCollection();
     auto layerSize = layerCollection->Size();
@@ -161,7 +166,7 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
     for(size_t i = 0; i < resultSize; ++i)
         (*m_result)[i].assign(layerSize, 0);
 
-    MapCtrl ctrl(bbox, stride, m_settings.threads);
+    MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, m_settings.threads);
     auto layerIter = layout->GetLayerIter();
 
     //stackuplayer
@@ -200,7 +205,7 @@ ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File()
     //ORIGIN     LLX(m)  LLY(m) URX(m) URY(m)
     //EXTENSION  LLX(m)  LLY(m) URX(m) URY(m)
     //TILE       WIDTH   HEIGHT
-    //RESOLUTION RES(m)
+    //RESOLUTION X(m)    Y(m)
     //X Y VALUE1 VALUE2  ...
 
     using namespace generic::format;
@@ -228,13 +233,13 @@ ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File()
     ss << Format2String("%1$12.9f %2$12.9f %3$12.9f %4$12.9f", info.extension[0][0] * scale, info.extension[0][1] * scale,
                                                                info.extension[1][0] * scale, info.extension[1][1] * scale);
     ss << std::endl;
-    ss << "TILE" << sp <<  info.tiles.first << sp << info.tiles.second << std::endl;
-    ss << "RESOLUTION" <<  Format2String("%1$12.9f", info.resolution * scale) << std::endl;
+    ss << "TILE" << sp <<  info.grid[0] << sp << info.grid[1] << std::endl;
+    ss << "RESOLUTION" <<  Format2String("%1$12.9f %2$12.9f", info.stride[0] * scale, info.stride[1] * scale) << std::endl;
 
     ss << std::endl;
     ss << std::setiosflags(std::ios::fixed) << std::setprecision(6);
-    for(size_t i = 0; i < info.tiles.first; ++i){
-        for(size_t j = 0; j < info.tiles.second; ++j){
+    for(size_t i = 0; i < info.grid[0]; ++i){
+        for(size_t j = 0; j < info.grid[1]; ++j){
             ss << i << sp << j;
             for(size_t k = 0; k < layers; ++k){
                 ss << sp << (*m_result)(i, j)[k];
@@ -269,8 +274,12 @@ ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File()
 
 ECAD_INLINE bool WriteThermalProfile(const MetalFractionInfo & info, const LayoutMetalFraction & mf, const std::string & filename)
 {
-    ECAD_ASSERT(info.tiles.first == mf.Width())
-    ECAD_ASSERT(info.tiles.second == mf.Height())
+    ECAD_ASSERT(info.grid[0] == mf.Width())
+    ECAD_ASSERT(info.grid[1] == mf.Height())
+
+    auto dir = generic::filesystem::DirName(filename);
+    if(!generic::filesystem::PathExists(dir))
+        generic::filesystem::CreateDir(dir);
 
     std::ofstream out(filename);
     if(!out.is_open()) return false;
@@ -287,7 +296,7 @@ ECAD_INLINE bool WriteThermalProfile(const MetalFractionInfo & info, const Layou
     out << unit.toUnit(bbox[1][0], um) << sp;
     out << unit.toUnit(bbox[1][1], um) << std::endl;
 
-    out << "# TILE" << sp << info.tiles.first << sp << info.tiles.second << std::endl;
+    out << "# TILE" << sp << info.grid[0] << sp << info.grid[1] << std::endl;
 
     std::string layers;
     auto layerSize = info.layers.size();
@@ -307,8 +316,8 @@ ECAD_INLINE bool WriteThermalProfile(const MetalFractionInfo & info, const Layou
     auto height = mf.Height();
     for(auto i = 0; i < width; ++i){
         for(auto j = 0; j < height; ++j){
-            auto ll = ref + EPoint2D(info.resolution * i, info.resolution * j);
-            auto ur = ll + EPoint2D(info.resolution, info.resolution);
+            auto ll = ref + EPoint2D(info.stride[0] * i, info.stride[1] * j);
+            auto ur = ll + EPoint2D(info.stride[0], info.stride[1]);
             auto box = EBox2D(ll, ur);
 
             out << index++;
