@@ -5,25 +5,24 @@ Import('env')
 
 build_dir = env['BUILDPATH']
 program_name = build_dir + '/ECadTest.exe'
+mfsolver_support = env['MFSOLVERSUPPORT']
+boost_library_path = env['BOOSTLIBRARYPATH']
+thirdpart_lib_path = env['THIRDPARTLIBPATH']
 
 source_files = [
     'UnitTest.cpp'
 ]
 
 libs_name = [
-    'Ecad',
     'boost_serialization',
-    'pthread'
+    'Ecad',
+    'pthread',
+    'png'
 ]
 
-libs_path = [
-    '/usr/local/lib',
-]
-
-libs_path.append(build_dir)
+libs_path = [build_dir, boost_library_path, thirdpart_lib_path]
 
 # mfsolver
-mfsolver_support = env['MFSOLVERSUPPORT']
 if mfsolver_support :
     mfsolver_path = env['MFSOLVERPATH']
     libs_path.append(mfsolver_path + '/mf2/lib')
@@ -46,13 +45,5 @@ if mfsolver_support :
         'ngcore'    
     ]   
 
-if platform == "linux" or platform == "linux2" :
-    libs_path.append('/usr/lib/x86_64-linux-gnu')
-    libs_name.append('png')
-elif platform == "darwin":
-    libs_name.append('png')
-#elif platform == "win32" :
-
 rpath = libs_path
-
 env.Program(program_name,source_files,LIBS=libs_name,LIBPATH=libs_path, RPATH=rpath)

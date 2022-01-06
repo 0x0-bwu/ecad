@@ -14,20 +14,25 @@ cxx_flags = [
     "-Wl,-rpath,\$$ORIGIN",
     "-std=c++17",
     "-fopenmp",
-    "-lpthread"
+    "-lpthread",
 ]
 
 if debug_mode :
-    cxx_flags.append([
-        "-g",
-        "-O0"
-    ])
+    cxx_flags.append(["-g", "-O0"])
 else :
-    cxx_flags.append([
-        "-s",
-        "-O0",
-        "-DNDEBUG"
-    ])
+    cxx_flags.append(["-s", "-O0", "-DNDEBUG"])
+
+# Thirdpart
+## boost
+boost_include_path = '/usr/local/include'
+boost_library_path = '/usr/local/lib'
+
+## mfsolver
+mfsolver_support = False
+mfsolver_path = os.path.abspath(cwd + '/thirdpart/internal/mfsolver')
+
+## thirdpart
+thirdpart_lib_path = cwd + '/thirdpart/libs'
 
 # Include dirs
 cpp_path = [
@@ -36,11 +41,7 @@ cpp_path = [
     cwd + '/thirdpart',
     cwd + '/thirdpart/eigen3',
 ]
-
-# Thirdpart
-mfsolver_support = False
-mfsolver_path = os.path.abspath(cwd + '/thirdpart/internal/mfsolver')
-
+cpp_path.append(boost_include_path)
 if mfsolver_support :
     cpp_path.append(mfsolver_path + "/mf2/include")
     cpp_path.append(mfsolver_path + "/mf2/include/core")
@@ -50,10 +51,13 @@ build_path = os.path.abspath(cwd + '/build')
 
 #Environment
 main_env = Environment()
-main_env.Append(CXXFLAGS=cxx_flags)
 main_env.Append(CPPPATH=cpp_path)
+main_env.Append(CXXFLAGS=cxx_flags)
 main_env.Append(BUILDPATH=build_path)
 main_env.Append(MFSOLVERSUPPORT=mfsolver_support)
+main_env.Append(BOOSTINCLUDEPATH=boost_include_path)
+main_env.Append(BOOSTLIBRARYPATH=boost_library_path)
+main_env.Append(THIRDPARTLIBPATH=thirdpart_lib_path)
 
 if mfsolver_support :
     main_env.Append(MFSOLVERPATH=mfsolver_path)

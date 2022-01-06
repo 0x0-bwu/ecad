@@ -17,7 +17,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
 
     esim::EMetalFractionMappingSettings settings;
     settings.threads = 16;
-    settings.grid = {50, 50};
+    settings.grid = {25, 25};
     settings.regionExtTop = 470;//um
     settings.regionExtBot = 470;//um
     settings.regionExtLeft = 470;//um

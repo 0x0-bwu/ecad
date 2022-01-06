@@ -1,65 +1,35 @@
 Import('env')
 import os
 import sys
+import fnmatch
 from sys import platform
+
+cwd = os.getcwd()
 
 build_dir = env['BUILDPATH']
 lib_name= build_dir + '/Ecad'
+mfsolver_support = env['MFSOLVERSUPPORT']
+boost_library_path = env['BOOSTLIBRARYPATH']
+thirdpart_lib_path = env['THIRDPARTLIBPATH']
 
 #Source to generate lib
-source_files = [
-    'extension/dmcdom/ECadExtDmcDomHandler.cpp',
-    'extension/gds/ECadExtGdsHandler.cpp',
-    'extension/gds/EGdsFileIO.cpp',
-    'extension/gds/EGdsParser.cpp',
-    'extension/ECadExtension.cpp',
-    'simulation/ELayerStackMeshGeneration.cpp',
-    'simulation/EMetalFractionMapping.cpp',
-    'simulation/EThermalNetworkExtraction.cpp',
-    'utility/EBoundaryCalculator.cpp',
-    'utility/EFlattenUtility.cpp',
-    'utility/ELayoutMergeUtility.cpp',
-    'utility/ELayoutConnectivity.cpp',
-    'ECell.cpp',
-    'ECellCollection.cpp',
-    'ECellInst.cpp',
-    'ECellInstCollection.cpp',
-    'ECollection.cpp',
-    'ECollectionCollection.cpp',
-    'EConnObj.cpp',
-    'EConnObjCollection.cpp',
-    'EDatabase.cpp',
-    'EDataMgr.cpp',
-    'EDefinition.cpp',
-    'EDefinitionCollection.cpp',
-    'EHierarchyObj.cpp',
-    'EHierarchyObjCollection.cpp',
-    'ELayer.cpp',
-    'ELayerCollection.cpp',
-    'ELayerMap.cpp',
-    'ELayerMapCollection.cpp',
-    'ELayoutView.cpp',
-    'EMaterialDef.cpp',
-    'ENet.cpp',
-    'ENetCollection.cpp',
-    'EObject.cpp',
-    'EPadstackDef.cpp',
-    'EPadstackDefCollection.cpp',
-    'EPadstackDefData.cpp',
-    'EPadstackInst.cpp',
-    'EPadstackInstCollection.cpp',
-    'EPrimitive.cpp',
-    'EPrimitiveCollection.cpp',
-    'EShape.cpp'
-]
+def get_source_files(dir, pattern) :
+    source_files = []
+    for root, dirs, files in os.walk(dir) :
+        for file in files :
+            if fnmatch.fnmatch(file, pattern) :
+                source_files.append(os.path.join(root, file))
+    return source_files
+    
+source_files = get_source_files(cwd, '*.cpp')
 
 libs_name = [
-    'boost_serialization'
+    'boost_serialization',
+    'pthread',
+    'omp'
 ]
 
-libs_path = [
-    '/usr/local/lib',
-]
+libs_path = [build_dir, boost_library_path, thirdpart_lib_path]
 
 # mfsolver
 mfsolver_support = env['MFSOLVERSUPPORT']
@@ -84,15 +54,6 @@ if mfsolver_support :
         'ansmf',
         'ngcore'    
     ]   
-
-
-if platform == "linux" or platform == "linux2" :
-    libs_path.append('/usr/lib/x86_64-linux-gnu')
-    libs_name.append('png')
-    # libs_name.append('omp')
-    libs_name.append('iomp5')
-elif platform == "darwin":
-    libs_name.append('png')
 
 #Build lib
 env.SharedLibrary(lib_name, source_files, LIBS=libs_name,LIBPATH=libs_path)
