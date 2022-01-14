@@ -26,6 +26,8 @@ else :
 ## boost
 boost_include_path = '/usr/local/include'
 boost_library_path = '/usr/local/lib'
+boost_python_support = True
+boost_python_version = 3.6
 
 ## mfsolver
 mfsolver_support = False
@@ -35,8 +37,10 @@ mfsolver_path = os.path.abspath(cwd + '/thirdpart/internal/mfsolver')
 thirdpart_lib_path = cwd + '/thirdpart/libs'
 
 # Include dirs
+python_include_path = '/usr/include/python' + str(boost_python_version)
 cpp_path = [
     '/usr/include',
+    python_include_path,
     cwd + '/src',
     cwd + '/thirdpart',
     cwd + '/thirdpart/eigen3',
@@ -57,6 +61,8 @@ main_env.Append(BUILDPATH=build_path)
 main_env.Append(MFSOLVERSUPPORT=mfsolver_support)
 main_env.Append(BOOSTINCLUDEPATH=boost_include_path)
 main_env.Append(BOOSTLIBRARYPATH=boost_library_path)
+main_env.Append(BOOSTPYTHONSUPPORT=boost_python_support)
+main_env.Append(BOOSTPYTHONVERSION=boost_python_version)
 main_env.Append(THIRDPARTLIBPATH=thirdpart_lib_path)
 
 if mfsolver_support :

@@ -14,6 +14,7 @@ source_files = [
 ]
 
 libs_name = [
+    'boost_python36',
     'boost_serialization',
     'Ecad',
     'pthread',
