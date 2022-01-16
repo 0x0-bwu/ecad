@@ -4,6 +4,11 @@
 #include "ECadVersion.h"
 #include "ECadUnits.h"
 #include <cassert>
+
+#ifdef ECAD_BOOST_PYTHON_SUPPORT
+#include <boost/python.hpp>
+#endif//ECAD_BOOST_PYTHON_SUPPORT
+
 #ifdef ECAD_DEBUG_MODE
     #include <iostream>
     #define ECAD_DEBUG(ex) std::cout << ex << std::endl;
@@ -15,11 +20,11 @@
 
 #ifdef ECAD_EFFICIENCY_TRACK_MODE
     #include "generic/tools/Tools.hpp"
-    #define COMBINER(a, b) a ## b
-    #define COMBINE(a, b) COMBINER(a, b)
+    #define ECAD_MACRO_COMBINER(a, b) a ## b
+    #define ECAD_MACRO_COMBINE(a, b) ECAD_MACRO_COMBINER(a, b)
     #define ECAD_EFFICIENCY_TRACK(task)                                              \
     std::cout << "progress name: " << task << std::endl;                             \
-    generic::tools::ProgressTimer COMBINE(__ECADTIMER__,__LINE__);                   \
+    generic::tools::ProgressTimer ECAD_MACRO_COMBINE(__ECADTIMER__,__LINE__);                   \
     /**/
 #else
     #define ECAD_EFFICIENCY_TRACK(task)

@@ -151,6 +151,4 @@ ECAD_INLINE EDataMgr & EDataMgr::Instance()
     return mgr;
 }
 
-
-
 }//namespace ecad

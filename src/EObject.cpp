@@ -79,18 +79,3 @@ ECAD_INLINE bool EObject::operator!= (const EObject & other) const
 }
 
 }//namespace ecad
-
-#ifdef ECAD_BOOST_PYTHON_SUPPORT
-#include <boost/python.hpp>
-namespace {
-    using namespace ecad;
-    using namespace boost::python;
-    BOOST_PYTHON_MODULE(ECAD_LIB_NAME)
-    {
-        class_<EObject>("eobject")
-            .def("set_name", &EObject::SetName)
-            .def("suuid", &EObject::sUuid)
-        ;
-    }
-}
-#endif//ECAD_BOOST_PYTHON_SUPPORT

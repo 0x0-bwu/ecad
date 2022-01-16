@@ -5,6 +5,7 @@ from sys import platform
 
 cwd = os.getcwd()
 debug_mode = True
+build_unit_test = False
 
 # Compile flags
 cxx_flags = [
@@ -25,9 +26,9 @@ else :
 # Thirdpart
 ## boost
 boost_include_path = '/usr/local/include'
-boost_library_path = '/usr/local/lib'
+boost_library_path = '/usr/lib/x86_64-linux-gnu'
 boost_python_support = True
-boost_python_version = 3.6
+boost_python_version = 3.8
 
 ## mfsolver
 mfsolver_support = False
@@ -37,15 +38,19 @@ mfsolver_path = os.path.abspath(cwd + '/thirdpart/internal/mfsolver')
 thirdpart_lib_path = cwd + '/thirdpart/libs'
 
 # Include dirs
-python_include_path = '/usr/include/python' + str(boost_python_version)
 cpp_path = [
     '/usr/include',
-    python_include_path,
     cwd + '/src',
     cwd + '/thirdpart',
     cwd + '/thirdpart/eigen3',
 ]
+
+##boost
 cpp_path.append(boost_include_path)
+##python
+python_include_path = '/usr/include/python' + str(boost_python_version)
+cpp_path.append(python_include_path)
+
 if mfsolver_support :
     cpp_path.append(mfsolver_path + "/mf2/include")
     cpp_path.append(mfsolver_path + "/mf2/include/core")
@@ -70,9 +75,11 @@ if mfsolver_support :
 
 # SCONS scripts to build
 build_scripts = [
-    'src/SConscript',  
-    'test/SConscript'
+    'src/SConscript' 
 ]
+
+if build_unit_test :
+    build_scripts.append('test/SConscript')
 
 for script in build_scripts:
     env = main_env.Clone()

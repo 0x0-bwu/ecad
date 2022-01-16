@@ -14,15 +14,20 @@ source_files = [
 ]
 
 libs_name = [
-    'boost_python36',
     'boost_serialization',
-    'Ecad',
     'pthread',
     'png'
 ]
 
 libs_path = [build_dir, boost_library_path, thirdpart_lib_path]
 
+# boost_python
+boost_python_support = env['BOOSTPYTHONSUPPORT']
+if boost_python_support :
+    boost_python_version = env['BOOSTPYTHONVERSION']
+    boost_python_lib = 'boost_python' + str(int(boost_python_version * 10))
+    libs_name.append(boost_python_lib)
+    
 # mfsolver
 if mfsolver_support :
     mfsolver_path = env['MFSOLVERPATH']
@@ -45,6 +50,6 @@ if mfsolver_support :
         'ansmf',
         'ngcore'    
     ]   
-
 rpath = libs_path
+libs_name.append('Ecad')
 env.Program(program_name,source_files,LIBS=libs_name,LIBPATH=libs_path, RPATH=rpath)
