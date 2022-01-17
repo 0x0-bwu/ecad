@@ -5,7 +5,7 @@ from sys import platform
 
 cwd = os.getcwd()
 debug_mode = True
-build_unit_test = False
+build_unit_test = True
 
 # Compile flags
 cxx_flags = [
@@ -26,9 +26,13 @@ else :
 # Thirdpart
 ## boost
 boost_include_path = '/usr/local/include'
-boost_library_path = '/usr/lib/x86_64-linux-gnu'
+boost_library_path = '/usr/local/lib'
+# boost_library_path = '/usr/lib/x86_64-linux-gnu'
 boost_python_support = True
-boost_python_version = 3.8
+# boost_python_version = 3.8
+boost_python_version = 3.6
+
+boost_serialization_support = True
 
 ## mfsolver
 mfsolver_support = False
@@ -36,6 +40,9 @@ mfsolver_path = os.path.abspath(cwd + '/thirdpart/internal/mfsolver')
 
 ## thirdpart
 thirdpart_lib_path = cwd + '/thirdpart/libs'
+
+## os
+linux_library_path = '/usr/lib/x86_64-linux-gnu'
 
 # Include dirs
 cpp_path = [
@@ -68,7 +75,9 @@ main_env.Append(BOOSTINCLUDEPATH=boost_include_path)
 main_env.Append(BOOSTLIBRARYPATH=boost_library_path)
 main_env.Append(BOOSTPYTHONSUPPORT=boost_python_support)
 main_env.Append(BOOSTPYTHONVERSION=boost_python_version)
+main_env.Append(BOOSTSERIALIZATIONSUPPORT=boost_serialization_support)
 main_env.Append(THIRDPARTLIBPATH=thirdpart_lib_path)
+main_env.Append(LINUXLIBRARYPATH=linux_library_path)
 
 if mfsolver_support :
     main_env.Append(MFSOLVERPATH=mfsolver_path)
