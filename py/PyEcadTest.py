@@ -5,11 +5,11 @@ current_dir = os.path.dirname(__file__)
 ecad_lib_path = os.path.abspath(current_dir + "/../build/")
 sys.path.append(ecad_lib_path)
 
-import libEcad
+import libEcad as ecad
 
 ###EDataMgr
 #instance
-mgr = libEcad.EDataMgr.instance()
+mgr = ecad.EDataMgr.instance()
 
 db_name = "test"
 #create database
@@ -34,12 +34,12 @@ assert(os.path.isfile(txt_file) == True)
 xml_file = current_dir + '/' + db_name + '.xml'
 if os.path.isfile(xml_file) :
     os.remove(xml_file)
-assert(mgr.save_database(database, xml_file, libEcad.EArchiveFormat.XML))
+assert(mgr.save_database(database, xml_file, ecad.EArchiveFormat.XML))
 assert(os.path.isfile(xml_file) == True)
 
 #load database
 assert(mgr.load_database(database, txt_file))
-assert(mgr.load_database(database, xml_file, libEcad.EArchiveFormat.XML))
+assert(mgr.load_database(database, xml_file, ecad.EArchiveFormat.XML))
 os.remove(txt_file)
 os.remove(xml_file)
 
@@ -66,9 +66,9 @@ next = net_iter.next()
 assert(next == None)
 
 #create stackup layer
-layer_m = mgr.create_stackup_layer("m", libEcad.ELayerType.ConductingLayer, 0, 10)
+layer_m = mgr.create_stackup_layer("m", ecad.ELayerType.ConductingLayer, 0, 10)
 assert(layer_m.thickness == 10)
-layer_v = mgr.create_stackup_layer("v", libEcad.ELayerType.DielectricLayer, 0, 20)
+layer_v = mgr.create_stackup_layer("v", ecad.ELayerType.DielectricLayer, 0, 20)
 layer_v.elevation = -10
 assert(layer_v.elevation == -10)
 
@@ -83,10 +83,36 @@ padstack_def = mgr.create_padstack_def(database, padstack_def_name)
 
 #create padstack def data
 padstackdef_data = mgr.create_padstack_def_data()
-###EDataMgr
+
+#create padstack inst
+padstack_inst_name = "padstack_inst"
+padstack_inst_tran = ecad.ETransform2D()
+padstack_inst = mgr.create_padstack_inst(layout, padstack_inst_name, padstack_def, ecad.ENetId(-1), ecad.ELayerId(-1), ecad.ELayerId(-1), layer_map, padstack_inst_tran)
+assert(padstack_inst != None)
+
+#create cell inst
+sub_cell_name = "sub_cell"
+sub_cell = mgr.create_circuit_cell(database, sub_cell_name)
+sub_layout = sub_cell.get_layout_view()
+cell_inst_name = "cell_inst"
+cell_inst_tran = ecad.ETransform2D()
+cell_inst = mgr.create_cell_inst(layout, cell_inst_name, sub_layout, cell_inst_tran)
+assert(cell_inst != None)
 
 ###ECell
 
-###ECell
-print("end")
+
+###EPoint
+p = ecad.EPoint2D(2, 3)
+assert(p.x == 2 and p.y == 3)
+p.x = 3
+p.y = 2
+assert(p.x == 3 and p.y == 2)
+
+###ETransform
+trans = ecad.make_transform_2d(0.5, 0, ecad.EPoint2D(3, 5), True)
+m = trans.get_transform()
+assert(m.a11 == -.5 and m.a13 == 3.0 and m.a22 == 0.5 and m.a23 == 5.0)
+
+print("every thing is fine")
 

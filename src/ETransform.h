@@ -48,8 +48,6 @@ private:
 
 class ECAD_API ETransform2D
 {
-    using Transform = ETransformData2D::Transform;
-
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
     template<class Archive>
@@ -69,6 +67,7 @@ class ECAD_API ETransform2D
     BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
+    using Transform = ETransformData2D::Transform;
     ETransform2D() { m_sequence.push_back(ETransformData2D{}); }
     
     ~ETransform2D() = default;
