@@ -30,7 +30,7 @@ public:
     EDefinitionType GetDefinitionType() const;
     const std::string & GetName() const;
     std::string sUuid() const;
-
+    
 protected:
     ECellType m_cellType;
     Ptr<IDatabase> m_database;

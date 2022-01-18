@@ -6,5 +6,6 @@
 *.exe
 *.png
 *.txt
+*.xml
 build
 .sconsign.dblite
