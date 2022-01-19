@@ -65,7 +65,7 @@ public:
                                           const ETransform2D & transform); 
 
     ///CellInstance
-    virtual Ptr<ICellInst> CreateCellInst(Ptr<ILayoutView> layout, const std::string & name,
+    Ptr<ICellInst> CreateCellInst(Ptr<ILayoutView> layout, const std::string & name,
                                           Ptr<ILayoutView> defLayout, const ETransform2D & transform);
 
     ///Primitive

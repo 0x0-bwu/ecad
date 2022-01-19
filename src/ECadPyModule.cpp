@@ -8,10 +8,12 @@
 #include "EPadstackInst.h"
 #include "EPadstackDef.h"
 #include "ELayoutView.h"
+#include "EPrimitive.h"
 #include "ECellInst.h"
 #include "EDatabase.h"
 #include "ELayerMap.h"
 #include "EDataMgr.h"
+#include "EConnObj.h"
 #include "EObject.h"
 #include "ELayer.h"
 #include "EShape.h"
@@ -29,7 +31,7 @@ namespace {
             return std::vector<T>(stl_input_iterator<T>(iterable), stl_input_iterator<T>());
         }
         catch (...) {
-            throw(std::runtime_error("Could not convert python list to std vector"));
+            throw(std::invalid_argument("Could not convert python list to std vector, illegal object type"));
         }
     }
 
@@ -81,6 +83,13 @@ namespace {
         return make_function([fn](C & self, Args... args){ return (self.*fn)(args...).release(); },
                                 return_value_policy<manage_new_object>(),
                                 boost::mpl::vector<T *, C &, Args...>());
+    }
+
+    //Wrappers
+    Ptr<IPrimitive> EDataMgrCreateGeometry2DWrap(EDataMgr & mgr, Ptr<ILayoutView> layout, ELayerId layer, ENetId net, Ptr<EShape> shape)
+    {
+        //todo, enhance, copy issue here
+        return mgr.CreateGeometry2D(layout, layer, net, shape->Clone());
     }
     
     BOOST_PYTHON_FUNCTION_OVERLOADS(makeETransform2DWithNoMirror, makeETransform2D, 3, 4)
@@ -221,6 +230,11 @@ namespace {
             .def("get_database", &ELayerMap::GetDatabase, return_internal_reference<>())
         ;
 
+        //ConnObj
+        class_<EConnObj, bases<EObject> >("EConnObj", no_init)
+            .add_property("net", &EConnObj::GetNet, &EConnObj::SetNet)
+        ;
+
         //Padstack Def
         class_<IPadstackDef, boost::noncopyable>("IPadstackDef", no_init)
         ;
@@ -238,7 +252,7 @@ namespace {
         class_<IPadstackInst, boost::noncopyable>("IPadstackInst", no_init)
         ;
 
-        class_<EPadstackInst, bases<IPadstackInst> >("EPadstackInst", no_init)
+        class_<EPadstackInst, bases<EConnObj, IPadstackInst> >("EPadstackInst", no_init)
         ;
 
         //CellInst
@@ -246,6 +260,22 @@ namespace {
         ;
 
         class_<ECellInst, bases<ICellInst> >("ECellInst", no_init)
+        ;
+
+        //Primitive
+        class_<IPrimitive, boost::noncopyable>("IPrimitive", no_init)
+        ;
+
+        class_<EPrimitive, bases<EConnObj, IPrimitive>, boost::noncopyable>("EPrimitive", no_init)
+        ;
+
+        class_<IText, boost::noncopyable>("IText", no_init)
+        ;
+
+        class_<EText, bases<EPrimitive, IText> >("EText", no_init)
+            .def(init<std::string>())
+            .def(init<std::string, ELayerId, ENetId>())
+            .add_property("text", make_function(&EText::GetText, return_value_policy<copy_const_reference>()))
         ;
 
         //LayoutView
@@ -302,9 +332,11 @@ namespace {
             .def("create_padstack_def_data", adapt_unique(&EDataMgr::CreatePadstackDefData))
             .def("create_padstack_inst", &EDataMgr::CreatePadstackInst, return_internal_reference<>())
             .def("create_cell_inst", &EDataMgr::CreateCellInst, return_internal_reference<>())
+            .def("create_geometry_2d", &EDataMgrCreateGeometry2DWrap, return_internal_reference<>())
             .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const boost::python::list & points){ return mgr.CreateShapePolygon(py_list_to_std_vector<EPoint2D>(points));}))
             .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const EPolygonData & polygon){ return mgr.CreateShapePolygon(polygon);}))
             .def("create_shape_polygon_with_holes", adapt_unique(&EDataMgr::CreateShapePolygonWithHoles))
+            .def("create_text", &EDataMgr::CreateText, return_internal_reference<>())
         ;
     }
 }

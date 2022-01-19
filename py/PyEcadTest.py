@@ -111,9 +111,16 @@ assert(eshape2.shape.size() == 0)
 eshape3 = mgr.create_shape_polygon_with_holes(ecad.EPolygonWithHolesData())
 assert(eshape3 != None)
 
+#create geometry 2d
+geom = mgr.create_geometry_2d(layout, ecad.ELayerId.noLayer, ecad.ENetId.noNet, eshape3)
+assert(geom != None)
+
+#create text
+s = "hello world"
+text = mgr.create_text(layout, ecad.ELayerId.noLayer, ecad.ETransform2D(), s)
+assert(text.text == s)
 
 ###ECell
-
 
 ###EPoint
 p = EPoint2D(2, 3)
