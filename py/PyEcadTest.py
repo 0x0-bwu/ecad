@@ -6,6 +6,7 @@ ecad_lib_path = os.path.abspath(current_dir + "/../build/")
 sys.path.append(ecad_lib_path)
 
 import libEcad as ecad
+from libEcad import EPoint2D
 
 ###EDataMgr
 #instance
@@ -51,7 +52,7 @@ assert(cell != None)
 #find cell
 found_cell = mgr.find_cell_by_name(database, cell_name)
 assert(found_cell != None)
-assert(found_cell.suuid() == cell.suuid())
+assert(found_cell.suuid == cell.suuid)
 
 #create net
 net_name = "net"
@@ -61,7 +62,7 @@ assert(net != None)
 
 net_iter = layout.get_net_iter()
 next = net_iter.next()
-assert(next.get_name() == net_name)
+assert(next.name == net_name)
 next = net_iter.next()
 assert(next == None)
 
@@ -75,7 +76,7 @@ assert(layer_v.elevation == -10)
 #create layer map
 layer_map_name = "layer_map"
 layer_map = mgr.create_layer_map(database, layer_map_name)
-assert(layer_map.get_database().suuid() == database.suuid())
+assert(layer_map.get_database().suuid == database.suuid)
 
 #create padstack def
 padstack_def_name = "padstack_def"
@@ -99,20 +100,39 @@ cell_inst_tran = ecad.ETransform2D()
 cell_inst = mgr.create_cell_inst(layout, cell_inst_name, sub_layout, cell_inst_tran)
 assert(cell_inst != None)
 
+#create shape polygon
+points = [EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)]
+eshape = mgr.create_shape_polygon(points)
+assert(eshape.shape.size() == 4)
+eshape2 = mgr.create_shape_polygon(ecad.EPolygonData())
+assert(eshape2.shape.size() == 0)
+
+#create shape polygon with holes
+eshape3 = mgr.create_shape_polygon_with_holes(ecad.EPolygonWithHolesData())
+assert(eshape3 != None)
+
+
 ###ECell
 
 
 ###EPoint
-p = ecad.EPoint2D(2, 3)
+p = EPoint2D(2, 3)
 assert(p.x == 2 and p.y == 3)
 p.x = 3
 p.y = 2
 assert(p.x == 3 and p.y == 2)
 
 ###ETransform
-trans = ecad.make_transform_2d(0.5, 0, ecad.EPoint2D(3, 5), True)
+trans = ecad.make_transform_2d(0.5, 0, EPoint2D(3, 5), True)
 m = trans.get_transform()
 assert(m.a11 == -.5 and m.a13 == 3.0 and m.a22 == 0.5 and m.a23 == 5.0)
+
+
+###EPolygonData
+points = [EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)]
+polygon = ecad.EPolygonData()
+polygon.set_points(points)
+assert(polygon.size() == 4)
 
 print("every thing is fine")
 

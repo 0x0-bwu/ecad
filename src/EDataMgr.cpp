@@ -121,19 +121,19 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(std::vector<Point2D<ECoord> > points)
 {
-    Polygon2D<ECoord> polygon;
+    EPolygonData polygon;
     polygon.Set(std::move(points));
     return CreateShapePolygon(polygon);
 }
 
-ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(Polygon2D<ECoord> polygon)
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(EPolygonData polygon)
 {
     auto shape = new EPolygon;
     shape->shape = std::move(polygon);
     return UPtr<EShape>(shape);
 }
 
-ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygonWithHoles(PolygonWithHoles2D<ECoord> pwh)
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygonWithHoles(EPolygonWithHolesData pwh)
 {
     auto shape = new EPolygonWithHoles;
     shape->shape = std::move(pwh);

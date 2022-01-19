@@ -145,7 +145,6 @@ ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::stri
         if(pwh.hasHole())
             shape = mgr.CreateShapePolygonWithHoles(std::move(pwh));
         else shape = mgr.CreateShapePolygon(std::move(pwh.outline));
-        shape->SetBBox(data.bbox);
 
         //net
         if(!netMap.count(data.netId)){ 

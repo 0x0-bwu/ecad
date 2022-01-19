@@ -22,6 +22,7 @@ class ILayoutView;
 class IPadstackDef;
 class IPadstackInst;
 class IPadstackDefData;
+
 using namespace generic::geometry;
 
 class ECAD_API EDataMgr

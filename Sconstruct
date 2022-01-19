@@ -26,11 +26,11 @@ else :
 # Thirdpart
 ## boost
 boost_include_path = '/usr/local/include'
-# boost_library_path = '/usr/local/lib'
-boost_library_path = '/usr/lib/x86_64-linux-gnu'
+boost_library_path = '/usr/local/lib'
+# boost_library_path = '/usr/lib/x86_64-linux-gnu'
 boost_python_support = True
-boost_python_version = 3.8
-# boost_python_version = 3.6
+# boost_python_version = 3.8
+boost_python_version = 3.6
 
 boost_serialization_support = True
 

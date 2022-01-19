@@ -1,11 +1,15 @@
 #ifndef ECAD_ESHAPE_H
 #define ECAD_ESHAPE_H
 #include "generic/geometry/Geometries.hpp"
+#include "generic/geometry/GeometryIO.hpp"
 #include "ECadCommon.h"
 #include "Protocol.h"
 namespace ecad {
 
 using namespace generic::geometry;
+using EPolygonData = Polygon2D<ECoord>;
+using EPolylineData = Polyline2D<ECoord>;
+using EPolygonWithHolesData = PolygonWithHoles2D<ECoord>;
 
 class ETransform;
 class ECAD_API EShape : public Clonable<EShape>
@@ -14,10 +18,9 @@ class ECAD_API EShape : public Clonable<EShape>
 public:
     virtual ~EShape() = default;
     virtual bool hasHole() const = 0;
-    virtual const EBox2D & GetBBox() const = 0;
-    virtual void SetBBox(EBox2D bbox) = 0;
-    virtual Polygon2D<ECoord> GetContour() const = 0;
-    virtual PolygonWithHoles2D<ECoord> GetPolygonWithHoles() const = 0;
+    virtual EBox2D GetBBox() const = 0;
+    virtual EPolygonData GetContour() const = 0;
+    virtual EPolygonWithHolesData GetPolygonWithHoles() const = 0;
     virtual void Transform(const ETransform2D & trans) = 0;
 };
 
@@ -30,10 +33,9 @@ public:
     ~ERectangle() = default;
 
     bool hasHole() const;
-    const EBox2D & GetBBox() const;
-    void SetBBox(EBox2D bbox);
-    Polygon2D<ECoord> GetContour() const;
-    PolygonWithHoles2D<ECoord> GetPolygonWithHoles() const;
+    EBox2D GetBBox() const;
+    EPolygonData GetContour() const;
+    EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
 protected:
     ///Copy
@@ -46,16 +48,14 @@ class ECAD_API EPath : public EShape
 
     int m_type;
     ECoord m_width;
-    mutable EBox2D m_bbox;
 public:
-    Polyline2D<ECoord> shape;
+    EPolylineData shape;
     EPath() = default;
     ~EPath() = default;
     bool hasHole() const;
-    const EBox2D & GetBBox() const;
-    void SetBBox(EBox2D bbox);   
-    Polygon2D<ECoord> GetContour() const;
-    PolygonWithHoles2D<ECoord> GetPolygonWithHoles() const;
+    EBox2D GetBBox() const;
+    EPolygonData GetContour() const;
+    EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
     void SetPoints(const std::vector<EPoint2D> & points);
     void SetType(int type);
@@ -68,17 +68,15 @@ protected:
 class ECAD_API EPolygon : public EShape
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-    mutable EBox2D m_bbox;
 public:
-    Polygon2D<ECoord> shape;
+    EPolygonData shape;
     EPolygon() = default;
     ~EPolygon() = default;
 
     bool hasHole() const;
-    const EBox2D & GetBBox() const;
-    void SetBBox(EBox2D bbox);
-    Polygon2D<ECoord> GetContour() const;
-    PolygonWithHoles2D<ECoord> GetPolygonWithHoles() const;
+    EBox2D GetBBox() const;
+    EPolygonData GetContour() const;
+    EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
     void SetPoints(const std::vector<EPoint2D> & points);
     EPolygon ConvexHull(const EPolygon & other);
@@ -90,16 +88,14 @@ protected:
 class ECAD_API EPolygonWithHoles : public EShape
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-    mutable EBox2D m_bbox;
 public:
-    PolygonWithHoles2D<ECoord> shape;
+    EPolygonWithHolesData shape;
     EPolygonWithHoles() = default;
     ~EPolygonWithHoles() = default;
     bool hasHole() const;
-    const EBox2D & GetBBox() const;
-    void SetBBox(EBox2D bbox);
-    Polygon2D<ECoord> GetContour() const;
-    PolygonWithHoles2D<ECoord> GetPolygonWithHoles() const;
+    EBox2D GetBBox() const;
+    EPolygonData GetContour() const;
+    EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
 protected:
     ///Copy

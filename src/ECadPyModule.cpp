@@ -1,6 +1,8 @@
 #include "ECadCommon.h"
 
 #ifdef ECAD_BOOST_PYTHON_SUPPORT
+#include <boost/python/stl_iterator.hpp>
+#include "generic/tools/Format.hpp"
 #include "EPadstackDefData.h"
 #include "ENetCollection.h"
 #include "EPadstackInst.h"
@@ -19,6 +21,26 @@
 namespace {
     using namespace ecad;
     using namespace boost::python;
+
+    template <typename T>
+    std::vector<T> py_list_to_std_vector(const object & iterable)
+    {
+        try{
+            return std::vector<T>(stl_input_iterator<T>(iterable), stl_input_iterator<T>());
+        }
+        catch (...) {
+            throw(std::runtime_error("Could not convert python list to std vector"));
+        }
+    }
+
+    template <typename T>
+    boost::python::list std_vector_to_py_list(const std::vector<T> & vec)
+    {
+        auto get_iter = iterator<std::vector<T> >();
+        auto iter = get_iter(vec);
+        boost::python::list l(iter);
+        return l;
+    }
 
     /**
      * @brief Adapter a non-member function that returns a unique_ptr to
@@ -97,6 +119,21 @@ namespace {
             .add_property("y",
                             +[](const EPoint2D & p){ return p[1]; },
                             make_function([](EPoint2D & p, ECoord y){ p[1] = y; }, default_call_policies(), boost::mpl::vector<void, EPoint2D &, ECoord>()))
+            .def("__str__", +[](const EPoint2D & p){ std::stringstream ss; ss << p; return ss.str(); })
+        ;
+
+        //Polygon
+        class_<EPolygonData>("EPolygonData")
+            .def("size", &EPolygonData::Size)
+            .def("set_points", make_function([](EPolygonData & polygon, const boost::python::list & points){
+                                                polygon.Set(py_list_to_std_vector<EPoint2D>(points));
+                                             },
+                                             default_call_policies(), boost::mpl::vector<void, EPolygonData &, const boost::python::list &>()))
+            .def("__str__", +[](const EPolygonData & polygon){ std::stringstream ss; ss << polygon; return ss.str(); })
+        ;
+
+        class_<EPolygonWithHolesData>("EPolygonWithHolesData")
+            .def("__str__", +[](const EPolygonWithHolesData & pwh){ std::stringstream ss; ss << pwh; return ss.str(); })
         ;
 
         //Transform
@@ -119,13 +156,27 @@ namespace {
 
         //Shape
         class_<EShape, boost::noncopyable>("EShape", no_init)
+            .def("has_hole", &EShape::hasHole)
+        ;
+
+        class_<ERectangle, bases<EShape> >("ERectangle")
+        ;
+
+        class_<EPath, bases<EShape> >("EPath")
+        ;
+
+        class_<EPolygon, bases<EShape> >("EPolygon")
+            .def_readwrite("shape", &EPolygon::shape)
+        ;
+
+        class_<EPolygonWithHoles, bases<EShape> >("EPolygonWithHoles")
+            .def_readwrite("shape", &EPolygonWithHoles::shape)
         ;
     
         //Object
         class_<EObject>("EObject")
-            .def("set_name", &EObject::SetName)
-            .def("get_name", &EObject::GetName, return_value_policy<copy_const_reference>())
-            .def("suuid", &EObject::sUuid)
+            .add_property("name", make_function(&EObject::GetName, return_value_policy<copy_const_reference>()), &EObject::SetName)
+            .add_property("suuid", &EObject::sUuid)
         ;
 
         //Definition
@@ -210,7 +261,6 @@ namespace {
         ;
 
         class_<ECell, bases<EDefinition, ICell>, boost::noncopyable>("ECell", no_init)
-            .def("get_name", &ECell::GetName, return_value_policy<copy_const_reference>())
             .def("get_database", &ECell::GetDatabase, return_internal_reference<>())
             .def("get_layout_view", &ECell::GetLayoutView,  return_internal_reference<>()) 
         ;
@@ -224,9 +274,8 @@ namespace {
         ;
         
         class_<EDatabase, bases<IDatabase>, std::shared_ptr<EDatabase> >("EDatabase", init<std::string>())
-            .def("set_name", &EDatabase::SetName)
-            .def("get_name", &EDatabase::GetName, return_value_policy<copy_const_reference>())
-            .def("suuid", &EDatabase::sUuid)
+            .add_property("name", make_function(&EDatabase::GetName, return_value_policy<copy_const_reference>()), &EDatabase::SetName)
+            .add_property("suuid", &EDatabase::sUuid)
         ;
 
         implicitly_convertible<std::shared_ptr<EDatabase>, std::shared_ptr<IDatabase> >();
@@ -253,6 +302,9 @@ namespace {
             .def("create_padstack_def_data", adapt_unique(&EDataMgr::CreatePadstackDefData))
             .def("create_padstack_inst", &EDataMgr::CreatePadstackInst, return_internal_reference<>())
             .def("create_cell_inst", &EDataMgr::CreateCellInst, return_internal_reference<>())
+            .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const boost::python::list & points){ return mgr.CreateShapePolygon(py_list_to_std_vector<EPoint2D>(points));}))
+            .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const EPolygonData & polygon){ return mgr.CreateShapePolygon(polygon);}))
+            .def("create_shape_polygon_with_holes", adapt_unique(&EDataMgr::CreateShapePolygonWithHoles))
         ;
     }
 }
