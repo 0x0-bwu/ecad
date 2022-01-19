@@ -4,6 +4,7 @@
 #include <boost/python/stl_iterator.hpp>
 #include "generic/tools/Format.hpp"
 #include "EPadstackDefData.h"
+#include "ECellCollection.h"
 #include "ENetCollection.h"
 #include "EPadstackInst.h"
 #include "EPadstackDef.h"
@@ -38,9 +39,8 @@ namespace {
     template <typename T>
     boost::python::list std_vector_to_py_list(const std::vector<T> & vec)
     {
-        auto get_iter = iterator<std::vector<T> >();
-        auto iter = get_iter(vec);
-        boost::python::list l(iter);
+        boost::python::list l;
+        for(auto t : vec) l.append(t);
         return l;
     }
 
@@ -93,8 +93,13 @@ namespace {
     }
     
     BOOST_PYTHON_FUNCTION_OVERLOADS(makeETransform2DWithNoMirror, makeETransform2D, 3, 4)
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrSaveDatabaseTxt, EDataMgr::SaveDatabase, 2, 3)
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrLoadDatabaseTxt, EDataMgr::LoadDatabase, 2, 3)
+    
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDatabaseSaveBin, EDatabase::Save, 1, 2)
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDatabaseLoadBin, EDatabase::Load, 1, 2)
+
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrSaveDatabaseBin, EDataMgr::SaveDatabase, 2, 3)
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrLoadDatabaseBin, EDataMgr::LoadDatabase, 2, 3)
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrShutDownWithAutoSave, EDataMgr::ShutDown, 0, 1)
 
     BOOST_PYTHON_MODULE(ECAD_LIB_NAME)
     {
@@ -118,6 +123,24 @@ namespace {
             .value("DielectricLayer", ELayerType::DielectricLayer)
             .value("ConductingLayer", ELayerType::ConductingLayer)
             .value("MetalizedSignal", ELayerType::MetalizedSignal)
+        ;
+
+        enum_<EDefinitionType>("EDefinitionType")
+            .value("Invalid", EDefinitionType::Invalid)
+            .value("PadstackDef", EDefinitionType::PadstackDef)
+            .value("LayerMap", EDefinitionType::LayerMap)
+            .value("Cell", EDefinitionType::Cell)
+        ;
+
+        //Unit
+        enum_<ECoordUnits::Unit>("ELengthUnit")
+            .value("nm", ECoordUnits::Unit::Nanometer)
+            .value("um", ECoordUnits::Unit::Micrometer)
+            .value("mm", ECoordUnits::Unit::Millimeter)
+            .value("m",  ECoordUnits::Unit::Meter)
+        ;
+
+        class_<ECoordUnits>("ECoordUnits", init<ECoordUnits::Unit, ECoordUnits::Unit>())
         ;
 
         //Point
@@ -299,12 +322,37 @@ namespace {
             .def("get_layout_view", &ECircuitCell::GetLayoutView,  return_internal_reference<>()) 
         ;
 
+        class_<ICellCollection, boost::noncopyable>("ICellCollection", no_init)
+        ;
+
+        class_<ECellCollection, bases<ICellCollection> >("ECellCollection", no_init)
+        ;
+
         //Database
         class_<IDatabase, std::shared_ptr<IDatabase>, boost::noncopyable>("IDatabase", no_init)
         ;
         
         class_<EDatabase, bases<IDatabase>, std::shared_ptr<EDatabase> >("EDatabase", init<std::string>())
-            .add_property("name", make_function(&EDatabase::GetName, return_value_policy<copy_const_reference>()), &EDatabase::SetName)
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+            .def("save", &EDatabase::Save)
+            .def("save", static_cast<bool(EDatabase::*)(const std::string &, EArchiveFormat) const>(&EDatabase::Save), EDatabaseSaveBin())
+            .def("load", &EDatabase::Load)
+            .def("load", static_cast<bool(EDatabase::*)(const std::string &, EArchiveFormat)>(&EDatabase::Load), EDatabaseLoadBin())
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+            .add_property("coord_units", make_function(&EDatabase::GetCoordUnits, return_value_policy<copy_const_reference>()), &EDatabase::SetCoordUnits)
+            .def("get_next_def_name", &EDatabase::GetNextDefName)
+            .def("get_cell_collection", &EDatabase::GetCellCollection, return_internal_reference<>())
+            .def("create_circuit_cell", &EDatabase::CreateCircuitCell, return_internal_reference<>())
+            .def("find_cell_by_name", &EDatabase::FindCellByName, return_internal_reference<>())
+            // .def("get_circuit_cells", +[](const EDatabase & database, boost::python::list & l){
+            //                                 std::vector<Ptr<ICell> > cells;
+            //                                 bool res = database.GetCircuitCells(cells);
+            //                                 for(auto cell : cells){
+            //                                     l.append(cell);
+            //                                 }
+            //                                 return res;
+            //                             })//todo, need fix
+            .add_property("name", make_function(&EDatabase::GetName, return_value_policy<copy_const_reference>()))
             .add_property("suuid", &EDatabase::sUuid)
         ;
 
@@ -312,16 +360,16 @@ namespace {
 
         //DataMgr
         class_<EDataMgr,boost::noncopyable>("EDataMgr", no_init)
-            .def("instance", &EDataMgr::Instance, return_value_policy<reference_existing_object>())
-            .staticmethod("instance")
             .def("create_database", &EDataMgr::CreateDatabase)
             .def("open_database", &EDataMgr::OpenDatabase)
             .def("remove_database", &EDataMgr::RemoveDatabase)
+            .def("shutdown", &EDataMgr::SaveDatabase)
+            .def("shutdown", static_cast<void(EDataMgr::*)(bool)>(&EDataMgr::ShutDown), EDataMgrShutDownWithAutoSave())
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("save_database", &EDataMgr::SaveDatabase)
-            .def("save_database", static_cast<bool(EDataMgr::*)(SPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::SaveDatabase), EDataMgrSaveDatabaseTxt())
+            .def("save_database", static_cast<bool(EDataMgr::*)(SPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::SaveDatabase), EDataMgrSaveDatabaseBin())
             .def("load_database", &EDataMgr::LoadDatabase)
-            .def("load_database", static_cast<bool(EDataMgr::*)(SPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseTxt())
+            .def("load_database", static_cast<bool(EDataMgr::*)(SPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseBin())
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("create_circuit_cell", &EDataMgr::CreateCircuitCell, return_internal_reference<>())
             .def("find_cell_by_name", &EDataMgr::FindCellByName, return_internal_reference<>())
@@ -337,6 +385,8 @@ namespace {
             .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const EPolygonData & polygon){ return mgr.CreateShapePolygon(polygon);}))
             .def("create_shape_polygon_with_holes", adapt_unique(&EDataMgr::CreateShapePolygonWithHoles))
             .def("create_text", &EDataMgr::CreateText, return_internal_reference<>())
+            .def("instance", &EDataMgr::Instance, return_value_policy<reference_existing_object>())
+            .staticmethod("instance")
         ;
     }
 }

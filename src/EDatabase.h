@@ -26,8 +26,8 @@ public:
     EDatabase & operator= (const EDatabase & other);
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    bool Save(const std::string & archive, EArchiveFormat fmt = EArchiveFormat::TXT) const;
-    bool Load(const std::string & archive, EArchiveFormat fmt = EArchiveFormat::TXT);
+    bool Save(const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN) const;
+    bool Load(const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
     void SetCoordUnits(const ECoordUnits & u);

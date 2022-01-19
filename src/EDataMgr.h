@@ -38,8 +38,8 @@ public:
     void ShutDown(bool autoSave = true);
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    bool SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::TXT);
-    bool LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::TXT);
+    bool SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
+    bool LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
     ///Cell
