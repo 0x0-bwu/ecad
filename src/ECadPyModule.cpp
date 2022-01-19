@@ -1,8 +1,11 @@
 #include "ECadCommon.h"
 
 #ifdef ECAD_BOOST_PYTHON_SUPPORT
+#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include "generic/tools/Format.hpp"
+#include "EPadstackDefCollection.h"
+#include "ELayerMapCollection.h"
 #include "EPadstackDefData.h"
 #include "ECellCollection.h"
 #include "ENetCollection.h"
@@ -86,6 +89,26 @@ namespace {
     }
 
     //Wrappers
+    std::vector<Ptr<ICell> > EDatabaseGetCircuitCellsWrap(const EDatabase & database)
+    {
+        std::vector<Ptr<ICell> > cells;
+        database.GetCircuitCells(cells);
+        return cells;
+    }
+
+    std::vector<Ptr<ICell> > EDatabaseGetTopCellsWrap(const EDatabase & database)
+    {
+        std::vector<Ptr<ICell> > cells;
+        database.GetTopCells(cells);
+        return cells;
+    }
+
+    bool EDatabaseAddLayerMapWrap(EDatabase & database, Ptr<ILayerMap> layerMap)
+    {
+        //todo, enhance, copy issue here
+        return database.AddLayerMap(layerMap->Clone());
+    }
+
     Ptr<IPrimitive> EDataMgrCreateGeometry2DWrap(EDataMgr & mgr, Ptr<ILayoutView> layout, ELayerId layer, ENetId net, Ptr<EShape> shape)
     {
         //todo, enhance, copy issue here
@@ -253,6 +276,23 @@ namespace {
             .def("get_database", &ELayerMap::GetDatabase, return_internal_reference<>())
         ;
 
+        //Layer Map Collection
+        class_<ILayerMapCollection, boost::noncopyable>("ILayerMapCollection", no_init)
+        ;
+
+        class_<ELayerMapCollection, bases<ILayerMapCollection> >("ELayerMapCollection", no_init)
+            .def("size", &ELayerMapCollection::Size)
+        ;
+
+        //Layer Map Iterator
+        class_<IIterator<ILayerMap>, boost::noncopyable>("ILayerMapIter", no_init)
+        ;
+
+        class_<ELayerMapIterator, bases<IIterator<ILayerMap> >, boost::noncopyable>("ELayerMapIter", no_init)
+            .def("next", &ELayerMapIterator::Next, return_internal_reference<>())
+            .def("current", &ELayerMapIterator::Current, return_internal_reference<>())
+        ;
+
         //ConnObj
         class_<EConnObj, bases<EObject> >("EConnObj", no_init)
             .add_property("net", &EConnObj::GetNet, &EConnObj::SetNet)
@@ -263,6 +303,23 @@ namespace {
         ;
 
         class_<EPadstackDef, bases<EDefinition, IPadstackDef> >("EPadstackDef", init<std::string>())
+        ;
+
+        //Padstack Def Collection
+        class_<IPadstackDefCollection, boost::noncopyable>("IPadstackDefCollection", no_init)
+        ;
+
+        class_<EPadstackDefCollection, bases<IPadstackDefCollection> >("EPadstackDefCollection", no_init)
+            .def("size", &EPadstackDefCollection::Size)
+        ;
+
+        //Padstack Def Iterator
+        class_<IIterator<IPadstackDef>, boost::noncopyable>("IPadstackDefIter", no_init)
+        ;
+
+        class_<EPadstackDefIterator, bases<IIterator<IPadstackDef> >, boost::noncopyable>("EPadstackDefIter", no_init)
+            .def("next", &EPadstackDefIterator::Next, return_internal_reference<>())
+            .def("current", &EPadstackDefIterator::Current, return_internal_reference<>())
         ;
 
         //Padstack Def Data
@@ -322,10 +379,25 @@ namespace {
             .def("get_layout_view", &ECircuitCell::GetLayoutView,  return_internal_reference<>()) 
         ;
 
+        class_<std::vector<Ptr<ICell> > >("ECellContainer")
+            .def(vector_indexing_suite<std::vector<Ptr<ICell> > >())
+        ;
+
+        //Cell Collection
         class_<ICellCollection, boost::noncopyable>("ICellCollection", no_init)
         ;
 
         class_<ECellCollection, bases<ICellCollection> >("ECellCollection", no_init)
+            .def("size", &ECellCollection::Size)
+        ;
+
+        //Cell Iterator
+        class_<IIterator<ICell>, boost::noncopyable>("ICellIter", no_init)
+        ;
+
+        class_<ECellIterator, bases<IIterator<ICell> >, boost::noncopyable>("ECellIter", no_init)
+            .def("next", &ECellIterator::Next, return_internal_reference<>())
+            .def("current", &ECellIterator::Current, return_internal_reference<>())
         ;
 
         //Database
@@ -344,16 +416,20 @@ namespace {
             .def("get_cell_collection", &EDatabase::GetCellCollection, return_internal_reference<>())
             .def("create_circuit_cell", &EDatabase::CreateCircuitCell, return_internal_reference<>())
             .def("find_cell_by_name", &EDatabase::FindCellByName, return_internal_reference<>())
-            // .def("get_circuit_cells", +[](const EDatabase & database, boost::python::list & l){
-            //                                 std::vector<Ptr<ICell> > cells;
-            //                                 bool res = database.GetCircuitCells(cells);
-            //                                 for(auto cell : cells){
-            //                                     l.append(cell);
-            //                                 }
-            //                                 return res;
-            //                             })//todo, need fix
+            .def("get_circuit_cells", &EDatabaseGetCircuitCellsWrap)
+            .def("get_top_cells", &EDatabaseGetTopCellsWrap)
+            .def("flatten", &EDatabase::Flatten)
+            .def("get_layer_map_collection", &EDatabase::GetLayerMapCollection, return_internal_reference<>())
+            .def("create_layer_map", &EDatabase::CreateLayerMap, return_internal_reference<>())
+            .def("add_layer_map",&EDatabaseAddLayerMapWrap)
+            .def("get_padstack_def_collection", &EDatabase::GetPadstackDefCollection, return_internal_reference<>())
+            .def("create_padstack_def", &EDatabase::CreatePadstackDef, return_internal_reference<>())
+            .def("get_cell_iter", adapt_unique(&EDatabase::GetCellIter))
+            .def("get_layer_map_iter", adapt_unique(&EDatabase::GetLayerMapIter))
+            .def("get_padstack_def_iter", adapt_unique(&EDatabase::GetPadstackDefIter))           
             .add_property("name", make_function(&EDatabase::GetName, return_value_policy<copy_const_reference>()))
             .add_property("suuid", &EDatabase::sUuid)
+            .def("clear", &EDatabase::Clear)
         ;
 
         implicitly_convertible<std::shared_ptr<EDatabase>, std::shared_ptr<IDatabase> >();

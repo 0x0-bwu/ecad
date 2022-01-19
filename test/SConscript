@@ -26,9 +26,7 @@ boost_python_support = env['BOOSTPYTHONSUPPORT']
 if boost_python_support :
     boost_python_version = env['BOOSTPYTHONVERSION']
     boost_python_lib = 'boost_python' + str(int(boost_python_version * 10))
-    python_lib = 'python' + str(boost_python_version)
-    if not os.path.isfile(linux_library_path + '/' + python_lib) :
-        python_lib += 'm'
+    python_lib = 'python' + str(boost_python_version) + 'm'
     libs_name.append(boost_python_lib)
     libs_name.append(python_lib)
 

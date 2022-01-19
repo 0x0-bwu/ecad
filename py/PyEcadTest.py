@@ -172,9 +172,69 @@ def test_database() :
     assert(found_cell.suuid == cell.suuid)
 
     #get_circuit_cells
-    circuit_cells = []
-    # res = database.get_circuit_cells(circuit_cells)
-    # assert(len(circuit_cells) == 1)
+    circuit_cells = database.get_circuit_cells()
+    assert(len(circuit_cells) == 1)
+    assert(circuit_cells[0].name == cell_name)
+
+    #get_top_cells
+    top_cells = database.get_top_cells()
+    assert(len(top_cells) == 1)
+    
+    #flatten
+    assert(database.flatten(top_cells[0]))
+
+    #get layer map collection
+    layer_map_collection = database.get_layer_map_collection()
+
+    #create layer map
+    layer_map_name = "layer_map"
+    layer_map = database.create_layer_map(layer_map_name)
+    assert(layer_map != None)
+    
+    #add layer map
+    assert(database.add_layer_map(layer_map) == False)
+
+    #get padstack def collection
+    padstack_def_collection = database.get_padstack_def_collection()
+
+    #create padstack def
+    padstack_def_name = "padstack"
+    padstack_def = database.create_padstack_def(padstack_def_name)
+    assert(padstack_def != None)
+    assert(padstack_def.name == padstack_def_name)
+
+    #get cell iter
+    iterator = database.get_cell_iter()
+    next = iterator.next()
+    assert(next.name == cell_name)
+    next = iterator.next()
+    assert(next == None)
+
+    #get layer map iter
+    iterator = database.get_layer_map_iter()
+    next = iterator.next()
+    assert(next.name == layer_map_name)
+    next = iterator.next()
+    assert(next == None)
+
+    #get padstack def iter
+    iterator = database.get_padstack_def_iter()
+    next = iterator.next()
+    assert(next.name == padstack_def_name)
+    next = iterator.next()
+    assert(next == None)
+
+    #name
+    assert(database.name == db_name)
+
+    #suuid
+    suuid = database.suuid
+
+    #clear
+    database.clear()
+    assert(cell_collection.size() == 0)
+    assert(layer_map_collection.size() == 0)
+    assert(padstack_def_collection.size() == 0)
 
 ###EPoint
 def test_point() :
