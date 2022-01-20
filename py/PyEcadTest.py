@@ -276,6 +276,97 @@ def test_cell() :
     assert(cell_name == cell.name)
     assert(cell.suuid)
 
+###ELayoutView
+def test_layout_view() :
+    #create layout
+    layout_name = "layout"
+    layout = ecad.ELayoutView(layout_name, None)
+
+    #name/suuid
+    assert(layout.name == layout_name)
+    assert(layout.suuid)
+
+    #get net iter
+    net_iter = layout.get_net_iter()
+
+    #get layer iter
+    layer_iter = layout.get_layer_iter()
+
+    #get conn obj iter
+    conn_obj_iter = layout.get_conn_obj_iter()
+
+    #get primitive iter
+    primitve_iter = layout.get_primitive_iter()
+
+    #get hierarchy obj iter
+    hierarchy_obj_iter = layout.get_hierarchy_obj_iter()
+
+    #get padstask inst iter
+    padstack_inst_iter = layout.get_padstack_inst_iter()
+
+    #append layer
+    layer = ecad.EStackupLayer("layer0", ecad.ELayerType.CONDUCTINGLAYER)
+    assert(ecad.ELayerId(0) == layout.append_layer(layer))
+
+    #append layers
+    layers = [ ecad.EStackupLayer("layer" + str(i), ecad.ELayerType.CONDUCTINGLAYER) for i in range(1, 3)]
+    assert(layout.append_layers(layers) == [1, 2])
+
+    #get stackup layers
+    layers = layout.get_stackup_layers()
+    assert(len(layers) == 3)
+
+    #add default dielectric layers
+    layer_map = layout.add_default_dielectric_layers()
+    assert(layer_map.get_mapping_forward(ecad.ELayerId(1)) == 2)
+    assert(layer_map.get_mapping_backward(ecad.ELayerId(4)) == 2)
+
+    #create net
+    net_name = "net"
+    net = layout.create_net(net_name)
+    net_iter = layout.get_net_iter()
+    assert(net.suuid == net_iter.next().suuid)
+
+    #create padstack inst
+    padstack_name = "padstack"
+    padstack_def = ecad.EPadstackDef("padstackdef")
+    padstack_inst = layout.create_padstack_inst(padstack_name, padstack_def, ecad.ENetId.NONET, ecad.ELayerId(0), ecad.ELayerId(1), layer_map, ecad.ETransform2D())
+    padstack_inst_iter = layout.get_padstack_inst_iter()
+    assert(padstack_inst.suuid == padstack_inst_iter.next().suuid)
+
+    #create cell inst
+    cell_name = "cell"
+    cell = ecad.ECircuitCell(cell_name, None)
+    cell_inst = layout.create_cell_inst(cell_name, cell.get_layout_view(), ecad.ETransform2D())
+    cell_inst_iter = layout.get_cell_inst_iter()
+    assert(cell_inst.suuid == cell_inst_iter.next().suuid)
+
+    #create geometry 2d
+    polygon_data = ecad.EPolygonData()
+    polygon_data.set_points([EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)])
+    shape_polygon = ecad.EPolygon()
+    shape_polygon.shape = polygon_data
+    geom = layout.create_geometry_2d(ecad.ELayerId(0), ecad.ENetId.NONET, shape_polygon)
+    assert(geom != None)
+    geom_iter = layout.get_primitive_iter()
+    assert(geom.suuid == geom_iter.next().suuid)
+
+    #create text
+    text = layout.create_text(ecad.ELayerId.NOLAYER, ecad.ETransform2D(), "text")
+    assert(text != None)
+
+    prim_iter = layout.get_primitive_iter()
+    prim = prim_iter.next()
+    while prim :
+        t = prim.get_text_from_primitive()
+        if t :
+            assert(t.suuid == text.suuid)
+        g = prim.get_geometry_2d_from_primitive()
+        if g :
+            assert(g.suuid == geom.suuid)
+        prim = prim_iter.next()
+    
+
 ###EPoint
 def test_point() :
     p = EPoint2D(2, 3)
@@ -304,6 +395,7 @@ def main() :
     test_transform()
     test_polygon_data()
     test_cell()
+    test_layout_view()
     print("every thing is fine")
 
 if __name__ == '__main__' :

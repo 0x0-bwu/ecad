@@ -4,8 +4,14 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include "generic/tools/Format.hpp"
+#include "EHierarchyObjCollection.h"
+#include "EPadstackInstCollection.h"
 #include "EPadstackDefCollection.h"
+#include "EPrimitiveCollection.h"
+#include "ECellInstCollection.h"
 #include "ELayerMapCollection.h"
+#include "EConnObjCollection.h"
+#include "ELayerCollection.h"
 #include "EPadstackDefData.h"
 #include "ECellCollection.h"
 #include "ENetCollection.h"
@@ -89,6 +95,36 @@ namespace {
     }
 
     //Wrappers
+    ELayerId ELayoutViewAppendLayerWrap(const ELayoutView & layout, Ptr<ILayer> layer)
+    {
+        //todo, enhance, copy issue here
+        return layout.AppendLayer(layer->Clone());
+    }
+
+    boost::python::list ELayoutViewAppendLayersWrap(const ELayoutView & layout, const boost::python::list & layers)
+    {
+        //todo, enhance, copy issue here
+        auto vec = py_list_to_std_vector<Ptr<ILayer> >(layers);
+        std::vector<UPtr<ILayer> > input;
+        for(auto layer : vec)
+            input.emplace_back(std::move(layer->Clone()));
+        auto res = layout.AppendLayers(std::move(input));
+        return std_vector_to_py_list<ELayerId>(res);
+    }
+
+    std::vector<Ptr<ILayer> > ELayoutViewGetStackupLayersWrap(const ELayoutView & layout)
+    {
+        std::vector<Ptr<ILayer> > layers;
+        layout.GetStackupLayers(layers);
+        return layers;
+    }
+
+    Ptr<IPrimitive> ELayoutViewCreateGeometry2DWrap(ELayoutView & layout, ELayerId layer, ENetId net, Ptr<EShape> shape)
+    {
+        //todo, enhance, copy issue here
+        return layout.CreateGeometry2D(layer, net, shape->Clone());
+    }
+
     bool ECellSetLayoutViewWrap(ECell & cell, Ptr<ILayoutView> layout)
     {
         //todo, enhance, copy issue here
@@ -273,11 +309,25 @@ namespace {
         ;
 
         class_<ELayer, bases<EObject, ILayer>, boost::noncopyable>("ELayer", no_init)
+            .add_property("layer_id", &ELayer::GetLayerId, &ELayer::SetLayerId)
         ;
 
         class_<EStackupLayer, bases<ELayer> >("EStackupLayer", init<std::string, ELayerType>())
             .add_property("elevation", &EStackupLayer::GetElevation, &EStackupLayer::SetElevation)
             .add_property("thickness", &EStackupLayer::GetThickness, &EStackupLayer::GetThickness)
+        ;
+
+        class_<std::vector<Ptr<ILayer> > >("ELayerContainer")
+            .def(vector_indexing_suite<std::vector<Ptr<ILayer> > >())
+        ;
+
+        //Layer Map Iterator
+        class_<IIterator<ILayer>, boost::noncopyable>("ILayerIter", no_init)
+        ;
+
+        class_<ELayerIterator, bases<IIterator<ILayer> >, boost::noncopyable>("ELayerIter", no_init)
+            .def("next", &ELayerIterator::Next, return_internal_reference<>())
+            .def("current", &ELayerIterator::Current, return_internal_reference<>())
         ;
 
         //Layer Map
@@ -286,6 +336,8 @@ namespace {
 
         class_<ELayerMap, bases<EDefinition, ILayerMap> >("ELayerMap", no_init)
             .def("get_database", &ELayerMap::GetDatabase, return_internal_reference<>())
+            .def("get_mapping_forward", &ELayerMap::GetMappingForward)
+            .def("get_mapping_backward", &ELayerMap::GetMappingBackward)
         ;
 
         //Layer Map Collection
@@ -304,17 +356,30 @@ namespace {
             .def("next", &ELayerMapIterator::Next, return_internal_reference<>())
             .def("current", &ELayerMapIterator::Current, return_internal_reference<>())
         ;
-
+        
         //ConnObj
-        class_<EConnObj, bases<EObject> >("EConnObj", no_init)
+        class_<IConnObj, boost::noncopyable>("IConnObj", no_init)
+        ;
+
+        class_<EConnObj, bases<EObject, IConnObj> >("EConnObj", no_init)
             .add_property("net", &EConnObj::GetNet, &EConnObj::SetNet)
+        ;
+
+        //ConnObj Iterator
+        class_<IIterator<IConnObj>, boost::noncopyable>("IConnObjIter", no_init)
+        ;
+
+        class_<EConnObjIterator, bases<IIterator<IConnObj> >, boost::noncopyable>("EConnObjIter", no_init)
+            .def("next", &EConnObjIterator::Next, return_internal_reference<>())
+            .def("current", &EConnObjIterator::Current, return_internal_reference<>())
         ;
 
         //Padstack Def
         class_<IPadstackDef, boost::noncopyable>("IPadstackDef", no_init)
         ;
 
-        class_<EPadstackDef, bases<EDefinition, IPadstackDef> >("EPadstackDef", init<std::string>())
+        class_<EPadstackDef, bases<EDefinition, IPadstackDef> >("EPadstackDef")
+            .def(init<std::string>())
         ;
 
         //Padstack Def Collection
@@ -338,20 +403,55 @@ namespace {
         class_<IPadstackDefData, boost::noncopyable>("IPadstackDefData", no_init)
         ;
 
-        class_<EPadstackDefData, bases<IPadstackDefData> >("EPadstackDefData", no_init)
+        class_<EPadstackDefData, bases<IPadstackDefData> >("EPadstackDefData")
         ;
 
+        //Padstack Inst
         class_<IPadstackInst, boost::noncopyable>("IPadstackInst", no_init)
         ;
 
         class_<EPadstackInst, bases<EConnObj, IPadstackInst> >("EPadstackInst", no_init)
         ;
 
+        //Padstack Inst Iterator
+        class_<IIterator<IPadstackInst>, boost::noncopyable>("IPadstackInstIter", no_init)
+        ;
+
+        class_<EPadstackInstIterator, bases<IIterator<IPadstackInst> >, boost::noncopyable>("EPadstackInstIter", no_init)
+            .def("next", &EPadstackInstIterator::Next, return_internal_reference<>())
+            .def("current", &EPadstackInstIterator::Current, return_internal_reference<>())
+        ;
+
+        //HierarchyObj
+        class_<IHierarchyObj, boost::noncopyable>("IHierarchyObj", no_init)
+        ;
+
+        class_<EHierarchyObj, bases<EObject, IHierarchyObj> >("EHierarchyObj", no_init)
+        ;
+
+        //HierarchyObj Iterator
+        class_<IIterator<IHierarchyObj>, boost::noncopyable>("IHierarchyObjIter", no_init)
+        ;
+
+        class_<EHierarchyObjIterator, bases<IIterator<IHierarchyObj> >, boost::noncopyable>("EHierarchyObjIter", no_init)
+            .def("next", &EHierarchyObjIterator::Next, return_internal_reference<>())
+            .def("current", &EHierarchyObjIterator::Current, return_internal_reference<>())
+        ;
+
         //CellInst
         class_<ICellInst, boost::noncopyable>("ICellInst", no_init)
         ;
 
-        class_<ECellInst, bases<ICellInst> >("ECellInst", no_init)
+        class_<ECellInst, bases<EHierarchyObj, ICellInst> >("ECellInst", no_init)
+        ;
+
+        //CellInst Iterator
+        class_<IIterator<ICellInst>, boost::noncopyable>("ICellInstIter", no_init)
+        ;
+
+        class_<ECellInstIterator, bases<IIterator<ICellInst> >, boost::noncopyable>("ECellInstIter", no_init)
+            .def("next", &ECellInstIterator::Next, return_internal_reference<>())
+            .def("current", &ECellInstIterator::Current, return_internal_reference<>())
         ;
 
         //Primitive
@@ -359,6 +459,24 @@ namespace {
         ;
 
         class_<EPrimitive, bases<EConnObj, IPrimitive>, boost::noncopyable>("EPrimitive", no_init)
+            .def("get_text_from_primitive", &EPrimitive::GetTextFromPrimitive, return_internal_reference<>())
+            .def("get_conn_obj_from_primitive", &EPrimitive::GetConnObjFromPrimitive, return_internal_reference<>())
+            .def("get_geometry_2d_from_primitive", &EPrimitive::GetGeometry2DFromPrimitive, return_internal_reference<>())
+        ;
+
+        //Primitive Iterator
+        class_<IIterator<IPrimitive>, boost::noncopyable>("IPrimitiveIter", no_init)
+        ;
+
+        class_<EPrimitiveIterator, bases<IIterator<IPrimitive> >, boost::noncopyable>("EPrimitiveIter", no_init)
+            .def("next", &EPrimitiveIterator::Next, return_internal_reference<>())
+            .def("current", &EPrimitiveIterator::Current, return_internal_reference<>())
+        ;
+
+        class_<IGeometry2D, boost::noncopyable>("IGeometry2D", no_init)
+        ;
+
+        class_<EGeometry2D, bases<EPrimitive, IGeometry2D> >("EGeometry2D", no_init)
         ;
 
         class_<IText, boost::noncopyable>("IText", no_init)
@@ -375,9 +493,25 @@ namespace {
         ;
 
         class_<ELayoutView, bases<ILayoutView> >("ELayoutView", init<std::string, Ptr<ICell> >())
-            .def("get_net_iter", adapt_unique(&ELayoutView::GetNetIter))
-            .def("get_cell", &ELayoutView::GetCell, return_internal_reference<>())
             .add_property("name", make_function(&ELayoutView::GetName, return_value_policy<copy_const_reference>()))
+            .add_property("suuid", &ELayoutView::sUuid)
+            .def("get_net_iter", adapt_unique(&ELayoutView::GetNetIter))
+            .def("get_layer_iter", adapt_unique(&ELayoutView::GetLayerIter))
+            .def("get_conn_obj_iter", adapt_unique(&ELayoutView::GetConnObjIter))
+            .def("get_cell_inst_iter", adapt_unique(&ELayoutView::GetCellInstIter))
+            .def("get_primitive_iter", adapt_unique(&ELayoutView::GetPrimitiveIter))
+            .def("get_hierarchy_obj_iter", adapt_unique(&ELayoutView::GetHierarchyObjIter))
+            .def("get_padstack_inst_iter", adapt_unique(&ELayoutView::GetPadstackInstIter))
+            .def("get_cell", &ELayoutView::GetCell, return_internal_reference<>())
+            .def("append_layer", &ELayoutViewAppendLayerWrap)
+            .def("append_layers", &ELayoutViewAppendLayersWrap)
+            .def("get_stackup_layers", &ELayoutViewGetStackupLayersWrap)
+            .def("add_default_dielectric_layers", adapt_unique(&ELayoutView::AddDefaultDielectricLayers))
+            .def("create_net", &ELayoutView::CreateNet, return_internal_reference<>())
+            .def("create_cell_inst", &ELayoutView::CreateCellInst, return_internal_reference<>())
+            .def("create_padstack_inst", &ELayoutView::CreatePadstackInst, return_internal_reference<>())
+            .def("create_geometry_2d", &ELayoutViewCreateGeometry2DWrap, return_internal_reference<>())
+            .def("create_text", &ELayoutView::CreateText, return_internal_reference<>())
         ;
 
         //Cell
@@ -392,7 +526,7 @@ namespace {
             .def("get_flattened_layout_view", &ECell::GetFlattenedLayoutView, return_internal_reference<>())
         ;
 
-        class_<ECircuitCell, bases<ECell> >("ECircuitCell", no_init)
+        class_<ECircuitCell, bases<ECell> >("ECircuitCell", init<std::string, Ptr<IDatabase> >())
         ;
 
         class_<std::vector<Ptr<ICell> > >("ECellContainer")
