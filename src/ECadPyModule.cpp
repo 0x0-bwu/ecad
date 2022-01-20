@@ -89,6 +89,12 @@ namespace {
     }
 
     //Wrappers
+    bool ECellSetLayoutViewWrap(ECell & cell, Ptr<ILayoutView> layout)
+    {
+        //todo, enhance, copy issue here
+        return cell.SetLayoutView(layout->Clone());
+    }
+
     std::vector<Ptr<ICell> > EDatabaseGetCircuitCellsWrap(const EDatabase & database)
     {
         std::vector<Ptr<ICell> > cells;
@@ -133,34 +139,39 @@ namespace {
             .value("BIN", EArchiveFormat::BIN)
         ;
 
+        enum_<ECellType>("ECellType")
+            .value("INVALID", ECellType::Invalid)
+            .value("CIRCUITCELL", ECellType::CircuitCell)
+        ;
+
         enum_<ELayerId>("ELayerId")
-            .value("noLayer", ELayerId::noLayer)
+            .value("NOLAYER", ELayerId::noLayer)
         ;
 
         enum_<ENetId>("ENetId")
-            .value("noNet", ENetId::noNet)
+            .value("NONET", ENetId::noNet)
         ;
 
         enum_<ELayerType>("ELayerType")
-            .value("Invalid", ELayerType::Invalid)
-            .value("DielectricLayer", ELayerType::DielectricLayer)
-            .value("ConductingLayer", ELayerType::ConductingLayer)
-            .value("MetalizedSignal", ELayerType::MetalizedSignal)
+            .value("INVALID", ELayerType::Invalid)
+            .value("DIELECTRICLAYER", ELayerType::DielectricLayer)
+            .value("CONDUCTINGLAYER", ELayerType::ConductingLayer)
+            .value("METALIZEDSIGNAL", ELayerType::MetalizedSignal)
         ;
 
         enum_<EDefinitionType>("EDefinitionType")
-            .value("Invalid", EDefinitionType::Invalid)
-            .value("PadstackDef", EDefinitionType::PadstackDef)
-            .value("LayerMap", EDefinitionType::LayerMap)
-            .value("Cell", EDefinitionType::Cell)
+            .value("INVALID", EDefinitionType::Invalid)
+            .value("PADSTACKDEF", EDefinitionType::PadstackDef)
+            .value("LAYERMAP", EDefinitionType::LayerMap)
+            .value("CELL", EDefinitionType::Cell)
         ;
 
         //Unit
         enum_<ECoordUnits::Unit>("ELengthUnit")
-            .value("nm", ECoordUnits::Unit::Nanometer)
-            .value("um", ECoordUnits::Unit::Micrometer)
-            .value("mm", ECoordUnits::Unit::Millimeter)
-            .value("m",  ECoordUnits::Unit::Meter)
+            .value("NM", ECoordUnits::Unit::Nanometer)
+            .value("UM", ECoordUnits::Unit::Micrometer)
+            .value("MM", ECoordUnits::Unit::Millimeter)
+            .value("METER",  ECoordUnits::Unit::Meter)
         ;
 
         class_<ECoordUnits>("ECoordUnits", init<ECoordUnits::Unit, ECoordUnits::Unit>())
@@ -239,6 +250,7 @@ namespace {
         ;
 
         class_<EDefinition, bases<EObject, IDefinition> >("EDefinition", no_init)
+            .def("get_definition_type", &EDefinition::GetDefinitionType)
         ;
 
         //Net
@@ -362,8 +374,10 @@ namespace {
         class_<ILayoutView, boost::noncopyable>("ILayoutView", no_init)
         ;
 
-        class_<ELayoutView, bases<ILayoutView> >("ELayoutView", no_init)
+        class_<ELayoutView, bases<ILayoutView> >("ELayoutView", init<std::string, Ptr<ICell> >())
             .def("get_net_iter", adapt_unique(&ELayoutView::GetNetIter))
+            .def("get_cell", &ELayoutView::GetCell, return_internal_reference<>())
+            .add_property("name", make_function(&ELayoutView::GetName, return_value_policy<copy_const_reference>()))
         ;
 
         //Cell
@@ -371,12 +385,14 @@ namespace {
         ;
 
         class_<ECell, bases<EDefinition, ICell>, boost::noncopyable>("ECell", no_init)
+            .def("set_layout_view", &ECellSetLayoutViewWrap)
+            .def("get_cell_type", &ECell::GetCellType)
             .def("get_database", &ECell::GetDatabase, return_internal_reference<>())
-            .def("get_layout_view", &ECell::GetLayoutView,  return_internal_reference<>()) 
+            .def("get_layout_view", &ECell::GetLayoutView,  return_internal_reference<>())
+            .def("get_flattened_layout_view", &ECell::GetFlattenedLayoutView, return_internal_reference<>())
         ;
 
         class_<ECircuitCell, bases<ECell> >("ECircuitCell", no_init)
-            .def("get_layout_view", &ECircuitCell::GetLayoutView,  return_internal_reference<>()) 
         ;
 
         class_<std::vector<Ptr<ICell> > >("ECellContainer")

@@ -68,9 +68,9 @@ def test_data_mgr() :
     assert(next == None)
 
     #create stackup layer
-    layer_m = mgr.create_stackup_layer("m", ecad.ELayerType.ConductingLayer, 0, 10)
+    layer_m = mgr.create_stackup_layer("m", ecad.ELayerType.CONDUCTINGLAYER, 0, 10)
     assert(layer_m.thickness == 10)
-    layer_v = mgr.create_stackup_layer("v", ecad.ELayerType.DielectricLayer, 0, 20)
+    layer_v = mgr.create_stackup_layer("v", ecad.ELayerType.DIELECTRICLAYER, 0, 20)
     layer_v.elevation = -10
     assert(layer_v.elevation == -10)
 
@@ -113,12 +113,12 @@ def test_data_mgr() :
     assert(eshape3 != None)
 
     #create geometry 2d
-    geom = mgr.create_geometry_2d(layout, ecad.ELayerId.noLayer, ecad.ENetId.noNet, eshape3)
+    geom = mgr.create_geometry_2d(layout, ecad.ELayerId.NOLAYER, ecad.ENetId.NONET, eshape3)
     assert(geom != None)
 
     #create text
     s = "hello world"
-    text = mgr.create_text(layout, ecad.ELayerId.noLayer, ecad.ETransform2D(), s)
+    text = mgr.create_text(layout, ecad.ELayerId.NOLAYER, ecad.ETransform2D(), s)
     assert(text.text == s)
 
     #shut down
@@ -155,7 +155,7 @@ def test_database() :
     database.coord_units = coord_units
 
     #get next def name
-    next_def_name = database.get_next_def_name("def", ecad.EDefinitionType.PadstackDef)
+    next_def_name = database.get_next_def_name("def", ecad.EDefinitionType.PADSTACKDEF)
     assert(next_def_name == "def")
 
     #get cell collection
@@ -236,6 +236,46 @@ def test_database() :
     assert(layer_map_collection.size() == 0)
     assert(padstack_def_collection.size() == 0)
 
+###ECell
+def test_cell() :
+    #create database
+    db_name = "test"
+    database = ecad.EDatabase(db_name)
+
+    #create cell
+    cell_name = "cell"
+    cell = database.create_circuit_cell(cell_name)
+
+    #create layout
+    layout_name = "layout"
+    layout = ecad.ELayoutView(layout_name, None)
+
+    #set layout view
+    assert(cell.set_layout_view(layout))
+
+    #get cell type
+    assert(cell.get_cell_type() == ecad.ECellType.CIRCUITCELL)
+
+    #get database
+    assert(cell.get_database().suuid == database.suuid)
+
+    #get layout view
+    layout = cell.get_layout_view() 
+    assert(layout != None)
+    assert(layout.name == layout_name)
+    assert(layout.get_cell().suuid == cell.suuid)
+
+    #get flattened layout view
+    flattened = cell.get_flattened_layout_view()
+    assert(flattened != None)
+
+    #get definition type
+    assert(ecad.EDefinitionType.CELL == cell.get_definition_type())
+
+    #name/suuid
+    assert(cell_name == cell.name)
+    assert(cell.suuid)
+
 ###EPoint
 def test_point() :
     p = EPoint2D(2, 3)
@@ -263,6 +303,7 @@ def main() :
     test_point()
     test_transform()
     test_polygon_data()
+    test_cell()
     print("every thing is fine")
 
 if __name__ == '__main__' :
