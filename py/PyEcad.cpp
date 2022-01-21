@@ -114,6 +114,12 @@ namespace {
     }
     
     //Wrappers
+    void EGeometry2DSetShapeWrap(EGeometry2D & geom, Ptr<EShape> shape)
+    {
+        //todo, enhance, copy issue here
+        return geom.SetShape(shape->Clone());
+    }
+
     ELayerId ELayoutViewAppendLayerWrap(const ELayoutView & layout, Ptr<ILayer> layer)
     {
         //todo, enhance, copy issue here
@@ -246,6 +252,8 @@ namespace {
 
         //Point
         class_<EPoint2D>("EPoint2D", init<ECoord, ECoord>())
+            .def("__eq__", &EPoint2D::operator==)
+            .def("__ne__", &EPoint2D::operator!=)
             .add_property("x",
                             +[](const EPoint2D & p){ return p[0]; },
                             make_function([](EPoint2D & p, ECoord x){ p[0] = x; }, default_call_policies(), boost::mpl::vector<void, EPoint2D &, ECoord>()))
@@ -253,6 +261,18 @@ namespace {
                             +[](const EPoint2D & p){ return p[1]; },
                             make_function([](EPoint2D & p, ECoord y){ p[1] = y; }, default_call_policies(), boost::mpl::vector<void, EPoint2D &, ECoord>()))
             .def("__str__", +[](const EPoint2D & p){ std::stringstream ss; ss << p; return ss.str(); })
+        ;
+
+        //box
+        class_<EBox2D>("EBox2D", init<EPoint2D, EPoint2D>())
+            .def("__eq__", &EBox2D::operator==)
+            .def("__ne__", &EBox2D::operator!=)
+            .add_property("ll",
+                            +[](const EBox2D & b){ return b[0]; },
+                            make_function([](EBox2D & b, const EPoint2D & p){ b[0] = p; }, default_call_policies(), boost::mpl::vector<void, EBox2D &, const EPoint2D &>()))
+            .add_property("ur",
+                            +[](const EBox2D & b){ return b[1]; },
+                            make_function([](EBox2D & b, const EPoint2D & p){ b[1] = p; }, default_call_policies(), boost::mpl::vector<void, EBox2D &, const EPoint2D &>()))
         ;
 
         //Polygon
@@ -290,6 +310,7 @@ namespace {
         //Shape
         class_<EShape, boost::noncopyable>("EShape", no_init)
             .def("has_hole", &EShape::hasHole)
+            .def("get_bbox", &EShape::GetBBox)
         ;
 
         class_<ERectangle, bases<EShape> >("ERectangle")
@@ -579,7 +600,10 @@ namespace {
         class_<IGeometry2D, boost::noncopyable>("IGeometry2D", no_init)
         ;
 
-        class_<EGeometry2D, bases<EPrimitive, IGeometry2D> >("EGeometry2D", no_init)
+        class_<EGeometry2D, bases<EPrimitive, IGeometry2D> >("EGeometry2D", init<ELayerId, ENetId>())
+            .def("set_shape", &EGeometry2DSetShapeWrap)
+            .def("get_shape", &EGeometry2D::GetShape, return_internal_reference<>())
+            .def("transform", &EGeometry2D::Transform)
         ;
 
         class_<IText, boost::noncopyable>("IText", no_init)
@@ -589,6 +613,7 @@ namespace {
             .def(init<std::string>())
             .def(init<std::string, ELayerId, ENetId>())
             .add_property("text", make_function(&EText::GetText, return_value_policy<copy_const_reference>()))
+            .def("get_position", &EText::GetPosition)
         ;
 
         //LayoutView

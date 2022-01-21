@@ -77,6 +77,23 @@ void t_class_layer_collection()
     mgr.ShutDown();
 }
 
+void t_class_primitive()
+{
+    auto & mgr = EDataMgr::Instance();
+    auto database = mgr.CreateDatabase(dbName);
+    auto cell = mgr.CreateCircuitCell(database, cellName);
+    auto layout = cell->GetLayoutView();
+
+    auto shape = mgr.CreateShapePolygon({{0, 0}, {10, 0}, {10, 10}, {0, 10}});
+    auto prim = mgr.CreateGeometry2D(layout, ELayerId(-1), ENetId(-1), std::move(shape));
+
+    //geometry2d
+    auto geom = prim->GetGeometry2DFromPrimitive();
+    BOOST_CHECK(geom != nullptr);
+    
+    mgr.ShutDown();   
+}
+
 test_suite * create_ecad_function_test_suite()
 {
     test_suite * function_suite = BOOST_TEST_SUITE("s_function_test");
@@ -84,6 +101,7 @@ test_suite * create_ecad_function_test_suite()
     function_suite->add(BOOST_TEST_CASE(&t_class_data_mgr));
     function_suite->add(BOOST_TEST_CASE(&t_class_cell));
     function_suite->add(BOOST_TEST_CASE(&t_class_layer_collection));
+    function_suite->add(BOOST_TEST_CASE(&t_class_primitive));
     //
     return function_suite;
 }

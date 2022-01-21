@@ -89,6 +89,24 @@ ECAD_INLINE EDefinitionType ECell::GetDefinitionType() const
     return EDefinitionType::Cell;
 }
 
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+template <typename Archive>
+ECAD_INLINE void ECircuitCell::save(Archive & ar, const unsigned int version) const
+{
+    ECAD_UNUSED(version)
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECell);
+}
+
+template <typename Archive>
+ECAD_INLINE void ECircuitCell::load(Archive & ar, const unsigned int version)
+{
+    ECAD_UNUSED(version)
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECell);
+}
+
+ECAD_SERIALIZATION_FUNCTIONS_IMP(ECircuitCell)
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+
 ECAD_INLINE ECircuitCell::ECircuitCell()
  : ECircuitCell(std::string{}, nullptr)
 {

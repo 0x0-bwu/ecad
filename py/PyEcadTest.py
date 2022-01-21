@@ -453,6 +453,37 @@ def test_cell_collection() :
     cell_collection.clear()
     assert(len(cell_collection) == 0)
 
+###EGeometry2D
+def test_geometry_2d() :
+    #create geometry 2d
+    geom = ecad.EGeometry2D(ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
+
+    #set shape
+    shape_polygon = ecad.EPolygon()
+    shape_polygon.set_points([EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)])
+    geom.set_shape(shape_polygon)
+
+    #get shape
+    shape = geom.get_shape()
+    assert(shape.get_bbox().ll == EPoint2D(0, 0))
+
+    #transform
+    trans = ecad.make_transform_2d(1.0, 0.0, EPoint2D(10, 10))
+    geom.transform(trans)
+    shape = geom.get_shape()
+    assert(shape.get_bbox().ll == EPoint2D(10, 10))
+
+###EText
+def test_text() :
+    #create text
+    text = ecad.EText("text", ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
+    
+    #text
+    assert(text.text == "text")
+
+    #get position
+    assert(text.get_position() == ecad.EPoint2D(0, 0))
+
 ###EPoint
 def test_point() :
     p = EPoint2D(2, 3)
@@ -480,6 +511,8 @@ def main() :
     test_cell()
     test_layout_view()
     test_cell_collection()
+    test_text()
+    test_geometry_2d()
     test_point()
     test_transform()
     test_polygon_data()

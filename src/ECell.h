@@ -40,25 +40,7 @@ protected:
 
 class ECAD_API ECircuitCell : public ECell
 {
-#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    friend class boost::serialization::access;
-    
-    template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
-    {
-        ECAD_UNUSED(version)
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECell);
-    }
-
-    template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
-    {
-        ECAD_UNUSED(version)
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECell);
-    }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
-#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ECircuitCell();
     explicit ECircuitCell(std::string name, Ptr<IDatabase> database);
