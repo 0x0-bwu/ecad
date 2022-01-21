@@ -95,6 +95,11 @@ namespace {
     }
 
     //Wrappers
+    Ptr<INet> ENetCollectionIndexWrap(const ENetCollection & collection, const std::string & name)
+    {
+        return collection.At(name).get();
+    }
+
     ELayerId ELayoutViewAppendLayerWrap(const ELayoutView & layout, Ptr<ILayer> layer)
     {
         //todo, enhance, copy issue here
@@ -123,6 +128,15 @@ namespace {
     {
         //todo, enhance, copy issue here
         return layout.CreateGeometry2D(layer, net, shape->Clone());
+    }
+
+    void ELayoutViewSetBoundaryWrap(ELayoutView & layout, Ptr<EPolygon> boundary)
+    {
+        //todo, enhance, copy issue here
+        auto shape = boundary->Clone();
+        auto polygon = UPtr<EPolygon>(dynamic_cast<Ptr<EPolygon> >(shape.get()));
+        shape.release();
+        return layout.SetBoundary(std::move(polygon));
     }
 
     bool ECellSetLayoutViewWrap(ECell & cell, Ptr<ILayoutView> layout)
@@ -269,6 +283,10 @@ namespace {
 
         class_<EPolygon, bases<EShape> >("EPolygon")
             .def_readwrite("shape", &EPolygon::shape)
+            .def("set_points", make_function([](EPolygon & polygon, const boost::python::list & points){
+                                    polygon.SetPoints(py_list_to_std_vector<EPoint2D>(points));
+                                    },
+                                    default_call_policies(), boost::mpl::vector<void, EPolygon &, const boost::python::list &>()))
         ;
 
         class_<EPolygonWithHoles, bases<EShape> >("EPolygonWithHoles")
@@ -296,12 +314,22 @@ namespace {
         class_<ENet, bases<EObject, INet> >("ENet", no_init)
         ;
 
+        //Net Iterator
         class_<IIterator<INet>, boost::noncopyable>("INetIter", no_init)
         ;
 
         class_<ENetIterator, bases<IIterator<INet> >, boost::noncopyable>("ENetIter", no_init)
             .def("next", &ENetIterator::Next, return_internal_reference<>())
             .def("current", &ENetIterator::Current, return_internal_reference<>())
+        ;
+
+        //Net Collection
+        class_<INetCollection, boost::noncopyable>("INetCollection", no_init)
+        ;
+
+        class_<ENetCollection, bases<INetCollection> >("ENetCollection", no_init)
+            .def("__len__", &ENetCollection::Size)
+            .def("__getitem__", &ENetCollectionIndexWrap, return_internal_reference<>())
         ;
 
         //Layer
@@ -319,6 +347,23 @@ namespace {
 
         class_<std::vector<Ptr<ILayer> > >("ELayerContainer")
             .def(vector_indexing_suite<std::vector<Ptr<ILayer> > >())
+        ;
+
+        //Layer Iterator
+        class_<IIterator<ILayer>, boost::noncopyable>("ILayerIter", no_init)
+        ;
+
+        class_<ELayerIterator, bases<IIterator<ILayer> >, boost::noncopyable>("ELayerIter", no_init)
+            .def("next", &ENetIterator::Next, return_internal_reference<>())
+            .def("current", &ENetIterator::Current, return_internal_reference<>())
+        ;
+
+        //Layer Collection
+        class_<ILayerCollection, boost::noncopyable>("ILayerCollection", no_init)
+        ;
+
+        class_<ELayerCollection, bases<ILayerCollection> >("ELayerCollection", no_init)
+            .def("__len__", &ELayerCollection::Size)
         ;
 
         //Layer Map Iterator
@@ -374,6 +419,14 @@ namespace {
             .def("current", &EConnObjIterator::Current, return_internal_reference<>())
         ;
 
+        //ConnObj Collection
+        class_<IConnObjCollection, boost::noncopyable>("IConnObjCollection", no_init)
+        ;
+
+        class_<EConnObjCollection, bases<IConnObjCollection> >("EConnObjCollection", no_init)
+            .def("__len__", &EConnObjCollection::Size)
+        ;
+
         //Padstack Def
         class_<IPadstackDef, boost::noncopyable>("IPadstackDef", no_init)
         ;
@@ -422,6 +475,14 @@ namespace {
             .def("current", &EPadstackInstIterator::Current, return_internal_reference<>())
         ;
 
+        //Primitive Collection
+        class_<IPadstackInstCollection, boost::noncopyable>("IPadstackInstCollection", no_init)
+        ;
+
+        class_<EPadstackInstCollection, bases<IPadstackInstCollection> >("EPadstackInstCollection", no_init)
+            .def("__len__", &EPadstackInstCollection::Size)
+        ;
+
         //HierarchyObj
         class_<IHierarchyObj, boost::noncopyable>("IHierarchyObj", no_init)
         ;
@@ -438,6 +499,14 @@ namespace {
             .def("current", &EHierarchyObjIterator::Current, return_internal_reference<>())
         ;
 
+        //HierarchyObj Collection
+        class_<IHierarchyObjCollection, boost::noncopyable>("IHierarchyObjCollection", no_init)
+        ;
+
+        class_<EHierarchyObjCollection, bases<IHierarchyObjCollection> >("EHierarchyObjCollection", no_init)
+            .def("__len__", &EHierarchyObjCollection::Size)
+        ;
+
         //CellInst
         class_<ICellInst, boost::noncopyable>("ICellInst", no_init)
         ;
@@ -452,6 +521,14 @@ namespace {
         class_<ECellInstIterator, bases<IIterator<ICellInst> >, boost::noncopyable>("ECellInstIter", no_init)
             .def("next", &ECellInstIterator::Next, return_internal_reference<>())
             .def("current", &ECellInstIterator::Current, return_internal_reference<>())
+        ;
+
+        //CellInst Collection
+        class_<ICellInstCollection, boost::noncopyable>("ICellInstCollection", no_init)
+        ;
+
+        class_<ECellInstCollection, bases<ICellInstCollection> >("ECellInstCollection", no_init)
+            .def("__len__", &ECellInstCollection::Size)
         ;
 
         //Primitive
@@ -473,6 +550,15 @@ namespace {
             .def("current", &EPrimitiveIterator::Current, return_internal_reference<>())
         ;
 
+        //Primitive Collection
+        class_<IPrimitiveCollection, boost::noncopyable>("IPrimitiveCollection", no_init)
+        ;
+
+        class_<EPrimitiveCollection, bases<IPrimitiveCollection> >("EPrimitiveCollection", no_init)
+            .def("__len__", &EPrimitiveCollection::Size)
+        ;
+
+        //Geometry2D
         class_<IGeometry2D, boost::noncopyable>("IGeometry2D", no_init)
         ;
 
@@ -512,6 +598,15 @@ namespace {
             .def("create_padstack_inst", &ELayoutView::CreatePadstackInst, return_internal_reference<>())
             .def("create_geometry_2d", &ELayoutViewCreateGeometry2DWrap, return_internal_reference<>())
             .def("create_text", &ELayoutView::CreateText, return_internal_reference<>())
+            .def("get_net_collection", &ELayoutView::GetNetCollection, return_internal_reference<>())
+            .def("get_layer_collection", &ELayoutView::GetLayerCollection, return_internal_reference<>())
+            .def("get_conn_obj_collection", &ELayoutView::GetConnObjCollection, return_internal_reference<>())
+            .def("get_cell_inst_collection", &ELayoutView::GetCellInstCollection, return_internal_reference<>())
+            .def("get_primitive_collection", &ELayoutView::GetPrimitiveCollection, return_internal_reference<>())
+            .def("get_hierarchy_obj_collection", &ELayoutView::GetHierarchyObjCollection, return_internal_reference<>())
+            .def("get_padstack_inst_collection", &ELayoutView::GetPadstackInstCollection, return_internal_reference<>())
+            .def("set_boundary", &ELayoutViewSetBoundaryWrap)
+            .def("get_boundary", &ELayoutView::GetBoundary, return_internal_reference<>())//todo, should be immutable
         ;
 
         //Cell

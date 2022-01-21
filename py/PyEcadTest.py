@@ -365,6 +365,46 @@ def test_layout_view() :
         if g :
             assert(g.suuid == geom.suuid)
         prim = prim_iter.next()
+
+    #get net collection
+    net_collection = layout.get_net_collection()
+    net = net_collection[net_name]
+    assert(net.name == net_name)
+
+    #get layer collection
+    layer_collection = layout.get_layer_collection()
+    assert(len(layer_collection) == 5)
+
+    #get conn obj collection
+    conn_obj_collection = layout.get_conn_obj_collection()
+    assert(len(conn_obj_collection) == 3)
+
+    #get cell inst collection
+    cell_inst_collection = layout.get_cell_inst_collection()
+    assert(len(cell_inst_collection) == 1)
+
+    #get primitive collection
+    primitive_collection = layout.get_primitive_collection()
+    assert(len(primitive_collection) == 2)
+
+    #get hierarchy obj collection
+    hierarchy_obj_collection = layout.get_hierarchy_obj_collection()
+    assert(len(hierarchy_obj_collection) == 1)
+
+    #get padstack inst collection
+    padstack_inst_collection = layout.get_padstack_inst_collection()
+    assert(len(padstack_inst_collection) == 1)
+
+    #set boundary
+    boundary = ecad.EPolygon()
+    boundary.set_points([EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)])
+    layout.set_boundary(boundary)
+
+    #get boundary
+    boundary = layout.get_boundary()
+
+
+
     
 
 ###EPoint

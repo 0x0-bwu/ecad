@@ -17,8 +17,8 @@ using CPtr = const T*;
 template <typename T>
 using SPtr = std::shared_ptr<T>;
 
-template <typename T>
-using UPtr = std::unique_ptr<T>;
+template <typename T, typename Deleter = std::default_delete<T> >
+using UPtr = std::unique_ptr<T, Deleter>;
 
 using ECoord = int64_t;
 using FCoord = double;
@@ -41,5 +41,6 @@ ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
 
 ECAD_ALWAYS_INLINE static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
+
 }//namespace ecad
 #endif//ECAD_ECADALIAS_H
