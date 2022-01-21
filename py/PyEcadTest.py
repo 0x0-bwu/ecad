@@ -427,7 +427,31 @@ def test_layout_view() :
     #map
     layout.map(layer_map)
 
+###ECellCollection
+def test_cell_collection() :
+    #create database
+    db_name = "test"
+    database = ecad.EDatabase(db_name)
+
+    #create circuit cell
+    r = range(0, 1)
+    for i in r :
+        database.create_circuit_cell('cell_{}'.format(i + 1))
     
+    cell_collection = database.get_cell_collection()
+    #__len__/size
+    assert(len(cell_collection) == 1)
+    assert(cell_collection.size() == 1)
+
+    #__getitem__/get cell iter
+    assert(cell_collection['cell_1'].suuid == cell_collection.get_cell_iter().next().suuid)
+
+    #__contains__
+    assert(('cell_0' in cell_collection) == False)
+
+    #clear
+    cell_collection.clear()
+    assert(len(cell_collection) == 0)
 
 ###EPoint
 def test_point() :
@@ -453,11 +477,12 @@ def test_polygon_data() :
 def main() :
     test_data_mgr()
     test_database()
+    test_cell()
+    test_layout_view()
+    test_cell_collection()
     test_point()
     test_transform()
     test_polygon_data()
-    test_cell()
-    test_layout_view()
     print("every thing is fine")
 
 if __name__ == '__main__' :

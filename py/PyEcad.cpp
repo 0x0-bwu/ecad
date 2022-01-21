@@ -112,13 +112,8 @@ namespace {
                                 return_value_policy<manage_new_object>(),
                                 boost::mpl::vector<T *, C &, Args...>());
     }
-
+    
     //Wrappers
-    Ptr<INet> ENetCollectionIndexWrap(const ENetCollection & collection, const std::string & name)
-    {
-        return collection.At(name).get();
-    }
-
     ELayerId ELayoutViewAppendLayerWrap(const ELayoutView & layout, Ptr<ILayer> layer)
     {
         //todo, enhance, copy issue here
@@ -351,7 +346,7 @@ namespace {
 
         class_<ENetCollection, bases<INetCollection> >("ENetCollection", no_init)
             .def("__len__", &ENetCollection::Size)
-            .def("__getitem__", &ENetCollectionIndexWrap, return_internal_reference<>())
+            .def("__getitem__", +[](const ENetCollection & c, const std::string & name){ return c.At(name).get(); }, return_internal_reference<>())
         ;
 
         //Layer
@@ -652,6 +647,7 @@ namespace {
         ;
 
         class_<std::vector<Ptr<ICell> > >("ECellContainer")
+            .def("__iter__", boost::python::iterator<std::vector<Ptr<ICell> > >())
             .def(vector_indexing_suite<std::vector<Ptr<ICell> > >())
         ;
 
@@ -660,7 +656,12 @@ namespace {
         ;
 
         class_<ECellCollection, bases<ICellCollection> >("ECellCollection", no_init)
+            .def("__len__", &ECellCollection::Size)
+            .def("__getitem__", +[](const ECellCollection & c, const std::string & name){ return c.At(name).get(); }, return_internal_reference<>())
+            .def("__contains__", &ECellCollection::Count)
+            .def("get_cell_iter", adapt_unique(&ECellCollection::GetCellIter))
             .def("size", &ECellCollection::Size)
+            .def("clear", &ECellCollection::Clear)
         ;
 
         //Cell Iterator
