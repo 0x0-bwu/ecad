@@ -3,6 +3,7 @@
 #ifdef ECAD_BOOST_PYTHON_SUPPORT
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/stl_iterator.hpp>
+#include <boost/python.hpp>
 #include "generic/tools/Format.hpp"
 #include "EHierarchyObjCollection.h"
 #include "EPadstackInstCollection.h"
@@ -34,23 +35,41 @@ namespace {
     using namespace ecad;
     using namespace boost::python;
 
-    template <typename T>
-    std::vector<T> py_list_to_std_vector(const object & iterable)
+    template <typename Container, typename T>
+    auto append_to_std_container(Container & container, T && t, int) -> decltype(container.push_back(std::forward<T>(t)), void())
+    {
+        container.push_back(std::forward<T>(t));
+    }
+
+    template <typename Container, typename T>
+    void append_to_std_container(Container & container, T && t, ...)
+    {
+        container.insert(std::forward<T>(t));
+    }    
+
+    template <typename Container, typename T = typename Container::value_type,
+              typename std::enable_if<std::is_same<typename Container::value_type, T>::value, bool>::type = true>
+    Container py_list_to_std_container(const boost::python::list & bpl)
     {
         try{
-            return std::vector<T>(stl_input_iterator<T>(iterable), stl_input_iterator<T>());
+            Container container;
+            for(int i = 0; i < len(bpl); ++i){
+                append_to_std_container(container, boost::python::extract<T>(bpl[i]), 0);
+            }
+            return container;
         }
         catch (...) {
-            throw(std::invalid_argument("Could not convert python list to std vector, illegal object type"));
+            throw(std::invalid_argument("Could not convert python list to std container, illegal object type"));
         }
     }
 
-    template <typename T>
-    boost::python::list std_vector_to_py_list(const std::vector<T> & vec)
+    template <typename Container, typename T = typename Container::value_type,
+              typename std::enable_if<std::is_same<typename Container::value_type, T>::value, bool>::type = true>
+    boost::python::list std_container_to_py_list(const Container & con)
     {
-        boost::python::list l;
-        for(auto t : vec) l.append(t);
-        return l;
+        boost::python::list bpl;
+        for(auto t : con) bpl.append(t);
+        return bpl;
     }
 
     /**
@@ -109,12 +128,12 @@ namespace {
     boost::python::list ELayoutViewAppendLayersWrap(const ELayoutView & layout, const boost::python::list & layers)
     {
         //todo, enhance, copy issue here
-        auto vec = py_list_to_std_vector<Ptr<ILayer> >(layers);
+        auto vec = py_list_to_std_container<std::vector<Ptr<ILayer> > >(layers);
         std::vector<UPtr<ILayer> > input;
         for(auto layer : vec)
             input.emplace_back(std::move(layer->Clone()));
         auto res = layout.AppendLayers(std::move(input));
-        return std_vector_to_py_list<ELayerId>(res);
+        return std_container_to_py_list(res);
     }
 
     std::vector<Ptr<ILayer> > ELayoutViewGetStackupLayersWrap(const ELayoutView & layout)
@@ -181,7 +200,7 @@ namespace {
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrShutDownWithAutoSave, EDataMgr::ShutDown, 0, 1)
 
     BOOST_PYTHON_MODULE(ECAD_LIB_NAME)
-    {
+    {           
         //Enum
         enum_<EArchiveFormat>("EArchiveFormat")
             .value("TXT", EArchiveFormat::TXT)
@@ -216,6 +235,9 @@ namespace {
             .value("CELL", EDefinitionType::Cell)
         ;
 
+        enum_<EFlattenOption>("EFlattenOption")
+        ;
+
         //Unit
         enum_<ECoordUnits::Unit>("ELengthUnit")
             .value("NM", ECoordUnits::Unit::Nanometer)
@@ -242,7 +264,7 @@ namespace {
         class_<EPolygonData>("EPolygonData")
             .def("size", &EPolygonData::Size)
             .def("set_points", make_function([](EPolygonData & polygon, const boost::python::list & points){
-                                                polygon.Set(py_list_to_std_vector<EPoint2D>(points));
+                                                polygon.Set(py_list_to_std_container<std::vector<EPoint2D> >(points));
                                              },
                                              default_call_policies(), boost::mpl::vector<void, EPolygonData &, const boost::python::list &>()))
             .def("__str__", +[](const EPolygonData & polygon){ std::stringstream ss; ss << polygon; return ss.str(); })
@@ -284,7 +306,7 @@ namespace {
         class_<EPolygon, bases<EShape> >("EPolygon")
             .def_readwrite("shape", &EPolygon::shape)
             .def("set_points", make_function([](EPolygon & polygon, const boost::python::list & points){
-                                    polygon.SetPoints(py_list_to_std_vector<EPoint2D>(points));
+                                        polygon.SetPoints(py_list_to_std_container<std::vector<EPoint2D> >(points));
                                     },
                                     default_call_policies(), boost::mpl::vector<void, EPolygon &, const boost::python::list &>()))
         ;
@@ -607,6 +629,11 @@ namespace {
             .def("get_padstack_inst_collection", &ELayoutView::GetPadstackInstCollection, return_internal_reference<>())
             .def("set_boundary", &ELayoutViewSetBoundaryWrap)
             .def("get_boundary", &ELayoutView::GetBoundary, return_internal_reference<>())//todo, should be immutable
+            .def("generate_metal_fraction_mapping", &ELayoutView::GenerateMetalFractionMapping)
+            .def("connectivity_extraction", &ELayoutView::ConnectivityExtraction)
+            .def("flatten", &ELayoutView::Flatten)
+            .def("merge", &ELayoutView::Merge)
+            .def("map", &ELayoutView::Map)
         ;
 
         //Cell
@@ -702,13 +729,35 @@ namespace {
             .def("create_padstack_inst", &EDataMgr::CreatePadstackInst, return_internal_reference<>())
             .def("create_cell_inst", &EDataMgr::CreateCellInst, return_internal_reference<>())
             .def("create_geometry_2d", &EDataMgrCreateGeometry2DWrap, return_internal_reference<>())
-            .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const boost::python::list & points){ return mgr.CreateShapePolygon(py_list_to_std_vector<EPoint2D>(points));}))
+            .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const boost::python::list & points){ return mgr.CreateShapePolygon(py_list_to_std_container<std::vector<EPoint2D> >(points));}))
             .def("create_shape_polygon", adapt_unique(+[](EDataMgr & mgr, const EPolygonData & polygon){ return mgr.CreateShapePolygon(polygon);}))
             .def("create_shape_polygon_with_holes", adapt_unique(&EDataMgr::CreateShapePolygonWithHoles))
             .def("create_text", &EDataMgr::CreateText, return_internal_reference<>())
             .def("instance", &EDataMgr::Instance, return_value_policy<reference_existing_object>())
             .staticmethod("instance")
         ;
+
+        //ESim
+        class_<esim::EMetalFractionMappingSettings>("EMetalFractionMappingSettings")
+            .def_readwrite("threads", &esim::EMetalFractionMappingSettings::threads)
+            .def_readwrite("out_file", &esim::EMetalFractionMappingSettings::outFile)
+            .def_readwrite("cood_units", &esim::EMetalFractionMappingSettings::coordUnits)
+            .def_readwrite("region_ext_top", &esim::EMetalFractionMappingSettings::regionExtTop)
+            .def_readwrite("region_ext_bot", &esim::EMetalFractionMappingSettings::regionExtBot)
+            .def_readwrite("region_ext_left", &esim::EMetalFractionMappingSettings::regionExtLeft)
+            .def_readwrite("region_ext_right", &esim::EMetalFractionMappingSettings::regionExtRight)
+            .add_property("grid_x",
+                            +[](const esim::EMetalFractionMappingSettings & settings){ return settings.grid[0]; },
+                            make_function([](esim::EMetalFractionMappingSettings & settings, size_t x){ settings.grid[0] = x; },
+                            default_call_policies(), boost::mpl::vector<void, esim::EMetalFractionMappingSettings &, size_t>()))
+            .add_property("grid_y",
+                            +[](const esim::EMetalFractionMappingSettings & settings){ return settings.grid[1]; },
+                            make_function([](esim::EMetalFractionMappingSettings & settings, size_t y){ settings.grid[1] = y; },
+                            default_call_policies(), boost::mpl::vector<void, esim::EMetalFractionMappingSettings &, size_t>()))
+            .add_property("select_nets", +[](const esim::EMetalFractionMappingSettings & settings){ return std_container_to_py_list(settings.selectNets); },
+                            make_function([](esim::EMetalFractionMappingSettings & settings, const boost::python::list & l){ settings.selectNets = py_list_to_std_container<std::unordered_set<int> >(l); },
+                            default_call_policies(), boost::mpl::vector<void, esim::EMetalFractionMappingSettings &, const boost::python::list &>()))
+            ;
     }
 }
 #endif//ECAD_BOOST_PYTHON_SUPPORT

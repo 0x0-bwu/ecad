@@ -10,6 +10,7 @@ namespace euti {
 ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayoutView> other, const ETransform2D & transform)
 {
     // ECAD_EFFICIENCY_TRACK("layout merge")
+    if(layout == other) return;
 
     //Boundary
     auto boundary = *(layout->GetBoundary());

@@ -27,10 +27,10 @@ else :
 ## boost
 boost_include_path = '/usr/local/include'
 boost_library_path = '/usr/local/lib'
-# boost_library_path = '/usr/lib/x86_64-linux-gnu'
+boost_library_path = '/usr/lib/x86_64-linux-gnu'
 boost_python_support = True
-# boost_python_version = 3.8
-boost_python_version = 3.6
+boost_python_version = 3.8
+# boost_python_version = 3.6
 
 boost_serialization_support = True
 
@@ -89,6 +89,9 @@ build_scripts = [
 
 if build_unit_test :
     build_scripts.append('test/SConscript')
+
+if boost_python_support :
+    build_scripts.append('py/SConscript')
 
 for script in build_scripts:
     env = main_env.Clone()

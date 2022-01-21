@@ -4,7 +4,7 @@ from sys import platform
 Import('env')
 
 build_dir = env['BUILDPATH']
-program_name = build_dir + '/ECadTest.exe'
+program_name = build_dir + '/EcadTest.exe'
 mfsolver_support = env['MFSOLVERSUPPORT']
 boost_library_path = env['BOOSTLIBRARYPATH']
 thirdpart_lib_path = env['THIRDPARTLIBPATH']
@@ -20,15 +20,6 @@ libs_name = [
 ]
 
 libs_path = [build_dir, boost_library_path, thirdpart_lib_path, linux_library_path]
-
-# boost_python
-boost_python_support = env['BOOSTPYTHONSUPPORT']
-if boost_python_support :
-    boost_python_version = env['BOOSTPYTHONVERSION']
-    boost_python_lib = 'boost_python' + str(int(boost_python_version * 10))
-    python_lib = 'python' + str(boost_python_version) + 'm'
-    libs_name.append(boost_python_lib)
-    libs_name.append(python_lib)
 
 # boost_serialization
 boost_serialization_support = env['BOOSTSERIALIZATIONSUPPORT']

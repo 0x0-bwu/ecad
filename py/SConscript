@@ -5,9 +5,9 @@ import fnmatch
 from sys import platform
 
 cwd = os.getcwd()
-
+env['SHLIBPREFIX'] = ''
 build_dir = env['BUILDPATH']
-lib_name= build_dir + '/Ecad'
+lib_name= build_dir + '/PyEcad'
 mfsolver_support = env['MFSOLVERSUPPORT']
 boost_library_path = env['BOOSTLIBRARYPATH']
 thirdpart_lib_path = env['THIRDPARTLIBPATH']
@@ -31,6 +31,15 @@ libs_name = [
 ]
 
 libs_path = [build_dir, boost_library_path, thirdpart_lib_path, linux_library_path]
+
+# boost_python
+boost_python_support = env['BOOSTPYTHONSUPPORT']
+if boost_python_support :
+    boost_python_version = env['BOOSTPYTHONVERSION']
+    boost_python_lib = 'boost_python' + str(int(boost_python_version * 10))
+    python_lib = 'python' + str(boost_python_version)# + 'm'
+    libs_name.append(boost_python_lib)
+    libs_name.append(python_lib)
 
 # boost_serialization
 boost_serialization_support = env['BOOSTSERIALIZATIONSUPPORT']
@@ -60,6 +69,8 @@ if mfsolver_support :
         'ansmf',
         'ngcore'    
     ]   
+
+libs_name.append('Ecad')
 
 #RPATH
 rpath = libs_path

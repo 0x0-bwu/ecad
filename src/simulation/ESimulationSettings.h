@@ -16,7 +16,7 @@ struct ECAD_API EMetalFractionMappingSettings
     EValue regionExtBot = 0;
     EValue regionExtLeft = 0;
     EValue regionExtRight = 0;
-    std::array<size_t, 2> grid;
+    std::array<size_t, 2> grid = {1, 1};
     std::unordered_set<int> selectNets;
 };
 

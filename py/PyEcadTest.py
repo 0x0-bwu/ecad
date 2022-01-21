@@ -5,8 +5,8 @@ current_dir = os.path.dirname(__file__)
 ecad_lib_path = os.path.abspath(current_dir + "/../build/")
 sys.path.append(ecad_lib_path)
 
-import libEcad as ecad
-from libEcad import EPoint2D
+import PyEcad as ecad
+from PyEcad import EPoint2D
 
 ###EDataMgr
 def test_data_mgr() :
@@ -278,12 +278,20 @@ def test_cell() :
 
 ###ELayoutView
 def test_layout_view() :
-    #create layout
-    layout_name = "layout"
-    layout = ecad.ELayoutView(layout_name, None)
+
+     #create database
+    db_name = "test"
+    database = ecad.EDatabase(db_name)
+
+    #create circuit cell
+    cell_name = "cell"
+    cell = database.create_circuit_cell(cell_name)
+    
+    #get layout view
+    layout = cell.get_layout_view()
 
     #name/suuid
-    assert(layout.name == layout_name)
+    assert(layout.name == cell_name)
     assert(layout.suuid)
 
     #get net iter
@@ -330,7 +338,7 @@ def test_layout_view() :
     #create padstack inst
     padstack_name = "padstack"
     padstack_def = ecad.EPadstackDef("padstackdef")
-    padstack_inst = layout.create_padstack_inst(padstack_name, padstack_def, ecad.ENetId.NONET, ecad.ELayerId(0), ecad.ELayerId(1), layer_map, ecad.ETransform2D())
+    padstack_inst = layout.create_padstack_inst(padstack_name, padstack_def, ecad.ENetId.NONET, ecad.ELayerId(0), ecad.ELayerId(1), database.create_layer_map("layer_map"), ecad.ETransform2D())
     padstack_inst_iter = layout.get_padstack_inst_iter()
     assert(padstack_inst.suuid == padstack_inst_iter.next().suuid)
 
@@ -403,7 +411,21 @@ def test_layout_view() :
     #get boundary
     boundary = layout.get_boundary()
 
+    #generate metal fraction mapping
+    mf_settings = ecad.EMetalFractionMappingSettings()
+    assert(layout.generate_metal_fraction_mapping(mf_settings))
 
+    #connectivity extraction
+    layout.connectivity_extraction()
+
+    #flatten
+    layout.flatten(ecad.EFlattenOption())
+
+    #merge
+    layout.merge(layout, ecad.ETransform2D())
+
+    #map
+    layout.map(layer_map)
 
     
 

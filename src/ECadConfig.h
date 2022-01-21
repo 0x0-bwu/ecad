@@ -9,7 +9,7 @@
 
 #ifdef ECAD_COMPILED_LIB
 #    undef ECAD_HEADER_ONLY
-#    define ECAD_LIB_NAME libEcad
+#    define ECAD_LIB_NAME PyEcad
 #    define ECAD_BOOST_PYTHON_SUPPORT
 #    if defined(_WIN32) && defined(ECAD_SHARED_LIB)
 #        ifdef ECAD_EXPORTS

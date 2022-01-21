@@ -5,10 +5,6 @@
 #include "ECadUnits.h"
 #include <cassert>
 
-#ifdef ECAD_BOOST_PYTHON_SUPPORT
-#include <boost/python.hpp>
-#endif//ECAD_BOOST_PYTHON_SUPPORT
-
 #ifdef ECAD_DEBUG_MODE
     #include <iostream>
     #define ECAD_DEBUG(ex) std::cout << ex << std::endl;
