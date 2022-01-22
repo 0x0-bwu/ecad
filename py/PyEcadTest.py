@@ -131,6 +131,11 @@ def test_database() :
     #create database
     db_name = "test"
     database = ecad.EDatabase(db_name)
+    
+    #clone
+    database_copy = database.clone()
+    assert(database_copy.suuid != database.suuid)
+    assert(database_copy.name == database.name)
 
     #save
     bin_file = current_dir + '/' + db_name + '.bin'
@@ -453,6 +458,73 @@ def test_cell_collection() :
     cell_collection.clear()
     assert(len(cell_collection) == 0)
 
+###EPrimitive Collection
+def test_primitive_collection() :
+    
+    #create primitive collection
+    collection = ecad.EPrimitiveCollection()
+
+    #create text
+    text = collection.create_text(ecad.ELayerId(-1), ecad.ETransform2D(), "text")
+    assert(text.text == "text")
+
+    #create geometry 2d
+    shape_polygon = ecad.EPolygon()
+    shape_polygon.set_points([EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)])
+    geom = collection.create_geometry_2d(ecad.ELayerId(-1), ecad.ENetId(-1), shape_polygon)
+
+    #add primitive
+    copy = geom.clone()
+    prim = collection.add_primitive(copy)
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 3)
+
+    #get primitive iter
+    iter = collection.get_primitive_iter()
+    curr = iter.next()
+    assert(curr.get_text_from_primitive() != None)
+
+    #map
+    database = ecad.EDatabase("database")
+    layer_map = database.create_layer_map("layer_map")
+    collection.map(layer_map)
+
+###EPrimitve
+def test_primitive() :
+        
+    #create primitive collection
+    collection = ecad.EPrimitiveCollection()
+
+    #create text
+    text = collection.create_text(ecad.ELayerId(-1), ecad.ETransform2D(), "text")
+    assert(text.text == "text")
+
+    #create geometry 2d
+    shape_polygon = ecad.EPolygon()
+    shape_polygon.set_points([EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)])
+    geom = collection.create_geometry_2d(ecad.ELayerId(-1), ecad.ENetId(-1), shape_polygon)
+
+    #get text from primitve
+    assert(text.get_text_from_primitive())
+
+    #get conn obj from primitive
+    assert(geom.get_conn_obj_from_primitive().net == ecad.ENetId(-1))
+    
+    #get geometry 2d from primitive
+    assert(geom.get_geometry_2d_from_primitive())
+
+    #net
+    assert(geom.net == ecad.ENetId(-1))
+
+    #layer
+    geom.layer = ecad.ELayerId(1)
+    assert(ecad.ELayerId(1) == geom.layer)
+
+    #get primitive type
+    assert(ecad.EPrimitiveType.TEXT == text.get_primitive_type())
+
+    
 ###EGeometry2D
 def test_geometry_2d() :
     #create geometry 2d
@@ -513,6 +585,8 @@ def main() :
     test_cell_collection()
     test_text()
     test_geometry_2d()
+    test_primitive_collection()
+    test_primitive()
     test_point()
     test_transform()
     test_polygon_data()

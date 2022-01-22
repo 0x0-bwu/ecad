@@ -114,6 +114,25 @@ namespace {
     }
     
     //Wrappers
+    template<typename Derived, typename Base, typename Deleter = std::default_delete<Base> >
+    UPtr<Base, Deleter> ECloneWrap(const Derived & derived)
+    {
+        static_assert(std::is_base_of<Base, Derived>::value, "not a derived class from base!");
+        return static_cast<const Base &>(derived).Clone();
+    }
+
+    Ptr<IPrimitive> EPrimitiveCollectionAddPrimitiveWrap(EPrimitiveCollection & collection, Ptr<IPrimitive> primitive)
+    {
+        //todo, enhance, copy issue here
+        return collection.AddPrimitive(primitive->Clone());
+    }
+
+    Ptr<IPrimitive> EPrimitiveCollectionCreatePrimitiveWrap(EPrimitiveCollection & collection, ELayerId layer, ENetId net, Ptr<EShape> shape)
+    {
+        //todo, enhance, copy issue here
+        return collection.CreateGeometry2D(layer, net, shape->Clone());
+    }
+    
     void EGeometry2DSetShapeWrap(EGeometry2D & geom, Ptr<EShape> shape)
     {
         //todo, enhance, copy issue here
@@ -227,6 +246,12 @@ namespace {
             .value("DIELECTRICLAYER", ELayerType::DielectricLayer)
             .value("CONDUCTINGLAYER", ELayerType::ConductingLayer)
             .value("METALIZEDSIGNAL", ELayerType::MetalizedSignal)
+        ;
+
+        enum_<EPrimitiveType>("EPrimitiveType")
+            .value("INVALID", EPrimitiveType::Invalid)
+            .value("GEOMETRY2D", EPrimitiveType::Geometry2D)
+            .value("TEXT", EPrimitiveType::Text)
         ;
 
         enum_<EDefinitionType>("EDefinitionType")
@@ -571,12 +596,15 @@ namespace {
 
         //Primitive
         class_<IPrimitive, boost::noncopyable>("IPrimitive", no_init)
+            .def("clone", adapt_unique(&ECloneWrap<EPrimitive, IPrimitive>))
         ;
 
         class_<EPrimitive, bases<EConnObj, IPrimitive>, boost::noncopyable>("EPrimitive", no_init)
             .def("get_text_from_primitive", &EPrimitive::GetTextFromPrimitive, return_internal_reference<>())
             .def("get_conn_obj_from_primitive", &EPrimitive::GetConnObjFromPrimitive, return_internal_reference<>())
             .def("get_geometry_2d_from_primitive", &EPrimitive::GetGeometry2DFromPrimitive, return_internal_reference<>())
+            .add_property("layer", &EPrimitive::GetLayer, &EPrimitive::SetLayer)
+            .def("get_primitive_type", &EPrimitive::GetPrimitiveType)
         ;
 
         //Primitive Iterator
@@ -592,8 +620,14 @@ namespace {
         class_<IPrimitiveCollection, boost::noncopyable>("IPrimitiveCollection", no_init)
         ;
 
-        class_<EPrimitiveCollection, bases<IPrimitiveCollection> >("EPrimitiveCollection", no_init)
+        class_<EPrimitiveCollection, bases<IPrimitiveCollection> >("EPrimitiveCollection")
             .def("__len__", &EPrimitiveCollection::Size)
+            .def("add_primitive", &EPrimitiveCollectionAddPrimitiveWrap, return_internal_reference<>())
+            .def("create_geometry_2d", &EPrimitiveCollectionCreatePrimitiveWrap, return_internal_reference<>())
+            .def("create_text", &EPrimitiveCollection::CreateText, return_internal_reference<>())
+            .def("map", &EPrimitiveCollection::Map)
+            .def("get_primitive_iter", adapt_unique(&EPrimitiveCollection::GetPrimitiveIter))
+            .def("size", &EPrimitiveCollection::Size)
         ;
 
         //Geometry2D
@@ -704,6 +738,7 @@ namespace {
         
         class_<EDatabase, bases<IDatabase>, std::shared_ptr<EDatabase> >("EDatabase", init<std::string>())
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+            .def("clone", adapt_unique(&ECloneWrap<EDatabase, IDatabase>))
             .def("save", &EDatabase::Save)
             .def("save", static_cast<bool(EDatabase::*)(const std::string &, EArchiveFormat) const>(&EDatabase::Save), EDatabaseSaveBin())
             .def("load", &EDatabase::Load)
