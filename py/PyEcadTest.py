@@ -490,6 +490,10 @@ def test_primitive_collection() :
     layer_map = database.create_layer_map("layer_map")
     collection.map(layer_map)
 
+    #clear
+    collection.clear()
+    assert(len(collection) == 0)
+
 ###EPrimitve
 def test_primitive() :
         
@@ -523,6 +527,50 @@ def test_primitive() :
 
     #get primitive type
     assert(ecad.EPrimitiveType.TEXT == text.get_primitive_type())
+
+###ECellInst Collection
+def test_cell_inst_collection() :
+    #create cell inst collection
+    collection = ecad.ECellInstCollection()
+
+    #create cell inst
+    inst = collection.create_cell_inst(None, "inst", None, ecad.ETransform2D())
+
+    #add cell inst
+    copy = inst.clone()
+    collection.add_cell_inst(copy)
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 2)
+
+    #get cell inst iter
+    iter = collection.get_cell_inst_iter()
+    curr = iter.next()
+    assert(curr.name == "inst")
+
+    #clear
+    collection.clear()
+    assert(len(collection) == 0)
+
+###ECellInst
+def test_cell_inst() :
+    #create cell inst
+    top_cell = ecad.ECircuitCell("top_cell", None)
+    sub_cell = ecad.ECircuitCell("sub_cell", None)
+
+    collection = top_cell.get_layout_view().get_cell_inst_collection()
+    inst = collection.create_cell_inst(None, "inst", None, ecad.ETransform2D())
+
+    #ref layout
+    inst.ref_layout = top_cell.get_layout_view()
+    assert(inst.ref_layout.suuid == top_cell.get_layout_view().suuid)
+
+    #def layout
+    inst.def_layout = sub_cell.get_layout_view()
+    assert(inst.def_layout.suuid == sub_cell.get_layout_view().suuid)
+
+    #get flattened layout view
+    assert(inst.get_flattened_layout_view().suuid == sub_cell.get_flattened_layout_view().suuid)
 
     
 ###EGeometry2D
@@ -587,6 +635,8 @@ def main() :
     test_geometry_2d()
     test_primitive_collection()
     test_primitive()
+    test_cell_inst_collection()
+    test_cell_inst()
     test_point()
     test_transform()
     test_polygon_data()

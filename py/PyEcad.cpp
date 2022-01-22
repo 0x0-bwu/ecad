@@ -121,6 +121,12 @@ namespace {
         return static_cast<const Base &>(derived).Clone();
     }
 
+    Ptr<ICellInst> ECellInstCollectionAddCellInstWrap(ECellInstCollection & collection, Ptr<ICellInst> inst)
+    {
+        //todo, enhance, copy issue here
+        return collection.AddCellInst(inst->Clone());
+    }
+
     Ptr<IPrimitive> EPrimitiveCollectionAddPrimitiveWrap(EPrimitiveCollection & collection, Ptr<IPrimitive> primitive)
     {
         //todo, enhance, copy issue here
@@ -575,6 +581,14 @@ namespace {
         ;
 
         class_<ECellInst, bases<EHierarchyObj, ICellInst> >("ECellInst", no_init)
+            .def("clone", adapt_unique(&ECloneWrap<ECellInst, ICellInst>))
+            .add_property("ref_layout",
+                            make_function(&ECellInst::GetRefLayoutView, return_value_policy<reference_existing_object>()),
+                            &ECellInst::SetRefLayoutView)
+            .add_property("def_layout",
+                            make_function(&ECellInst::GetDefLayoutView, return_value_policy<reference_existing_object>()),
+                            &ECellInst::SetDefLayoutView)
+            .def("get_flattened_layout_view", &ECellInst::GetFlattenedLayoutView, return_internal_reference<>())
         ;
 
         //CellInst Iterator
@@ -590,8 +604,13 @@ namespace {
         class_<ICellInstCollection, boost::noncopyable>("ICellInstCollection", no_init)
         ;
 
-        class_<ECellInstCollection, bases<ICellInstCollection> >("ECellInstCollection", no_init)
+        class_<ECellInstCollection, bases<ICellInstCollection> >("ECellInstCollection")
             .def("__len__", &ECellInstCollection::Size)
+            .def("add_cell_inst", &ECellInstCollectionAddCellInstWrap, return_internal_reference<>())
+            .def("create_cell_inst", &ECellInstCollection::CreateCellInst, return_internal_reference<>())
+            .def("get_cell_inst_iter", adapt_unique(&ECellInstCollection::GetCellInstIter))
+            .def("size", &ECellInstCollection::Size)
+            .def("clear", &ECellInstCollection::Clear)
         ;
 
         //Primitive
@@ -628,6 +647,7 @@ namespace {
             .def("map", &EPrimitiveCollection::Map)
             .def("get_primitive_iter", adapt_unique(&EPrimitiveCollection::GetPrimitiveIter))
             .def("size", &EPrimitiveCollection::Size)
+            .def("clear", &EPrimitiveCollection::Clear)
         ;
 
         //Geometry2D

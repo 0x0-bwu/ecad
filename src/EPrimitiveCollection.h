@@ -33,6 +33,8 @@ public:
     PrimitiveIter GetPrimitiveIter() const;
 
     size_t Size() const;
+    void Clear();
+    
 protected:
     ///Copy
     virtual Ptr<EPrimitiveCollection> CloneImp() const override { return new EPrimitiveCollection(*this); }

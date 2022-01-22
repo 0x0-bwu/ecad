@@ -86,4 +86,9 @@ ECAD_INLINE size_t EPrimitiveCollection::Size() const
     return BaseCollection::Size();
 }
 
+ECAD_INLINE void EPrimitiveCollection::Clear()
+{
+    return BaseCollection::Clear();
+}
+
 }//namesapce ecad
