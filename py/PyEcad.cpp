@@ -121,6 +121,12 @@ namespace {
         return static_cast<const Base &>(derived).Clone();
     }
 
+    Ptr<IPadstackInst> EPadstackInstCollectionAddPadstackInstWrap(EPadstackInstCollection & collection, Ptr<IPadstackInst> inst)
+    {
+        //todo, enhance, copy isuue here
+        return collection.AddPadstackInst(inst->Clone());
+    }
+
     Ptr<ICellInst> ECellInstCollectionAddCellInstWrap(ECellInstCollection & collection, Ptr<ICellInst> inst)
     {
         //todo, enhance, copy issue here
@@ -533,6 +539,7 @@ namespace {
         ;
 
         class_<EPadstackInst, bases<EConnObj, IPadstackInst> >("EPadstackInst", no_init)
+            .def("clone", adapt_unique(&ECloneWrap<EPadstackInst, IPadstackInst>))
         ;
 
         //Padstack Inst Iterator
@@ -548,8 +555,13 @@ namespace {
         class_<IPadstackInstCollection, boost::noncopyable>("IPadstackInstCollection", no_init)
         ;
 
-        class_<EPadstackInstCollection, bases<IPadstackInstCollection> >("EPadstackInstCollection", no_init)
+        class_<EPadstackInstCollection, bases<IPadstackInstCollection> >("EPadstackInstCollection")
             .def("__len__", &EPadstackInstCollection::Size)
+            .def("add_padstack_inst", &EPadstackInstCollectionAddPadstackInstWrap, return_internal_reference<>())
+            .def("create_padstack_inst", &EPadstackInstCollection::CreatePadstackInst, return_internal_reference<>())
+            .def("map", &EPadstackInstCollection::Map)
+            .def("get_padstack_inst_iter", adapt_unique(&EPadstackInstCollection::GetPadstackInstIter))
+            .def("size", &EPadstackInstCollection::Size)
         ;
 
         //HierarchyObj
@@ -572,8 +584,11 @@ namespace {
         class_<IHierarchyObjCollection, boost::noncopyable>("IHierarchyObjCollection", no_init)
         ;
 
-        class_<EHierarchyObjCollection, bases<IHierarchyObjCollection> >("EHierarchyObjCollection", no_init)
+        class_<EHierarchyObjCollection, bases<IHierarchyObjCollection> >("EHierarchyObjCollection")
             .def("__len__", &EHierarchyObjCollection::Size)
+            .def("get_cell_inst_collection", &EHierarchyObjCollection::GetCellInstCollection, return_internal_reference<>())
+            .def("get_hierarchy_obj_iter", adapt_unique(&EHierarchyObjCollection::GetHierarchyObjIter))
+            .def("size", &EHierarchyObjCollection::Size)
         ;
 
         //CellInst

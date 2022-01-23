@@ -572,6 +572,21 @@ def test_cell_inst() :
     #get flattened layout view
     assert(inst.get_flattened_layout_view().suuid == sub_cell.get_flattened_layout_view().suuid)
 
+
+###EHierarchyObjCollection
+def test_hierarchy_obj_collection() :
+    collection = ecad.EHierarchyObjCollection()
+    
+    #get cell inst collection
+    cell_inst_collection = collection.get_cell_inst_collection()
+    assert(len(cell_inst_collection) == 0)
+
+    #get hierarchy obj iter
+    iter = collection.get_hierarchy_obj_iter()
+    assert(iter.current() == None)
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 0)
     
 ###EGeometry2D
 def test_geometry_2d() :
@@ -637,6 +652,8 @@ def main() :
     test_primitive()
     test_cell_inst_collection()
     test_cell_inst()
+    test_hierarchy_obj_collection()
+    test_padstack_inst_collection()
     test_point()
     test_transform()
     test_polygon_data()
