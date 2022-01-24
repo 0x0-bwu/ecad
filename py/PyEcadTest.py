@@ -241,6 +241,32 @@ def test_database() :
     assert(layer_map_collection.size() == 0)
     assert(padstack_def_collection.size() == 0)
 
+###ECellCollection
+def test_cell_collection() :
+    #create database
+    db_name = "test"
+    database = ecad.EDatabase(db_name)
+
+    #create circuit cell
+    r = range(0, 1)
+    for i in r :
+        database.create_circuit_cell('cell_{}'.format(i + 1))
+    
+    cell_collection = database.get_cell_collection()
+    #__len__/size
+    assert(len(cell_collection) == 1)
+    assert(cell_collection.size() == 1)
+
+    #__getitem__/get cell iter
+    assert(cell_collection['cell_1'].suuid == cell_collection.get_cell_iter().next().suuid)
+
+    #__contains__
+    assert(('cell_0' in cell_collection) == False)
+
+    #clear
+    cell_collection.clear()
+    assert(len(cell_collection) == 0)
+
 ###ECell
 def test_cell() :
     #create database
@@ -432,32 +458,6 @@ def test_layout_view() :
     #map
     layout.map(layer_map)
 
-###ECellCollection
-def test_cell_collection() :
-    #create database
-    db_name = "test"
-    database = ecad.EDatabase(db_name)
-
-    #create circuit cell
-    r = range(0, 1)
-    for i in r :
-        database.create_circuit_cell('cell_{}'.format(i + 1))
-    
-    cell_collection = database.get_cell_collection()
-    #__len__/size
-    assert(len(cell_collection) == 1)
-    assert(cell_collection.size() == 1)
-
-    #__getitem__/get cell iter
-    assert(cell_collection['cell_1'].suuid == cell_collection.get_cell_iter().next().suuid)
-
-    #__contains__
-    assert(('cell_0' in cell_collection) == False)
-
-    #clear
-    cell_collection.clear()
-    assert(len(cell_collection) == 0)
-
 ###EPrimitive Collection
 def test_primitive_collection() :
     
@@ -528,6 +528,37 @@ def test_primitive() :
     #get primitive type
     assert(ecad.EPrimitiveType.TEXT == text.get_primitive_type())
 
+###EGeometry2D
+def test_geometry_2d() :
+    #create geometry 2d
+    geom = ecad.EGeometry2D(ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
+
+    #set shape
+    shape_polygon = ecad.EPolygon()
+    shape_polygon.set_points([EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)])
+    geom.set_shape(shape_polygon)
+
+    #get shape
+    shape = geom.get_shape()
+    assert(shape.get_bbox().ll == EPoint2D(0, 0))
+
+    #transform
+    trans = ecad.make_transform_2d(1.0, 0.0, EPoint2D(10, 10))
+    geom.transform(trans)
+    shape = geom.get_shape()
+    assert(shape.get_bbox().ll == EPoint2D(10, 10))
+
+###EText
+def test_text() :
+    #create text
+    text = ecad.EText("text", ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
+    
+    #text
+    assert(text.text == "text")
+
+    #get position
+    assert(text.get_position() == ecad.EPoint2D(0, 0))
+    
 ###ECellInst Collection
 def test_cell_inst_collection() :
     #create cell inst collection
@@ -575,6 +606,7 @@ def test_cell_inst() :
 
 ###EHierarchyObjCollection
 def test_hierarchy_obj_collection() :
+    #create hierarchy obj collection
     collection = ecad.EHierarchyObjCollection()
     
     #get cell inst collection
@@ -587,37 +619,125 @@ def test_hierarchy_obj_collection() :
 
     #__len__/size
     assert(len(collection) == collection.size() == 0)
-    
-###EGeometry2D
-def test_geometry_2d() :
-    #create geometry 2d
-    geom = ecad.EGeometry2D(ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
 
-    #set shape
+###EPadstackInstCollection
+def test_padstack_inst_collection() :
+    #create padstack inst collection
+    collection = ecad.EPadstackInstCollection()
+
+    #create padstack inst
+    database = ecad.EDatabase("database")
+    layer_map = database.create_layer_map("layer_map")
+    padstack_inst = collection.create_padstack_inst("padstack", None, ecad.ENetId.NONET, ecad.ELayerId.NOLAYER, ecad.ELayerId.NOLAYER, layer_map, ecad.ETransform2D())
+
+    #add padstack inst
+    copy = padstack_inst.clone()
+    padstack_copy = collection.add_padstack_inst(copy)
+
+    #map
+    collection.map(layer_map)
+
+    #get padstack inst iter
+    iter = collection.get_padstack_inst_iter()
+    curr = iter.next()
+    curr = iter.next()
+    assert(iter.next() == None)
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 2)
+
+###EPadstackInst
+def test_padstack_inst() :
+
+    #create padstack inst
+    padstack_inst = ecad.EPadstackInst("padstack", None, ecad.ENetId.NONET)
+
+    #net
+    padstack_inst.net = ecad.ENetId(0)
+    assert(padstack_inst.net == ecad.ENetId(0))
+
+    #set layer range
+    padstack_inst.set_layer_range(ecad.ELayerId(0), ecad.ELayerId(1))
+
+    #get layer range
+    top, bot = padstack_inst.get_layer_range()
+    assert(top == ecad.ELayerId(0) and bot == ecad.ELayerId(1))
+
+    #set/get layer map
+    database = ecad.EDatabase("database")
+    layer_map = database.create_layer_map("layer_map")
+    padstack_inst.layer_map = layer_map
+    assert(layer_map.suuid == padstack_inst.layer_map.suuid)
+
+    #get padstack def
+    assert(padstack_inst.get_padstack_def() == None)
+
+    #get layer shape
+    assert(padstack_inst.get_layer_shape(ecad.ELayerId(0)) == None)
+
+###EPadstackDefData
+def test_padstack_def_data() :
+    
+    #create padstack def data
+    def_data = ecad.EPadstackDefData()
+
+    #material
+    def_data.material = "copper"
+
+    #clone
+    copy = def_data.clone()
+    assert(copy.material == def_data.material)
+    
+    #set layers
+    def_data.set_layers(["layer1", "layer2"])
+
+    #set pad parameters
     shape_polygon = ecad.EPolygon()
     shape_polygon.set_points([EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)])
-    geom.set_shape(shape_polygon)
+    assert(def_data.set_pad_parameters(ecad.ELayerId(0), shape_polygon, ecad.EPoint2D(1, 2), 0.5) == True)
+    assert(def_data.set_pad_parameters("layer3", shape_polygon, ecad.EPoint2D(0, 0), 0) == False)
 
-    #get shape
-    shape = geom.get_shape()
-    assert(shape.get_bbox().ll == EPoint2D(0, 0))
+    # get pad parameters
+    offset, rotation = def_data.get_pad_parameters(ecad.ELayerId(0))
+    assert(offset == EPoint2D(1, 2))
+    assert(rotation == 0.5)
+    assert(def_data.get_pad_shape("layer3") == None)
 
-    #transform
-    trans = ecad.make_transform_2d(1.0, 0.0, EPoint2D(10, 10))
-    geom.transform(trans)
-    shape = geom.get_shape()
-    assert(shape.get_bbox().ll == EPoint2D(10, 10))
+    #set via parameter
+    def_data.set_via_parameters(shape_polygon, ecad.EPoint2D(0, 0), 0.5)
 
-###EText
-def test_text() :
-    #create text
-    text = ecad.EText("text", ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
-    
-    #text
-    assert(text.text == "text")
+    #get via parameter
+    offset, rotation = def_data.get_via_parameters()
+    assert(offset == EPoint2D(0, 0))
+    assert(rotation == 0.5)
+    assert(def_data.get_via_shape() != None)
 
-    #get position
-    assert(text.get_position() == ecad.EPoint2D(0, 0))
+###EPadstackDef Collection
+def test_padstack_def_collection() :
+    #create padstack def collection
+    collection = ecad.EPadstackDefCollection()
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 0)
+
+    #get padstack def iter
+    iter = collection.get_padstack_def_iter()
+    assert(iter.next() == None)
+
+    #clear
+    collection.clear()
+
+###EPadstackDef
+def test_padstack_def() :
+    #create padstack def
+    padstack_def = ecad.EPadstackDef("padstack_def")
+
+    #set padstack def data
+    def_data = ecad.EPadstackDefData()
+    padstack_def.set_padstack_def_data(def_data)
+
+    #get padstack def data
+    assert(padstack_def.get_padstack_def_data())
 
 ###EPoint
 def test_point() :
@@ -643,17 +763,21 @@ def test_polygon_data() :
 def main() :
     test_data_mgr()
     test_database()
+    test_cell_collection()
     test_cell()
     test_layout_view()
-    test_cell_collection()
-    test_text()
-    test_geometry_2d()
     test_primitive_collection()
     test_primitive()
+    test_geometry_2d()
+    test_text()
     test_cell_inst_collection()
     test_cell_inst()
     test_hierarchy_obj_collection()
     test_padstack_inst_collection()
+    test_padstack_inst()
+    test_padstack_def_data()
+    test_padstack_def_collection()
+    test_padstack_def()
     test_point()
     test_transform()
     test_polygon_data()

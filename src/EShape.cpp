@@ -118,6 +118,11 @@ ECAD_INLINE void ERectangle::Transform(const ETransform2D & trans)
     shape = Extent(trans.GetTransform() * shape);
 }
 
+ECAD_INLINE EShapeType ERectangle::GetShapeType() const
+{
+    return EShapeType::Rectangle;
+}
+
 ///EPath
 ECAD_INLINE bool EPath::hasHole() const
 {
@@ -144,6 +149,11 @@ ECAD_INLINE EPolygonWithHolesData EPath::GetPolygonWithHoles() const
 ECAD_INLINE void EPath::Transform(const ETransform2D & trans)
 {
     generic::geometry::Transform(shape, trans.GetTransform());
+}
+
+ECAD_INLINE EShapeType EPath::GetShapeType() const
+{
+    return EShapeType::Path;
 }
 
 ECAD_INLINE void EPath::SetPoints(const std::vector<EPoint2D> & points)
@@ -189,6 +199,10 @@ ECAD_INLINE void EPolygon::Transform(const ETransform2D & trans)
     generic::geometry::Transform(shape, trans.GetTransform());    
 }
 
+ECAD_INLINE EShapeType EPolygon::GetShapeType() const
+{
+    return EShapeType::Polygon;
+}
 
 ECAD_INLINE void EPolygon::SetPoints(const std::vector<EPoint2D> & points)
 {
@@ -228,6 +242,11 @@ ECAD_INLINE EPolygonWithHolesData EPolygonWithHoles::GetPolygonWithHoles() const
 ECAD_INLINE void EPolygonWithHoles::Transform(const ETransform2D & trans)
 {
     generic::geometry::Transform(shape, trans.GetTransform());    
+}
+
+ECAD_INLINE EShapeType EPolygonWithHoles::GetShapeType() const
+{
+    return EShapeType::PolygonWithHoles;
 }
 
 }//namespace ecad

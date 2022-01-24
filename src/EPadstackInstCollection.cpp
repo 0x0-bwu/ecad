@@ -83,6 +83,7 @@ ECAD_INLINE void EPadstackInstCollection::Map(CPtr<ILayerMap> lyrMap)
         if(!lyrMaps.count(origin)){
             auto newMap = origin->Clone();
             auto database = origin->GetDatabase();
+            ECAD_ASSERT(database != nullptr)
             auto newName = database->GetNextDefName(newMap->GetName(), EDefinitionType::LayerMap);
             newMap->SetName(newName);
             newMap->MappingLeft(lyrMap);

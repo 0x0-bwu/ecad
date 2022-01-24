@@ -31,8 +31,7 @@
 #include "ECell.h"
 #include "ENet.h"
 
-namespace {
-    using namespace ecad;
+namespace ecad {
     using namespace boost::python;
 
     template <typename Container, typename T>
@@ -112,13 +111,103 @@ namespace {
                                 return_value_policy<manage_new_object>(),
                                 boost::mpl::vector<T *, C &, Args...>());
     }
-    
+
     //Wrappers
     template<typename Derived, typename Base, typename Deleter = std::default_delete<Base> >
     UPtr<Base, Deleter> ECloneWrap(const Derived & derived)
     {
         static_assert(std::is_base_of<Base, Derived>::value, "not a derived class from base!");
         return static_cast<const Base &>(derived).Clone();
+    }
+
+    void EPadstackDefSetPadstackDefDataWrap(EPadstackDef & def, Ptr<IPadstackDefData> data)
+    {
+        //todo, enhance, copy issue here
+        return def.SetPadstackDefData(data->Clone());
+    }
+
+    void EViaSetViaShapeWrap(EVia & via, Ptr<EShape> shape)
+    {
+        //todo, enhance, copy issue here
+        via.shape = std::move(shape->Clone());
+    }
+
+    void EPadSetPadShapeWrap(EPad & pad, Ptr<EShape> shape)
+    {
+        //todo, enhance, copy issue here
+        pad.shape = std::move(shape->Clone());
+    }
+
+    bool EPadstackDefDataSetPadParametersWrapWithLayerId(EPadstackDefData & data, ELayerId layer, Ptr<EShape> shape, const EPoint2D & offset, EValue rotation)
+    {
+        //todo, enhance, copy issue here
+        return data.SetPadParameters(layer, shape->Clone(), offset, rotation);
+    }
+
+    bool EPadstackDefDataSetPadParametersWrapWithLayerName(EPadstackDefData & data, const std::string & layer, Ptr<EShape> shape, const EPoint2D & offset, EValue rotation)
+    {
+        //todo, enhance, copy issue here
+        return data.SetPadParameters(layer, shape->Clone(), offset, rotation);
+    }
+
+    object EPadstackDefDataGetPadParametersWrapWithLayerId(const EPadstackDefData & data, ELayerId layer)
+    {
+        EValue rotation = 0;
+        EPoint2D offset{0, 0};
+        CPtr<EShape> shape{nullptr};
+        if(!data.GetPadParameters(layer, shape, offset, rotation)) return boost::python::object();
+        return boost::python::make_tuple(offset, rotation);
+    }
+
+    CPtr<EShape> EPadstackDefDataGetPadShapeWrapWithLayerId(const EPadstackDefData & data, ELayerId layer)
+    {
+        EValue rotation = 0;
+        EPoint2D offset{0, 0};
+        CPtr<EShape> shape{nullptr};
+        if(!data.GetPadParameters(layer, shape, offset, rotation)) return nullptr;
+        return shape;
+    }
+
+    object EPadstackDefDataGetPadParametersWrapWithLayerName(const EPadstackDefData & data, const std::string & layer)
+    {
+        EValue rotation = 0;
+        EPoint2D offset{0, 0};
+        CPtr<EShape> shape{nullptr};
+        if(!data.GetPadParameters(layer, shape, offset, rotation)) return boost::python::object();
+        return boost::python::make_tuple(offset, rotation);
+    }
+
+    CPtr<EShape> EPadstackDefDataGetPadShapeWrapWithLayerName(const EPadstackDefData & data, const std::string & layer)
+    {
+        EValue rotation = 0;
+        EPoint2D offset{0, 0};
+        CPtr<EShape> shape{nullptr};
+        if(!data.GetPadParameters(layer, shape, offset, rotation)) return nullptr;
+        return shape;
+    }
+
+    void EPadstackDefDataSetViaParametersWrap(EPadstackDefData & data, Ptr<EShape> shape, const EPoint2D & offset, EValue rotation)
+    {
+        //todo, enhance, copy issue here
+        data.SetViaParameters(shape->Clone(), offset, rotation);
+    }
+
+    boost::python::tuple EPadstackDefDataGetViaParametersWrap(const EPadstackDefData & data)
+    {
+        EValue rotation = 0;
+        EPoint2D offset{0, 0};
+        CPtr<EShape> shape{nullptr};
+        data.GetViaParameters(shape, offset, rotation);
+        return boost::python::make_tuple(offset, rotation);
+    }
+
+    CPtr<EShape> EPadstackDefDataGetViaShapeWrap(const EPadstackDefData & data)
+    {
+        CPtr<EShape> shape{nullptr};
+        EPoint2D offset{0, 0};
+        EValue rotation = 0;
+        data.GetViaParameters(shape, offset, rotation);
+        return shape; 
     }
 
     Ptr<IPadstackInst> EPadstackInstCollectionAddPadstackInstWrap(EPadstackInstCollection & collection, Ptr<IPadstackInst> inst)
@@ -221,7 +310,13 @@ namespace {
         //todo, enhance, copy issue here
         return mgr.CreateGeometry2D(layout, layer, net, shape->Clone());
     }
-    
+
+}//namespace ecad
+
+namespace {
+    using namespace ecad;
+    using namespace boost::python;
+
     BOOST_PYTHON_FUNCTION_OVERLOADS(makeETransform2DWithNoMirror, makeETransform2D, 3, 4)
     
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDatabaseSaveBin, EDatabase::Save, 1, 2)
@@ -506,16 +601,21 @@ namespace {
         class_<IPadstackDef, boost::noncopyable>("IPadstackDef", no_init)
         ;
 
-        class_<EPadstackDef, bases<EDefinition, IPadstackDef> >("EPadstackDef")
-            .def(init<std::string>())
+        class_<EPadstackDef, bases<EDefinition, IPadstackDef> >("EPadstackDef", init<std::string>())
+            .def("clone", adapt_unique(&ECloneWrap<EPadstackDef, IPadstackDef>))
+            .def("set_padstack_def_data", &EPadstackDefSetPadstackDefDataWrap)
+            .def("get_padstack_def_data", &EPadstackDef::GetPadstackDefData, return_internal_reference<>())
         ;
 
         //Padstack Def Collection
         class_<IPadstackDefCollection, boost::noncopyable>("IPadstackDefCollection", no_init)
         ;
 
-        class_<EPadstackDefCollection, bases<IPadstackDefCollection> >("EPadstackDefCollection", no_init)
+        class_<EPadstackDefCollection, bases<IPadstackDefCollection> >("EPadstackDefCollection")
+            .def("__len__", &EPadstackDefCollection::Size)
+            .def("get_padstack_def_iter", adapt_unique(&EPadstackDefCollection::GetPadstackDefIter))
             .def("size", &EPadstackDefCollection::Size)
+            .def("clear", &EPadstackDefCollection::Clear)
         ;
 
         //Padstack Def Iterator
@@ -527,19 +627,66 @@ namespace {
             .def("current", &EPadstackDefIterator::Current, return_internal_reference<>())
         ;
 
+        //Via
+        class_<EVia>("EVia")
+            .def_readwrite("rotation", &EVia::rotation)
+            .def_readwrite("offset", &EVia::offset)
+            .add_property("shape",
+                           make_function([](const EVia & via){ return via.shape.get(); },
+                           return_value_policy<reference_existing_object>(), boost::mpl::vector<CPtr<EShape>, const EVia &>()),
+                           make_function(&EViaSetViaShapeWrap,
+                           default_call_policies(), boost::mpl::vector<void, EVia &, Ptr<EShape> >()))
+        ;
+
+        //Pad
+        class_<EPad>("EPad")
+            .def_readwrite("layer", &EPad::lyr)
+            .def_readwrite("rotation", &EPad::rotation)
+            .def_readwrite("offset", &EPad::offset)
+            .add_property("shape",
+                           make_function([](const EPad & pad){ return pad.shape.get(); },
+                           return_value_policy<reference_existing_object>(), boost::mpl::vector<CPtr<EShape>, const EPad &>()),
+                           make_function(&EPadSetPadShapeWrap,
+                           default_call_policies(), boost::mpl::vector<void, EPad &, Ptr<EShape> >()))
+        ;
+
         //Padstack Def Data
         class_<IPadstackDefData, boost::noncopyable>("IPadstackDefData", no_init)
         ;
 
         class_<EPadstackDefData, bases<IPadstackDefData> >("EPadstackDefData")
+            .def("clone", adapt_unique(&ECloneWrap<EPadstackDefData, IPadstackDefData>))
+            .add_property("material", &EPadstackDefData::GetMaterial, &EPadstackDefData::SetMaterial)
+            .def("set_layers", +[](EPadstackDefData & data, const boost::python::list & layers){ return data.SetLayers(py_list_to_std_container<std::vector<std::string> >(layers)); })
+            .def("set_pad_parameters", &EPadstackDefDataSetPadParametersWrapWithLayerId)
+            .def("get_pad_parameters", &EPadstackDefDataGetPadParametersWrapWithLayerId)
+            .def("get_pad_shape", &EPadstackDefDataGetPadShapeWrapWithLayerId, return_internal_reference<>())
+            .def("set_pad_parameters", &EPadstackDefDataSetPadParametersWrapWithLayerName)
+            .def("get_pad_parameters", &EPadstackDefDataGetPadParametersWrapWithLayerName)
+            .def("get_pad_shape", &EPadstackDefDataGetPadShapeWrapWithLayerName, return_internal_reference<>())
+            .def("set_via_parameters", &EPadstackDefDataSetViaParametersWrap)
+            .def("get_via_parameters", &EPadstackDefDataGetViaParametersWrap)
+            .def("get_via_shape", &EPadstackDefDataGetViaShapeWrap, return_internal_reference<>())
         ;
 
         //Padstack Inst
         class_<IPadstackInst, boost::noncopyable>("IPadstackInst", no_init)
         ;
 
-        class_<EPadstackInst, bases<EConnObj, IPadstackInst> >("EPadstackInst", no_init)
+        class_<EPadstackInst, bases<EConnObj, IPadstackInst> >("EPadstackInst", init<std::string, CPtr<IPadstackDef>, ENetId>())
             .def("clone", adapt_unique(&ECloneWrap<EPadstackInst, IPadstackInst>))
+            .add_property("net", &EPadstackInst::GetNet, &EPadstackInst::SetNet)
+            .def("set_layer_range", &EPadstackInst::SetLayerRange)
+            .def("get_layer_range", +[](const EPadstackInst & inst){
+                                        ELayerId top, bot;
+                                        inst.GetLayerRange(top, bot);
+                                        return boost::python::make_tuple(top, bot);
+                                    })
+            .add_property("layer_map",
+                            make_function(&EPadstackInst::GetLayerMap, return_value_policy<reference_existing_object>()),
+                            &EPadstackInst::SetLayerMap)
+            .def("get_padstack_def", &EPadstackInst::GetPadstackDef, return_internal_reference<>())
+            .def("get_layer_shape", adapt_unique(&EPadstackInst::GetLayerShape))
         ;
 
         //Padstack Inst Iterator

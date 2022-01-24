@@ -3,6 +3,7 @@
 #include "generic/geometry/Geometries.hpp"
 #include "generic/geometry/GeometryIO.hpp"
 #include "ECadCommon.h"
+#include "ECadDef.h"
 #include "Protocol.h"
 namespace ecad {
 
@@ -22,6 +23,7 @@ public:
     virtual EPolygonData GetContour() const = 0;
     virtual EPolygonWithHolesData GetPolygonWithHoles() const = 0;
     virtual void Transform(const ETransform2D & trans) = 0;
+    virtual EShapeType GetShapeType() const = 0;
 };
 
 class ECAD_API ERectangle : public EShape
@@ -37,6 +39,7 @@ public:
     EPolygonData GetContour() const;
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
+    EShapeType GetShapeType() const;
 protected:
     ///Copy
     virtual Ptr<ERectangle> CloneImp() const override { return new ERectangle(*this); }
@@ -57,6 +60,7 @@ public:
     EPolygonData GetContour() const;
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
+    EShapeType GetShapeType() const;
     void SetPoints(const std::vector<EPoint2D> & points);
     void SetType(int type);
     void SetWidth(ECoord width);
@@ -78,6 +82,7 @@ public:
     EPolygonData GetContour() const;
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
+    EShapeType GetShapeType() const;
     void SetPoints(const std::vector<EPoint2D> & points);
     EPolygon ConvexHull(const EPolygon & other);
 protected:
@@ -97,6 +102,7 @@ public:
     EPolygonData GetContour() const;
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
+    EShapeType GetShapeType() const;
 protected:
     ///Copy
     virtual Ptr<EPolygonWithHoles> CloneImp() const override { return new EPolygonWithHoles(*this); }

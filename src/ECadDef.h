@@ -54,6 +54,15 @@ enum class EPrimitiveType
     Text
 };
 
+enum class EShapeType
+{
+    Invalid = -1,
+    Rectangle,
+    Path,
+    Polygon,
+    PolygonWithHoles,
+};
+
 enum class EPadType
 {
     Invalid = -1,
