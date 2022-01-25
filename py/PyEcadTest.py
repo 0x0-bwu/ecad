@@ -896,6 +896,21 @@ def test_net_collection() :
     collection.clear()
     assert(len(collection) == 0)
 
+###ENet
+def test_net() :
+    #create net
+    net = ecad.ENet("net")
+    
+    #net id
+    net.net_id = ecad.ENetId(1)
+    assert(net.net_id == ecad.ENetId(1))
+
+###EShape
+def test_shape() :
+    #create polygon with holes
+    pwh = ecad.EPolygonWithHoles()
+    assert(pwh.has_hole() == False)
+
 ###EPoint
 def test_point() :
     p = EPoint2D(2, 3)
@@ -940,6 +955,8 @@ def main() :
     test_layer_collection()
     test_layer()
     test_net_collection()
+    test_net()
+    test_shape()
     test_point()
     test_transform()
     test_polygon_data()

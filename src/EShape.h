@@ -11,6 +11,7 @@ using namespace generic::geometry;
 using EPolygonData = Polygon2D<ECoord>;
 using EPolylineData = Polyline2D<ECoord>;
 using EPolygonWithHolesData = PolygonWithHoles2D<ECoord>;
+using EPolygonHolesData = typename EPolygonWithHolesData::hole_container;
 
 class ETransform;
 class ECAD_API EShape : public Clonable<EShape>

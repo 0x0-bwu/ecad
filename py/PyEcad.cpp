@@ -414,6 +414,7 @@ namespace {
 
         //Point
         class_<EPoint2D>("EPoint2D", init<ECoord, ECoord>())
+            .def("__str__", +[](const EPoint2D & p){ std::stringstream ss; ss << p; return ss.str(); })
             .def("__eq__", &EPoint2D::operator==)
             .def("__ne__", &EPoint2D::operator!=)
             .add_property("x",
@@ -422,7 +423,6 @@ namespace {
             .add_property("y",
                             +[](const EPoint2D & p){ return p[1]; },
                             make_function([](EPoint2D & p, ECoord y){ p[1] = y; }, default_call_policies(), boost::mpl::vector<void, EPoint2D &, ECoord>()))
-            .def("__str__", +[](const EPoint2D & p){ std::stringstream ss; ss << p; return ss.str(); })
         ;
 
         //box
@@ -437,18 +437,29 @@ namespace {
                             make_function([](EBox2D & b, const EPoint2D & p){ b[1] = p; }, default_call_policies(), boost::mpl::vector<void, EBox2D &, const EPoint2D &>()))
         ;
 
-        //Polygon
+        //polygon
         class_<EPolygonData>("EPolygonData")
+            .def("__str__", +[](const EPolygonData & polygon){ std::stringstream ss; ss << polygon; return ss.str(); })
             .def("size", &EPolygonData::Size)
             .def("set_points", make_function([](EPolygonData & polygon, const boost::python::list & points){
                                                 polygon.Set(py_list_to_std_container<std::vector<EPoint2D> >(points));
                                              },
                                              default_call_policies(), boost::mpl::vector<void, EPolygonData &, const boost::python::list &>()))
-            .def("__str__", +[](const EPolygonData & polygon){ std::stringstream ss; ss << polygon; return ss.str(); })
         ;
+
+        class_<EPolygonHolesData>("EPolygonHolesData")
+            .def("size", &EPolygonHolesData::size)
+            .def("add_hole", +[](EPolygonHolesData & holes, EPolygonData hole){
+                                    if(hole.isCCW()) hole.Reverse();
+                                    holes.emplace_back(std::move(hole));
+                                })
+            .def("clear", &EPolygonHolesData::clear)
+            ;
 
         class_<EPolygonWithHolesData>("EPolygonWithHolesData")
             .def("__str__", +[](const EPolygonWithHolesData & pwh){ std::stringstream ss; ss << pwh; return ss.str(); })
+            .def_readwrite("outline", &EPolygonWithHolesData::outline)
+            .def_readwrite("holes", &EPolygonWithHolesData::holes)
         ;
 
         //Transform
@@ -473,12 +484,17 @@ namespace {
         class_<EShape, boost::noncopyable>("EShape", no_init)
             .def("has_hole", &EShape::hasHole)
             .def("get_bbox", &EShape::GetBBox)
+            .def("get_contour", &EShape::GetContour)
+            .def("get_polygon_with_holes", &EShape::GetPolygonWithHoles)
+            .def("transform", &EShape::Transform)
+            .def("get_shape_type", &EShape::GetShapeType)
         ;
 
         class_<ERectangle, bases<EShape> >("ERectangle")
         ;
 
         class_<EPath, bases<EShape> >("EPath")
+            .def_readwrite("shape", &EPath::shape)
         ;
 
         class_<EPolygon, bases<EShape> >("EPolygon")
@@ -511,8 +527,9 @@ namespace {
         class_<INet, boost::noncopyable>("INet", no_init)
         ;
 
-        class_<ENet, bases<EObject, INet> >("ENet", no_init)
+        class_<ENet, bases<EObject, INet> >("ENet", init<std::string>())
             .def("clone", adapt_unique(&ECloneWrap<ENet, INet>))
+            .add_property("net_id", &ENet::GetNetId, &ENet::SetNetId)
         ;
 
         //Net Iterator
