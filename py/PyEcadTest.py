@@ -1,3 +1,4 @@
+from gc import collect
 import os
 import sys
 
@@ -739,6 +740,162 @@ def test_padstack_def() :
     #get padstack def data
     assert(padstack_def.get_padstack_def_data())
 
+###ConnObj Collection
+def test_conn_obj_collection() :
+    #create conn obj collection
+    collection = ecad.EConnObjCollection()
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 0)
+
+    #get primitive collection
+    assert(collection.get_primitive_collection() != None)
+
+    #get padstack inst collection
+    assert(collection.get_padstack_inst_collection() != None)
+
+    #get conn obj iter
+    iter = collection.get_conn_obj_iter()
+    assert(iter.next() == None)
+    
+###ELayerMapCollection
+def test_conn_obj_collection() :
+    #create conn obj collection
+    collection = ecad.ELayerMapCollection()
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 0)
+
+    #get layer map iter
+    iter = collection.get_layer_map_iter()
+    assert(iter.next() == None)
+
+###ELayerMap
+def test_layer_map() :
+    #create layer map
+    layer_map = ecad.ELayerMap("layer_map", None)
+
+    #clone
+    copy = layer_map.clone()
+
+    #get database
+    assert(layer_map.get_database() == None)
+
+    #set mapping
+    layer_map.set_mapping(ecad.ELayerId(0), ecad.ELayerId(1))
+
+    #get mapping forward/backward
+    assert(layer_map.get_mapping_forward(ecad.ELayerId(0)) == ecad.ELayerId(1))
+    assert(layer_map.get_mapping_backward(ecad.ELayerId(1)) == ecad.ELayerId(0))
+
+    #mapping left/right
+    copy.set_mapping(ecad.ELayerId(0), ecad.ELayerId(1))
+    copy.set_mapping(ecad.ELayerId(1), ecad.ELayerId(0))
+
+    layer_map.mapping_left(copy)
+    assert(layer_map.get_mapping_backward(ecad.ELayerId(1)) == ecad.ELayerId(1))
+    layer_map.mapping_right(copy)
+    assert(layer_map.get_mapping_forward(ecad.ELayerId(1)) == ecad.ELayerId(0))
+
+###ELayerCollection
+def test_layer_collection() :
+    #create layer collection
+    collection = ecad.ELayerCollection()
+
+    #append layer
+    layer = ecad.EStackupLayer("layer1", ecad.ELayerType.CONDUCTINGLAYER)
+    assert(collection.append_layer(layer) == ecad.ELayerId(0))
+
+    #append layers
+    layers = [ecad.EStackupLayer("layer2", ecad.ELayerType.CONDUCTINGLAYER)]
+    assert(collection.append_layers(layers) == [1])
+
+    #add default die lectric layers
+    layer_map = collection.add_default_dielectric_layers()
+    assert(layer_map.get_mapping_forward(ecad.ELayerId(1)) == ecad.ELayerId(2))
+
+    #get default layer map
+    layer_map = collection.get_default_layer_map()
+    assert(layer_map.get_mapping_forward(ecad.ELayerId(1)) == ecad.ELayerId(1))
+
+    #get stackup layers
+    layers = collection.get_stackup_layers()
+    assert(len(layers) == 3)
+
+    #get layer iter
+    iter = collection.get_layer_iter()
+    curr = iter.next()
+    assert(curr.name == "layer1")
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 3)
+
+    #find layer by name
+    assert(collection.find_layer_by_name("layer1").suuid == layers[0].suuid)
+
+    #get next layer name
+    assert(collection.get_next_layer_name("layer1") == "layer11")
+
+###ELayer
+def test_layer() :
+    #create stackup layer
+    layer = ecad.EDataMgr.instance().create_stackup_layer("layer", ecad.ELayerType.CONDUCTINGLAYER, 0, 10)
+
+    #id
+    assert(layer.layer_id == ecad.ELayerId.NOLAYER)
+
+    #type
+    assert(layer.get_layer_type() == ecad.ELayerType.CONDUCTINGLAYER)
+
+    #get stackup layer from layer
+    assert(layer.get_stackup_layer_from_layer() != None)
+
+    #get via layer from layer
+    assert(layer.get_via_layer_from_layer() == None)
+
+    #elevation
+    layer.elevation = -0.5
+    assert(layer.elevation == -0.5)
+
+    #thickness
+    assert(layer.thickness == 10)
+
+###ENetCollection
+def test_net_collection() :
+    #create net collection
+    collection = ecad.ENetCollection()
+
+    #create net
+    net = collection.create_net("net")
+    
+    #find net by name
+    assert(collection.find_net_by_name("net").suuid == net.suuid)
+
+    #clone
+    copy = net.clone()
+
+    #add net
+    assert(collection.add_net(copy).name == "net1")
+
+    #next net name
+    assert(collection.next_net_name("net") == "net2")
+
+    #get net iter
+    iter = collection.get_net_iter()
+    iter.next()
+    iter.next()
+    assert(iter.next() == None)
+
+    #__len__/size
+    assert(len(collection) == collection.size() == 2)
+
+    #contains
+    assert("net" in collection)
+
+    #clear
+    collection.clear()
+    assert(len(collection) == 0)
+
 ###EPoint
 def test_point() :
     p = EPoint2D(2, 3)
@@ -778,6 +935,11 @@ def main() :
     test_padstack_def_data()
     test_padstack_def_collection()
     test_padstack_def()
+    test_conn_obj_collection()
+    test_layer_map()
+    test_layer_collection()
+    test_layer()
+    test_net_collection()
     test_point()
     test_transform()
     test_polygon_data()

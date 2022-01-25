@@ -120,6 +120,36 @@ namespace ecad {
         return static_cast<const Base &>(derived).Clone();
     }
 
+    Ptr<INet> ENetCollectionAddNetWrap(ENetCollection & collection, Ptr<INet> net)
+    {
+        //todo, enhance, copy issue here
+        return collection.AddNet(net->Clone());
+    }
+
+    ELayerId ELayerCollectionAppendLayerWrap(ELayerCollection & collection, Ptr<ILayer> layer)
+    {
+        //todo, enhance, copy issue here
+        return collection.AppendLayer(layer->Clone());
+    }
+
+    boost::python::list ELayerCollectionAppendLayersWrap(ELayerCollection & collection, const boost::python::list & layers)
+    {
+        //todo, enhance, copy issue here
+        auto vec = py_list_to_std_container<std::vector<Ptr<ILayer> > >(layers);
+        std::vector<UPtr<ILayer> > input;
+        for(auto layer : vec)
+            input.emplace_back(std::move(layer->Clone()));
+        auto res = collection.AppendLayers(std::move(input));
+        return std_container_to_py_list(res);
+    }
+
+    std::vector<Ptr<ILayer> > ELayerCollectionGetStackupLayersWrap(const ELayerCollection & collection)
+    {
+        std::vector<Ptr<ILayer> > layers;
+        collection.GetStackupLayers(layers);
+        return layers;
+    }
+
     void EPadstackDefSetPadstackDefDataWrap(EPadstackDef & def, Ptr<IPadstackDefData> data)
     {
         //todo, enhance, copy issue here
@@ -482,6 +512,7 @@ namespace {
         ;
 
         class_<ENet, bases<EObject, INet> >("ENet", no_init)
+            .def("clone", adapt_unique(&ECloneWrap<ENet, INet>))
         ;
 
         //Net Iterator
@@ -497,22 +528,43 @@ namespace {
         class_<INetCollection, boost::noncopyable>("INetCollection", no_init)
         ;
 
-        class_<ENetCollection, bases<INetCollection> >("ENetCollection", no_init)
+        class_<ENetCollection, bases<INetCollection> >("ENetCollection")
             .def("__len__", &ENetCollection::Size)
             .def("__getitem__", +[](const ENetCollection & c, const std::string & name){ return c.At(name).get(); }, return_internal_reference<>())
+            .def("__contains__", &ENetCollection::Count)
+            .def("next_net_name", &ENetCollection::NextNetName)
+            .def("find_net_by_name", &ENetCollection::FindNetByName, return_internal_reference<>())
+            .def("create_net", &ENetCollection::CreateNet, return_internal_reference<>())
+            .def("add_net", &ENetCollectionAddNetWrap, return_internal_reference<>())
+            .def("get_net_iter", adapt_unique(&ENetCollection::GetNetIter))
+            .def("size", &ENetCollection::Size)
+            .def("clear", &ENetCollection::Clear)
         ;
 
         //Layer
         class_<ILayer, boost::noncopyable>("ILayer", no_init)
         ;
 
-        class_<ELayer, bases<EObject, ILayer>, boost::noncopyable>("ELayer", no_init)
-            .add_property("layer_id", &ELayer::GetLayerId, &ELayer::SetLayerId)
+        class_<IStackupLayer, boost::noncopyable>("IStackupLayer", no_init)
         ;
 
-        class_<EStackupLayer, bases<ELayer> >("EStackupLayer", init<std::string, ELayerType>())
+        class_<IViaLayer, boost::noncopyable>("IViaLayer", no_init)
+        ;
+
+        class_<ELayer, bases<EObject, ILayer>, boost::noncopyable>("ELayer", no_init)
+            .def("clone", adapt_unique(&ECloneWrap<ELayer, ILayer>))
+            .add_property("layer_id", &ELayer::GetLayerId, &ELayer::SetLayerId)
+            .def("get_layer_type", &ELayer::GetLayerType)
+            .def("get_stackup_layer_from_layer", &ELayer::GetStackupLayerFromLayer, return_internal_reference<>())
+            .def("get_via_layer_from_layer", &ELayer::GetViaLayerFromLayer, return_internal_reference<>())
+        ;
+
+        class_<EStackupLayer, bases<ELayer, IStackupLayer> >("EStackupLayer", init<std::string, ELayerType>())
             .add_property("elevation", &EStackupLayer::GetElevation, &EStackupLayer::SetElevation)
             .add_property("thickness", &EStackupLayer::GetThickness, &EStackupLayer::GetThickness)
+        ;
+
+        class_<EViaLayer, bases<ELayer, IViaLayer> >("EViaLayer", init<std::string>())
         ;
 
         class_<std::vector<Ptr<ILayer> > >("ELayerContainer")
@@ -532,8 +584,17 @@ namespace {
         class_<ILayerCollection, boost::noncopyable>("ILayerCollection", no_init)
         ;
 
-        class_<ELayerCollection, bases<ILayerCollection> >("ELayerCollection", no_init)
+        class_<ELayerCollection, bases<ILayerCollection> >("ELayerCollection")
             .def("__len__", &ELayerCollection::Size)
+            .def("append_layer", &ELayerCollectionAppendLayerWrap)
+            .def("append_layers", &ELayerCollectionAppendLayersWrap)
+            .def("add_default_dielectric_layers", adapt_unique(&ELayerCollection::AddDefaultDielectricLayers))
+            .def("get_default_layer_map", adapt_unique(&ELayerCollection::GetDefaultLayerMap))
+            .def("get_stackup_layers", &ELayerCollectionGetStackupLayersWrap)
+            .def("get_layer_iter", adapt_unique(&ELayerCollection::GetLayerIter))
+            .def("size", &ELayerCollection::Size)
+            .def("find_layer_by_name", &ELayerCollection::FindLayerByName, return_internal_reference<>())
+            .def("get_next_layer_name", &ELayerCollection::GetNextLayerName)
         ;
 
         //Layer Map Iterator
@@ -549,8 +610,12 @@ namespace {
         class_<ILayerMap, boost::noncopyable>("ILayerMap", no_init)
         ;
 
-        class_<ELayerMap, bases<EDefinition, ILayerMap> >("ELayerMap", no_init)
+        class_<ELayerMap, bases<EDefinition, ILayerMap> >("ELayerMap", init<std::string, Ptr<IDatabase> >())
+            .def("clone", adapt_unique(&ECloneWrap<ELayerMap, ILayerMap>))
             .def("get_database", &ELayerMap::GetDatabase, return_internal_reference<>())
+            .def("set_mapping", &ELayerMap::SetMapping)
+            .def("mapping_left", &ELayerMap::MappingLeft)
+            .def("mapping_right", &ELayerMap::MappingRight)
             .def("get_mapping_forward", &ELayerMap::GetMappingForward)
             .def("get_mapping_backward", &ELayerMap::GetMappingBackward)
         ;
@@ -559,8 +624,11 @@ namespace {
         class_<ILayerMapCollection, boost::noncopyable>("ILayerMapCollection", no_init)
         ;
 
-        class_<ELayerMapCollection, bases<ILayerMapCollection> >("ELayerMapCollection", no_init)
+        class_<ELayerMapCollection, bases<ILayerMapCollection> >("ELayerMapCollection")
+            .def("__len__", &ELayerMapCollection::Size)
+            .def("get_layer_map_iter", adapt_unique(&ELayerMapCollection::GetLayerMapIter))
             .def("size", &ELayerMapCollection::Size)
+            .def("clear", &ELayerMapCollection::Clear)
         ;
 
         //Layer Map Iterator
@@ -593,8 +661,12 @@ namespace {
         class_<IConnObjCollection, boost::noncopyable>("IConnObjCollection", no_init)
         ;
 
-        class_<EConnObjCollection, bases<IConnObjCollection> >("EConnObjCollection", no_init)
+        class_<EConnObjCollection, bases<IConnObjCollection> >("EConnObjCollection")
             .def("__len__", &EConnObjCollection::Size)
+            .def("get_primitive_collection", &EConnObjCollection::GetPrimitiveCollection, return_internal_reference<>())
+            .def("get_padstack_inst_collection", &EConnObjCollection::GetPadstackInstCollection, return_internal_reference<>())
+            .def("get_conn_obj_iter", adapt_unique(&EConnObjCollection::GetConnObjIter))
+            .def("size", &EConnObjCollection::Size)
         ;
 
         //Padstack Def
@@ -896,7 +968,7 @@ namespace {
         class_<ICellCollection, boost::noncopyable>("ICellCollection", no_init)
         ;
 
-        class_<ECellCollection, bases<ICellCollection> >("ECellCollection", no_init)
+        class_<ECellCollection, bases<ICellCollection> >("ECellCollection")
             .def("__len__", &ECellCollection::Size)
             .def("__getitem__", +[](const ECellCollection & c, const std::string & name){ return c.At(name).get(); }, return_internal_reference<>())
             .def("__contains__", &ECellCollection::Count)
