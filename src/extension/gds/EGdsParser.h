@@ -1,5 +1,5 @@
-#ifndef ECAD_EXT_GDS_PARSER_EGDSPARSER_H
-#define ECAD_EXT_GDS_PARSER_EGDSPARSER_H
+#ifndef ECAD_EXT_GDS_EGDSPARSER_H
+#define ECAD_EXT_GDS_EGDSPARSER_H
 #include "EGdsObjects.h"
 #include "EGdsRecords.h"
 #include <istream>
@@ -40,4 +40,4 @@ protected:
 #include "EGdsParser.cpp"
 #endif
 
-#endif//ECAD_EXT_GDS_PARSER_EGDSPARSER_H
+#endif//ECAD_EXT_GDS_EGDSPARSER_H
