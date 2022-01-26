@@ -20,14 +20,14 @@ public:
     bool operator() (std::istream & fp);
 
 protected:
-    const char * Parse(std::istream & fp, int & noRead, size_t n);
+    CPtr<char> Parse(std::istream & fp, int & noRead, size_t n);
     void FindRecordType(int numeric, EGdsRecords::EnumType & recordType, int & expectedDataType);
     void FindDataType(int numeric, EGdsData::EnumType & dataType);
 
 protected:
     EGdsReader & m_reader;
-    char * m_buffer;
-    char * m_bptr;
+    Ptr<char> m_buffer;
+    Ptr<char> m_bptr;
     size_t m_bcap;//buffer capacity
     size_t m_blen;//current buffer size, from m_bptr to m_buffer + m_bcap
 };

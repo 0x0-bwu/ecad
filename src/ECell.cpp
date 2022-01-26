@@ -154,4 +154,5 @@ ECAD_INLINE Ptr<ILayoutView> ECircuitCell::GetFlattenedLayoutView()
     }
     return m_flattenedLayoutView.get();
 }
+
 }//namesapce ecad

@@ -37,10 +37,16 @@ void t_extension_dmcdom()
 void t_extension_gds()
 {
     std::string err;
-    std::string gds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
-    auto database = ext::CreateDatabaseFromGds("test_gds", gds, &err);
+    std::string ringoGds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
+    auto ringo = ext::CreateDatabaseFromGds("ringo", ringoGds, std::string{}, &err);
     BOOST_CHECK(err.empty());
-    BOOST_CHECK(database != nullptr);
+    BOOST_CHECK(ringo != nullptr);
+
+    std::string testGds = ecad_test::GetTestDataPath() + "/extension/gdsii/test.gds";
+    std::string testLyrMap = ecad_test::GetTestDataPath() + "/extension/gdsii/test.layermap";
+    auto test = ext::CreateDatabaseFromGds("test", testGds, testLyrMap, &err);
+    BOOST_CHECK(err.empty());
+    BOOST_CHECK(test != nullptr);
 
     EDataMgr::Instance().ShutDown();
 }

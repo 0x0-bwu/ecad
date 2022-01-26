@@ -18,6 +18,7 @@ public:
     EDefinition & operator= (const EDefinition & other);
 
     virtual EDefinitionType GetDefinitionType() const;
+    void Print(std::ostream & os) const;
     const std::string & GetName() const;
     const EUuid & Uuid() const;
     std::string sUuid() const;
@@ -26,6 +27,12 @@ protected:
     ///Copy
     virtual Ptr<EDefinition> CloneImp() const override { return new EDefinition(*this); }
 };
+
+ECAD_ALWAYS_INLINE void EDefinition::Print(std::ostream & os) const
+{
+    EObject::Print(os);
+    os << "DEFINITION TYPE: " << toString(GetDefinitionType()) << ECAD_EOL;
+}
 
 ECAD_ALWAYS_INLINE const std::string & EDefinition::GetName() const
 {

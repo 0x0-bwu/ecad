@@ -20,7 +20,7 @@ void t_metal_fraction_mapping()
     std::string err;
     std::string name = "4004";
     std::string gds = ecad_test::GetTestDataPath() + "/extension/gdsii/" + name + ".gds";
-    auto database = ext::CreateDatabaseFromGds(name, gds, &err);
+    auto database = ext::CreateDatabaseFromGds(name, gds, std::string{}, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
 

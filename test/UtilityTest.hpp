@@ -16,7 +16,7 @@ void t_flatten_utility()
     std::string err;
     std::string name = "ringo";
     std::string gds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
-    auto database = ext::CreateDatabaseFromGds(name, gds, &err);
+    auto database = ext::CreateDatabaseFromGds(name, gds, std::string{}, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
 

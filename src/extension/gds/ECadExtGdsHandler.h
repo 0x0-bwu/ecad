@@ -12,7 +12,7 @@ namespace gds {
 class ECAD_API ECadExtGdsHandler
 {
 public:
-    explicit ECadExtGdsHandler(const std::string & gdsFile);
+    explicit ECadExtGdsHandler(const std::string & gdsFile, const std::string & lyrMapFile = std::string{});
     SPtr<IDatabase> CreateDatabase(const std::string & name, Ptr<std::string> err = nullptr);
 private:
     ///cell and cell primitives
@@ -30,6 +30,7 @@ private:
     void Reset();
 private:
     std::string m_gdsFile;
+    std::string m_lyrMapFile;
 
 private:
     // temporary data

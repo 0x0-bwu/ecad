@@ -9,9 +9,29 @@ namespace ecad {
 namespace ext {
 namespace gds {
 
-namespace psr = generic::parser;
-namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
+ECAD_INLINE const std::list<EGdsLayer> & EGdsLayerMap::GetAllLayers() const
+{
+    return m_layers;
+}
+
+ECAD_INLINE CPtr<EGdsLayer> EGdsLayerMap::GetLayer(int id) const
+{
+    auto iter = m_lyrIdMap.find(id);
+    if(iter == m_lyrIdMap.end()) return nullptr;
+    else return iter->second;
+}
+
+ECAD_INLINE void EGdsLayerMap::AddLayer(EGdsLayer layer)
+{
+    m_layers.emplace_back(std::move(layer));
+    m_lyrIdMap.insert(std::make_pair(m_layers.back().layerId, &(m_layers.back())));
+}
+
+ECAD_INLINE void EGdsLayerMap::Clear()
+{
+    m_layers.clear();
+    m_lyrIdMap.clear();
+}
 
 ECAD_INLINE EGdsLayerMapParser::EGdsLayerMapParser(EGdsLayerMap & layerMap)
  : m_layerMap(layerMap)
@@ -36,19 +56,29 @@ ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (const std::string & filena
 
 ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (std::istream & fp)
 {
+    std::string line;
+    while(fp.eof()){
+        line.clear();
+        std::getline(fp, line);
+        if(line.empty()) continue;
+        if(line.front() == '#') continue;
 
+        EGdsLayer layer;
+        if(!ParseOneLine(line, layer)) return false;
+        m_layerMap.AddLayer(std::move(layer));
+    }
+    return true;
 }
 
 ECAD_INLINE bool EGdsHelicLayerMapParser::ParseOneLine(const std::string & line, EGdsLayer & layer)
 {
-    // auto begin = line.begin(), end = line.end();
-    // bool ok = qi::phrase_parse(begin, end,
-    //                             (
-    //                                 qi::double_[phx::ref(point[0]) = qi::_1] >>
-    //                                 qi::double_[phx::ref(point[1]) = qi::_1]
-    //                             ),
-    //                             ascii::space);
-    // if(!ok || begin != end) return false;
+    using namespace generic::parser;
+    auto split = Split(line, char(32));
+    if(split.size() != 4) return false;
+    
+    auto name = split[0];
+    auto type = (name.front() == 'm' || name.front() == 'M') ? ELayerType::ConductingLayer : ELayerType::DielectricLayer;
+    layer = EGdsLayer{ name, split[1], std::stoi(split[2]), std::stoi(split[3]) };
     return true;
 }
 

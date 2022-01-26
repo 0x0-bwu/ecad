@@ -12,9 +12,9 @@ ECAD_INLINE SPtr<IDatabase> CreateDatabaseFromDomDmc(const std::string & name, c
     return handler.CreateDatabase(name, err);
 }
 
-ECAD_INLINE SPtr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, std::string * err)
+ECAD_INLINE SPtr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap, std::string * err)
 {
-    gds::ECadExtGdsHandler handler(gds);
+    gds::ECadExtGdsHandler handler(gds, lyrMap);
     return handler.CreateDatabase(name, err);
 }
 

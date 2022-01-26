@@ -28,6 +28,7 @@ public:
     virtual Ptr<ILayoutView> GetFlattenedLayoutView() { return nullptr; }
 
     EDefinitionType GetDefinitionType() const;
+    void Print(std::ostream & os) const;
     const std::string & GetName() const;
     std::string sUuid() const;
     
@@ -57,7 +58,13 @@ public:
 protected:
     ///Copy
     virtual Ptr<ECircuitCell> CloneImp() const override { return new ECircuitCell(*this); }
+    virtual void PrintImp(std::ostream & os) const { ECell::Print(os); }
 };
+
+ECAD_ALWAYS_INLINE void ECell::Print(std::ostream & os) const
+{
+    return EDefinition::Print(os);
+}
 
 ECAD_ALWAYS_INLINE const std::string & ECell::GetName() const
 {

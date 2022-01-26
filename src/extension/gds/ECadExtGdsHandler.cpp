@@ -2,6 +2,7 @@
 #include "ECadExtGdsHandler.h"
 #endif
 
+#include "extension/gds/EGdsLayerMap.h"
 #include "extension/gds/EGdsFileIO.h"
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/Format.hpp"
@@ -15,8 +16,8 @@ namespace gds {
 
 namespace fmt = generic::format;
 
-ECAD_INLINE ECadExtGdsHandler::ECadExtGdsHandler(const std::string & gdsFile)
- : m_gdsFile(gdsFile){}
+ECAD_INLINE ECadExtGdsHandler::ECadExtGdsHandler(const std::string & gdsFile, const std::string & lyrMapFile)
+ : m_gdsFile(gdsFile), m_lyrMapFile(lyrMapFile){}
 
 ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
 {
@@ -40,15 +41,30 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
 
     //import layers
     int id = 0;
-    m_layerIdMap.clear();
     std::vector<UPtr<ILayer> > layers;
-    for(const auto & lyr : db.Layers()){
-        std::string name = "layer_" + std::to_string(lyr);
-        auto layer = eMgr.CreateStackupLayer(name, ELayerType::ConductingLayer, 0, 0);
-        layers.push_back(std::move(layer));
-        m_layerIdMap.insert(std::make_pair(lyr, static_cast<ELayerId>(id++)));
+    if(!m_lyrMapFile.empty()){
+        EGdsLayerMap layerMap;
+        bool res = EGdsHelicLayerMapParser(layerMap)(m_lyrMapFile);
+        if(!res){
+            if(err) *err = fmt::Format2String("Error: failed to parse layer map file %1%.", m_lyrMapFile);
+            return nullptr;
+        }
+        auto gdsLayers = layerMap.GetAllLayers();
+        for(const auto & gdsLayer  : gdsLayers){
+            auto layer = eMgr.CreateStackupLayer(gdsLayer.name, gdsLayer.type, 0, 0);
+            layers.push_back(std::move(layer));
+            m_layerIdMap.insert(std::make_pair(gdsLayer.layerId, static_cast<ELayerId>(id++)));
+        }
     }
-    
+    else{
+        for(const auto & lyr : db.Layers()){
+            std::string name = "layer_" + std::to_string(lyr);
+            auto layer = eMgr.CreateStackupLayer(name, ELayerType::ConductingLayer, 0, 0);
+            layers.push_back(std::move(layer));
+            m_layerIdMap.insert(std::make_pair(lyr, static_cast<ELayerId>(id++)));
+        }
+    }
+
     //import cells
     for(const auto & cell : db.cells){
         auto iCell = eMgr.CreateCircuitCell(m_database, cell.name);

@@ -1,6 +1,7 @@
 #ifndef ECAD_EXT_GDS_EGDSLAYMAP_H
 #define ECAD_EXT_GDS_EGDSLAYMAP_H
 #include "ECadCommon.h"
+#include "ECadDef.h"
 #include <unordered_map>
 #include <istream>
 #include <list>
@@ -12,20 +13,23 @@ struct ECAD_API EGdsLayer
 {
     std::string name;
     std::string purpose;
-    int16_t     layerId;
-    int16_t     dataType;   
+    int         layerId  = -1;
+    int         dataType = -1;
+    ELayerType type = ELayerType::Invalid;
 };
 
-struct ECAD_API EGdsLayerMap
+class ECAD_API EGdsLayerMap
 {
-    std::list<EGdsLayer> layers;
-    std::unordered_map<int16_t, CPtr<EGdsLayer> > lyrIdMap;
-
-    void Clear()
-    {
-        layers.clear();
-        lyrIdMap.clear();
-    }
+public:
+    EGdsLayerMap() = default;
+    virtual ~EGdsLayerMap() = default;
+    const std::list<EGdsLayer> & GetAllLayers() const;
+    CPtr<EGdsLayer> GetLayer(int id) const;
+    void AddLayer(EGdsLayer layer);
+    void Clear();
+private:
+    std::list<EGdsLayer> m_layers;
+    std::unordered_map<int, CPtr<EGdsLayer> > m_lyrIdMap;
 };
 
 class ECAD_API EGdsLayerMapParser

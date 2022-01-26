@@ -90,5 +90,17 @@ enum class ECloneOption
     LayoutView = 2
 };
 
-}//namespace
+ECAD_ALWAYS_INLINE std::string toString(EDefinitionType type)
+{
+    switch(type)
+    {
+        case EDefinitionType::Invalid : return "Invalid";
+        case EDefinitionType::PadstackDef : return "Padstack Def";
+        case EDefinitionType::LayerMap : return "Layer Map";
+        case EDefinitionType::Cell : return "Cell";
+        default : return std::string{};
+    }
+}
+
+}//namespace ecad
 #endif//ECAD_ECADDEF_H
