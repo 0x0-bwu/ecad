@@ -2,6 +2,7 @@
 #include "EGdsLayerMap.h"
 #endif
 
+#include "generic/tools/StringHelper.hpp"
 #include "generic/tools/Parser.hpp"
 
 namespace ecad {
@@ -57,7 +58,7 @@ ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (const std::string & filena
 ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (std::istream & fp)
 {
     std::string line;
-    while(fp.eof()){
+    while(!fp.eof()){
         line.clear();
         std::getline(fp, line);
         if(line.empty()) continue;
@@ -72,12 +73,13 @@ ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (std::istream & fp)
 
 ECAD_INLINE bool EGdsHelicLayerMapParser::ParseOneLine(const std::string & line, EGdsLayer & layer)
 {
+    using namespace generic::str;
     using namespace generic::parser;
     auto split = Split(line, char(32));
     if(split.size() != 4) return false;
     
     auto name = split[0];
-    auto type = (name.front() == 'm' || name.front() == 'M') ? ELayerType::ConductingLayer : ELayerType::DielectricLayer;
+    auto type = StartsWith<CaseInsensitive>(name, "m") ? ELayerType::ConductingLayer : ELayerType::DielectricLayer;
     layer = EGdsLayer{ name, split[1], std::stoi(split[2]), std::stoi(split[3]) };
     return true;
 }

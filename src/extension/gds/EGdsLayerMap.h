@@ -13,8 +13,8 @@ struct ECAD_API EGdsLayer
 {
     std::string name;
     std::string purpose;
-    int         layerId  = -1;
-    int         dataType = -1;
+    int layerId = -1;
+    int dataType = -1;
     ELayerType type = ELayerType::Invalid;
 };
 
