@@ -39,6 +39,22 @@ enum ELayerId { noLayer = -1 };
 
 enum ENetId { noNet = -1 };
 
+enum EMaterialPropId
+{
+    Invalid = -1,
+    Permittivity = 3,
+    Permeability = 4,
+    Conductivity = 5,
+    DielectricLossTangent = 6,
+    MagneticLossTangent = 7,
+    ThermalConductivity = 14,
+    MassDensity = 34,
+    SpecificHeat = 38,
+    YoungsModulus = 39,
+    PoissonsRatio = 40,
+    ThermalExpansionCoefficient = 42,
+};
+
 enum class ELayerType
 {
     Invalid = -1,

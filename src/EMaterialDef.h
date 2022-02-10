@@ -22,6 +22,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<EMaterialDef> CloneImp() const override { return new EMaterialDef(*this); }
+private:
 };
 
 ECAD_ALWAYS_INLINE const std::string & EMaterialDef::GetName() const
