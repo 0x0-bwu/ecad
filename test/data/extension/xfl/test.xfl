@@ -1,0 +1,11 @@
+.version 2 1
+.unit mm
+.design_type PKG
+.scale 1
+.material
+D "AIR" 1 1 0 0 0
+C "COPPER" 59590
+D "FR-4" 4.5 1 0.035 0 0
+C "GOLD" 40980
+C "SOLDER" 7000
+.end material

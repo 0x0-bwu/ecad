@@ -4,6 +4,7 @@
 
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/Format.hpp"
+#include "EXflParser.h"
 #include "ETransform.h"
 #include "Interface.h"
 #include "ELayerMap.h"
@@ -20,8 +21,8 @@ ECAD_INLINE ECadExtXflHandler::ECadExtXflHandler(const std::string & xflFile)
 ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
 {
     EXflDB db;
-    // EXflReader reader(db);
-    // if(!reader(m_xflFile)) return nullptr;
+    EXflReader reader(db);
+    if(!reader(m_xflFile)) return nullptr;
 
     auto & eMgr = EDataMgr::Instance();
     if(eMgr.OpenDatabase(name)){
@@ -41,7 +42,7 @@ ECAD_INLINE void ECadExtXflHandler::Reset()
 {
     m_database.reset();
 }
-
 }//namespace xfl
+
 }//namespace ext
 }//namespace ecad
