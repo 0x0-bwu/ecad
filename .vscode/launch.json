@@ -9,7 +9,7 @@
             "name": "(gdb) ECadTest",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/ECadTest.exe",
+            "program": "${workspaceFolder}/build/EcadTest.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

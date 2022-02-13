@@ -9,3 +9,24 @@ D "FR-4" 4.5 1 0.035 0 0
 C "GOLD" 40980
 C "SOLDER" 7000
 .end material
+#.material_frequency
+#.end material_frequency
+.layer
+"TOP" 0.03048 S "COPPER" "AIR"
+"Diel_1" 0.2032 D "COPPER" "FR-4"
+"VDD_C1" 0.03048 P "COPPER" "FR-4"
+"Diel_3" 0.2032 D "COPPER" "FR-4"
+"VSS_C1" 0.03048 P "COPPER" "FR-4"
+"Diel_5" 0.2032 D "COPPER" "FR-4"
+"BOTTOM" 0.03048 S "COPPER" "AIR"
+.end layer
+.shape
+1 circle 0.25
+2 circle 0.375
+3 circle 0.1
+4 circle 0.125
+5 circle 0.2
+6 circle 0.37
+7 circle 0.165
+8 circle 0.55
+.end shape

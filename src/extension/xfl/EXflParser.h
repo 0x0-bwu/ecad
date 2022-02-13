@@ -130,7 +130,10 @@ struct EXflReader
     {
         qi::rule<Iterator, Skipper> expression;
         qi::rule<Iterator, Skipper> others;
-		qi::rule<Iterator, Skipper> materials;
+		qi::rule<Iterator, Skipper> material;
+		qi::rule<Iterator, Skipper> materialFreq;
+		qi::rule<Iterator, Skipper> layer;
+		qi::rule<Iterator, Skipper> shape;
         qi::rule<Iterator, std::string(), Skipper> text;
         qi::rule<Iterator, std::string(), Skipper> textNC; //no constraints
 		qi::rule<Iterator, std::string(), Skipper> textDQ; //text with double quotes ""
@@ -156,7 +159,10 @@ struct EXflReader
             expression = qi::eps > 
 				*(
 					others
-					| materials
+					| material
+					| materialFreq
+					| layer
+					| shape
 				) 
             ;
             others = 
@@ -165,13 +171,29 @@ struct EXflReader
 				| (lexeme[no_case[".design_type"]] >> text) [boost::phoenix::bind(&EXflGrammar::DesignTypeHandle, this, _1)]
 				| (lexeme[no_case[".scale"]] >> double_) [boost::phoenix::bind(&EXflGrammar::ScaleHandle, this, _1)]
 				;
-            materials = lexeme[no_case[".material"]] >>
+            material = lexeme[no_case[".material"]] >>
 				*(
 					  (lexeme[no_case["C"]] >> textDQ >> double_) [boost::phoenix::bind(&EXflGrammar::ConductingMatHandle, this, _1, _2)]
-					| (lexeme[no_case["D"]] >> textDQ >> double_ >> double_ >> double_ >> double_ >> uint_)
-						[boost::phoenix::bind(&EXflGrammar::DielectricMatHandle, this, _1, _2, _3, _4, _5, _6)]
-				) >> lexeme[no_case[".end material"]];
+					| (lexeme[no_case["D"]] >> textDQ >> double_ >> double_ >> double_ >> double_ >> uint_) [boost::phoenix::bind(&EXflGrammar::DielectricMatHandle, this, _1, _2, _3, _4, _5, _6)]
+				) >> lexeme[no_case[".end material"]]
+				;
+			
+			materialFreq = lexeme[no_case[".material_frequency"]] >>
+				lexeme[no_case[".end material_frequency"]]
+			;
 
+			layer = lexeme[no_case[".layer"]] >>
+				*(
+					(textDQ >> double_ >> char_("SDP") >> textDQ >> textDQ) [boost::phoenix::bind(&EXflGrammar::LayerHandle, this, _1, _2, _3, _4, _5)]
+				) >> lexeme[no_case[".end layer"]]
+			;
+
+			shape = lexeme[no_case[".shape"]] >>
+				*(
+					(int_ >> lexeme[no_case["circle"]] >> double_) [boost::phoenix::bind(&EXflGrammar::ShapeCircleHandle, this, _1, _2)]
+				) >> lexeme[no_case[".end shape"]]
+			;
+			
 			text = lexeme[(char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-"))];
 			textNC = lexeme[+char_("a-zA-Z_0-9.-")];
 			textDQ = lexeme['"' >> + (char_ - '"') >> '"'];
@@ -219,6 +241,21 @@ struct EXflReader
 		void DielectricMatHandle(const std::string & name, double conductivity, double permittivity, double permeability, double lossTangent, uint causality)
 		{
 			std::cout << "Material: " << name << ", Conductivity: " << conductivity << ", Permittivity: " << permittivity << ", Permeability: " << permeability << ", Loss Tangent: " << lossTangent << ", Causality: " << causality << std::endl;
+		}
+		
+		void MatetialFreqHandle(const std::string & text)
+		{
+			std::cout << "Material Freq: " << text << std::endl;
+		}
+
+		void LayerHandle(const std::string & name, double thickness, char type, const std::string & conductingMat, const std::string & dielectricMat)
+		{
+			std::cout << "Layer Name: " << name << ", Thickness: " << thickness << ", Type: " << type << ", Conducting Material: " << conductingMat << ", Dielectric Material: " << dielectricMat << std::endl;
+		}
+
+		void ShapeCircleHandle(int id, double radius)
+		{
+			std::cout << "Shape ID: " << id << ", R: " << radius << std::endl;
 		}
     };
 
