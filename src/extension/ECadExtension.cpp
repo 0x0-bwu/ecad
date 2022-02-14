@@ -19,7 +19,7 @@ ECAD_INLINE SPtr<IDatabase> CreateDatabaseFromGds(const std::string & name, cons
     return handler.CreateDatabase(name, err);
 }
 
-ECAD_API SPtr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl, std::string * err)
+ECAD_INLINE SPtr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl, std::string * err)
 {
     xfl::ECadExtXflHandler handler(xfl);
     return handler.CreateDatabase(name, err);

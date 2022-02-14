@@ -1,10 +1,12 @@
 #ifndef ECAD_EXT_XFL_EXFLPARSER_H
 #define ECAD_EXT_XFL_EXFLPARSER_H
 #include "EXflObjects.h"
+#include "ECadAlias.h"
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/qi_no_case.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/variant.hpp>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -12,9 +14,27 @@ namespace ecad {
 namespace ext {
 namespace xfl {
 
+struct Point { double x, y; };
+struct Polygon { std::vector<Point> points; };
+struct Arc { int type; Point end; Point mid; };//type: 0-arc, 1-rarc, 2-arc3
+struct Composite { using Element = boost::variant<Point, Arc>; std::vector<Element> elements; };
+
+}//namespace xfl
+}//namespace ext
+}//namespace ecad
+
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Point, (double, x) (double, y))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Polygon, (std::vector<ecad::ext::xfl::Point>, points))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Arc, (int, type) (ecad::ext::xfl::Point, end), (ecad::ext::xfl::Point, mid))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Composite, (std::vector<ecad::ext::xfl::Composite::Element>, elements))
+
+namespace ecad {
+namespace ext {
+namespace xfl {
+
 namespace qi = boost::spirit::qi;
+namespace phx = boost::phoenix;
 namespace spirit = boost::spirit;
-namespace phoenix = boost::phoenix;
 namespace ascii = boost::spirit::ascii;
 
 ///@brief print line number and line content if error is met 
@@ -138,6 +158,10 @@ struct EXflReader
         qi::rule<Iterator, std::string(), Skipper> textNC; //no constraints
 		qi::rule<Iterator, std::string(), Skipper> textDQ; //text with double quotes ""
 		qi::rule<Iterator, std::string(), Skipper> textSQ; //text with single quotes ''
+		qi::rule<Iterator, Point(), Skipper> point;
+		qi::rule<Iterator, Polygon(), Skipper> polygon;
+		qi::rule<Iterator, Arc(), Skipper> arc;
+		qi::rule<Iterator, Composite(), Skipper> composite;
         DatabaseType & db;
         EXflGrammar(DatabaseType & db, ErrorHandler<Iterator> & errorHandler)
         : EXflGrammar::base_type(expression), db(db)
@@ -150,11 +174,15 @@ struct EXflReader
             using qi::char_;
             using qi::_1; using qi::_2; using qi::_3; using qi::_4; using qi::_5; using qi::_6;
             using qi::_a;
+			using qi::_val;
             using qi::lexeme;
             using qi::no_case;
+			using phx::at_c;
+            using phx::push_back;
             using spirit::repeat;
             using spirit::as_string;
             using spirit::lit;
+			using spirit::inf;
 
             expression = qi::eps > 
 				*(
@@ -166,15 +194,15 @@ struct EXflReader
 				) 
             ;
             others = 
-                  (lexeme[no_case[".version"]] >> int_ >> int_) [boost::phoenix::bind(&EXflGrammar::VersionHandle, this, _1, _2)]
-                | (lexeme[no_case[".unit"]] >> text) [boost::phoenix::bind(&EXflGrammar::UnitHandle, this, _1)]
-				| (lexeme[no_case[".design_type"]] >> text) [boost::phoenix::bind(&EXflGrammar::DesignTypeHandle, this, _1)]
-				| (lexeme[no_case[".scale"]] >> double_) [boost::phoenix::bind(&EXflGrammar::ScaleHandle, this, _1)]
+                  (lexeme[no_case[".version"]] >> int_ >> int_) [phx::bind(&EXflGrammar::VersionHandle, this, _1, _2)]
+                | (lexeme[no_case[".unit"]] >> text) [phx::bind(&EXflGrammar::UnitHandle, this, _1)]
+				| (lexeme[no_case[".design_type"]] >> text) [phx::bind(&EXflGrammar::DesignTypeHandle, this, _1)]
+				| (lexeme[no_case[".scale"]] >> double_) [phx::bind(&EXflGrammar::ScaleHandle, this, _1)]
 				;
             material = lexeme[no_case[".material"]] >>
 				*(
-					  (lexeme[no_case["C"]] >> textDQ >> double_) [boost::phoenix::bind(&EXflGrammar::ConductingMatHandle, this, _1, _2)]
-					| (lexeme[no_case["D"]] >> textDQ >> double_ >> double_ >> double_ >> double_ >> uint_) [boost::phoenix::bind(&EXflGrammar::DielectricMatHandle, this, _1, _2, _3, _4, _5, _6)]
+					  (lexeme[no_case["C"]] >> textDQ >> double_) [phx::bind(&EXflGrammar::ConductingMatHandle, this, _1, _2)]
+					| (lexeme[no_case["D"]] >> textDQ >> double_ >> double_ >> double_ >> double_ >> uint_) [phx::bind(&EXflGrammar::DielectricMatHandle, this, _1, _2, _3, _4, _5, _6)]
 				) >> lexeme[no_case[".end material"]]
 				;
 			
@@ -184,13 +212,21 @@ struct EXflReader
 
 			layer = lexeme[no_case[".layer"]] >>
 				*(
-					(textDQ >> double_ >> char_("SDP") >> textDQ >> textDQ) [boost::phoenix::bind(&EXflGrammar::LayerHandle, this, _1, _2, _3, _4, _5)]
+					(textDQ >> double_ >> char_("SDP") >> textDQ >> textDQ) [phx::bind(&EXflGrammar::LayerHandle, this, _1, _2, _3, _4, _5)]
 				) >> lexeme[no_case[".end layer"]]
 			;
 
 			shape = lexeme[no_case[".shape"]] >>
 				*(
-					(int_ >> lexeme[no_case["circle"]] >> double_) [boost::phoenix::bind(&EXflGrammar::ShapeCircleHandle, this, _1, _2)]
+					  (int_ >> lexeme[no_case["polygon"]] >> polygon) [phx::bind(&EXflGrammar::ShapePolygonHandle, this, _1, _2)]
+					| (int_ >> lexeme[no_case["rectangle"]] >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeRectangleHandle, this, _1, _2, _3)]
+					| (int_ >> lexeme[no_case["square"]] >> double_) [phx::bind(&EXflGrammar::ShapeSquareHandle, this, _1, _2)]
+					| (int_ >> lexeme[no_case["circle"]] >> double_) [phx::bind(&EXflGrammar::ShapeCircleHandle, this, _1, _2)]
+					| (int_ >> lexeme[no_case["annular"]] >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeAnnularHandle, this, _1, _2, _3)]
+					| (int_ >> lexeme[no_case["oblong"]] >> double_ >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeOblongHandle, this, _1, _2, _3, _4)]
+					| (int_ >> lexeme[no_case["bullet"]] >> double_ >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeBulletHandle, this, _1, _2, _3, _4)]
+					| (int_ >> lexeme[no_case["finger"]] >> double_ >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeFingerHandle, this, _1, _2, _3, _4)]
+					| (int_ >> lexeme[no_case["composite"]] >> composite) [phx::bind(&EXflGrammar::ShapeCompositeHandle, this, _1, _2)]
 				) >> lexeme[no_case[".end shape"]]
 			;
 			
@@ -198,6 +234,22 @@ struct EXflReader
 			textNC = lexeme[+char_("a-zA-Z_0-9.-")];
 			textDQ = lexeme['"' >> + (char_ - '"') >> '"'];
 			textSQ = lexeme['\'' >> + (char_ - '\'') >> '\''];
+
+			point %= (double_ >> double_);
+			polygon = '{' >> *((point)[push_back(at_c<0>(_val), _1)]) >> '}';
+			arc =   ( lexeme[no_case["ARC" ]][at_c<0>(_val) = 0]
+					| lexeme[no_case["RARC"]][at_c<0>(_val) = 1]
+					| lexeme[no_case["ARC3"]][at_c<0>(_val) = 2] ) >>
+					(point)[at_c<1>(_val) = _1] >>
+					(point)[at_c<2>(_val) = _1]
+					;
+			composite = '{' >> (point)[push_back(at_c<0>(_val), _1)] >>
+						*(
+							  (point)[push_back(at_c<0>(_val), _1)]
+							| (arc)  [push_back(at_c<0>(_val), _1)]
+						) >> '}'
+						;
+				
             expression.name("XFL Expression");
             others.name("XFL Block Others");
 			text.name("XFL Text");
@@ -205,11 +257,11 @@ struct EXflReader
 
             qi::on_error<qi::fail> (
                 expression,
-                phoenix::ref(std::cout)
-                << phoenix::val("Error! Expecting ")
+                phx::ref(std::cout)
+                << phx::val("Error! Expecting ")
                 << _4 << " here: '"
-                << phoenix::construct<std::string>(_3, _2)
-                << phoenix::val("'\n")
+                << phx::construct<std::string>(_3, _2)
+                << phx::val("'\n")
             );
         }
 
@@ -253,9 +305,49 @@ struct EXflReader
 			std::cout << "Layer Name: " << name << ", Thickness: " << thickness << ", Type: " << type << ", Conducting Material: " << conductingMat << ", Dielectric Material: " << dielectricMat << std::endl;
 		}
 
+		void ShapePolygonHandle(int id, const Polygon & polygon)
+		{
+			std::cout << "Shape ID: " << id << ", Size: " << polygon.points.size() << std::endl;
+		}
+
+		void ShapeRectangleHandle(int id, double width, double height)
+		{
+			std::cout << "Shape ID: " << id << ", Width: " << width << ", Height: " << height << std::endl;
+		}
+
+		void ShapeSquareHandle(int id, double width)
+		{
+			std::cout << "Shape ID: " << id << ", Width: " << width << std::endl;
+		}
+		
 		void ShapeCircleHandle(int id, double radius)
 		{
 			std::cout << "Shape ID: " << id << ", R: " << radius << std::endl;
+		}
+
+		void ShapeAnnularHandle(int id, double outerDia, double innerDia)
+		{
+			std::cout << "Shape ID: " << id << ", Outer D: " << outerDia << ", Inner D: " << innerDia << std::endl;
+		}
+
+		void ShapeOblongHandle(int id, double width, double left, double right)
+		{
+			std::cout << "Shape ID: " << id << ", Width: " << width << ", Left: " << left << ", Right: " << right << std::endl;
+		}
+
+		void ShapeBulletHandle(int id, double width, double left, double right)
+		{
+			std::cout << "Shape ID: " << id << ", Width: " << width << ", Left: " << left << ", Right: " << right << std::endl;
+		}
+
+		void ShapeFingerHandle(int id, double width, double left, double right)
+		{
+			std::cout << "Shape ID: " << id << ", Width: " << width << ", Left: " << left << ", Right: " << right << std::endl;
+		}
+
+		void ShapeCompositeHandle(int id, const Composite & composite)
+		{
+			std::cout << "Shape ID: " << id << ", Size: " << composite.elements.size() << std::endl; 
 		}
     };
 
