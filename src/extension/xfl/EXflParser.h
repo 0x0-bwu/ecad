@@ -162,6 +162,7 @@ struct EXflReader
 		qi::rule<Iterator, Polygon(), Skipper> polygon;
 		qi::rule<Iterator, Arc(), Skipper> arc;
 		qi::rule<Iterator, Composite(), Skipper> composite;
+		qi::rule<Iterator, Skipper> boardGeom;
         DatabaseType & db;
         EXflGrammar(DatabaseType & db, ErrorHandler<Iterator> & errorHandler)
         : EXflGrammar::base_type(expression), db(db)
@@ -191,6 +192,7 @@ struct EXflReader
 					| materialFreq
 					| layer
 					| shape
+					| boardGeom
 				) 
             ;
             others = 
@@ -203,7 +205,8 @@ struct EXflReader
 				*(
 					  (lexeme[no_case["C"]] >> textDQ >> double_) [phx::bind(&EXflGrammar::ConductingMatHandle, this, _1, _2)]
 					| (lexeme[no_case["D"]] >> textDQ >> double_ >> double_ >> double_ >> double_ >> uint_) [phx::bind(&EXflGrammar::DielectricMatHandle, this, _1, _2, _3, _4, _5, _6)]
-				) >> lexeme[no_case[".end material"]]
+				) >>
+				lexeme[no_case[".end material"]]
 				;
 			
 			materialFreq = lexeme[no_case[".material_frequency"]] >>
@@ -213,7 +216,8 @@ struct EXflReader
 			layer = lexeme[no_case[".layer"]] >>
 				*(
 					(textDQ >> double_ >> char_("SDP") >> textDQ >> textDQ) [phx::bind(&EXflGrammar::LayerHandle, this, _1, _2, _3, _4, _5)]
-				) >> lexeme[no_case[".end layer"]]
+				) >>
+				lexeme[no_case[".end layer"]]
 			;
 
 			shape = lexeme[no_case[".shape"]] >>
@@ -227,9 +231,20 @@ struct EXflReader
 					| (int_ >> lexeme[no_case["bullet"]] >> double_ >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeBulletHandle, this, _1, _2, _3, _4)]
 					| (int_ >> lexeme[no_case["finger"]] >> double_ >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeFingerHandle, this, _1, _2, _3, _4)]
 					| (int_ >> lexeme[no_case["composite"]] >> composite) [phx::bind(&EXflGrammar::ShapeCompositeHandle, this, _1, _2)]
-				) >> lexeme[no_case[".end shape"]]
+				) >>
+				lexeme[no_case[".end shape"]]
 			;
 			
+			boardGeom = lexeme[no_case[".board_geom"]] >>
+				*(
+					//   (lexeme[no_case["polygon"]] >> polygon) [phx::bind(&EXflGrammar::BoardPolygonHandle, this, _1)]
+					//  (lexeme[no_case["composite"]] >> composite) [phx::bind(&EXflGrammar::BoardCompositeHandle, this, _1)]
+					 (lexeme[no_case["shape"]] >> int_ >> point >> double_ >> char_("XYN")) [phx::bind(&EXflGrammar::BoardShapeWithRotMirrorHandle, this, _1, _2, _3, _4)]
+					| (lexeme[no_case["shape"]] >> int_ >> point >> char_("XYN") >> double_) [phx::bind(&EXflGrammar::BoardShapeWithMirrorRotHandle, this, _1, _2, _3, _4)]
+				) >>
+				lexeme[no_case[".end board_geom"]]
+			;
+
 			text = lexeme[(char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-"))];
 			textNC = lexeme[+char_("a-zA-Z_0-9.-")];
 			textDQ = lexeme['"' >> + (char_ - '"') >> '"'];
@@ -237,18 +252,20 @@ struct EXflReader
 
 			point %= (double_ >> double_);
 			polygon = '{' >> *((point)[push_back(at_c<0>(_val), _1)]) >> '}';
-			arc =   ( lexeme[no_case["ARC" ]][at_c<0>(_val) = 0]
-					| lexeme[no_case["RARC"]][at_c<0>(_val) = 1]
-					| lexeme[no_case["ARC3"]][at_c<0>(_val) = 2] ) >>
-					(point)[at_c<1>(_val) = _1] >>
-					(point)[at_c<2>(_val) = _1]
-					;
+			arc = (lexeme[no_case["ARC" ]][at_c<0>(_val) = 0]
+				| lexeme[no_case["RARC"]][at_c<0>(_val) = 1]
+				| lexeme[no_case["ARC3"]][at_c<0>(_val) = 2] ) >>
+				(point)[at_c<1>(_val) = _1] >>
+				(point)[at_c<2>(_val) = _1]
+			;
+
 			composite = '{' >> (point)[push_back(at_c<0>(_val), _1)] >>
-						*(
-							  (point)[push_back(at_c<0>(_val), _1)]
-							| (arc)  [push_back(at_c<0>(_val), _1)]
-						) >> '}'
-						;
+				*(
+						(point)[push_back(at_c<0>(_val), _1)]
+					| (arc)  [push_back(at_c<0>(_val), _1)]
+				) >>
+				'}'
+			;
 				
             expression.name("XFL Expression");
             others.name("XFL Block Others");
@@ -348,6 +365,26 @@ struct EXflReader
 		void ShapeCompositeHandle(int id, const Composite & composite)
 		{
 			std::cout << "Shape ID: " << id << ", Size: " << composite.elements.size() << std::endl; 
+		}
+
+		void BoardPolygonHandle(const Polygon & polygon)
+		{
+			std::cout << "Board Geom Polygon Size: " << polygon.points.size() << std::endl;
+		}
+
+		void BoardCompositeHandle(const Composite & composite)
+		{
+			std::cout << "Board Geom Composite Size: " << composite.elements.size() << std::endl;
+		}
+
+		void BoardShapeWithRotMirrorHandle(int id, const Point & loc, double rot, char mirror)//rot-unit: degree, mirror: X-axisX, Y-axisY, N-no
+		{
+			std::cout << "Board Shape ID: " << id << ", Loc: " << loc.x << ", " << loc.y << ", Rot: " << rot << ", Mirror: " << mirror << std::endl;
+		}
+
+		void BoardShapeWithMirrorRotHandle(int id, const Point & loc, char mirror, double rot)//rot-unit: degree, mirror: X-axisX, Y-axisY, N-no
+		{
+			std::cout << "Board Shape ID: " << id << ", Loc: " << loc.x << ", " << loc.y << ", Mirror: " << mirror << ", Rot: " << rot << std::endl;
 		}
     };
 
