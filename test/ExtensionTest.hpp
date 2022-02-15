@@ -54,8 +54,8 @@ void t_extension_gds()
 void t_extension_xfl()
 {
     std::string err;
-    std::string testXfl = ecad_test::GetTestDataPath() + "/extension/xfl/test.xfl";
-    auto ringo = ext::CreateDatabaseFromXfl("test", testXfl, &err);
+    std::string fccspXfl = ecad_test::GetTestDataPath() + "/extension/xfl/fccsp.xfl";
+    auto fccsp = ext::CreateDatabaseFromXfl("test", fccspXfl, &err);
     // BOOST_CHECK(err.empty());
     // BOOST_CHECK(ringo != nullptr);
 

@@ -207,13 +207,13 @@ struct EXflReader
 		qi::rule<Iterator, Skipper> netAttrSection;
 		qi::rule<Iterator, Skipper> netlistSection;
 		qi::rule<Iterator, Skipper> routeSection;
-		qi::rule<Iterator, Skipper> unknownSection;
+		qi::rule<Iterator, std::string(), Skipper> unknownSection;
 		qi::rule<Iterator, std::string(), Skipper> startTag;
 		qi::rule<Iterator, void(std::string), Skipper> endTag;
         qi::rule<Iterator, std::string(), Skipper> text;
         qi::rule<Iterator, std::string(), Skipper> textNC; //no constraints
 		qi::rule<Iterator, std::string(), Skipper> textDQ; //text with double quotes ""
-		qi::rule<Iterator, std::string(), Skipper> textSQ; //text with single quotes ''
+		qi::rule<Iterator, std::string(), Skipper> textED;
 		qi::rule<Iterator, Point(), Skipper> point;
 		qi::rule<Iterator, Polygon(), Skipper> polygon;
 		qi::rule<Iterator, Arc(), Skipper> arc;
@@ -246,8 +246,7 @@ struct EXflReader
             using qi::double_;
             using qi::char_;
             using qi::_1; using qi::_2; using qi::_3; using qi::_4; using qi::_5; using qi::_6;
-            using qi::_a;
-			using qi::_r1;
+            using qi::_a; using qi::_r1;
 			using qi::_val;
             using qi::lexeme;
             using qi::no_case;
@@ -260,21 +259,24 @@ struct EXflReader
 
             expression = qi::eps > 
 				*(
-					others
-					| materialSection
-					| materialFreqSection
-					| layerSection
-					| shapeSection
-					| boardGeomSection
-					| padstackSection
-					| viaSection
-					| partSection
-					| componentSection
-					| netAttrSection
-					| netlistSection
-					| routeSection
-					| unknownSection
-				) 
+					(
+						others
+						| materialSection
+						| materialFreqSection
+						| layerSection
+						| shapeSection
+						| boardGeomSection
+						| padstackSection
+						| viaSection
+						| partSection
+						| componentSection
+						| netAttrSection
+						| netlistSection
+						| routeSection
+					)
+					// | unknownSection
+					| lexeme[+(char_ - eol)]
+				)
             ;
             others = 
                   (lexeme[no_case[".version"]] >> int_ >> int_) [phx::bind(&EXflGrammar::VersionHandle, this, _1, _2)]
@@ -364,26 +366,18 @@ struct EXflReader
 			;
 
 			unknownSection =
-				startTag[phx::bind(&EXflGrammar::UnknownSectionHandle, this, _1), _a = _1] >>
+				startTag[_val = _1, phx::bind(&EXflGrammar::UnknownSectionHandle, this, _1)] >>
 				+(char_ - lexeme[no_case[".end"]]) >>
-				endTag(_a)
+				endTag(_val)
 			;
  
-			startTag = '.' >> 
-				!lit("end") >>
-				text[_val = _1]
-			;
-			
-			endTag = '.' >>
-				lexeme[no_case[".end"]] >>
-				lit(_r1)
-			;
-
+			startTag = '.' >> !lit("end") >> textED[_val = _1];
+			endTag = lexeme[no_case[".end"]] >> lit(_r1);
 
 			text = lexeme[(char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-"))];
 			textNC = lexeme[+char_("a-zA-Z_0-9.-")];
 			textDQ = lexeme['"' >> + (char_ - '"') >> '"'];
-			textSQ = lexeme['\'' >> + (char_ - '\'') >> '\''];
+			textED = lexeme[+char_ - eol];
 
 			point %= double_ >> double_;
 			polygon = "{" >> *point [push_back(_val, _1)] >> "}";
