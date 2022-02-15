@@ -27,7 +27,7 @@ struct Padstack { int id; std::vector<Pad> pads; };
 struct Via { std::string name; int padstackId; double padstackRot; int shapeId; double shapeRot; double barrelThickness = 0.0; std::string material; };
 struct Node { std::string component; std::string pinName; std::string ioType; int npeGrpNum; int npeNdUsage; Point loc; int layer; };
 struct Net { std::string name; char type; int attrId; int analysis; int npeType; int anlandBch; std::vector<Node> nodes; };
-struct InstPath { int layer; double width; Polygon points; };
+struct InstPath { int layer; double width; Composite path; };
 struct InstVia { int sLayer; int eLayer; std::string name; Point loc; double rot; char mirror = 'N'; };
 struct InstBondwire { int sLayer; int eLayer; int id; Point sLoc; Point eLoc; std::string die1; std::string die2; };
 struct InstPolygon { bool isVoid; int layer; Polygon polygon; };
@@ -36,7 +36,7 @@ struct InstSquare { bool isVoid; int layer; bool isDiamond; double width; Point 
 struct InstCircle { bool isVoid; int layer; double diameter; Point loc; };
 struct InstAnnular { int layer; double outerDia; double innerDia; Point loc;};
 struct InstComposite {bool isVoid; int layer; Composite composite; };
-struct InstShape { bool isVoid; int layer; int shapeId; double rot; bool mirror; bool rotThenMirror = true; };
+struct InstShape { bool isVoid; int layer; int shapeId; Point loc; double rot; char mirror; bool rotThenMirror = true; };
 using InstObject = boost::variant<InstPath, InstVia, InstBondwire, InstPolygon, InstRectangle, InstSquare, InstCircle, InstAnnular, InstComposite, InstShape>;
 struct Route { std::string net; std::vector<InstObject> objects; };
 
@@ -51,16 +51,16 @@ BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Padstack, (int, id) (std::vector<ecad:
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Via, (std::string, name) (int, padstackId) (double, padstackRot) (int, shapeId) (double, shapeRot) (double, barrelThickness) (std::string, material))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Node, (std::string, component) (std::string, pinName) (std::string, ioType) (int, npeGrpNum) (int, npeNdUsage) (ecad::ext::xfl::Point, loc) (int, layer))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Net, (std::string, name) (char, type) (int, attrId) (int, analysis) (int, npeType) (int, anlandBch) (std::vector<ecad::ext::xfl::Node>, nodes))
-BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstPath, (int, layer) (double, width) (ecad::ext::xfl::Polygon, points))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstPath, (int, layer) (double, width) (ecad::ext::xfl::Composite, path))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstVia, (int, sLayer) (int, eLayer) (std::string, name) (ecad::ext::xfl::Point, loc) (double, rot) (char, mirror))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstBondwire, (int, sLayer) (int, eLayer) (int, id) (ecad::ext::xfl::Point, sLoc) (ecad::ext::xfl::Point, eLoc) (std::string, die1) (std::string, die2))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstPolygon, (bool, isVoid) (int, layer) (ecad::ext::xfl::Polygon, polygon))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstRectangle, (bool, isVoid) (int, layer) (double, width) (double, length) (ecad::ext::xfl::Point, loc))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstSquare, (bool, isVoid) (int, layer) (bool, isDiamond) (double, width) (ecad::ext::xfl::Point, loc))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstCircle, (bool, isVoid) (int, layer) (double, diameter) (ecad::ext::xfl::Point, loc))
-BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstAnnular, (int, layer) (double, outerDia) (double, innerDia))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstAnnular, (int, layer) (double, outerDia) (double, innerDia) (ecad::ext::xfl::Point, loc))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstComposite, (bool, isVoid) (int, layer) (ecad::ext::xfl::Composite, composite))
-BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstShape, (bool, isVoid) (int, layer) (int, shapeId) (double, rot) (bool, mirror) (bool, rotThenMirror))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstShape, (bool, isVoid) (int, layer) (int, shapeId) (ecad::ext::xfl::Point, loc) (double, rot) (char, mirror) (bool, rotThenMirror))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Route, (std::string, net) (std::vector<ecad::ext::xfl::InstObject>, objects))
 
 namespace ecad {
@@ -161,6 +161,16 @@ struct EXflReader
         
         bool res = qi::phrase_parse(iter, end, grammar, skipper);
 		std::cout << "res: " << (res && iter == end) << std::endl;//wbtest
+		auto e = end;
+		if(iter != e){
+			auto distance = std::distance(iter, e);
+			if(distance > 100){
+				e = iter;
+				std::advance(e, 100);
+			}
+			std::string s(iter, e);
+			std::cout << "remine: " << s << std::endl;
+		}
         return res && iter == end;
     }
 
@@ -197,6 +207,9 @@ struct EXflReader
 		qi::rule<Iterator, Skipper> netAttrSection;
 		qi::rule<Iterator, Skipper> netlistSection;
 		qi::rule<Iterator, Skipper> routeSection;
+		qi::rule<Iterator, Skipper> unknownSection;
+		qi::rule<Iterator, std::string(), Skipper> startTag;
+		qi::rule<Iterator, void(std::string), Skipper> endTag;
         qi::rule<Iterator, std::string(), Skipper> text;
         qi::rule<Iterator, std::string(), Skipper> textNC; //no constraints
 		qi::rule<Iterator, std::string(), Skipper> textDQ; //text with double quotes ""
@@ -216,10 +229,11 @@ struct EXflReader
 		qi::rule<Iterator, InstPolygon(), Skipper> instPolygon;
 		qi::rule<Iterator, InstRectangle(), Skipper> instRectangle;
 		qi::rule<Iterator, InstSquare(), Skipper> instSquare;
-		// qi::rule<Iterator, InstCircle(), Skipper> instCircle;
-		// qi::rule<Iterator, InstAnnular(), Skipper> instAnnular;
-		// qi::rule<Iterator, InstComposite(), Skipper> instComposite;
-		// qi::rule<Iterator, InstShape(), Skipper> instShape;
+		qi::rule<Iterator, InstCircle(), Skipper> instCircle;
+		qi::rule<Iterator, InstAnnular(), Skipper> instAnnular;
+		qi::rule<Iterator, InstComposite(), Skipper> instComposite;
+		qi::rule<Iterator, InstShape(), Skipper> instShape;
+		qi::rule<Iterator, Route(), Skipper> route;
 
         DatabaseType & db;
         EXflGrammar(DatabaseType & db, ErrorHandler<Iterator> & errorHandler)
@@ -233,6 +247,7 @@ struct EXflReader
             using qi::char_;
             using qi::_1; using qi::_2; using qi::_3; using qi::_4; using qi::_5; using qi::_6;
             using qi::_a;
+			using qi::_r1;
 			using qi::_val;
             using qi::lexeme;
             using qi::no_case;
@@ -258,6 +273,7 @@ struct EXflReader
 					| netAttrSection
 					| netlistSection
 					| routeSection
+					| unknownSection
 				) 
             ;
             others = 
@@ -343,9 +359,26 @@ struct EXflReader
 			;
 
 			routeSection = lexeme[no_case[".route"]] >>
-				//todo
+				*route [phx::bind(&EXflGrammar::RouteHandle, this, _1)] >>
 				lexeme[no_case[".end route"]]
 			;
+
+			unknownSection =
+				startTag[phx::bind(&EXflGrammar::UnknownSectionHandle, this, _1), _a = _1] >>
+				+(char_ - lexeme[no_case[".end"]]) >>
+				endTag(_a)
+			;
+ 
+			startTag = '.' >> 
+				!lit("end") >>
+				text[_val = _1]
+			;
+			
+			endTag = '.' >>
+				lexeme[no_case[".end"]] >>
+				lit(_r1)
+			;
+
 
 			text = lexeme[(char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-"))];
 			textNC = lexeme[+char_("a-zA-Z_0-9.-")];
@@ -363,7 +396,7 @@ struct EXflReader
 
 			composite = "{" >> (point)[push_back(_val, _1)] >>
 				*(
-						(point) [push_back(_val, _1)]
+					(point) [push_back(_val, _1)]
 					| (arc) [push_back(_val, _1)]
 				) >>
 				"}"
@@ -384,15 +417,18 @@ struct EXflReader
 				"{" >> *node [push_back(at_c<6>(_val), _1)] >> "}"
 			;
 
-			instPath %= lexeme[no_case["path"]] >> int_ >> double_ >> polygon;
-			instVia %= lexeme[no_case["via"]] >> int_ >> int_ >> textNC >> point >> double_ >> -char_("NY");
+			instPath %= lexeme[no_case["path"]] >> int_ >> double_ >> composite;
+			instVia = lexeme[no_case["via"]] >> int_[at_c<0>(_val) = _1] >> int_[at_c<1>(_val) = _1] >>
+				textNC[at_c<2>(_val) = _1] >> point[at_c<3>(_val) = _1] >> double_[at_c<4>(_val) = _1] >>
+				-char_("NY")[at_c<5>(_val) = _1]
+			;
 			instBondwire %= lexeme[no_case["bondwire"]] >> int_ >> int_ >> int_ >> point >> point >> -(textNC >> textNC);
 			instPolygon = (lexeme[no_case["polygon"]][at_c<0>(_val) = false] |
 				lexeme[no_case["void_polygon"]][at_c<0>(_val) = true]) >> 
 				int_[at_c<1>(_val) = _1] >> polygon[at_c<2>(_val) = _1]
 			;
-			instRectangle = (lexeme[no_case["retangle"]][at_c<0>(_val) = false] |
-				lexeme[no_case["void_retangle"]][at_c<0>(_val) = true]) >>
+			instRectangle = (lexeme[no_case["rectangle"]][at_c<0>(_val) = false] |
+				lexeme[no_case["void_rectangle"]][at_c<0>(_val) = true]) >>
 				int_[at_c<1>(_val) = _1] >> double_[at_c<2>(_val) = _1] >> double_[at_c<3>(_val) = _1] >>
 				point[at_c<4>(_val) = _1]
 			;
@@ -400,8 +436,46 @@ struct EXflReader
 				((lexeme[no_case["diamond"]][at_c<0>(_val) = false] | lexeme[no_case["void_diamond"]][at_c<0>(_val) = true]) >> qi::eps[at_c<2>(_val) = true]) >>
 				int_[at_c<1>(_val) = _1] >> double_[at_c<3>(_val) = _1] >>
 				point[at_c<4>(_val) = _1]
-			;	
-	
+			;
+			instCircle = (lexeme[no_case["circle"]][at_c<0>(_val) = false] |
+				lexeme[no_case["void_circle"]][at_c<0>(_val) = true]) >>
+				int_[at_c<1>(_val) = _1] >> double_[at_c<2>(_val) = _1] >>
+				point[at_c<3>(_val) = _1]
+			;
+			instAnnular = lexeme[no_case["annular"]] >> int_[at_c<0>(_val) = _1] >> 
+				double_[at_c<1>(_val) = _1] >> double_[at_c<2>(_val) = _1] >>
+				point[at_c<3>(_val) = _1]
+			;
+			instComposite = (lexeme[no_case["composite"]][at_c<0>(_val) = false] |
+				lexeme[no_case["void_composite"]][at_c<0>(_val) = true]) >>
+				int_[at_c<1>(_val) = _1] >>
+				composite[at_c<2>(_val) = _1]
+			;
+			instShape = (lexeme[no_case["shape"]][at_c<0>(_val) = false] |
+				lexeme[no_case["void_shape"]][at_c<0>(_val) = true]) >>
+				int_[at_c<1>(_val) = _1] >> int_[at_c<2>(_val) = _1] >>
+				point[at_c<3>(_val) = _1] >>
+				(
+					(double_[at_c<4>(_val) = _1] >> char_("NY")[at_c<5>(_val) = _1, at_c<6>(_val) = true]) |
+					(char_("NY")[at_c<5>(_val) = _1] >> double_[at_c<4>(_val) = _1, at_c<6>(_val) = false])
+				)
+			;
+
+			route = textDQ[at_c<0>(_val) = _1] >> "{" >>
+				*(
+					instPath		[push_back(at_c<1>(_val), _1)] |
+					instVia			[push_back(at_c<1>(_val), _1)] |
+					instBondwire	[push_back(at_c<1>(_val), _1)] |
+					instPolygon		[push_back(at_c<1>(_val), _1)] |
+					instRectangle	[push_back(at_c<1>(_val), _1)] |
+					instSquare		[push_back(at_c<1>(_val), _1)] |
+					instCircle		[push_back(at_c<1>(_val), _1)] |
+					instAnnular		[push_back(at_c<1>(_val), _1)] |
+					instComposite	[push_back(at_c<1>(_val), _1)] |
+					instShape		[push_back(at_c<1>(_val), _1)]
+				) >> "}"
+			;
+
             expression.name("XFL Expression");
             others.name("XFL Block Others");
 			text.name("XFL Text");
@@ -535,6 +609,16 @@ struct EXflReader
 		void NetHandle(const Net & net)
 		{
 			std::cout << "Net Name: " << net.name << ", Type: " << net.type << ", Nodes: " << net.nodes.size() << std::endl;
+		}
+
+		void RouteHandle(const Route & route)
+		{
+			std::cout << "Route Name: " << route.net << ", Object Size: " << route.objects.size() << std::endl;
+		}
+
+		void UnknownSectionHandle(const std::string & unknown)
+		{
+			std::cout << "Unknow Section: " << unknown << std::endl;
 		}
     };
 
