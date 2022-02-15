@@ -2,10 +2,14 @@
 #define ECAD_EXT_XFL_EXFLPARSER_H
 #include "EXflObjects.h"
 #include "ECadAlias.h"
+#include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/qi_no_case.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/phoenix/fusion.hpp>
+#include <boost/phoenix/stl.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/variant.hpp>
 #include <unordered_map>
 #include <unordered_set>
@@ -15,18 +19,25 @@ namespace ext {
 namespace xfl {
 
 struct Point { double x, y; };
-struct Polygon { std::vector<Point> points; };
+using Polygon = std::vector<Point>;
 struct Arc { int type; Point end; Point mid; };//type: 0-arc, 1-rarc, 2-arc3
-struct Composite { using Element = boost::variant<Point, Arc>; std::vector<Element> elements; };
-
+using Composite = std::vector<boost::variant<Point, Arc> >;
+struct Pad { int sigLyr; int shapeId; double shapeRot; int apShapeId = -1; double apShapeRot = .0; };//rot unit: degree, ccw
+struct Padstack { int id; std::vector<Pad> pads; };
+struct Via { std::string name; int padstackId; double padstackRot; int shapeId; double shapeRot; double barrelThickness = 0.0; std::string material; };
+struct Node { std::string component; std::string pinName; std::string ioType; int npeGrpNum; int npeNdUsage; Point loc; int layer; };
+struct Net { std::string name; char type; int attrId; int analysis; int npeType; int anlandBch; std::vector<Node> nodes; };
 }//namespace xfl
 }//namespace ext
 }//namespace ecad
 
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Point, (double, x) (double, y))
-BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Polygon, (std::vector<ecad::ext::xfl::Point>, points))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Arc, (int, type) (ecad::ext::xfl::Point, end), (ecad::ext::xfl::Point, mid))
-BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Composite, (std::vector<ecad::ext::xfl::Composite::Element>, elements))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Pad, (int, sigLyr) (int, shapeId) (double, shapeRot) (int, apShapeId) (double, apShapeRot))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Padstack, (int, id) (std::vector<ecad::ext::xfl::Pad>, pads))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Via, (std::string, name) (int, padstackId) (double, padstackRot) (int, shapeId) (double, shapeRot) (double, barrelThickness) (std::string, material))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Node, (std::string, component) (std::string, pinName) (std::string, ioType) (int, npeGrpNum) (int, npeNdUsage) (ecad::ext::xfl::Point, loc) (int, layer))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Net, (std::string, name) (char, type) (int, attrId) (int, analysis) (int, npeType) (int, anlandBch) (std::vector<ecad::ext::xfl::Node>, nodes))
 
 namespace ecad {
 namespace ext {
@@ -150,10 +161,18 @@ struct EXflReader
     {
         qi::rule<Iterator, Skipper> expression;
         qi::rule<Iterator, Skipper> others;
-		qi::rule<Iterator, Skipper> material;
-		qi::rule<Iterator, Skipper> materialFreq;
-		qi::rule<Iterator, Skipper> layer;
-		qi::rule<Iterator, Skipper> shape;
+		qi::rule<Iterator, Skipper> materialSection;
+		qi::rule<Iterator, Skipper> materialFreqSection;
+		qi::rule<Iterator, Skipper> layerSection;
+		qi::rule<Iterator, Skipper> shapeSection;
+		qi::rule<Iterator, Skipper> boardGeomSection;
+		qi::rule<Iterator, Skipper> padstackSection;
+		qi::rule<Iterator, Skipper> viaSection;
+		qi::rule<Iterator, Skipper> partSection;
+		qi::rule<Iterator, Skipper> componentSection;
+		qi::rule<Iterator, Skipper> netAttrSection;
+		qi::rule<Iterator, Skipper> netlistSection;
+		qi::rule<Iterator, Skipper> routeSection;
         qi::rule<Iterator, std::string(), Skipper> text;
         qi::rule<Iterator, std::string(), Skipper> textNC; //no constraints
 		qi::rule<Iterator, std::string(), Skipper> textDQ; //text with double quotes ""
@@ -162,7 +181,11 @@ struct EXflReader
 		qi::rule<Iterator, Polygon(), Skipper> polygon;
 		qi::rule<Iterator, Arc(), Skipper> arc;
 		qi::rule<Iterator, Composite(), Skipper> composite;
-		qi::rule<Iterator, Skipper> boardGeom;
+		qi::rule<Iterator, Pad(), Skipper> pad;
+		qi::rule<Iterator, Padstack(), Skipper> padstack;
+		qi::rule<Iterator, Via(), Skipper> via;
+		qi::rule<Iterator, Node(), Skipper> node;
+		qi::rule<Iterator, Net(), Skipper> net;
         DatabaseType & db;
         EXflGrammar(DatabaseType & db, ErrorHandler<Iterator> & errorHandler)
         : EXflGrammar::base_type(expression), db(db)
@@ -188,11 +211,18 @@ struct EXflReader
             expression = qi::eps > 
 				*(
 					others
-					| material
-					| materialFreq
-					| layer
-					| shape
-					| boardGeom
+					| materialSection
+					| materialFreqSection
+					| layerSection
+					| shapeSection
+					| boardGeomSection
+					| padstackSection
+					| viaSection
+					| partSection
+					| componentSection
+					| netAttrSection
+					| netlistSection
+					| routeSection
 				) 
             ;
             others = 
@@ -201,7 +231,7 @@ struct EXflReader
 				| (lexeme[no_case[".design_type"]] >> text) [phx::bind(&EXflGrammar::DesignTypeHandle, this, _1)]
 				| (lexeme[no_case[".scale"]] >> double_) [phx::bind(&EXflGrammar::ScaleHandle, this, _1)]
 				;
-            material = lexeme[no_case[".material"]] >>
+            materialSection = lexeme[no_case[".material"]] >>
 				*(
 					  (lexeme[no_case["C"]] >> textDQ >> double_) [phx::bind(&EXflGrammar::ConductingMatHandle, this, _1, _2)]
 					| (lexeme[no_case["D"]] >> textDQ >> double_ >> double_ >> double_ >> double_ >> uint_) [phx::bind(&EXflGrammar::DielectricMatHandle, this, _1, _2, _3, _4, _5, _6)]
@@ -209,18 +239,19 @@ struct EXflReader
 				lexeme[no_case[".end material"]]
 				;
 			
-			materialFreq = lexeme[no_case[".material_frequency"]] >>
+			materialFreqSection = lexeme[no_case[".material_frequency"]] >>
+				+(char_ - lexeme[no_case[".end material_frequency"]]) >>//todo
 				lexeme[no_case[".end material_frequency"]]
 			;
 
-			layer = lexeme[no_case[".layer"]] >>
+			layerSection = lexeme[no_case[".layer"]] >>
 				*(
 					(textDQ >> double_ >> char_("SDP") >> textDQ >> textDQ) [phx::bind(&EXflGrammar::LayerHandle, this, _1, _2, _3, _4, _5)]
 				) >>
 				lexeme[no_case[".end layer"]]
 			;
 
-			shape = lexeme[no_case[".shape"]] >>
+			shapeSection = lexeme[no_case[".shape"]] >>
 				*(
 					  (int_ >> lexeme[no_case["polygon"]] >> polygon) [phx::bind(&EXflGrammar::ShapePolygonHandle, this, _1, _2)]
 					| (int_ >> lexeme[no_case["rectangle"]] >> double_ >> double_) [phx::bind(&EXflGrammar::ShapeRectangleHandle, this, _1, _2, _3)]
@@ -235,14 +266,50 @@ struct EXflReader
 				lexeme[no_case[".end shape"]]
 			;
 			
-			boardGeom = lexeme[no_case[".board_geom"]] >>
-				*(
-					//   (lexeme[no_case["polygon"]] >> polygon) [phx::bind(&EXflGrammar::BoardPolygonHandle, this, _1)]
-					//  (lexeme[no_case["composite"]] >> composite) [phx::bind(&EXflGrammar::BoardCompositeHandle, this, _1)]
-					 (lexeme[no_case["shape"]] >> int_ >> point >> double_ >> char_("XYN")) [phx::bind(&EXflGrammar::BoardShapeWithRotMirrorHandle, this, _1, _2, _3, _4)]
+			boardGeomSection = lexeme[no_case[".board_geom"]] >>
+				(
+					  (lexeme[no_case["polygon"]] >> polygon) [phx::bind(&EXflGrammar::BoardPolygonHandle, this, _1)]
+					| (lexeme[no_case["composite"]] >> composite) [phx::bind(&EXflGrammar::BoardCompositeHandle, this, _1)]
+					| (lexeme[no_case["shape"]] >> int_ >> point >> double_ >> char_("XYN")) [phx::bind(&EXflGrammar::BoardShapeWithRotMirrorHandle, this, _1, _2, _3, _4)]
 					| (lexeme[no_case["shape"]] >> int_ >> point >> char_("XYN") >> double_) [phx::bind(&EXflGrammar::BoardShapeWithMirrorRotHandle, this, _1, _2, _3, _4)]
-				) >>
+				)
+				>>
 				lexeme[no_case[".end board_geom"]]
+			;
+
+			padstackSection = lexeme[no_case[".padstack"]] >>
+				*padstack [phx::bind(&EXflGrammar::PadstackHandle, this, _1)] >>
+				lexeme[no_case[".end padstack"]]
+			;
+
+			viaSection = lexeme[no_case[".via"]] >>
+				*via [phx::bind(&EXflGrammar::ViaHandle, this, _1)] >>
+				lexeme[no_case[".end via"]]
+			;
+
+			partSection = lexeme[no_case[".part"]] >>
+				+(char_ - lexeme[no_case[".end part"]]) >>//todo
+				lexeme[no_case[".end part"]]
+			;
+
+			componentSection = lexeme[no_case[".component"]] >>
+				+(char_ - lexeme[no_case[".end component"]]) >>//todo
+				lexeme[no_case[".end component"]]
+			;
+
+			netAttrSection = lexeme[no_case[".netattr"]] >>
+				+(char_ - lexeme[no_case[".end netattr"]]) >>//todo
+				lexeme[no_case[".end netattr"]]
+			;
+
+			netlistSection = lexeme[no_case[".netlist"]] >>
+				*net [phx::bind(&EXflGrammar::NetHandle, this, _1)] >>
+				lexeme[no_case[".end netlist"]]
+			;
+
+			routeSection = lexeme[no_case[".route"]] >>
+				//todo
+				lexeme[no_case[".end route"]]
 			;
 
 			text = lexeme[(char_("a-zA-Z_") >> *char_("a-zA-Z_0-9-"))];
@@ -250,23 +317,38 @@ struct EXflReader
 			textDQ = lexeme['"' >> + (char_ - '"') >> '"'];
 			textSQ = lexeme['\'' >> + (char_ - '\'') >> '\''];
 
-			point %= (double_ >> double_);
-			polygon = '{' >> *((point)[push_back(at_c<0>(_val), _1)]) >> '}';
-			arc = (lexeme[no_case["ARC" ]][at_c<0>(_val) = 0]
+			point %= double_ >> double_;
+			polygon = "{" >> *point [push_back(_val, _1)] >> "}";
+			arc = (lexeme[no_case["ARC"]][at_c<0>(_val) = 0]
 				| lexeme[no_case["RARC"]][at_c<0>(_val) = 1]
 				| lexeme[no_case["ARC3"]][at_c<0>(_val) = 2] ) >>
 				(point)[at_c<1>(_val) = _1] >>
 				(point)[at_c<2>(_val) = _1]
 			;
 
-			composite = '{' >> (point)[push_back(at_c<0>(_val), _1)] >>
+			composite = "{" >> (point)[push_back(_val, _1)] >>
 				*(
-						(point)[push_back(at_c<0>(_val), _1)]
-					| (arc)  [push_back(at_c<0>(_val), _1)]
+						(point) [push_back(_val, _1)]
+					| (arc) [push_back(_val, _1)]
 				) >>
-				'}'
+				"}"
 			;
-				
+
+			pad %= int_ >> int_ >> double_ >> -(int_ >> double_);
+			padstack = int_[at_c<0>(_val) = _1] >> "{" >> *pad [push_back(at_c<1>(_val), _1)] >> "}";
+
+			via %= textNC >> int_ >> double_ >> int_ >> double_ >> -(double_ >> textNC);
+
+			node %= textNC >> textNC >> text >> int_ >> int_ >> "{" >> point >> int_ >> "}";
+			net = textDQ[at_c<0>(_val) = _1] >>
+					char_("SPG")[at_c<1>(_val) = _1] >>
+					int_[at_c<2>(_val) = _1] >>
+					int_[at_c<3>(_val) = _1] >>
+					int_[at_c<4>(_val) = _1] >>
+					int_[at_c<5>(_val) = _1] >>
+					"{" >> *node [push_back(at_c<6>(_val), _1)] >> "}"
+			;
+	
             expression.name("XFL Expression");
             others.name("XFL Block Others");
 			text.name("XFL Text");
@@ -324,7 +406,7 @@ struct EXflReader
 
 		void ShapePolygonHandle(int id, const Polygon & polygon)
 		{
-			std::cout << "Shape ID: " << id << ", Size: " << polygon.points.size() << std::endl;
+			std::cout << "Shape ID: " << id << ", Size: " << polygon.size() << std::endl;
 		}
 
 		void ShapeRectangleHandle(int id, double width, double height)
@@ -364,17 +446,17 @@ struct EXflReader
 
 		void ShapeCompositeHandle(int id, const Composite & composite)
 		{
-			std::cout << "Shape ID: " << id << ", Size: " << composite.elements.size() << std::endl; 
+			std::cout << "Shape ID: " << id << ", Size: " << composite.size() << std::endl; 
 		}
 
 		void BoardPolygonHandle(const Polygon & polygon)
 		{
-			std::cout << "Board Geom Polygon Size: " << polygon.points.size() << std::endl;
+			std::cout << "Board Geom Polygon Size: " << polygon.size() << std::endl;
 		}
 
 		void BoardCompositeHandle(const Composite & composite)
 		{
-			std::cout << "Board Geom Composite Size: " << composite.elements.size() << std::endl;
+			std::cout << "Board Geom Composite Size: " << composite.size() << std::endl;
 		}
 
 		void BoardShapeWithRotMirrorHandle(int id, const Point & loc, double rot, char mirror)//rot-unit: degree, mirror: X-axisX, Y-axisY, N-no
@@ -385,6 +467,21 @@ struct EXflReader
 		void BoardShapeWithMirrorRotHandle(int id, const Point & loc, char mirror, double rot)//rot-unit: degree, mirror: X-axisX, Y-axisY, N-no
 		{
 			std::cout << "Board Shape ID: " << id << ", Loc: " << loc.x << ", " << loc.y << ", Mirror: " << mirror << ", Rot: " << rot << std::endl;
+		}
+
+		void PadstackHandle(const Padstack & padstack)
+		{
+			std::cout << "Padstack ID: " << padstack.id << ", Pads: " << padstack.pads.size() << std::endl;
+		}
+
+		void ViaHandle(const Via & via)
+		{
+			std::cout << "Via Name: " << via.name << ", Padstack ID: " << via.padstackId << ", Material: " << via.material << std::endl;
+		}
+
+		void NetHandle(const Net & net)
+		{
+			std::cout << "Net Name: " << net.name << ", Type: " << net.type << ", Nodes: " << net.nodes.size() << std::endl;
 		}
     };
 
