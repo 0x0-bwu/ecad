@@ -16,7 +16,7 @@ using EPolygonHolesData = typename EPolygonWithHolesData::hole_container;
 class ETransform;
 class ECAD_API EShape : public Clonable<EShape>
 {
-    ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     virtual ~EShape() = default;
     virtual bool hasHole() const = 0;
@@ -25,6 +25,10 @@ public:
     virtual EPolygonWithHolesData GetPolygonWithHoles() const = 0;
     virtual void Transform(const ETransform2D & trans) = 0;
     virtual EShapeType GetShapeType() const = 0;
+    virtual void SetVoid(bool isVoid);
+    virtual bool isVoid() const;
+protected:
+    bool m_bVoid = false;
 };
 
 class ECAD_API ERectangle : public EShape
@@ -104,6 +108,7 @@ public:
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
     EShapeType GetShapeType() const;
+    void SetVoid(bool isVoid);
 protected:
     ///Copy
     virtual Ptr<EPolygonWithHoles> CloneImp() const override { return new EPolygonWithHoles(*this); }
@@ -111,11 +116,11 @@ protected:
 
 }//namespace ecad
 
+ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EShape)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPolygonWithHoles)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ERectangle)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPolygon)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPath)
-ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::EShape)
 
 #ifdef ECAD_HEADER_ONLY
 #include "EShape.cpp"
