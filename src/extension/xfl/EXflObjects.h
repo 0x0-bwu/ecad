@@ -4,7 +4,6 @@
 #include "ECadCommon.h"
 #include "EShape.h"
 #include <unordered_map>
-#include <unordered_set>
 namespace ecad {
 
 namespace ext {
@@ -12,61 +11,148 @@ namespace xfl {
 
 using namespace generic::geometry;
 
-enum class EXflUnit { INCH, MM };
-enum class EXflLayerType { SIGNAL, DIELECTRIC, POWERGROUND };
-using EXflVersion = std::pair<int, int>;//<major, minor>
+enum class Unit { INCH, MM };
+using Version = std::pair<int, int>;//<major, minor>
 
-struct EXflObject
+struct Material
 {
-    using LayerId = int16_t;
-    virtual ~EXflObject() = default;
-};
-
-struct EXflMaterial : public EXflObject
-{
-    std::string name;
     bool isMetal;
-    double conductivity;
-    double permittivity;
-    double permeability;
-    double lossTangent;
-    int causality;//0-none, 1-wideband debye, 2-multipole debye
-    ~EXflMaterial() = default;
+    std::string name;
+    double conductivity = .0;
+    double permittivity= .0;
+    double permeability = .0;
+    double lossTangent = .0;
+    int causality = 0;//0-none, 1-wideband debye, 2-multipole debye
 };
 
-struct EXflLayer : public EXflObject
+struct Layer
 {
     std::string name;
     double thickness;
-    EXflLayerType type;
-    std::string conductingMatName;
-    std::string dielectricMatName;
-    ~EXflLayer() = default;
+    char type;//S-Signal layer, D-Dielectric layer, P-Power or ground layer
+    std::string conductingMat;
+    std::string dielectricMat;
 };
 
-struct EXflShape : public EXflObject
+struct Point { double x, y; };
+using Polygon = std::vector<Point>;
+struct Arc { int type; Point end; Point mid; };//type: 0-arc, 1-rarc, 2-arc3
+using Composite = std::vector<boost::variant<Point, Arc> >;
+struct Rectangle { double width, height; };
+struct Square { double width; };
+struct Diamond { double width; };
+struct Circle { double diameter; };
+struct Annular { double outerDia; double innerDia; };
+struct Oblong { double width; double left; double right; };
+struct Bullet { double width; double left; double right; };
+struct Finger { double width; double left; double right; };
+using Shape = boost::variant<
+                                Polygon,
+                                Composite,
+                                Rectangle,
+                                Square,
+                                Diamond, 
+                                Circle,
+                                Annular, 
+                                Oblong, 
+                                Bullet, 
+                                Finger
+                            >;
+
+struct TemplateShape { int id; Shape shape; };
+
+struct BoardShape { int shapeId; Point loc; double rot; char mirror; bool rotThenMirror = true; };
+using BoardGeom = boost::variant<Polygon, Composite, BoardShape>;
+
+struct Pad
+{   
+    int sigLyr;
+    int shapeId; 
+    double shapeRot;
+    int apShapeId = -1;
+    double apShapeRot = .0;
+};//rot unit: degree, ccw
+
+struct Padstack
 {
-    using BaseType = EXflObject;
-    virtual ~EXflShape() = default;
+    int id; 
+    std::vector<Pad> pads;
 };
 
-struct EXflRectangle : public EXflShape
+struct Via
 {
-    FCoord width, height;
-    ~EXflRectangle() = default;
+    std::string name; 
+    int padstackId; 
+    double padstackRot; 
+    int shapeId; 
+    double shapeRot; 
+    double barrelThickness = 0.0; 
+    std::string material; 
 };
 
-struct EXflPolygon : public EXflShape
-{
+struct Node
+{ 
+    std::string component; 
+    std::string pinName; 
+    std::string ioType; 
+    int npeGrpNum; 
+    int npeNdUsage; 
+    Point loc; 
+    int layer;
 };
 
-struct EXflDB : public EXflObject
+struct Net
+{ 
+    std::string name; 
+    char type; 
+    int attrId; 
+    int analysis; 
+    int npeType; 
+    int anlandBch; 
+    std::vector<Node> nodes; 
+};
+
+struct InstPath { int layer; double width; Composite path; };
+struct InstVia { int sLayer; int eLayer; std::string name; Point loc; double rot; char mirror = 'N'; };
+struct InstBondwire { int sLayer; int eLayer; int id; Point sLoc; Point eLoc; std::string die1; std::string die2; };
+struct InstPolygon { bool isVoid; int layer; Polygon polygon; };
+struct InstRectangle { bool isVoid; int layer; Rectangle rectangle; Point loc; };
+struct InstSquare { bool isVoid; int layer; Square square; Point loc; };
+struct InstDiamond { bool isVoid; int layer; Diamond diamond; Point loc; };
+struct InstCircle { bool isVoid; int layer; Circle circle; Point loc; };
+struct InstAnnular { int layer; Annular annular; Point loc;};
+struct InstComposite {bool isVoid; int layer; Composite composite; };
+struct InstShape { bool isVoid; int layer; int shapeId; Point loc; double rot; char mirror; bool rotThenMirror = true; };
+
+using InstObject = boost::variant<InstPath,
+                                  InstVia,
+                                  InstBondwire,
+                                  InstPolygon,
+                                  InstRectangle, 
+                                  InstSquare,
+                                  InstDiamond, 
+                                  InstCircle, 
+                                  InstAnnular, 
+                                  InstComposite, 
+                                  InstShape
+                                  >;
+
+struct Route
 {
-    EXflVersion version;
-    EXflUnit unit;
-    FCoord scale;
-    std::vector<EXflMaterial> materials;
-    std::vector<EXflLayer> layers;
+    std::string net;
+    std::vector<InstObject> objects;
+};
+
+struct EXflDB
+{
+    Unit unit;
+    double scale;
+    Version version;
+    BoardGeom boardGeom;
+    std::string designType;
+    std::vector<Layer> layers;
+    std::vector<Material> materials;
+    std::unordered_map<int, TemplateShape> templates;
 };
 
 }//namespace xfl   
