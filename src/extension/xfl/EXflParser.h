@@ -143,17 +143,6 @@ struct EXflReader
         EXflGrammar<std::string::const_iterator, Skipper> grammar(db, errHandler);
         
         bool res = qi::phrase_parse(iter, end, grammar, skipper);
-		std::cout << "res: " << (res && iter == end) << std::endl;//wbtest
-		auto e = end;
-		if(iter != e){
-			auto distance = std::distance(iter, e);
-			if(distance > 100){
-				e = iter;
-				std::advance(e, 100);
-			}
-			std::string s(iter, e);
-			std::cout << "remine: " << s << std::endl;
-		}
         return res && iter == end;
     }
 
@@ -515,8 +504,8 @@ struct EXflReader
 		{
 			//std::cout << "Unit: " << unit << std::endl;
 			if(str::Equals<str::CaseInsensitive>(unit, "inch"))
-				db.unit = Unit::MM;
-			else db.unit = Unit::INCH;
+				db.unit = Unit::Inch;
+			else db.unit = Unit::Millimeter;
 		}
 
 		void DesignTypeHandle(const std::string & designType)
@@ -546,7 +535,7 @@ struct EXflReader
 		void ShapeHandle(TemplateShape shape)
 		{
 			//std::cout << "Shape ID: " << shape.id << std::endl;
-			db.templates.insert(std::make_pair(shape.id, std::move(shape)));
+			db.templates.emplace_back(std::move(shape));
 		}
 
 		void BoardPolygonHandle(Polygon polygon)
@@ -573,37 +562,42 @@ struct EXflReader
 			db.boardGeom = BoardShape{id, loc, rot, mirror, false};
 		}
 
-		void PadstackHandle(const Padstack & padstack)
+		void PadstackHandle(Padstack padstack)
 		{
-			std::cout << "Padstack ID: " << padstack.id << ", Pads: " << padstack.pads.size() << std::endl;
+			// std::cout << "Padstack ID: " << padstack.id << ", Pads: " << padstack.pads.size() << std::endl;
+			db.padstacks.emplace_back(std::move(padstack));
 		}
 
-		void ViaHandle(const Via & via)
+		void ViaHandle(Via via)
 		{
-			std::cout << "Via Name: " << via.name << ", Padstack ID: " << via.padstackId << ", Material: " << via.material << std::endl;
+			// std::cout << "Via Name: " << via.name << ", Padstack ID: " << via.padstackId << ", Material: " << via.material << std::endl;
+			db.vias.emplace_back(std::move(via));
 		}
 
-		void NetHandle(const Net & net)
+		void NetHandle(Net net)
 		{
-			std::cout << "Net Name: " << net.name << ", Type: " << net.type << ", Nodes: " << net.nodes.size() << std::endl;
+			// std::cout << "Net Name: " << net.name << ", Type: " << net.type << ", Nodes: " << net.nodes.size() << std::endl;
+			db.nets.emplace_back(std::move(net));
 		}
 
-		void RouteHandle(const Route & route)
+		void RouteHandle(Route route)
 		{
-			std::cout << "Route Name: " << route.net << ", Object Size: " << route.objects.size() << std::endl;
+			// std::cout << "Route Name: " << route.net << ", Object Size: " << route.objects.size() << std::endl;
+			db.routes.emplace_back(std::move(route));
 		}
 
 		void UnknownSectionHandle(const std::string & unknown)
 		{
-			std::cout << "Unknow Section: " << unknown << std::endl;
+			ECAD_UNUSED(unknown)
+			//std::cout << "Unknow Section: " << unknown << std::endl;
 		}
 
 		void UnrecognizedHandle(const std::string & unrecognized)
 		{
-			std::cout << "Unrecogized: " << unrecognized << std::endl;
+			ECAD_UNUSED(unrecognized)
+			// std::cout << "Unrecogized: " << unrecognized << std::endl;
 		}
     };
-
 };
 
 }//namespace xfl   

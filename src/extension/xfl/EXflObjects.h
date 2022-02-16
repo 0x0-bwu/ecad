@@ -10,8 +10,7 @@ namespace ext {
 namespace xfl {
 
 using namespace generic::geometry;
-
-enum class Unit { INCH, MM };
+using Unit = typename ECoordUnits::Unit;
 using Version = std::pair<int, int>;//<major, minor>
 
 struct Material
@@ -150,9 +149,50 @@ struct EXflDB
     Version version;
     BoardGeom boardGeom;
     std::string designType;
+    std::vector<Net> nets;
+    std::vector<Via> vias;
     std::vector<Layer> layers;
+    std::vector<Route> routes;
     std::vector<Material> materials;
-    std::unordered_map<int, TemplateShape> templates;
+    std::vector<Padstack> padstacks;
+    std::vector<TemplateShape> templates;
+
+    void Clear()
+    {
+        ClearLUTs();
+        nets.clear();
+        vias.clear();
+        layers.clear();
+        routes.clear();
+        materials.clear();
+        padstacks.clear();
+        templates.clear();
+    }
+
+    void BuildLUTs()
+    {
+        ClearLUTs();
+        for(const auto & net : nets)
+            m_nets.insert(std::make_pair(net.name, &net));
+        
+        for(const auto & via : vias)
+            m_vias.insert(std::make_pair(via.name, &via));
+
+        for(const auto & temp : templates)
+            m_templates.insert(std::make_pair(temp.id, &temp));
+    }
+
+private:
+    void ClearLUTs()
+    {
+        m_nets.clear();
+        m_vias.clear();
+        m_templates.clear();
+    }
+
+    std::unordered_map<std::string, CPtr<Net> > m_nets;
+    std::unordered_map<std::string, CPtr<Via> > m_vias;
+    std::unordered_map<int, CPtr<TemplateShape> > m_templates;
 };
 
 }//namespace xfl   
