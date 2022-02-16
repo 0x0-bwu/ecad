@@ -58,6 +58,26 @@ using Shape = boost::variant<
                                 Finger
                             >;
 
+class EShapeGetter : public boost::static_visitor<UPtr<EShape> >
+{
+public:
+    EShapeGetter(double scale, size_t circleDiv) : m_circleDiv(circleDiv) {}
+
+    UPtr<EShape> operator() (const Polygon & polygon) const
+    {
+        auto shape = new EPolygon;
+        auto & data = shape->shape;
+        for(const auto & point : polygon){
+            data << EPoint2D(point.x * m_scale, point.y * m_scale);
+        }
+        return UPtr<EShape>(shape);
+    }
+
+private:
+    double m_scale = 1.0;
+    size_t m_circleDiv = 12;
+};
+
 struct TemplateShape { int id; Shape shape; };
 
 struct BoardShape { int shapeId; Point loc; double rot; char mirror; bool rotThenMirror = true; };

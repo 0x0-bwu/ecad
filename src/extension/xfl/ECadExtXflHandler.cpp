@@ -20,8 +20,8 @@ ECAD_INLINE ECadExtXflHandler::ECadExtXflHandler(const std::string & xflFile)
 
 ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string & name, std::string * err)
 {
-    auto & eMgr = EDataMgr::Instance();
-    if(eMgr.OpenDatabase(name)){
+    auto & mgr = EDataMgr::Instance();
+    if(mgr.OpenDatabase(name)){
         if(err) *err = fmt::Format2String("Error: database %1% is already exist.", name);
         return nullptr;
     }
@@ -34,7 +34,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     m_xflDB->BuildLUTs();
 
     //reset temporary data
-    m_database = eMgr.CreateDatabase(name);
+    m_database = mgr.CreateDatabase(name);
     if(nullptr == m_database) return nullptr;
 
     //set units
@@ -46,7 +46,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     ImportPadstackDefs();
 
     //create top cell
-    auto iCell = eMgr.CreateCircuitCell(m_database, name);
+    auto iCell = mgr.CreateCircuitCell(m_database, name);
     auto iLayout = iCell->GetLayoutView();
 
     //import layers
@@ -60,12 +60,18 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
 
 ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
 {
+    auto & mgr = EDataMgr::Instance();
+
+    for(const auto & xflVia : m_xflDB->vias){
+        auto psDefData = mgr.CreatePadstackDefData();
+    
+    }
 
 }
 
 ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
 {
-    auto & eMgr = EDataMgr::Instance();
+    auto & mgr = EDataMgr::Instance();
 
     int id = -1;
     int xflLayerId = 1;
@@ -75,7 +81,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
     for(const auto & xflLyr : m_xflDB->layers){
         id++;
         ELayerType type = xflLyr.type == 'D' ? ELayerType::DielectricLayer : ELayerType::ConductingLayer;
-        auto layer = eMgr.CreateStackupLayer(xflLyr.name, type, elevation * m_scale2Coord, xflLyr.thickness * m_scale2Coord);
+        auto layer = mgr.CreateStackupLayer(xflLyr.name, type, elevation * m_scale2Coord, xflLyr.thickness * m_scale2Coord);
         if(type != ELayerType::DielectricLayer)
             m_metalLyrIdMap.insert(std::make_pair(xflMetalId++, static_cast<ELayerId>(id)));
         m_layerIdMap.insert(std::make_pair(xflLayerId++, static_cast<ELayerId>(id)));
@@ -87,9 +93,9 @@ ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
 
 ECAD_INLINE void ECadExtXflHandler::ImportNets(Ptr<ILayoutView> layout)
 {
-    auto & eMgr = EDataMgr::Instance();
+    auto & mgr = EDataMgr::Instance();
     for(const auto & xflNet : m_xflDB->nets){
-        auto net = eMgr.CreateNet(layout, xflNet.name);
+        auto net = mgr.CreateNet(layout, xflNet.name);
         if(net == nullptr){
             //error handle
         }
