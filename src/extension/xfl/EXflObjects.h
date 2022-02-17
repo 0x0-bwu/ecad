@@ -73,6 +73,11 @@ public:
         return UPtr<EShape>(shape);
     }
 
+    UPtr<EShape> operator() (const Composite & composite) const
+    {
+        
+    }
+
 private:
     double m_scale = 1.0;
     size_t m_circleDiv = 12;
