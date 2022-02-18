@@ -10,22 +10,24 @@ namespace xfl {
 class ECAD_API ECadExtXflHandler
 {
 public:
-    explicit ECadExtXflHandler(const std::string & xflFile);
+    explicit ECadExtXflHandler(const std::string & xflFile, size_t circleDiv = 12);
     SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:
     void ImportPadstackDefs();
     void ImportLayers(Ptr<ILayoutView> layout);
     void ImportNets(Ptr<ILayoutView> layout);
+    void ImportConnObjs(Ptr<ILayoutView> layout);
 
     void Reset();
 
 private:
     std::string m_xflFile;
+    size_t m_circleDiv = 12;
 
 private:
     // temporary data
-    double m_scale2Coord = 1.0;
+    double m_scale = 1.0;
     UPtr<EXflDB> m_xflDB = nullptr;
     SPtr<IDatabase> m_database = nullptr;
     std::map<int, ELayerId> m_layerIdMap;//xfl to ecad
