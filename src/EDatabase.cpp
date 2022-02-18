@@ -207,6 +207,12 @@ ECAD_INLINE Ptr<ILayerMap> EDatabase::CreateLayerMap(const std::string & name)
     return dynamic_cast<Ptr<ILayerMap> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(layerMap)));
 }
 
+ECAD_INLINE Ptr<ILayerMap> EDatabase::FindLayerMapByName(const std::string & name) const
+{
+    auto layerMap = EDefinitionCollection::GetDefinition(name, EDefinitionType::LayerMap));
+    return dynamic_cast<Ptr<ILayerMap> >(layerMap);
+}
+
 ECAD_INLINE bool EDatabase::AddLayerMap(UPtr<ILayerMap> layerMap)
 {
     auto name = layerMap->GetName();

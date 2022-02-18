@@ -46,6 +46,7 @@ public:
     ///LayerMap
     Ptr<ILayerMapCollection> GetLayerMapCollection() const;
     Ptr<ILayerMap> CreateLayerMap(const std::string & name);
+    Ptr<ILayerMap> FindLayerMapByName(const std::string & name) const;
     bool AddLayerMap(UPtr<ILayerMap> layerMap);
     
     ///PadstackDef

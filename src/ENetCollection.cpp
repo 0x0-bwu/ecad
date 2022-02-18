@@ -54,7 +54,7 @@ ECAD_INLINE std::string ENetCollection::NextNetName(const std::string & name) co
     return NextKey(*this, name);
 }
 
-ECAD_INLINE Ptr<INet> ENetCollection::FindNetByName(const std::string & name)
+ECAD_INLINE Ptr<INet> ENetCollection::FindNetByName(const std::string & name) const
 {
     if(!Count(name)) return nullptr;
     return At(name).get();

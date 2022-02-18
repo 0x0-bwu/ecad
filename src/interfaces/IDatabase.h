@@ -40,6 +40,7 @@ public:
 
     virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const = 0;
     virtual Ptr<ILayerMap> CreateLayerMap(const std::string & name) = 0;
+    virtual Ptr<ILayerMap> FindLayerMapByName(const std::string & name) const = 0;
     virtual bool AddLayerMap(UPtr<ILayerMap> layerMap) = 0;
     
     virtual Ptr<IPadstackDef> CreatePadstackDef(const std::string & name) = 0;

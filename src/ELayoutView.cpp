@@ -147,6 +147,11 @@ ECAD_INLINE Ptr<INet> ELayoutView::CreateNet(const std::string & name)
     return GetNetCollection()->CreateNet(name);
 }
 
+ECAD_INLINE Ptr<INet> ELayoutView::FindNetByName(const std::string & name) const
+{
+    return GetNetCollection()->FindNetByName(name);
+}
+
 ECAD_INLINE Ptr<IPadstackInst> ELayoutView::CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,
                                                                 ELayerId topLyr, ELayerId botLyr, CPtr<ILayerMap> layerMap,
                                                                 const ETransform2D & transform)

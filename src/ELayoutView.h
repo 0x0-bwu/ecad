@@ -49,6 +49,7 @@ public:
 
     ///Net
     Ptr<INet> CreateNet(const std::string & name);
+    Ptr<INet> FindNetByName(const std::string & name) const;
 
     ///PadstackInst
     Ptr<IPadstackInst> CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,

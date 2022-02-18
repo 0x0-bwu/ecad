@@ -54,7 +54,9 @@ public:
     virtual void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const = 0;
     virtual UPtr<ILayerMap> AddDefaultDielectricLayers() const = 0;
 
+    ///Net
     virtual Ptr<INet> CreateNet(const std::string & name) = 0;
+    virtual Ptr<INet> FindNetByName(const std::string & name) const = 0;
 
     ///Padstack
     virtual Ptr<IPadstackInst> CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,

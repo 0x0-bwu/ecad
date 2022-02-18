@@ -77,6 +77,11 @@ ECAD_INLINE Ptr<INet> EDataMgr::CreateNet(Ptr<ILayoutView> layout, const std::st
     return layout->CreateNet(name);
 }
 
+ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std::string & name)
+{
+    return layout->FindNetByName(name);
+}
+
 ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness)
 {
     auto stackupLayer = new EStackupLayer(name, type);
@@ -88,6 +93,11 @@ ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, 
 ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(SPtr<IDatabase> database, const std::string & name)
 {
     return database->CreateLayerMap(name);
+}
+
+ECAD_INLINE Ptr<ILayerMap> EDataMgr::FindLayerMapByName(SPtr<IDatabase> database, const std::string & name)
+{
+    return database->FindLayerMapByName(name);
 }
 
 ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(Ptr<IDatabase> database, const std::string & name)
@@ -118,6 +128,15 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
 {
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(std::vector<EPoint2D> points, ECoord width)
+{
+    auto shape = new EPath;
+    shape->shape = std::move(points);
+    shape->SetWidth(width);
+    return UPtr<EShape>(shape);
+}
+
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(std::vector<Point2D<ECoord> > points)
 {

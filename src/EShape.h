@@ -54,7 +54,7 @@ class ECAD_API EPath : public EShape
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 
-    int m_type;
+    int m_type = 0;
     ECoord m_width;
 public:
     EPolylineData shape;

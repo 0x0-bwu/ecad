@@ -48,12 +48,14 @@ public:
 
     ///Net
     Ptr<INet> CreateNet(Ptr<ILayoutView> layout, const std::string & name);
+    Ptr<INet> FindNetByName(Ptr<ILayoutView> layout, const std::string & name);
 
     ///Layer
     UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness);
     
     ///LayerMap
     Ptr<ILayerMap> CreateLayerMap(SPtr<IDatabase> database, const std::string & name);
+    Ptr<ILayerMap> FindLayerMapByName(SPtr<IDatabase> database, const std::string & name);
 
     ///PadstackDef
     Ptr<IPadstackDef> CreatePadstackDef(Ptr<IDatabase> database, const std::string & name);
@@ -72,6 +74,7 @@ public:
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
 
     ///Shape
+    UPtr<EShape> CreateShapePath(std::vector<EPoint2D> points, ECoord width);
     UPtr<EShape> CreateShapePolygon(std::vector<EPoint2D> points);
     UPtr<EShape> CreateShapePolygon(Polygon2D<ECoord> polygon);
     UPtr<EShape> CreateShapePolygonWithHoles(PolygonWithHoles2D<ECoord> pwh);

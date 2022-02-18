@@ -23,7 +23,7 @@ public:
 
     std::string NextNetName(const std::string & name) const;
     
-    Ptr<INet> FindNetByName(const std::string & name);
+    Ptr<INet> FindNetByName(const std::string & name) const;
     Ptr<INet> CreateNet(const std::string & name);
     Ptr<INet> AddNet(UPtr<INet> net);
 
