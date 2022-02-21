@@ -52,6 +52,7 @@ public:
     ///PadstackDef
     Ptr<IPadstackDefCollection> GetPadstackDefCollection() const;
     Ptr<IPadstackDef> CreatePadstackDef(const std::string & name);
+    Ptr<IPadstackDef> FindPadstackDefByName(const std::string & name) const;
 
     ///Iterator
     CellIter GetCellIter() const;

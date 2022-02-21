@@ -193,7 +193,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::stri
         psDefData->SetLayers(layerNames);
         psDefData->SetViaParameters(std::move(std::get<3>(via)), EPoint2D(0, 0), 0);
         auto name = dc->GetNextDefName(sPadstack, EDefinitionType::PadstackDef);
-        auto psDef = mgr.CreatePadstackDef(database.get(), name);
+        auto psDef = mgr.CreatePadstackDef(database, name);
         psDef->SetPadstackDefData(std::move(psDefData));
 
         std::string viaName = "via_" + std::to_string(i++);

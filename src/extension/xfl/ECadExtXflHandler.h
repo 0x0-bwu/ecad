@@ -26,6 +26,9 @@ private:
     size_t m_circleDiv = 12;
 
 private:
+    std::string GetNextPadstackInstName(const std::string & defName);
+
+private:
     // temporary data
     double m_scale = 1.0;
     UPtr<EXflDB> m_xflDB = nullptr;
@@ -33,6 +36,7 @@ private:
     std::map<int, ELayerId> m_layerIdMap;//xfl to ecad
     std::map<int, ELayerId> m_metalLyrIdMap;//xfl metal Id to ecad
     std::unordered_map<std::string, ENetId> m_netIdMap;
+    std::unordered_set<std::string> m_padstackInstNames;
 };
 
 }//namespace xfl

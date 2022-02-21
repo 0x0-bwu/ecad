@@ -44,6 +44,7 @@ public:
     virtual bool AddLayerMap(UPtr<ILayerMap> layerMap) = 0;
     
     virtual Ptr<IPadstackDef> CreatePadstackDef(const std::string & name) = 0;
+    virtual Ptr<IPadstackDef> FindPadstackDefByName(const std::string & name) const = 0;
 
     ///Iterator
     virtual CellIter GetCellIter() const = 0;

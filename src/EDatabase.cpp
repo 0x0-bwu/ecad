@@ -209,7 +209,7 @@ ECAD_INLINE Ptr<ILayerMap> EDatabase::CreateLayerMap(const std::string & name)
 
 ECAD_INLINE Ptr<ILayerMap> EDatabase::FindLayerMapByName(const std::string & name) const
 {
-    auto layerMap = EDefinitionCollection::GetDefinition(name, EDefinitionType::LayerMap));
+    auto layerMap = EDefinitionCollection::GetDefinition(name, EDefinitionType::LayerMap);
     return dynamic_cast<Ptr<ILayerMap> >(layerMap);
 }
 
@@ -234,6 +234,12 @@ ECAD_INLINE Ptr<IPadstackDef> EDatabase::CreatePadstackDef(const std::string & n
 
     auto padstackDef = new EPadstackDef(name);
     return dynamic_cast<Ptr<IPadstackDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(padstackDef)));
+}
+
+ECAD_INLINE Ptr<IPadstackDef> EDatabase::FindPadstackDefByName(const std::string & name) const
+{
+    auto psDef = EDefinitionCollection::GetDefinition(name, EDefinitionType::PadstackDef);
+    return dynamic_cast<Ptr<IPadstackDef> >(psDef);
 }
 
 ECAD_INLINE CellIter EDatabase::GetCellIter() const

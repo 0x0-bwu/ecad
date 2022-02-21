@@ -401,6 +401,12 @@ namespace {
         enum_<EFlattenOption>("EFlattenOption")
         ;
 
+        enum_<EMirror2D>("EMirror2D")
+            .value("NO", EMirror2D::No)
+            .value("X", EMirror2D::X)
+            .value("Y", EMirror2D::Y)
+        ;
+
         //Unit
         enum_<ECoordUnits::Unit>("ELengthUnit")
             .value("NM", ECoordUnits::Unit::Nanometer)

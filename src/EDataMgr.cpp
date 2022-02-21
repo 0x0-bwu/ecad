@@ -100,9 +100,14 @@ ECAD_INLINE Ptr<ILayerMap> EDataMgr::FindLayerMapByName(SPtr<IDatabase> database
     return database->FindLayerMapByName(name);
 }
 
-ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(Ptr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(SPtr<IDatabase> database, const std::string & name)
 {
     return database->CreatePadstackDef(name);
+}
+
+ECAD_INLINE Ptr<IPadstackDef> EDataMgr::FindPadstackDefByName(SPtr<IDatabase> database, const std::string & name) const
+{
+    return database->FindPadstackDefByName(name);
 }
 
 ECAD_INLINE UPtr<IPadstackDefData> EDataMgr::CreatePadstackDefData()

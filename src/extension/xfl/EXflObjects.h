@@ -112,7 +112,7 @@ struct Net
 };
 
 struct InstPath { int layer; double width; Composite path; };
-struct InstVia { int sLayer; int eLayer; std::string name; Point loc; double rot; char mirror = 'N'; };
+struct InstVia { int sLayer; int eLayer; std::string name; Point loc; double rot; char mirror = 'N'; };//rot unit: degree
 struct InstBondwire { int sLayer; int eLayer; int id; Point sLoc; Point eLoc; std::string die1; std::string die2; };
 struct InstPolygon { bool isVoid; int layer; Polygon polygon; };
 struct InstRectangle { bool isVoid; int layer; Rectangle rectangle; Point loc; };

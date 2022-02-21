@@ -58,7 +58,8 @@ public:
     Ptr<ILayerMap> FindLayerMapByName(SPtr<IDatabase> database, const std::string & name);
 
     ///PadstackDef
-    Ptr<IPadstackDef> CreatePadstackDef(Ptr<IDatabase> database, const std::string & name);
+    Ptr<IPadstackDef> CreatePadstackDef(SPtr<IDatabase> database, const std::string & name);
+    Ptr<IPadstackDef> FindPadstackDefByName(SPtr<IDatabase> database, const std::string & name) const;
     UPtr<IPadstackDefData> CreatePadstackDefData();
 
     ///PadstackInst
