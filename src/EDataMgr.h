@@ -19,9 +19,12 @@ class IDatabase;
 class ICellInst;
 class IPrimitive;
 class ILayoutView;
+class IMaterialDef;
 class IPadstackDef;
+class IMaterialProp;
 class IPadstackInst;
 class IPadstackDefData;
+class IMaterialPropValue;
 
 using namespace generic::geometry;
 
@@ -51,8 +54,17 @@ public:
     Ptr<INet> FindNetByName(Ptr<ILayoutView> layout, const std::string & name);
 
     ///Layer
-    UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness);
+    UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness,
+                                    const std::string & conductingMat = sDefaultConductingMat,
+                                    const std::string & dirlectricMat = sDefaultDielectricMat);
     
+    ///Material
+    Ptr<IMaterialDef> CreateMaterialDef(SPtr<IDatabase> database, const std::string & name);
+    Ptr<IMaterialDef> FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name);
+    UPtr<IMaterialProp> CreateSimpleMaterialProp(EValue value);
+    UPtr<IMaterialProp> CreateAnsiotropicMaterialProp(const std::array<EValue, 3> & values);
+    UPtr<IMaterialProp> CreateTensorMateriaProp(const std::array<EValue, 9> & values);
+
     ///LayerMap
     Ptr<ILayerMap> CreateLayerMap(SPtr<IDatabase> database, const std::string & name);
     Ptr<ILayerMap> FindLayerMapByName(SPtr<IDatabase> database, const std::string & name);

@@ -10,9 +10,11 @@ namespace ecad {
 class ICell;
 class ILayerMap;
 class IDefinition;
+class IMaterialDef;
 class IPadstackDef;
 class ILayerMapCollection;
 class IDefinitionCollection;
+class IMaterialDefCollection;
 class ECAD_API IDatabase : public Clonable<IDatabase>
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
@@ -37,6 +39,9 @@ public:
     virtual bool GetCircuitCells(std::vector<Ptr<ICell> > & cells) const = 0;
     virtual bool GetTopCells(std::vector<Ptr<ICell> > & cells) const = 0;
     virtual bool Flatten(Ptr<ICell> cell) const = 0;
+
+    virtual Ptr<IMaterialDef> CreateMaterialDef(const std::string & name) = 0;
+    virtual Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const = 0;
 
     virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const = 0;
     virtual Ptr<ILayerMap> CreateLayerMap(const std::string & name) = 0;

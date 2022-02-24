@@ -54,12 +54,21 @@ public:
 
     void SetThickness(FCoord thickness);
     FCoord GetThickness() const;
+
+    void SetConductingMaterial(const std::string & material);
+    const std::string & GetConductingMaterial() const;
+
+    void SetDielectricMaterial(const std::string & material);
+    const std::string & GetDielectricMaterial() const;
+
 protected:
     ///Copy
     virtual Ptr<ELayer> CloneImp() const override { return new EStackupLayer(*this);}
 protected:
     FCoord m_elevation = 0;
     FCoord m_thickness = 0;
+    std::string m_conductingMat;
+    std::string m_dielectricMat;
 };
 
 class ECAD_API EViaLayer : public ELayer, public IViaLayer

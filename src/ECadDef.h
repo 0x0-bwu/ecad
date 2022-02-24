@@ -23,6 +23,7 @@ enum class ECollectionType
     LayerMap,
     Primitive,
     Definition,
+    MaterialDef,
     PadstackDef,
     HierarchyObj,
     PadstackInst,
@@ -41,7 +42,6 @@ enum ENetId { noNet = -1 };
 
 enum EMaterialPropId
 {
-    Invalid = -1,
     Permittivity = 3,
     Permeability = 4,
     Conductivity = 5,
@@ -90,6 +90,7 @@ enum class EDefinitionType
 {
     Invalid = -1,
     PadstackDef,
+    MaterialDef,
     LayerMap,
     Cell
 };

@@ -96,6 +96,8 @@ ECAD_INLINE void EStackupLayer::save(Archive & ar, const unsigned int version) c
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ELayer);
     ar & boost::serialization::make_nvp("elevation", m_elevation);
     ar & boost::serialization::make_nvp("thickness", m_thickness);
+    ar & boost::serialization::make_nvp("conducting_mat", m_conductingMat);
+    ar & boost::serialization::make_nvp("dielectric_mat", m_dielectricMat);
 }
 
 template <typename Archive>
@@ -106,6 +108,8 @@ ECAD_INLINE void EStackupLayer::load(Archive & ar, const unsigned int version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ELayer);
     ar & boost::serialization::make_nvp("elevation", m_elevation);
     ar & boost::serialization::make_nvp("thickness", m_thickness);
+    ar & boost::serialization::make_nvp("conducting_mat", m_conductingMat);
+    ar & boost::serialization::make_nvp("dielectric_mat", m_dielectricMat);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EStackupLayer)
@@ -157,6 +161,26 @@ ECAD_INLINE void EStackupLayer::SetThickness(FCoord thickness)
 ECAD_INLINE FCoord EStackupLayer::GetThickness() const
 {
     return m_thickness;
+}
+
+ECAD_INLINE void EStackupLayer::SetConductingMaterial(const std::string & material)
+{
+    m_conductingMat = material;
+}
+
+ECAD_INLINE const std::string & EStackupLayer::GetConductingMaterial() const
+{
+    return m_conductingMat;
+}
+
+ECAD_INLINE void EStackupLayer::SetDielectricMaterial(const std::string & material)
+{
+    m_dielectricMat = material;
+}
+
+ECAD_INLINE const std::string & EStackupLayer::GetDielectricMaterial() const
+{
+    return m_dielectricMat;
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

@@ -5,9 +5,11 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 
 #include "generic/tools/FileSystem.hpp"
 #include "utility/EFlattenUtility.h"
+#include "EMaterialDefCollection.h"
 #include "EPadstackDefCollection.h"
 #include "ELayerMapCollection.h"
 #include "ECellCollection.h"
+#include "EMaterialDef.h"
 #include "EPadstackDef.h"
 #include "ELayerMap.h"
 #include "ECell.h"
@@ -192,6 +194,25 @@ ECAD_INLINE bool EDatabase::Flatten(Ptr<ICell> cell) const
 {
     euti::EFlattenUtility utility;
     return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, DefaultThreads());
+}
+
+ECAD_INLINE Ptr<IMaterialDefCollection> EDatabase::GetMaterialCollection() const
+{
+    return dynamic_cast<Ptr<IMaterialDefCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::MaterialDef));
+}
+
+ECAD_INLINE Ptr<IMaterialDef> EDatabase::CreateMaterialDef(const std::string & name)
+{
+    if(EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef)) return nullptr;
+
+    auto material = new EMaterialDef(name);
+    return dynamic_cast<Ptr<IMaterialDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(material)));
+}
+
+ECAD_INLINE Ptr<IMaterialDef> EDatabase::FindMaterialDefByName(const std::string & name) const
+{
+    auto material = EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef);
+    return dynamic_cast<Ptr<IMaterialDef> >(material);
 }
 
 ECAD_INLINE Ptr<ILayerMapCollection> EDatabase::GetLayerMapCollection() const

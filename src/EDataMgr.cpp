@@ -3,6 +3,7 @@
 #endif
 
 #include "EPadstackDefData.h"
+#include "EMaterialProp.h"
 #include "ELayoutView.h"
 #include "EDatabase.h"
 #include "ELayerMap.h"
@@ -82,12 +83,46 @@ ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std
     return layout->FindNetByName(name);
 }
 
-ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness)
+ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness,
+                                                      const std::string & conductingMat, const std::string & dielectricMat)
 {
     auto stackupLayer = new EStackupLayer(name, type);
     stackupLayer->SetElevation(elevation);
     stackupLayer->SetThickness(thickness);
+    stackupLayer->SetConductingMaterial(conductingMat);
+    stackupLayer->SetDielectricMaterial(dielectricMat);
     return UPtr<ILayer>(stackupLayer);
+}
+
+ECAD_INLINE Ptr<IMaterialDef> EDataMgr::CreateMaterialDef(SPtr<IDatabase> database, const std::string & name)
+{
+    return database->CreateMaterialDef(name);
+}
+
+ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name)
+{
+    return database->FindMaterialDefByName(name);
+}
+
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateSimpleMaterialProp(EValue value)
+{
+    auto prop = new EMaterialPropValue;
+    prop->SetSimpleProperty(value);
+    return UPtr<IMaterialProp>(new EMaterialPropValue);
+}
+
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnsiotropicMaterialProp(const std::array<EValue, 3> & values)
+{
+    auto prop = new EMaterialPropValue;
+    prop->SetAnsiotropicProerty(values);
+    return UPtr<IMaterialProp>(prop);
+}
+
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::array<EValue, 9> & values)
+{
+    auto prop = new EMaterialPropValue;
+    prop->SetTensorProperty(values);
+    return UPtr<IMaterialProp>(prop);
 }
 
 ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(SPtr<IDatabase> database, const std::string & name)

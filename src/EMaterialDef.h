@@ -1,5 +1,6 @@
 #ifndef ECAD_EMATERIALDEF_H
 #define ECAD_EMATERIALDEF_H
+#include "interfaces/IMaterialProp.h"
 #include "interfaces/IMaterialDef.h"
 #include "EDefinition.h"
 namespace ecad {
@@ -16,6 +17,10 @@ public:
     EMaterialDef(const EMaterialDef & other);
     EMaterialDef & operator= (const EMaterialDef & other);
 
+    bool hasProperty(EMaterialPropId id) const;
+    void SetProperty(EMaterialPropId id, UPtr<IMaterialProp> prop);
+    CPtr<IMaterialProp> GetPropperty(EMaterialPropId id) const;
+
     const std::string & GetName() const;
     const EUuid & Uuid() const;
 
@@ -23,6 +28,7 @@ protected:
     ///Copy
     virtual Ptr<EMaterialDef> CloneImp() const override { return new EMaterialDef(*this); }
 private:
+    std::unordered_map<EMaterialPropId, UPtr<IMaterialProp> > m_properties;
 };
 
 ECAD_ALWAYS_INLINE const std::string & EMaterialDef::GetName() const

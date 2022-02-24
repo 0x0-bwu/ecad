@@ -56,8 +56,12 @@ void t_extension_xfl()
     std::string err;
     std::string fccspXfl = ecad_test::GetTestDataPath() + "/extension/xfl/fccsp.xfl";
     auto fccsp = ext::CreateDatabaseFromXfl("test", fccspXfl, &err);
-    // BOOST_CHECK(err.empty());
-    // BOOST_CHECK(ringo != nullptr);
+    BOOST_CHECK(err.empty());
+    BOOST_CHECK(fccsp != nullptr);
+
+    // std::string archiveXML = ecad_test::GetTestDataPath() + "/serialization/xfl/fccsp.xml";
+    // auto res = EDataMgr::Instance().SaveDatabase(fccsp, archiveXML, EArchiveFormat::XML);
+    // BOOST_CHECK(res);
 
     EDataMgr::Instance().ShutDown(); 
 }

@@ -11,6 +11,7 @@ class IDefinition;
 class IPadstackDef;
 class ILayerMapCollection;
 class IDefinitionCollection;
+class IMaterialDefCollection;
 class IPadstackDefCollection;
 using CellCollection = EUnorderedMapCollection<std::string, UPtr<ICell> >;
 class ECAD_API EDatabase : public EDefinitionCollection, public IDatabase
@@ -42,6 +43,11 @@ public:
     bool GetCircuitCells(std::vector<Ptr<ICell> > & cells) const;
     bool GetTopCells(std::vector<Ptr<ICell> > & cells) const;
     bool Flatten(Ptr<ICell> cell) const;
+    
+    ///Material
+    Ptr<IMaterialDefCollection> GetMaterialCollection() const;
+    Ptr<IMaterialDef> CreateMaterialDef(const std::string & name);
+    Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const;
 
     ///LayerMap
     Ptr<ILayerMapCollection> GetLayerMapCollection() const;

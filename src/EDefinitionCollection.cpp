@@ -61,6 +61,9 @@ ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::AddDefinitionColle
         case EDefinitionType::LayerMap : {
             return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::AddCollection(ECollectionType::LayerMap));
         }
+        case EDefinitionType::MaterialDef : {
+            return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::AddCollection(ECollectionType::MaterialDef));
+        }
         case EDefinitionType::PadstackDef : {
             return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::AddCollection(ECollectionType::PadstackDef));
         }
@@ -77,6 +80,9 @@ ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::GetDefinitionColle
         }
         case EDefinitionType::LayerMap : {
             return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::GetCollection(ECollectionType::LayerMap));
+        }
+        case EDefinitionType::MaterialDef : {
+            return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::GetCollection(ECollectionType::MaterialDef));
         }
         case EDefinitionType::PadstackDef : {
             return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::GetCollection(ECollectionType::PadstackDef));
