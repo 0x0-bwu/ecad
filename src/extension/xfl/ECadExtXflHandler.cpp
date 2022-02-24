@@ -4,10 +4,10 @@
 
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/Format.hpp"
+#include "EMaterialProp.h"
 #include "EXflParser.h"
 #include "ETransform.h"
 #include "Interface.h"
-#include "ELayerMap.h"
 #include "EDataMgr.h"
 namespace ecad {
 namespace ext {
@@ -43,7 +43,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     m_scale = coordUnits.Scale2Coord() / m_xflDB->scale;
 
     //import material
-    //todo
+    ImportMaterialDefs();
 
     //create top cell
     auto cell = mgr.CreateCircuitCell(m_database, name);
@@ -61,7 +61,39 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     //import connection objects, should import nets firstly
     ImportConnObjs(layout);
 
+    //import board geom
+    ImportBoardGeom(layout);
+
+
     return m_database;
+}
+
+ECAD_INLINE void ECadExtXflHandler::ImportMaterialDefs()
+{
+    auto & mgr = EDataMgr::Instance();
+
+    for(const auto & xflMat : m_xflDB->materials) {
+        auto name = m_database->GetNextDefName(xflMat.name, EDefinitionType::MaterialDef);
+        auto material = mgr.CreateMaterialDef(m_database, name);
+        if(nullptr == material) {
+            //todo, error handle
+            continue;
+        }
+
+        m_matNameMap.insert(std::make_pair(xflMat.name, name));
+
+        auto conductivity = mgr.CreateSimpleMaterialProp(xflMat.conductivity);
+        material->SetProperty(EMaterialPropId::Conductivity, std::move(conductivity));
+
+        auto permittivity = mgr.CreateSimpleMaterialProp(xflMat.permittivity);
+        material->SetProperty(EMaterialPropId::Permittivity, std::move(permittivity));
+
+        auto permeability = mgr.CreateSimpleMaterialProp(xflMat.permeability);
+        material->SetProperty(EMaterialPropId::Permeability, std::move(permeability));
+
+        auto lossTangent = mgr.CreateSimpleMaterialProp(xflMat.lossTangent);
+        material->SetProperty(EMaterialPropId::MagneticLossTangent, std::move(lossTangent));
+    }
 }
 
 ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
@@ -84,11 +116,16 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
 
         auto psDefData = mgr.CreatePadstackDefData();
 
+        if(!m_matNameMap.count(xflVia.material)){
+            //todo, error handle
+            continue;
+        }
+        psDefData->SetMaterial(m_matNameMap.at(xflVia.material));
+
         auto eShape = boost::apply_visitor(eShapeGetter, xflShape->shape);
         GENERIC_ASSERT(eShape != nullptr)
 
         psDefData->SetViaParameters(std::move(eShape), EPoint2D(0, 0), math::Rad(xflVia.shapeRot));
-        psDefData->SetMaterial(xflVia.material);
 
         auto layerMap = mgr.CreateLayerMap(m_database, xflVia.name);
     
@@ -133,7 +170,17 @@ ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
     for(const auto & xflLyr : m_xflDB->layers){
         id++;
         ELayerType type = xflLyr.type == 'D' ? ELayerType::DielectricLayer : ELayerType::ConductingLayer;
-        auto layer = mgr.CreateStackupLayer(xflLyr.name, type, elevation * m_scale, xflLyr.thickness * m_scale);
+        std::string conductingMat = sDefaultConductingMat;
+        std::string dielectricMat = sDefaultDielectricMat;
+        auto iter_c = m_matNameMap.find(xflLyr.conductingMat);
+        if(iter_c != m_matNameMap.end()) conductingMat = iter_c->second;
+        auto iter_d = m_matNameMap.find(xflLyr.dielectricMat);
+        if(iter_d != m_matNameMap.end()) dielectricMat = iter_d->second;
+
+        auto layer = mgr.CreateStackupLayer(xflLyr.name, type,
+                                            elevation * m_scale, xflLyr.thickness * m_scale,
+                                            conductingMat, dielectricMat);
+
         if(type != ELayerType::DielectricLayer)
             m_metalLyrIdMap.insert(std::make_pair(xflMetalId++, static_cast<ELayerId>(id)));
         m_layerIdMap.insert(std::make_pair(xflLayerId++, static_cast<ELayerId>(id)));
@@ -163,20 +210,14 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
     auto toEPoint2D = [this](const Point & p) { return EPoint2D(m_scale * p.x, m_scale * p.y); };
 
-    int i = 0;//wbtest
     for(const auto & route : m_xflDB->routes) {
-        i++;
         auto net = mgr.FindNetByName(layout, route.net);
         if(nullptr == net){
             //todo, error handle
             continue;
         }
         auto netId = net->GetNetId();
-        int j = 0;//wbtest
         for(const auto & instObj : route.objects){
-            if(i == 75){
-                std::cout << j++ << std::endl;//wbtest
-            }
             //inst path
             if(auto * instPath = boost::get<InstPath>(&instObj)) {
                 auto layer = m_metalLyrIdMap.find(instPath->layer);
@@ -345,16 +386,67 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
 
                 auto eShape = boost::apply_visitor(eShapeGetter, temp->shape);
                 eShape->SetVoid(instShape->isVoid);
-                //todo, transform
+                
+                EMirror2D m = instShape->mirror == 'N' ? EMirror2D::No : 
+                             (instShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
+                if(instShape->rotThenMirror) {
+                    auto trans = makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc), m);
+                    eShape->Transform(trans);
+                }
+                else {
+                    eShape->Transform(makeETransform2D(1.0, 0.0, EPoint2D(0, 0), m));
+                    auto trans = makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc));
+                    eShape->Transform(trans);
+                }
 
-
-
-
+                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
+                GENERIC_ASSERT(ePrim != nullptr)
+            }
+            else {
+                GENERIC_ASSERT(false)
             }
         }
     }
 }
 
+ECAD_INLINE void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
+{
+    auto & mgr = EDataMgr::Instance();
+    EShapeGetter eShapeGetter(m_scale, m_circleDiv);
+    auto toEPoint2D = [this](const Point & p) { return EPoint2D(m_scale * p.x, m_scale * p.y); };
+
+    auto eShape = UPtr<EShape>();
+    if(auto * polygon = boost::get<Polygon>(&(m_xflDB->boardGeom))) {
+        eShape = eShapeGetter(*polygon);
+    }
+    else if(auto * composite = boost::get<Composite>(&(m_xflDB->boardGeom))) {
+        eShape = eShapeGetter(*composite);
+    }
+    else if(auto * boardShape = boost::get<BoardShape>(&(m_xflDB->boardGeom))) {
+        auto temp = m_xflDB->GetTemplateShape(boardShape->shapeId);
+        if(nullptr == temp) {
+            //todo, error handle
+            return;
+        }
+
+        auto eShape = boost::apply_visitor(eShapeGetter, temp->shape);
+        
+        EMirror2D m = boardShape->mirror == 'N' ? EMirror2D::No : 
+                     (boardShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
+        if(boardShape->rotThenMirror) {
+            auto trans = makeETransform2D(1.0, math::Rad(boardShape->rot), toEPoint2D(boardShape->loc), m);
+            eShape->Transform(trans);
+        }
+        else {
+            eShape->Transform(makeETransform2D(1.0, 0.0, EPoint2D(0, 0), m));
+            auto trans = makeETransform2D(1.0, math::Rad(boardShape->rot), toEPoint2D(boardShape->loc));
+            eShape->Transform(trans);
+        }
+    }
+    auto ePolygon = std::make_unique<EPolygon>();
+    ePolygon->shape = eShape->GetContour();
+    layout->SetBoundary(std::move(ePolygon));
+}
 
 ECAD_INLINE void ECadExtXflHandler::Reset()
 {
@@ -364,6 +456,7 @@ ECAD_INLINE void ECadExtXflHandler::Reset()
     m_xflDB.reset(new EXflDB);
 
     m_netIdMap.clear();
+    m_matNameMap.clear();
     m_layerIdMap.clear();
     m_metalLyrIdMap.clear();
     m_padstackInstNames.clear();
@@ -382,7 +475,6 @@ ECAD_INLINE std::string ECadExtXflHandler::GetNextPadstackInstName(const std::st
     }
     return "";
 }
-
 
 }//namespace xfl
 }//namespace ext

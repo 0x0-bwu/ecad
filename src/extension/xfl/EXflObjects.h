@@ -255,15 +255,15 @@ public:
         Point lastPt = *pt;
         for(; iter != composite.cend(); ++iter) {
             if(pt = boost::get<Point>(&(*iter))) {
-                lastPt = *pt;
                 data << toEPoint2D(lastPt);
+                lastPt = *pt;
             }
             else if(auto * arc = boost::get<Arc>(&(*iter))) {
-                lastPt = arc->end;
                 auto points = toEPoint2Ds(lastPt, *arc);
                 auto iter_p = points.begin(); iter_p++;//skip first one
                 for(; iter_p != points.end(); ++iter_p)
                     data << *iter_p;
+                lastPt = arc->end;
             }
             else {
                 GENERIC_ASSERT(false)

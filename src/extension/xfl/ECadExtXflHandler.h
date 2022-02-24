@@ -14,10 +14,12 @@ public:
     SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:
+    void ImportMaterialDefs();
     void ImportPadstackDefs();
     void ImportLayers(Ptr<ILayoutView> layout);
     void ImportNets(Ptr<ILayoutView> layout);
     void ImportConnObjs(Ptr<ILayoutView> layout);
+    void ImportBoardGeom(Ptr<ILayoutView> layout);
 
     void Reset();
 
@@ -36,6 +38,7 @@ private:
     std::map<int, ELayerId> m_layerIdMap;//xfl to ecad
     std::map<int, ELayerId> m_metalLyrIdMap;//xfl metal Id to ecad
     std::unordered_map<std::string, ENetId> m_netIdMap;
+    std::unordered_map<std::string, std::string> m_matNameMap;
     std::unordered_set<std::string> m_padstackInstNames;
 };
 
