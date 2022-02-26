@@ -10,6 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/EcadTest.exe",
+            // "program": "${workspaceFolder}/thirdpart/generic/build/UnitTest.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

@@ -23,14 +23,17 @@ public:
     EPrimitiveCollection(const EPrimitiveCollection & other);
     EPrimitiveCollection & operator= (const EPrimitiveCollection & other);
 
+    Ptr<IPrimitive> GetPrimitive(size_t index) const;
     Ptr<IPrimitive> AddPrimitive(UPtr<IPrimitive> primitive);
-    
+    bool SetPrimitive(UPtr<IPrimitive> primitive, size_t index);
+
     Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape);
     Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text);
 
     void Map(CPtr<ILayerMap> lyrMap);
 
     PrimitiveIter GetPrimitiveIter() const;
+    UPtr<IPrimitive> PopBack();
 
     size_t Size() const;
     void Clear();

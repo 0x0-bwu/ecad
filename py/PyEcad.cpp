@@ -17,6 +17,7 @@
 #include "ECellCollection.h"
 #include "ENetCollection.h"
 #include "EPadstackInst.h"
+#include "ECadSettings.h"
 #include "EPadstackDef.h"
 #include "ELayoutView.h"
 #include "EPrimitive.h"
@@ -1076,25 +1077,25 @@ namespace {
         ;
 
         //ESim
-        class_<esim::EMetalFractionMappingSettings>("EMetalFractionMappingSettings")
-            .def_readwrite("threads", &esim::EMetalFractionMappingSettings::threads)
-            .def_readwrite("out_file", &esim::EMetalFractionMappingSettings::outFile)
-            .def_readwrite("cood_units", &esim::EMetalFractionMappingSettings::coordUnits)
-            .def_readwrite("region_ext_top", &esim::EMetalFractionMappingSettings::regionExtTop)
-            .def_readwrite("region_ext_bot", &esim::EMetalFractionMappingSettings::regionExtBot)
-            .def_readwrite("region_ext_left", &esim::EMetalFractionMappingSettings::regionExtLeft)
-            .def_readwrite("region_ext_right", &esim::EMetalFractionMappingSettings::regionExtRight)
+        class_<EMetalFractionMappingSettings>("EMetalFractionMappingSettings")
+            .def_readwrite("threads", &EMetalFractionMappingSettings::threads)
+            .def_readwrite("out_file", &EMetalFractionMappingSettings::outFile)
+            .def_readwrite("cood_units", &EMetalFractionMappingSettings::coordUnits)
+            .def_readwrite("region_ext_top", &EMetalFractionMappingSettings::regionExtTop)
+            .def_readwrite("region_ext_bot", &EMetalFractionMappingSettings::regionExtBot)
+            .def_readwrite("region_ext_left", &EMetalFractionMappingSettings::regionExtLeft)
+            .def_readwrite("region_ext_right", &EMetalFractionMappingSettings::regionExtRight)
             .add_property("grid_x",
-                            +[](const esim::EMetalFractionMappingSettings & settings){ return settings.grid[0]; },
-                            make_function([](esim::EMetalFractionMappingSettings & settings, size_t x){ settings.grid[0] = x; },
-                            default_call_policies(), boost::mpl::vector<void, esim::EMetalFractionMappingSettings &, size_t>()))
+                            +[](const EMetalFractionMappingSettings & settings){ return settings.grid[0]; },
+                            make_function([](EMetalFractionMappingSettings & settings, size_t x){ settings.grid[0] = x; },
+                            default_call_policies(), boost::mpl::vector<void, EMetalFractionMappingSettings &, size_t>()))
             .add_property("grid_y",
-                            +[](const esim::EMetalFractionMappingSettings & settings){ return settings.grid[1]; },
-                            make_function([](esim::EMetalFractionMappingSettings & settings, size_t y){ settings.grid[1] = y; },
-                            default_call_policies(), boost::mpl::vector<void, esim::EMetalFractionMappingSettings &, size_t>()))
-            .add_property("select_nets", +[](const esim::EMetalFractionMappingSettings & settings){ return std_container_to_py_list(settings.selectNets); },
-                            make_function([](esim::EMetalFractionMappingSettings & settings, const boost::python::list & l){ settings.selectNets = py_list_to_std_container<std::unordered_set<int> >(l); },
-                            default_call_policies(), boost::mpl::vector<void, esim::EMetalFractionMappingSettings &, const boost::python::list &>()))
+                            +[](const EMetalFractionMappingSettings & settings){ return settings.grid[1]; },
+                            make_function([](EMetalFractionMappingSettings & settings, size_t y){ settings.grid[1] = y; },
+                            default_call_policies(), boost::mpl::vector<void, EMetalFractionMappingSettings &, size_t>()))
+            .add_property("select_nets", +[](const EMetalFractionMappingSettings & settings){ return std_container_to_py_list(settings.selectNets); },
+                            make_function([](EMetalFractionMappingSettings & settings, const boost::python::list & l){ settings.selectNets = py_list_to_std_container<std::unordered_set<ENetId> >(l); },
+                            default_call_policies(), boost::mpl::vector<void, EMetalFractionMappingSettings &, const boost::python::list &>()))
             ;
     }
 }

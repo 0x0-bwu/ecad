@@ -75,7 +75,7 @@ ECAD_INLINE ELayerType ELayer::GetLayerType() const
 {
     return m_layerType;
 }
-
+    
 ECAD_INLINE Ptr<IStackupLayer> ELayer::GetStackupLayerFromLayer()
 {
     return dynamic_cast<Ptr<IStackupLayer> >(this);

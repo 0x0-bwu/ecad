@@ -4,6 +4,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #endif
 
 #include "simulation/EMetalFractionMapping.h"
+#include "utility/ELayoutPolygonMerger.h"
 #include "utility/EBoundaryCalculator.h"
 #include "utility/ELayoutMergeUtility.h"
 #include "utility/ELayoutConnectivity.h"
@@ -221,7 +222,7 @@ ECAD_INLINE CPtr<EPolygon> ELayoutView::GetBoundary() const
     return m_boundary.get();
 }
 
-ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const esim::EMetalFractionMappingSettings & settings) const
+ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) const
 {
     esim::LayoutMetalFractionMapper mapper(settings);
     return mapper.GenerateMetalFractionMapping(this);
@@ -230,6 +231,14 @@ ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const esim::EMetalFra
 ECAD_INLINE void ELayoutView::ConnectivityExtraction()
 {
     euti::ELayoutConnectivity::ConnectivityExtraction(this);
+}
+
+ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings)
+{
+    euti::ELayoutPolygonMerger merger(this);
+    merger.SetLayoutMergeSettings(settings);
+    //todo, wbtest
+    return true;
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)

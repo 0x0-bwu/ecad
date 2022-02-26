@@ -78,10 +78,13 @@ public:
     CPtr<EPolygon> GetBoundary() const;
 
     ///Metal Fraction Mapping
-    bool GenerateMetalFractionMapping(const esim::EMetalFractionMappingSettings & settings) const;
+    bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) const;
 
     ///Connectivity Extraction
     void ConnectivityExtraction();
+
+    ///Layout Polygon Merge
+    bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings);
     
     ///Flatten
     void Flatten(const EFlattenOption & option);

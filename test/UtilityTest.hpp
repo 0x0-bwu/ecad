@@ -54,12 +54,33 @@ void t_connectivity_extraction()
     EDataMgr::Instance().ShutDown();
 }
 
+void t_layout_polygon_merge()
+{
+    std::string err;
+    std::string fccspXfl = ecad_test::GetTestDataPath() + "/extension/xfl/fccsp.xfl";
+    auto fccsp = ext::CreateDatabaseFromXfl("test", fccspXfl, &err);
+    BOOST_CHECK(err.empty());
+    BOOST_CHECK(fccsp != nullptr);
+
+    std::vector<Ptr<ICell> > cells;
+    fccsp->GetCircuitCells(cells);
+    BOOST_CHECK(cells.size() == 1);
+    
+    auto layout = cells.front()->GetLayoutView();
+
+    ELayoutPolygonMergeSettings settings;
+    BOOST_CHECK(layout->MergeLayerPolygons(settings));
+
+    EDataMgr::Instance().ShutDown();
+}
+
 test_suite * create_ecad_utility_test_suite()
 {
     test_suite * utility_suite = BOOST_TEST_SUITE("s_utility_test");
     //
     utility_suite->add(BOOST_TEST_CASE(&t_flatten_utility));
     utility_suite->add(BOOST_TEST_CASE(&t_connectivity_extraction));
+    utility_suite->add(BOOST_TEST_CASE(&t_layout_polygon_merge));
     //
     return utility_suite;
 }

@@ -49,12 +49,24 @@ ECAD_INLINE EPrimitiveCollection & EPrimitiveCollection::operator= (const EPrimi
     return *this;
 }
 
+ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::GetPrimitive(size_t index) const
+{
+    if(index >= Size()) return nullptr;
+    return m_collection[index].get();
+}
+
 ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::AddPrimitive(UPtr<IPrimitive> primitive)
 {
     Append(std::move(primitive));
     return Back().get();
 }
 
+ECAD_INLINE bool EPrimitiveCollection::SetPrimitive(UPtr<IPrimitive> primitive, size_t index)
+{
+    if(index >= Size()) return false;
+    m_collection[index] = std::move(primitive);
+    return true;
+}
 
 ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape)
 {
@@ -79,6 +91,14 @@ ECAD_INLINE void EPrimitiveCollection::Map(CPtr<ILayerMap> lyrMap)
 ECAD_INLINE PrimitiveIter EPrimitiveCollection::GetPrimitiveIter() const
 {
     return PrimitiveIter(new EPrimitiveIterator(*this));
+}
+
+ECAD_INLINE UPtr<IPrimitive> EPrimitiveCollection::PopBack()
+{
+    if(0 == Size()) return nullptr;
+    UPtr<IPrimitive> tail = std::move(m_collection.back());
+    m_collection.pop_back();
+    return std::move(tail);
 }
 
 ECAD_INLINE size_t EPrimitiveCollection::Size() const

@@ -15,13 +15,13 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
 
     std::string currentPath = generic::filesystem::CurrentPath();
 
-    esim::EMetalFractionMappingSettings settings;
+    EMetalFractionMappingSettings settings;
     settings.threads = 16;
     settings.grid = {25, 25};
-    settings.regionExtTop = 470;//um
-    settings.regionExtBot = 470;//um
-    settings.regionExtLeft = 470;//um
-    settings.regionExtRight = 470;//um
+    settings.regionExtTop   = 0;//0.47;//mm
+    settings.regionExtBot   = 0;//0.47;//mm
+    settings.regionExtLeft  = 0;//0.47;//mm
+    settings.regionExtRight = 0;//0.47;//mm
     settings.coordUnits = layout->GetCell()->GetDatabase()->GetCoordUnits();
     settings.outFile = currentPath + "/test/ecad/testdata/simulation/result.mf";
 
@@ -37,14 +37,14 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     WriteThermalProfile(*mfInfo, *mf, densityFile);
 
     //wbtest
-    std::vector<double> thickness(7);
-    thickness[0] = 0.00003048 * 1e9;
-    thickness[1] = 0.00020320 * 1e9;
-    thickness[2] = 0.00003048 * 1e9;
-    thickness[3] = 0.00020320 * 1e9;
-    thickness[4] = 0.00003048 * 1e9;
-    thickness[5] = 0.00020320 * 1e9;
-    thickness[6] = 0.00003048 * 1e9;
+    std::vector<Ptr<ILayer> > layers;
+    layout->GetStackupLayers(layers);
+
+    std::vector<FCoord> thickness;
+    for(auto layer : layers) {
+        auto stackupLayer = layer->GetStackupLayerFromLayer();
+        thickness.push_back(stackupLayer->GetThickness());
+    }
 
     auto [nx, ny] = mfInfo->grid;
     std::cout << "x: " << nx << ", y: " << ny << std::endl;//wbtest

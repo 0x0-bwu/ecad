@@ -1,8 +1,6 @@
 #ifndef ECAD_ILAYOUTVIEW_H
 #define ECAD_ILAYOUTVIEW_H
-#include "simulation/ESimulationSettings.h"
-#include "ECadCommon.h"
-#include "ECadDef.h"
+#include "ECadSettings.h"
 #include "IIterator.h"
 #include "Protocol.h"
 #include <string>
@@ -88,10 +86,13 @@ public:
     virtual void Flatten(const EFlattenOption & option) = 0;
 
     ///Metal Fraction Mapping
-    virtual bool GenerateMetalFractionMapping(const esim::EMetalFractionMappingSettings & settings) const = 0;
+    virtual bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) const = 0;
 
     ///Connectivity Extraction
     virtual void ConnectivityExtraction() = 0;
+
+    ///Layout Polygon Merge
+    virtual bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) = 0;
 
     ///Mapping
     virtual void Map(CPtr<ILayerMap> lyrMap) = 0;

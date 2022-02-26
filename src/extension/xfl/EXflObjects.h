@@ -228,7 +228,8 @@ private:
 class EShapeGetter : public boost::static_visitor<UPtr<EShape> >
 {
 public:
-    EShapeGetter(double scale, size_t circleDiv) : m_circleDiv(circleDiv) {}
+    EShapeGetter(double scale, size_t circleDiv)
+     : m_scale(scale), m_circleDiv(circleDiv) {}
 
     UPtr<EShape> operator() (const Polygon & polygon) const
     {

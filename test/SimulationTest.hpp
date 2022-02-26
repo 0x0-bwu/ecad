@@ -31,7 +31,7 @@ void t_metal_fraction_mapping()
     auto topCell = topCells.front();
     auto flattened = topCell->GetFlattenedLayoutView();
 
-    esim::EMetalFractionMappingSettings settings;
+    EMetalFractionMappingSettings settings;
     settings.threads = 16;
     settings.grid = {50, 50};
     settings.coordUnits = database->GetCoordUnits();
@@ -60,12 +60,12 @@ void t_metal_fraction_mapping_select_nets()
     auto layout = cells.front()->GetLayoutView();
     layout->ConnectivityExtraction();
 
-    esim::EMetalFractionMappingSettings settings;
+    EMetalFractionMappingSettings settings;
     settings.threads = 16;
     settings.grid = {50, 50};
     settings.coordUnits = database->GetCoordUnits();
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
-    settings.selectNets.insert(1);
+    settings.selectNets.insert(static_cast<ENetId>(1));
 
     BOOST_CHECK(layout->GenerateMetalFractionMapping(settings));
 
@@ -77,14 +77,13 @@ void t_thermal_network_extraction()
     using namespace generic::filesystem;
 
     std::string err;
-    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
-    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
-    auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
+    std::string fccspXfl = ecad_test::GetTestDataPath() + "/extension/xfl/fccsp.xfl";
+    auto fccsp = ext::CreateDatabaseFromXfl("test", fccspXfl, &err);
     BOOST_CHECK(err.empty());
-    BOOST_CHECK(database != nullptr);
+    BOOST_CHECK(fccsp != nullptr);
 
     std::vector<Ptr<ICell> > cells;
-    database->GetCircuitCells(cells);
+    fccsp->GetCircuitCells(cells);
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();

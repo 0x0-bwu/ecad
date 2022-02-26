@@ -32,9 +32,15 @@ ECAD_INLINE void LayereMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
     m_solids.clear();
     m_holes.clear();
 
+    auto layoutCopy = layout->Clone();
+    ELayoutPolygonMergeSettings settings;
+    settings.threads = m_settings.threads;
+    settings.selectNets = m_settings.selectNets;
+    layoutCopy->MergeLayerPolygons(settings);
+
     bool bSelNet = m_settings.selectNets.size() > 0;
     const auto & selNets = m_settings.selectNets;
-    auto primIter = layout->GetPrimitiveIter();
+    auto primIter = layoutCopy->GetPrimitiveIter();
     while(auto primitive = primIter->Next()){
         auto layer = primitive->GetLayer();
         if(noLayer == layer) continue;
@@ -45,8 +51,8 @@ ECAD_INLINE void LayereMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
         auto shape = geom->GetShape();
         if(nullptr == shape) continue;
 
-        auto net = primitive->GetNet();
-        if(bSelNet && !selNets.count(static_cast<int>(net))) continue;
+        auto netId = primitive->GetNet();
+        if(bSelNet && !selNets.count(netId)) continue;
 
         if(shape->hasHole()){
             auto pwh = shape->GetPolygonWithHoles();
@@ -59,44 +65,6 @@ ECAD_INLINE void LayereMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
             m_solids.emplace_back(std::move(polygon));
         }
     }
-
-    //need merge pads firstly
-    if(!m_bMetal){
-        auto psInstIter = layout->GetPadstackInstIter();
-        while(auto psInst = psInstIter->Next()){
-
-            auto net = psInst->GetNet();
-            if(bSelNet && !selNets.count(static_cast<int>(net))) continue;
-
-            ELayerId top, bot;
-            psInst->GetLayerRange(top, bot);
-            if(m_id < top || m_id > bot) continue;
-
-            auto defData = psInst->GetPadstackDef()->GetPadstackDefData();
-            if(nullptr == defData) continue;
-            
-            CPtr<EShape> shape;
-            EPoint2D offset;
-            EValue rotation;
-            defData->GetViaParameters(shape, offset, rotation);
-
-            if(nullptr == shape) continue;
-            auto trans = psInst->GetTransform().GetTransform()
-                       * makeShiftTransform2D<EValue>(offset)
-                       * makeRotateTransform2D(rotation);
-            if(shape->hasHole()){
-                auto pwh = trans * shape->GetPolygonWithHoles();
-                m_solids.emplace_back(std::move(pwh.outline));
-                for(auto & hole : pwh.holes)
-                    m_holes.emplace_back(std::move(hole));
-            }
-            else {
-                auto polygon = trans * shape->GetContour();
-                m_solids.emplace_back(std::move(polygon));
-            }  
-        }
-    }
-
     Mapping(ctrl);
 }
 

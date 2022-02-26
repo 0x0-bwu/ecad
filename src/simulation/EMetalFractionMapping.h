@@ -2,9 +2,7 @@
 #define ECAD_ESIM_EMATELFRACTIONMAPPING_H
 #include "generic/geometry/OccupancyGridMap.hpp"
 #include "generic/tools/FileSystem.hpp"
-#include "ESimulationSettings.h"
-#include "ECadCommon.h"
-#include "ECadDef.h"
+#include "ECadSettings.h"
 #include <vector>
 namespace ecad {
 
