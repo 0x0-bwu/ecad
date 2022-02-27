@@ -3,6 +3,7 @@
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "Protocol.h"
+#include "EcadDef.h"
 #include <string>
 namespace ecad {
 class INet;
@@ -13,6 +14,7 @@ public:
     virtual ~INetCollection() = default;
     virtual std::string NextNetName(const std::string & name) const = 0;
     virtual Ptr<INet> FindNetByName(const std::string & name) const = 0;
+    virtual Ptr<INet> FindNetByNetId(ENetId netId) const = 0;
     virtual Ptr<INet> CreateNet(const std::string & name) = 0;
     virtual Ptr<INet> AddNet(UPtr<INet> net) = 0;
     virtual NetIter GetNetIter() const = 0;

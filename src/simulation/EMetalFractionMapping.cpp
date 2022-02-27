@@ -15,7 +15,7 @@ namespace ecad {
 namespace esim {
 using namespace generic::geometry;
 
-ECAD_INLINE LayereMetalFractionMapper::LayereMetalFractionMapper(const Setting & settings, LayoutMetalFraction & fraction, ELayerId layerId, bool isMetal)
+ECAD_INLINE LayerMetalFractionMapper::LayerMetalFractionMapper(const Setting & settings, LayoutMetalFraction & fraction, ELayerId layerId, bool isMetal)
  : m_id(layerId)
  , m_bMetal(isMetal)
  , m_settings(settings)
@@ -23,36 +23,30 @@ ECAD_INLINE LayereMetalFractionMapper::LayereMetalFractionMapper(const Setting &
 {
 }
 
-ECAD_INLINE LayereMetalFractionMapper::~LayereMetalFractionMapper()
+ECAD_INLINE LayerMetalFractionMapper::~LayerMetalFractionMapper()
 {
 }
 
-ECAD_INLINE void LayereMetalFractionMapper::GenerateMetalFractionMapping(CPtr<ILayoutView> layout, const MapCtrl & ctrl)
+ECAD_INLINE void LayerMetalFractionMapper::GenerateMetalFractionMapping(CPtr<ILayoutView> layout, const MapCtrl & ctrl)
 {
     m_solids.clear();
     m_holes.clear();
 
-    auto layoutCopy = layout->Clone();
-    ELayoutPolygonMergeSettings settings;
-    settings.threads = m_settings.threads;
-    settings.selectNets = m_settings.selectNets;
-    layoutCopy->MergeLayerPolygons(settings);
-
     bool bSelNet = m_settings.selectNets.size() > 0;
     const auto & selNets = m_settings.selectNets;
-    auto primIter = layoutCopy->GetPrimitiveIter();
+    auto primIter = layout->GetPrimitiveIter();
     while(auto primitive = primIter->Next()){
         auto layer = primitive->GetLayer();
         if(noLayer == layer) continue;
         if(m_id != layer) continue;
 
+        auto netId = primitive->GetNet();
+        if(bSelNet && !selNets.count(netId)) continue;
+
         auto geom = primitive->GetGeometry2DFromPrimitive();
         if(nullptr == geom) continue;
         auto shape = geom->GetShape();
         if(nullptr == shape) continue;
-
-        auto netId = primitive->GetNet();
-        if(bSelNet && !selNets.count(netId)) continue;
 
         if(shape->hasHole()){
             auto pwh = shape->GetPolygonWithHoles();
@@ -68,7 +62,7 @@ ECAD_INLINE void LayereMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
     Mapping(ctrl);
 }
 
-ECAD_INLINE void LayereMetalFractionMapper::Mapping(const MapCtrl & ctrl)
+ECAD_INLINE void LayerMetalFractionMapper::Mapping(const MapCtrl & ctrl)
 {
     const auto id = m_id;
     auto solidBlend = [&id](typename LayoutMetalFraction::ResultType & res, const Product & p) { res[id] += p.ratio; };
@@ -107,18 +101,25 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
 {
     ECAD_EFFICIENCY_TRACK("metal fraction mapping");
     
+    auto layoutCopy = layout->Clone();
+    ELayoutPolygonMergeSettings settings;
+    settings.threads = m_settings.threads;
+    settings.selectNets = m_settings.selectNets;
+    layoutCopy->MergeLayerPolygons(settings);
+
+    auto coordUnits = layoutCopy->GetCoordUnits();
     m_mfInfo.reset(new MetalFractionInfo);
     m_mfInfo->grid = m_settings.grid;
-    m_mfInfo->coordUnits = m_settings.coordUnits;
+    m_mfInfo->coordUnits = coordUnits;
     
-    auto boundary = layout->GetBoundary();
+    auto boundary = layoutCopy->GetBoundary();
     auto bbox = boundary->GetBBox();
 
     m_mfInfo->origin = bbox;
-    bbox[0][0] -= m_settings.coordUnits.toCoord(m_settings.regionExtLeft);
-    bbox[0][1] -= m_settings.coordUnits.toCoord(m_settings.regionExtBot);
-    bbox[1][0] += m_settings.coordUnits.toCoord(m_settings.regionExtRight);
-    bbox[1][1] += m_settings.coordUnits.toCoord(m_settings.regionExtTop);
+    bbox[0][0] -= coordUnits.toCoord(m_settings.regionExtLeft);
+    bbox[0][1] -= coordUnits.toCoord(m_settings.regionExtBot);
+    bbox[1][0] += coordUnits.toCoord(m_settings.regionExtRight);
+    bbox[1][1] += coordUnits.toCoord(m_settings.regionExtTop);
     m_mfInfo->stride[0] = std::round(FCoord(bbox.Length()) / m_settings.grid[0]);
     m_mfInfo->stride[1] = std::round(FCoord(bbox.Width())  / m_settings.grid[1]);
 
@@ -128,29 +129,27 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
     m_mfInfo->extension = bbox;
     m_result.reset(new LayoutMetalFraction(m_mfInfo->grid[0], m_mfInfo->grid[1]));
 
-    auto layerCollection = layout->GetLayerCollection();
+    auto layerCollection = layoutCopy->GetLayerCollection();
     auto layerSize = layerCollection->Size();
     auto resultSize = m_result->Size();
     for(size_t i = 0; i < resultSize; ++i)
         (*m_result)[i].assign(layerSize, 0);
 
     MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, m_settings.threads);
-    auto layerIter = layout->GetLayerIter();
+    auto layerIter = layoutCopy->GetLayerIter();
 
     //stackuplayer
     while(auto * layer = layerIter->Next()){
         auto * stackupLayer = layer->GetStackupLayerFromLayer();
         if(nullptr == stackupLayer) continue;
         bool isMetal = layer->GetLayerType() == ELayerType::ConductingLayer;
-        LayereMetalFractionMapper mapper(m_settings, *m_result, layer->GetLayerId(), isMetal);
-        mapper.GenerateMetalFractionMapping(layout, ctrl);
+        LayerMetalFractionMapper mapper(m_settings, *m_result, layer->GetLayerId(), isMetal);
+        mapper.GenerateMetalFractionMapping(layoutCopy.get(), ctrl);
 
         StackupLayerInfo lyrInfo{ isMetal, stackupLayer->GetElevation(), stackupLayer->GetThickness(), layer->GetName() };
         (m_mfInfo->layers).emplace_back(std::move(lyrInfo));
-    }
-    //further, via layer
-    
-    //return WriteResult2File();
+    }    
+    //return WriteResult2File(coordUnits.Scale2Unit());
     return true; 
 }
 
@@ -166,7 +165,7 @@ ECAD_INLINE CPtr<MetalFractionInfo> LayoutMetalFractionMapper::GetMetalFractionI
     return m_mfInfo.get();
 }
 
-ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File()
+ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File(double scale)
 {
     //LAYERS 7
     //LAYNERNAME ISMETAL ELEVATION(m) THICKNESS(m)
@@ -181,7 +180,6 @@ ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File()
     if(!m_fileHelper.Open(m_settings.outFile)) return false;
 
     const auto & info = *m_mfInfo;
-    auto scale = m_settings.coordUnits.Scale2Unit();
 
     std::stringstream ss;
     char sp(32);

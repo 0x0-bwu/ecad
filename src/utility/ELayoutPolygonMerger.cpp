@@ -3,6 +3,7 @@
 #endif
 
 #include "generic/geometry/PolygonMerge.hpp"
+#include "generic/tools/FileSystem.hpp"
 #include "Interface.h"
 namespace ecad {
 namespace euti {
@@ -39,12 +40,18 @@ ECAD_INLINE void ELayoutPolygonMerger::SetLayoutMergeSettings(ELayoutPolygonMerg
 ECAD_INLINE void ELayoutPolygonMerger::Merge()
 {
     FillPolygonsFromLayout();
+
+    if(!m_settings.outFile.empty())
+        WriteDomDmcFiles(m_settings.outFile);
+        
     MergeLayers();
+
     FillPolygonsBackToLayout();
 }
 
 ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
 {
+    m_netIdNameMap.clear();
     m_primTobeRemove.clear();
 
     size_t i = 0;
@@ -98,8 +105,9 @@ ECAD_INLINE void ELayoutPolygonMerger::MergeOneLayer(Ptr<LayerMerger> merger)
     //todo, add settings
     merger->SetMergeSettings(settings);
 
-    PolygonMergeRunner runner(*merger, m_settings.threads);
-    runner.Run();
+    // PolygonMergeRunner runner(*merger, m_settings.threads);
+    // runner.Run();//wbtest
+    merger->Merge();
 }
 
 ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
@@ -110,7 +118,6 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
         std::list<CPtr<PolygonData> > polygons;
         merger.second->GetAllPolygons(polygons);
         for(const auto * polygon : polygons) {
-            if(!polygon->hasSolid()) continue;
             UPtr<EShape> eShape = nullptr;
             if(!polygon->hasHole()) {
                 auto shape = new EPolygon;
@@ -144,17 +151,17 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
     switch (shape->GetShapeType()) {
         case EShapeType::Rectangle : {
             auto rect = dynamic_cast<Ptr<ERectangle> >(shape);
-            merger->second->AddObject(netId, rect->shape, rect->isVoid());
+            merger->second->AddObject(netId, rect->shape);
             break;
         }
         case EShapeType::Path : {
             auto path = dynamic_cast<Ptr<EPath> >(shape);
-            merger->second->AddObject(netId, path->GetContour(), path->isVoid());
+            merger->second->AddObject(netId, path->GetContour());
             break;
         }
         case EShapeType::Polygon : {
             auto polygon = dynamic_cast<Ptr<EPolygon> >(shape);
-            merger->second->AddObject(netId, polygon->shape, polygon->isVoid());
+            merger->second->AddObject(netId, polygon->shape);
             break;
         }
         case EShapeType::PolygonWithHoles : {
@@ -167,6 +174,69 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
         }
     }
     return true;
+}
+
+ECAD_INLINE bool ELayoutPolygonMerger::WriteDomDmcFiles(const std::string & filename)
+{
+    auto dir = filesystem::DirName(filename);
+    if(!filesystem::PathExists(dir))
+        filesystem::CreateDir(dir);
+
+    std::string dom = filename + ".dom";
+    std::string dmc = filename + ".dmc";
+    std::fstream f_dom(dom, std::ios::out | std::ios::trunc);
+    std::fstream f_dmc(dmc, std::ios::out | std::ios::trunc);
+    if(f_dom.bad() || f_dmc.bad()) return false;
+
+    f_dom << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+    f_dmc << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+
+    for(const auto & merger : m_mergers)
+        WriteDomDmcForOneLayer(f_dom, f_dmc, merger.first, merger.second.get());
+
+    f_dom.close();
+    f_dmc.close();
+
+    return true;
+}
+
+ECAD_INLINE void ELayoutPolygonMerger::WriteDomDmcForOneLayer(std::fstream & dom, std::fstream & dmc, ELayerId layerId, Ptr<LayerMerger> merger)
+{
+    using PolygonData = typename LayerMerger::PolygonData;
+    int lyrId = static_cast<int>(layerId);
+    EValue scale = m_layout->GetCoordUnits().Scale2Unit();
+    auto writeOnePolygon = [this, &dom, &dmc, &scale, &lyrId](const std::string & lyrName, int netId, const std::string & netName, const Polygon2D<ECoord> & p, bool isHole)
+    {
+        char s(32);
+        auto box = geometry::Extent(p);
+        int solidOrHole = isHole ? 0 : 1;
+        //<pt size> <solid/hole> <layer number> <lx> <rx> <ly> <uy> <net number> <net name> <signal layer number> <layer name>
+        dmc << p.Size() << s << solidOrHole << s << lyrId << s;
+        dmc << box[0][0] * scale << s << box[1][0] * scale << s;
+        dmc << box[0][1] * scale << s << box[1][1] * scale << s;
+        dmc << netId << s << netName << s << lyrId << s << lyrName << GENERIC_DEFAULT_EOL;
+        for(size_t i = 0; i < p.Size(); ++i)
+            dom << p[i][0] * scale << s << p[i][1] * scale << GENERIC_DEFAULT_EOL;
+    };
+
+    auto writeOnePolygonData = [this, &layerId, &writeOnePolygon](CPtr<PolygonData> pd)
+    {
+        auto net = m_layout->FindNetByNetId(pd->property);
+        auto layer = m_layout->FindLayerByLayerId(layerId);
+        if(net && layer) {
+            auto netName = net->GetName();
+            auto lyrName = layer->GetName();
+            auto netId = static_cast<int>(net->GetNetId());
+            writeOnePolygon(lyrName, netId, netName, pd->solid, false);
+            for(const auto & hole : pd->holes)
+                writeOnePolygon(lyrName, netId, netName, hole, true);
+        }
+    };
+
+    std::list<CPtr<PolygonData> > polygons;
+    merger->GetAllPolygons(polygons);
+    for(auto polygon : polygons)
+        writeOnePolygonData(polygon);
 }
 
 }//namespace euti

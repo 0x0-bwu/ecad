@@ -14,15 +14,15 @@ using namespace generic::geometry;
 using IntPolygon = Polygon2D<ECoord>;
 using MapCtrl = OccupancyGridMappingFactory::GridCtrl<ECoord>;
 using LayoutMetalFraction = OccupancyGridMap<std::vector<float> >;
-class ECAD_API LayereMetalFractionMapper
+class ECAD_API LayerMetalFractionMapper
 {
 public:
     using Property = void*;//not used now
     using Factory = OccupancyGridMappingFactory;
     using Product = typename Factory::Product<Property>;
     using Setting = EMetalFractionMappingSettings;
-    explicit LayereMetalFractionMapper(const Setting & settings, LayoutMetalFraction & fraction, ELayerId layerId, bool isMetal);
-    virtual ~LayereMetalFractionMapper();
+    explicit LayerMetalFractionMapper(const Setting & settings, LayoutMetalFraction & fraction, ELayerId layerId, bool isMetal);
+    virtual ~LayerMetalFractionMapper();
 
     void GenerateMetalFractionMapping(CPtr<ILayoutView> layout, const MapCtrl & ctrl);
 
@@ -68,7 +68,7 @@ public:
     CPtr<MetalFractionInfo> GetMetalFractionInfo() const;
 
 private:
-    bool WriteResult2File();
+    bool WriteResult2File(double scale);
 
 private:
     EMetalFractionMappingSettings m_settings;

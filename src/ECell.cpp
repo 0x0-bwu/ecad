@@ -79,6 +79,11 @@ ECAD_INLINE void ECell::SetDatabase(Ptr<IDatabase> database)
     m_database = database; 
 }
 
+ECAD_INLINE const ECoordUnits & ECell::GetCoordUnits() const
+{
+    return GetDatabase()->GetCoordUnits();
+}
+
 ECAD_INLINE Ptr<IDatabase> ECell::GetDatabase() const
 {
     return m_database;

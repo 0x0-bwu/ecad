@@ -1080,7 +1080,6 @@ namespace {
         class_<EMetalFractionMappingSettings>("EMetalFractionMappingSettings")
             .def_readwrite("threads", &EMetalFractionMappingSettings::threads)
             .def_readwrite("out_file", &EMetalFractionMappingSettings::outFile)
-            .def_readwrite("cood_units", &EMetalFractionMappingSettings::coordUnits)
             .def_readwrite("region_ext_top", &EMetalFractionMappingSettings::regionExtTop)
             .def_readwrite("region_ext_bot", &EMetalFractionMappingSettings::regionExtBot)
             .def_readwrite("region_ext_left", &EMetalFractionMappingSettings::regionExtLeft)

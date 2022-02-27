@@ -20,6 +20,8 @@ public:
     virtual void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const = 0;
     virtual LayerIter GetLayerIter() const = 0;
     virtual size_t Size() const = 0;
+    virtual Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const = 0;
+    virtual Ptr<ILayer> FindLayerByName(const std::string & name) const = 0;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ILayerCollection)

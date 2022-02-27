@@ -33,6 +33,9 @@ public:
     virtual const std::string & GetName() const = 0;
     virtual std::string sUuid() const = 0;
     
+    ///Units
+    virtual const ECoordUnits & GetCoordUnits() const = 0;
+
     ///Iterating objects
     virtual NetIter GetNetIter() const = 0;
     virtual LayerIter GetLayerIter() const = 0;
@@ -51,10 +54,13 @@ public:
     virtual void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const = 0;
     virtual void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const = 0;
     virtual UPtr<ILayerMap> AddDefaultDielectricLayers() const = 0;
+    virtual Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const = 0;
+    virtual Ptr<ILayer> FindLayerByName(const std::string & name) const = 0;
 
     ///Net
     virtual Ptr<INet> CreateNet(const std::string & name) = 0;
     virtual Ptr<INet> FindNetByName(const std::string & name) const = 0;
+    virtual Ptr<INet> FindNetByNetId(ENetId netId) const = 0;
 
     ///Padstack
     virtual Ptr<IPadstackInst> CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,

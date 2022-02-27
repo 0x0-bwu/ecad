@@ -18,11 +18,10 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     EMetalFractionMappingSettings settings;
     settings.threads = 16;
     settings.grid = {25, 25};
-    settings.regionExtTop   = 0;//0.47;//mm
-    settings.regionExtBot   = 0;//0.47;//mm
-    settings.regionExtLeft  = 0;//0.47;//mm
-    settings.regionExtRight = 0;//0.47;//mm
-    settings.coordUnits = layout->GetCell()->GetDatabase()->GetCoordUnits();
+    settings.regionExtTop   = 0.47;//mm
+    settings.regionExtBot   = 0.47;//mm
+    settings.regionExtLeft  = 0.47;//mm
+    settings.regionExtRight = 0.47;//mm
     settings.outFile = currentPath + "/test/ecad/testdata/simulation/result.mf";
 
     LayoutMetalFractionMapper mapper(settings);
@@ -36,7 +35,6 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     std::string densityFile = currentPath + "/test/ecad/testdata/simulation/density.txt";
     WriteThermalProfile(*mfInfo, *mf, densityFile);
 
-    //wbtest
     std::vector<Ptr<ILayer> > layers;
     layout->GetStackupLayers(layers);
 
@@ -68,8 +66,9 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     double area = 0;
     size_t count = 0;
     auto m = generic::unit::Length::Meter;
-    double xLen = settings.coordUnits.toUnit(mfInfo->stride[0], m);
-    double yLen = settings.coordUnits.toUnit(mfInfo->stride[1], m);
+    auto coordUnits = layout->GetCoordUnits();
+    double xLen = coordUnits.toUnit(mfInfo->stride[0], m);
+    double yLen = coordUnits.toUnit(mfInfo->stride[1], m);
     for(size_t i = 0; i < size; ++i){
 
         auto modelIndex = GetModelIndex(i);
@@ -90,25 +89,25 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
         if(invalidIndex != xNb){
             if(mfIdx1.isValid()){
                 k += equivK(blockF(mfIdx1));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
                 area += 0.25 * zLen * yLen;
                 count++;
             }
             if(mfIdx4.isValid()){
                 k += equivK(blockF(mfIdx4));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
                 area += 0.25 * zLen * yLen;
                 count++;
             }
             if(mfIdx5.isValid()){
                 k += equivK(blockF(mfIdx5));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
                 area += 0.25 * zLen * yLen;
                 count++;
             }
             if(mfIdx8.isValid()){
                 k += equivK(blockF(mfIdx8));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
                 area += 0.25 * zLen * yLen;
                 count++;
             }
@@ -126,25 +125,25 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
         if(invalidIndex != yNb){
             if(mfIdx1.isValid()){
                 k += equivK(blockF(mfIdx1));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
                 area += 0.25 * zLen * xLen;
                 count++;
             }
             if(mfIdx2.isValid()){
                 k += equivK(blockF(mfIdx2));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
                 area += 0.25 * zLen * xLen;
                 count++;
             }
             if(mfIdx3.isValid()){
                 k += equivK(blockF(mfIdx3));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
                 area += 0.25 * zLen * xLen;
                 count++;
             }
             if(mfIdx4.isValid()){
                 k += equivK(blockF(mfIdx4));
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z), m);
                 area += 0.25 * zLen * xLen;
                 count++;
             }
@@ -181,7 +180,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
                 count++;
             }
             if(count != 0){
-                auto zLen = settings.coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
+                auto zLen = coordUnits.toUnit(thickness.at(nz - modelIndex.z - 1), m);
                 k = k / count * zLen / area;
                 m_network->SetR(i, zNb, k);
             }

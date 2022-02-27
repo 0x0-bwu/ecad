@@ -114,7 +114,14 @@ ECAD_INLINE size_t ELayerCollection::Size() const
     return BaseCollection::Size();
 }
 
-ECAD_INLINE CPtr<ILayer> ELayerCollection::FindLayerByName(const std::string & name) const
+ECAD_INLINE Ptr<ILayer> ELayerCollection::FindLayerByLayerId(ELayerId lyrId) const
+{
+    size_t index = static_cast<size_t>(lyrId);
+    if(index >= Size()) return nullptr;
+    return At(index).get();
+}
+
+ECAD_INLINE Ptr<ILayer> ELayerCollection::FindLayerByName(const std::string & name) const
 {
     for(const auto & layer : m_collection){
         if(name == layer->GetName())

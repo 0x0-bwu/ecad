@@ -70,6 +70,11 @@ ECAD_INLINE ELayoutView & ELayoutView::operator= (const ELayoutView & other)
     return *this;
 }
 
+ECAD_INLINE const ECoordUnits & ELayoutView::GetCoordUnits() const
+{
+    return GetCell()->GetCoordUnits();
+}
+
 ECAD_INLINE NetIter ELayoutView::GetNetIter() const
 {
     return GetNetCollection()->GetNetIter();
@@ -143,6 +148,16 @@ ECAD_INLINE UPtr<ILayerMap> ELayoutView::AddDefaultDielectricLayers() const
     return std::move(lyrMap);
 }
 
+ECAD_INLINE Ptr<ILayer> ELayoutView::FindLayerByLayerId(ELayerId lyrId) const
+{
+    return GetLayerCollection()->FindLayerByLayerId(lyrId);
+}
+
+ECAD_INLINE Ptr<ILayer> ELayoutView::FindLayerByName(const std::string & name) const
+{
+    return GetLayerCollection()->FindLayerByName(name);
+}
+
 ECAD_INLINE Ptr<INet> ELayoutView::CreateNet(const std::string & name)
 {
     return GetNetCollection()->CreateNet(name);
@@ -151,6 +166,11 @@ ECAD_INLINE Ptr<INet> ELayoutView::CreateNet(const std::string & name)
 ECAD_INLINE Ptr<INet> ELayoutView::FindNetByName(const std::string & name) const
 {
     return GetNetCollection()->FindNetByName(name);
+}
+
+ECAD_INLINE Ptr<INet> ELayoutView::FindNetByNetId(ENetId netId) const
+{
+    return GetNetCollection()->FindNetByNetId(netId);
 }
 
 ECAD_INLINE Ptr<IPadstackInst> ELayoutView::CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,
@@ -237,7 +257,7 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
 {
     euti::ELayoutPolygonMerger merger(this);
     merger.SetLayoutMergeSettings(settings);
-    //todo, wbtest
+    merger.Merge();
     return true;
 }
 

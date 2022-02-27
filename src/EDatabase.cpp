@@ -38,7 +38,7 @@ ECAD_INLINE void EDatabase::load(Archive & ar, const unsigned int version)
 
     //need set cell's ref since EDatabase may not come from serialization
     auto cellIter = GetCellIter();
-    while(auto * cell = cellIter->Next()){
+    while(auto cell = cellIter->Next()){
         cell->SetDatabase(this);
     }
 }
@@ -178,7 +178,7 @@ ECAD_INLINE bool EDatabase::GetCircuitCells(std::vector<Ptr<ICell> > & cells) co
 {
     cells.clear();
     auto cellIter = GetCellCollection()->GetCellIter();
-    while(auto * cell = cellIter->Next()){
+    while(auto cell = cellIter->Next()){
         if(ECellType::CircuitCell == cell->GetCellType())
             cells.push_back(cell);
     }

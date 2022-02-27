@@ -2,6 +2,7 @@
 #define ECAD_EUIT_ELAYOUTPOLYGONMERGER_H
 #include "ECadSettings.h"
 #include <unordered_map>
+#include <fstream>
 namespace generic {
 namespace geometry {
 
@@ -31,10 +32,13 @@ private:
     void MergeOneLayer(Ptr<LayerMerger> merger);
     void FillPolygonsBackToLayout();
     bool FillOneShape(ENetId netId, ELayerId layerId, Ptr<EShape> shape);
+    bool WriteDomDmcFiles(const std::string & filename);
+    void WriteDomDmcForOneLayer(std::fstream & dom, std::fstream & dmc, ELayerId layerId, Ptr<LayerMerger> merger);
 private:
     Ptr<ILayoutView> m_layout;
     ELayoutPolygonMergeSettings m_settings;
     std::unordered_set<size_t> m_primTobeRemove;
+    std::unordered_map<ENetId, std::string> m_netIdNameMap;
     std::unordered_map<ELayerId, UPtr<LayerMerger> > m_mergers;
 };
 

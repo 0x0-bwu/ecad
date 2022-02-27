@@ -17,6 +17,8 @@ public:
     virtual std::string sUuid() const = 0;
     virtual void Print(std::ostream & os) const = 0;
 
+    virtual const ECoordUnits & GetCoordUnits() const = 0;
+
     virtual void SetDatabase(Ptr<IDatabase> database) = 0;
     virtual bool SetLayoutView(UPtr<ILayoutView> layout) = 0;
 

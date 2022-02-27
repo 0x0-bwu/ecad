@@ -15,22 +15,6 @@ using namespace generic::geometry;
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EShape::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("is_void", m_bVoid);
-}
-
-template <typename Archive>
-ECAD_INLINE void EShape::load(Archive & ar, const unsigned int version)
-{
-    ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("is_void", m_bVoid);
-}
-
-ECAD_SERIALIZATION_FUNCTIONS_IMP(EShape)
-
-template <typename Archive>
 ECAD_INLINE void ERectangle::save(Archive & ar, const unsigned int version) const
 {
     ECAD_UNUSED(version)
@@ -106,16 +90,6 @@ ECAD_INLINE void EPolygonWithHoles::load(Archive & ar, const unsigned int versio
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPolygonWithHoles)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
-
-ECAD_INLINE void EShape::SetVoid(bool isVoid)
-{
-    m_bVoid = isVoid;
-}
-
-ECAD_INLINE bool EShape::isVoid() const
-{
-    return m_bVoid;
-}
 
 ECAD_INLINE bool ERectangle::hasHole() const
 {
@@ -274,12 +248,5 @@ ECAD_INLINE EShapeType EPolygonWithHoles::GetShapeType() const
 {
     return EShapeType::PolygonWithHoles;
 }
-
-ECAD_INLINE void EPolygonWithHoles::SetVoid(bool)
-{
-    //EPolygonWithHoles should always not be void
-    m_bVoid = false;
-}
-
 
 }//namespace ecad

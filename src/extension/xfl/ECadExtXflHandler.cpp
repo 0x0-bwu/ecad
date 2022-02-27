@@ -9,6 +9,7 @@
 #include "ETransform.h"
 #include "Interface.h"
 #include "EDataMgr.h"
+#include <boost/geometry/index/rtree.hpp>
 namespace ecad {
 namespace ext {
 namespace xfl {
@@ -210,6 +211,9 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
     auto toEPoint2D = [this](const Point & p) { return EPoint2D(m_scale * p.x, m_scale * p.y); };
 
+    using TShape = std::pair<bool, UPtr<EShape> >;//true-isHole
+    using TLayerShapes = std::vector<TShape>;
+    using TLayerShapesMap = std::unordered_map<ELayerId, TLayerShapes>;
     for(const auto & route : m_xflDB->routes) {
         auto net = mgr.FindNetByName(layout, route.net);
         if(nullptr == net){
@@ -217,6 +221,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
             continue;
         }
         auto netId = net->GetNetId();
+        TLayerShapesMap tLayerShapesMap;
         for(const auto & instObj : route.objects){
             //inst path
             if(auto * instPath = boost::get<InstPath>(&instObj)) {
@@ -228,8 +233,8 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 auto eShape = eShapeGetter(instPath->path);
                 auto ePath = mgr.CreateShapePath(eShape->GetContour().GetPoints(), instPath->width * m_scale);
 
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(ePath));
-                GENERIC_ASSERT(ePrim != nullptr)
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(false, std::move(ePath)));
             }
             //inst padstack
             else if(auto * instVia = boost::get<InstVia>(&instObj)) {
@@ -273,10 +278,8 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto eShape = eShapeGetter(instPolygon->polygon);
-                eShape->SetVoid(instPolygon->isVoid);
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(instPolygon->isVoid, std::move(eShape)));
             }
             //inst rectangle
             else if(auto * instRect = boost::get<InstRectangle>(&instObj)) {
@@ -286,13 +289,10 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto eShape = eShapeGetter(instRect->rectangle);
-                eShape->SetVoid(instRect->isVoid);
+                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instRect->loc)));
 
-                auto trans = makeETransform2D(1.0, 0.0, toEPoint2D(instRect->loc));
-                eShape->Transform(trans);
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(instRect->isVoid, std::move(eShape)));
             }
             //inst square
             else if(auto * instSquare = boost::get<InstSquare>(&instObj)) {
@@ -302,13 +302,10 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto eShape = eShapeGetter(instSquare->square);
-                eShape->SetVoid(instSquare->isVoid);
+                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instSquare->loc)));
 
-                auto trans = makeETransform2D(1.0, 0.0, toEPoint2D(instSquare->loc));
-                eShape->Transform(trans);
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(instSquare->isVoid, std::move(eShape)));
             }
             //inst diamond
             else if(auto * instDiamond = boost::get<InstDiamond>(&instObj)) {
@@ -318,13 +315,9 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto eShape = eShapeGetter(instDiamond->diamond);
-                eShape->SetVoid(instDiamond->isVoid);
-
-                auto trans = makeETransform2D(1.0, 0.0, toEPoint2D(instDiamond->loc));
-                eShape->Transform(trans);
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instDiamond->loc)));
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(instDiamond->isVoid, std::move(eShape)));
             }
             //inst circle
             else if(auto * instCircle = boost::get<InstCircle>(&instObj)) {
@@ -334,13 +327,9 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto eShape = eShapeGetter(instCircle->circle);
-                eShape->SetVoid(instCircle->isVoid);
-
-                auto trans = makeETransform2D(1.0, 0.0, toEPoint2D(instCircle->loc));
-                eShape->Transform(trans);
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instCircle->loc)));
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(instCircle->isVoid, std::move(eShape)));
             }
             //inst annular
             else if(auto * instAnnular = boost::get<InstAnnular>(&instObj)) {
@@ -350,12 +339,9 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto eShape = eShapeGetter(instAnnular->annular);
-
-                auto trans = makeETransform2D(1.0, 0.0, toEPoint2D(instAnnular->loc));
-                eShape->Transform(trans);
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instAnnular->loc)));
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(false, std::move(eShape)));
             }
             //inst composite
             else if(auto * instComp = boost::get<InstComposite>(&instObj)) {
@@ -365,10 +351,8 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto eShape = eShapeGetter(instComp->composite);
-                eShape->SetVoid(instComp->isVoid);
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr) 
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(instComp->isVoid, std::move(eShape)));
             }
             //inst shape from template
             else if(auto * instShape = boost::get<InstShape>(&instObj)) {
@@ -385,25 +369,84 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 }
 
                 auto eShape = boost::apply_visitor(eShapeGetter, temp->shape);
-                eShape->SetVoid(instShape->isVoid);
-                
                 EMirror2D m = instShape->mirror == 'N' ? EMirror2D::No : 
                              (instShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
                 if(instShape->rotThenMirror) {
-                    auto trans = makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc), m);
-                    eShape->Transform(trans);
+                    eShape->Transform(makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc), m));
                 }
                 else {
                     eShape->Transform(makeETransform2D(1.0, 0.0, EPoint2D(0, 0), m));
-                    auto trans = makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc));
-                    eShape->Transform(trans);
+                    eShape->Transform(makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc)));
                 }
-
-                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(eShape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
+                                .emplace_back(std::make_pair(instShape->isVoid, std::move(eShape)));
             }
             else {
                 GENERIC_ASSERT(false)
+            }
+        }
+        for(auto & tLayerShapesPair : tLayerShapesMap) {
+            auto layerId = tLayerShapesPair.first;
+            auto & tLayerShapes = tLayerShapesPair.second;
+
+            bool hasHole = false;
+            for(auto & tShape : tLayerShapes) {
+                if(tShape.first) {
+                    hasHole = true;
+                    break;
+                }
+            }
+
+            if(hasHole) {
+                using RtValue = std::pair<Box2D<ECoord>, size_t>;
+                using Rtree = boost::geometry::index::rtree<RtValue, boost::geometry::index::dynamic_rstar>;
+
+                Rtree tree(boost::geometry::index::dynamic_rstar(16));
+                for(size_t i = 0; i < tLayerShapes.size(); ++i) {
+                    if(tLayerShapes[i].first) continue;//skip holes
+                    tree.insert(std::make_pair(tLayerShapes[i].second->GetBBox(), i));
+                }
+
+                std::vector<std::set<size_t> > idxPwh(tLayerShapes.size());
+                std::vector<Polygon2D<ECoord> > contours(tLayerShapes.size());
+                for(size_t i = 0; i < tLayerShapes.size(); ++i) {
+                    contours[i] = tLayerShapes[i].second->GetContour();
+                    if(!tLayerShapes[i].first) continue;//skip solids
+                    
+                    auto hPoint = contours[i].Front();
+                    Box2D<ECoord> searchBox(hPoint, hPoint);
+                    std::vector<RtValue> results;
+                    tree.query(boost::geometry::index::intersects(searchBox), std::back_inserter(results));
+                    for(const auto & result : results) {
+                        if(Contains(contours[result.second], hPoint)){
+                            idxPwh[result.second].insert(i);
+                            break;
+                        }
+                    }
+                }
+
+                for(size_t i = 0; i < idxPwh.size(); ++i) {
+                    if(tLayerShapes[i].first) continue;//skip holes
+                    if(idxPwh[i].empty()) {
+                        auto ePrim = mgr.CreateGeometry2D(layout, layerId, netId, std::move(tLayerShapes[i].second));
+                        GENERIC_ASSERT(ePrim != nullptr)
+                    }
+                    else {
+                        auto ePwh = std::make_unique<EPolygonWithHoles>();
+                        ePwh->shape.outline = std::move(contours[i]);
+                        for(auto index : idxPwh[i]) {
+                            ePwh->shape.holes.emplace_back(std::move(contours[i]));
+                        }
+                        auto ePrim = mgr.CreateGeometry2D(layout, layerId, netId, std::move(ePwh));
+                        GENERIC_ASSERT(ePrim != nullptr)
+                    }
+                }
+            }
+            else {
+                for(auto & tShape : tLayerShapes) {
+                    auto ePrim = mgr.CreateGeometry2D(layout, layerId, netId, std::move(tShape.second));
+                    GENERIC_ASSERT(ePrim != nullptr)
+                }
             }
         }
     }

@@ -256,7 +256,7 @@ public:
         Point lastPt = *pt;
         for(; iter != composite.cend(); ++iter) {
             if(pt = boost::get<Point>(&(*iter))) {
-                data << toEPoint2D(lastPt);
+                data << toEPoint2D(*pt);
                 lastPt = *pt;
             }
             else if(auto * arc = boost::get<Arc>(&(*iter))) {
@@ -399,13 +399,13 @@ private:
         using namespace generic;
         auto toFPoint2D = [](const Point & p) { return FPoint2D(p.x, p.y); };
         std::vector<geometry::Point2D<double> > fps;
-        if(0 == arc.type) {
+        if(0 == arc.type) {//arc
             auto radian = geometry::Angle(toFPoint2D(arc.end), toFPoint2D(arc.mid), toFPoint2D(start));
             geometry::Arc<double> a(toFPoint2D(arc.mid), toFPoint2D(start), -radian);
             fps = geometry::toPolyline(a, m_circleDiv);
 
         }
-        else if(1 == arc.type) {
+        else if(1 == arc.type) {//rarc
             auto radian = geometry::Angle(toFPoint2D(start), toFPoint2D(arc.mid), toFPoint2D(arc.end));
             geometry::Arc<double> a(toFPoint2D(arc.mid), toFPoint2D(start), radian);
             fps = geometry::toPolyline(a, m_circleDiv);

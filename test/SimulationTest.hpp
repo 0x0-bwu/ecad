@@ -34,7 +34,6 @@ void t_metal_fraction_mapping()
     EMetalFractionMappingSettings settings;
     settings.threads = 16;
     settings.grid = {50, 50};
-    settings.coordUnits = database->GetCoordUnits();
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
 
     BOOST_CHECK(flattened->GenerateMetalFractionMapping(settings));
@@ -63,7 +62,6 @@ void t_metal_fraction_mapping_select_nets()
     EMetalFractionMappingSettings settings;
     settings.threads = 16;
     settings.grid = {50, 50};
-    settings.coordUnits = database->GetCoordUnits();
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
     settings.selectNets.insert(static_cast<ENetId>(1));
 

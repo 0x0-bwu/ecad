@@ -10,6 +10,7 @@ class INet;
 using ENetIterator = EUnorderedMapCollectionIterator<std::string, UPtr<INet> >;
 class ECAD_API ENetCollection : public EUnorderedMapCollection<std::string, UPtr<INet> >, public INetCollection
 {
+    using NetIdNameMap = std::unordered_map<ENetId, std::string>;
     using BaseCollection = EUnorderedMapCollection<std::string, UPtr<INet> >;
     using BaseCollection::CollectionContainer;
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
@@ -24,6 +25,7 @@ public:
     std::string NextNetName(const std::string & name) const;
     
     Ptr<INet> FindNetByName(const std::string & name) const;
+    Ptr<INet> FindNetByNetId(ENetId netId) const;
     Ptr<INet> CreateNet(const std::string & name);
     Ptr<INet> AddNet(UPtr<INet> net);
 
@@ -36,7 +38,12 @@ protected:
     Ptr<ENetCollection> CloneImp() const override;
 
 protected:
+    void BuildNetIdLUT() const;
+    void ResetNetIdLUT();
+
+protected:
     EUidGenerator m_uidGen;
+    mutable UPtr<NetIdNameMap> m_netIdNameMap;
 };
 
 }//namespace ecad

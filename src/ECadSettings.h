@@ -10,7 +10,6 @@ struct EMetalFractionMappingSettings
 {
     size_t threads = 1;
     std::string outFile;
-    ECoordUnits coordUnits;
     EValue regionExtTop = 0;
     EValue regionExtBot = 0;
     EValue regionExtLeft = 0;
@@ -22,6 +21,7 @@ struct EMetalFractionMappingSettings
 struct ELayoutPolygonMergeSettings
 {
     size_t threads = 1;
+    std::string outFile;
     bool includePadstackInst = true;
     bool includeDielectricLayer = true;
     bool skipTopBotDielectricLayers = false;

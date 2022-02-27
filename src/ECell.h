@@ -19,6 +19,8 @@ public:
     ECell(const ECell & other);
     ECell & operator= (const ECell & other);
 
+    virtual const ECoordUnits & GetCoordUnits() const;
+
     virtual void SetDatabase(Ptr<IDatabase> database);
     virtual bool SetLayoutView(UPtr<ILayoutView> layout) { return false; }
 

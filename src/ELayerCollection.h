@@ -32,7 +32,8 @@ public:
     LayerIter GetLayerIter() const;
     size_t Size() const;
 
-    CPtr<ILayer> FindLayerByName(const std::string & name) const;
+    Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const;
+    Ptr<ILayer> FindLayerByName(const std::string & name) const;
     std::string GetNextLayerName(const std::string & base) const;
 
 protected:
