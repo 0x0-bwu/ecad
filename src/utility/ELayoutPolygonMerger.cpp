@@ -3,6 +3,7 @@
 #endif
 
 #include "generic/geometry/PolygonMerge.hpp"
+#include "generic/geometry/GeometryIO.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "Interface.h"
 namespace ecad {
@@ -41,9 +42,10 @@ ECAD_INLINE void ELayoutPolygonMerger::Merge()
 {
     FillPolygonsFromLayout();
 
+#ifdef BOOST_GIL_IO_PNG_SUPPORT
     if(!m_settings.outFile.empty())
-        WriteDomDmcFiles(m_settings.outFile);
-        
+        WritePngFiles(m_settings.outFile);
+#endif//BOOST_GIL_IO_PNG_SUPPORT
     MergeLayers();
 
     FillPolygonsBackToLayout();
@@ -105,9 +107,8 @@ ECAD_INLINE void ELayoutPolygonMerger::MergeOneLayer(Ptr<LayerMerger> merger)
     //todo, add settings
     merger->SetMergeSettings(settings);
 
-    // PolygonMergeRunner runner(*merger, m_settings.threads);
-    // runner.Run();//wbtest
-    merger->Merge();
+    PolygonMergeRunner runner(*merger, m_settings.threads);
+    runner.Run();
 }
 
 ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
@@ -174,6 +175,72 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
         }
     }
     return true;
+}
+
+#ifdef BOOST_GIL_IO_PNG_SUPPORT
+ECAD_INLINE bool ELayoutPolygonMerger::WritePngFiles(const std::string & filename, size_t width)
+{
+    auto dir = filesystem::DirName(filename);
+    if(!filesystem::PathExists(dir))
+        filesystem::CreateDir(dir);
+    
+    bool res = true;
+    for(const auto & merger : m_mergers) {
+        std::string filePath = filename + '_' + std::to_string(static_cast<int>(merger.first)) + ".png";
+        /*res = res && */WritePngFileForOneLayer(filePath, merger.second.get(), width);
+    }
+    return res;   
+}
+
+ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger, size_t width)
+{
+    using PolygonData = typename LayerMerger::PolygonData;
+
+    std::list<CPtr<PolygonData> > polygons;
+    merger->GetAllPolygons(polygons);
+
+    std::vector<Polygon2D<ECoord> > outs;
+    outs.reserve(polygons.size());
+    for(auto polygon : polygons) {
+        outs.push_back(polygon->solid);
+        for(const auto & hole : polygon->holes) {
+            outs.push_back(hole);
+        }
+    }
+    return GeometryIO::WritePNG<Polygon2D<ECoord> >(filename, outs.begin(), outs.end(), width);
+}
+#endif//BOOST_GIL_IO_PNG_SUPPORT
+
+ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(const std::string & filename)
+{
+    auto dir = filesystem::DirName(filename);
+    if(!filesystem::PathExists(dir))
+        filesystem::CreateDir(dir);
+    
+    bool res = true;
+    for(const auto & merger : m_mergers) {
+        std::string filePath = filename + '_' + std::to_string(static_cast<int>(merger.first)) + ".vtk";
+        res = res && WriteVtkFileForOneLayer(filePath, merger.second.get());
+    }
+    return res;
+}
+
+ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger)
+{
+    using PolygonData = typename LayerMerger::PolygonData;
+
+    std::list<CPtr<PolygonData> > polygons;
+    merger->GetAllPolygons(polygons);
+
+    std::vector<Polygon2D<ECoord> > outs;
+    outs.reserve(polygons.size());
+    for(auto polygon : polygons) {
+        outs.push_back(polygon->solid);
+        for(const auto & hole : polygon->holes) {
+            outs.push_back(hole);
+        }
+    }
+    return GeometryIO::WriteVTK<Polygon2D<ECoord> >(filename, outs.begin(), outs.end());
 }
 
 ECAD_INLINE bool ELayoutPolygonMerger::WriteDomDmcFiles(const std::string & filename)

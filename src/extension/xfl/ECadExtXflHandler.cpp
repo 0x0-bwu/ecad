@@ -9,7 +9,6 @@
 #include "ETransform.h"
 #include "Interface.h"
 #include "EDataMgr.h"
-#include <boost/geometry/index/rtree.hpp>
 namespace ecad {
 namespace ext {
 namespace xfl {
@@ -65,7 +64,6 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     //import board geom
     ImportBoardGeom(layout);
 
-
     return m_database;
 }
 
@@ -117,16 +115,18 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
 
         auto psDefData = mgr.CreatePadstackDefData();
 
-        if(!m_matNameMap.count(xflVia.material)){
-            //todo, error handle
-            continue;
+        if(!xflVia.material.empty()){
+            if(!m_matNameMap.count(xflVia.material)){
+                //todo, error handle
+                continue;
+            }
+            psDefData->SetMaterial(m_matNameMap.at(xflVia.material));
         }
-        psDefData->SetMaterial(m_matNameMap.at(xflVia.material));
 
-        auto eShape = boost::apply_visitor(eShapeGetter, xflShape->shape);
-        GENERIC_ASSERT(eShape != nullptr)
+        auto shape = boost::apply_visitor(eShapeGetter, xflShape->shape);
+        GENERIC_ASSERT(shape != nullptr)
 
-        psDefData->SetViaParameters(std::move(eShape), EPoint2D(0, 0), math::Rad(xflVia.shapeRot));
+        psDefData->SetViaParameters(std::move(shape), EPoint2D(0, 0), math::Rad(xflVia.shapeRot));
 
         auto layerMap = mgr.CreateLayerMap(m_database, xflVia.name);
     
@@ -141,10 +141,10 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
                 //todo, error handle
                 continue;
             }
-            eShape = boost::apply_visitor(eShapeGetter, xflShape->shape);
-            GENERIC_ASSERT(eShape != nullptr)
+            shape = boost::apply_visitor(eShapeGetter, xflShape->shape);
+            GENERIC_ASSERT(shape != nullptr)
 
-            psDefData->SetPadParameters(static_cast<ELayerId>(i), std::move(eShape), EPoint2D(0, 0), math::Rad(xflPad.shapeRot));
+            psDefData->SetPadParameters(static_cast<ELayerId>(i), std::move(shape), EPoint2D(0, 0), math::Rad(xflPad.shapeRot));
         
             //todo, anti-pad
 
@@ -209,20 +209,17 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
 {
     auto & mgr = EDataMgr::Instance();
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
-    auto toEPoint2D = [this](const Point & p) { return EPoint2D(m_scale * p.x, m_scale * p.y); };
 
-    using TShape = std::pair<bool, UPtr<EShape> >;//true-isHole
-    using TLayerShapes = std::vector<TShape>;
-    using TLayerShapesMap = std::unordered_map<ELayerId, TLayerShapes>;
     for(const auto & route : m_xflDB->routes) {
         auto net = mgr.FindNetByName(layout, route.net);
         if(nullptr == net){
             //todo, error handle
             continue;
         }
+        size_t i = 0;
         auto netId = net->GetNetId();
-        TLayerShapesMap tLayerShapesMap;
-        for(const auto & instObj : route.objects){
+        while(i < route.objects.size()) {
+            auto & instObj = route.objects[i++];
             //inst path
             if(auto * instPath = boost::get<InstPath>(&instObj)) {
                 auto layer = m_metalLyrIdMap.find(instPath->layer);
@@ -230,11 +227,10 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     //todo, error handle
                     continue;
                 }
-                auto eShape = eShapeGetter(instPath->path);
-                auto ePath = mgr.CreateShapePath(eShape->GetContour().GetPoints(), instPath->width * m_scale);
-
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(false, std::move(ePath)));
+                auto shape = eShapeGetter(instPath->path);
+                auto ePath = mgr.CreateShapePath(shape->GetContour().GetPoints(), instPath->width * m_scale);
+                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(ePath));
+                GENERIC_ASSERT(ePrim != nullptr)
             }
             //inst padstack
             else if(auto * instVia = boost::get<InstVia>(&instObj)) {
@@ -259,7 +255,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 }
 
                 EMirror2D mirror = instVia->mirror == 'Y' ? EMirror2D::Y : EMirror2D::No;
-                auto trans = makeETransform2D(1.0, math::Rad(instVia->rot), toEPoint2D(instVia->loc), mirror);
+                auto trans = makeETransform2D(1.0, math::Rad(instVia->rot), makeEPoint2D(instVia->loc), mirror);
                 
                 auto name = GetNextPadstackInstName(instVia->name);
                 auto psInst = mgr.CreatePadstackInst(layout, name, psDef, netId, sLayer->second, eLayer->second, layerMap, trans);
@@ -270,67 +266,6 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 //todo
                 continue;
             }
-            //inst polygon
-            else if(auto * instPolygon = boost::get<InstPolygon>(&instObj)) {
-                auto layer = m_metalLyrIdMap.find(instPolygon->layer);
-                if(layer == m_metalLyrIdMap.end()) {
-                    //todo, error handle
-                    continue;
-                }
-                auto eShape = eShapeGetter(instPolygon->polygon);
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(instPolygon->isVoid, std::move(eShape)));
-            }
-            //inst rectangle
-            else if(auto * instRect = boost::get<InstRectangle>(&instObj)) {
-                auto layer = m_metalLyrIdMap.find(instRect->layer);
-                if(layer == m_metalLyrIdMap.end()) {
-                    //todo, error handle
-                    continue;
-                }
-                auto eShape = eShapeGetter(instRect->rectangle);
-                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instRect->loc)));
-
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(instRect->isVoid, std::move(eShape)));
-            }
-            //inst square
-            else if(auto * instSquare = boost::get<InstSquare>(&instObj)) {
-                auto layer = m_metalLyrIdMap.find(instSquare->layer);
-                if(layer == m_metalLyrIdMap.end()) {
-                    //todo, error handle
-                    continue;
-                }
-                auto eShape = eShapeGetter(instSquare->square);
-                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instSquare->loc)));
-
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(instSquare->isVoid, std::move(eShape)));
-            }
-            //inst diamond
-            else if(auto * instDiamond = boost::get<InstDiamond>(&instObj)) {
-                auto layer = m_metalLyrIdMap.find(instDiamond->layer);
-                if(layer == m_metalLyrIdMap.end()) {
-                    //todo, error handle
-                    continue;
-                }
-                auto eShape = eShapeGetter(instDiamond->diamond);
-                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instDiamond->loc)));
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(instDiamond->isVoid, std::move(eShape)));
-            }
-            //inst circle
-            else if(auto * instCircle = boost::get<InstCircle>(&instObj)) {
-                auto layer = m_metalLyrIdMap.find(instCircle->layer);
-                if(layer == m_metalLyrIdMap.end()) {
-                    //todo, error handle
-                    continue;
-                }
-                auto eShape = eShapeGetter(instCircle->circle);
-                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instCircle->loc)));
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(instCircle->isVoid, std::move(eShape)));
-            }
             //inst annular
             else if(auto * instAnnular = boost::get<InstAnnular>(&instObj)) {
                 auto layer = m_metalLyrIdMap.find(instAnnular->layer);
@@ -338,113 +273,42 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     //todo, error handle
                     continue;
                 }
-                auto eShape = eShapeGetter(instAnnular->annular);
-                eShape->Transform(makeETransform2D(1.0, 0.0, toEPoint2D(instAnnular->loc)));
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(false, std::move(eShape)));
+                auto shape = eShapeGetter(instAnnular->annular);
+                shape->Transform(makeETransform2D(1.0, 0.0, makeEPoint2D(instAnnular->loc)));
+                auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(shape));
+                GENERIC_ASSERT(ePrim != nullptr)
             }
-            //inst composite
-            else if(auto * instComp = boost::get<InstComposite>(&instObj)) {
-                auto layer = m_metalLyrIdMap.find(instComp->layer);
+            //others
+            else {
+                //ignore if first shape is hole
+                if(isHole(instObj)) continue;
+                auto [lyr, shape] = makeEShapeFromInstObject(eShapeGetter, instObj);
+                auto layer = m_metalLyrIdMap.find(lyr);
                 if(layer == m_metalLyrIdMap.end()) {
                     //todo, error handle
                     continue;
                 }
-                auto eShape = eShapeGetter(instComp->composite);
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(instComp->isVoid, std::move(eShape)));
-            }
-            //inst shape from template
-            else if(auto * instShape = boost::get<InstShape>(&instObj)) {
-                auto layer = m_metalLyrIdMap.find(instShape->layer);
-                if(layer == m_metalLyrIdMap.end()) {
-                    //todo, error handle
-                    continue;
+                if(nullptr == shape) continue;
+                std::list<UPtr<EShape> > holes;
+                while(i < route.objects.size()) {
+                    const auto & instHole = route.objects[i++];
+                    if(!isHole(instHole)) { i--; break; }
+                    auto [nextLyr, nextShape] = makeEShapeFromInstObject(eShapeGetter, instHole);
+                    if(nextLyr != lyr || nullptr == nextShape) { i--; break; }
+                    holes.emplace_back(std::move(nextShape));
                 }
-
-                auto temp = m_xflDB->GetTemplateShape(instShape->shapeId);
-                if(nullptr == temp) {
-                    //todo, error handle
-                    continue;
-                }
-
-                auto eShape = boost::apply_visitor(eShapeGetter, temp->shape);
-                EMirror2D m = instShape->mirror == 'N' ? EMirror2D::No : 
-                             (instShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
-                if(instShape->rotThenMirror) {
-                    eShape->Transform(makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc), m));
+                if(holes.empty()) {
+                    auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(shape));
+                    GENERIC_ASSERT(ePrim != nullptr)
                 }
                 else {
-                    eShape->Transform(makeETransform2D(1.0, 0.0, EPoint2D(0, 0), m));
-                    eShape->Transform(makeETransform2D(1.0, math::Rad(instShape->rot), toEPoint2D(instShape->loc)));
-                }
-                tLayerShapesMap.insert(std::make_pair(layer->second, TLayerShapes{})).first->second
-                                .emplace_back(std::make_pair(instShape->isVoid, std::move(eShape)));
-            }
-            else {
-                GENERIC_ASSERT(false)
-            }
-        }
-        for(auto & tLayerShapesPair : tLayerShapesMap) {
-            auto layerId = tLayerShapesPair.first;
-            auto & tLayerShapes = tLayerShapesPair.second;
-
-            bool hasHole = false;
-            for(auto & tShape : tLayerShapes) {
-                if(tShape.first) {
-                    hasHole = true;
-                    break;
-                }
-            }
-
-            if(hasHole) {
-                using RtValue = std::pair<Box2D<ECoord>, size_t>;
-                using Rtree = boost::geometry::index::rtree<RtValue, boost::geometry::index::dynamic_rstar>;
-
-                Rtree tree(boost::geometry::index::dynamic_rstar(16));
-                for(size_t i = 0; i < tLayerShapes.size(); ++i) {
-                    if(tLayerShapes[i].first) continue;//skip holes
-                    tree.insert(std::make_pair(tLayerShapes[i].second->GetBBox(), i));
-                }
-
-                std::vector<std::set<size_t> > idxPwh(tLayerShapes.size());
-                std::vector<Polygon2D<ECoord> > contours(tLayerShapes.size());
-                for(size_t i = 0; i < tLayerShapes.size(); ++i) {
-                    contours[i] = tLayerShapes[i].second->GetContour();
-                    if(!tLayerShapes[i].first) continue;//skip solids
-                    
-                    auto hPoint = contours[i].Front();
-                    Box2D<ECoord> searchBox(hPoint, hPoint);
-                    std::vector<RtValue> results;
-                    tree.query(boost::geometry::index::intersects(searchBox), std::back_inserter(results));
-                    for(const auto & result : results) {
-                        if(Contains(contours[result.second], hPoint)){
-                            idxPwh[result.second].insert(i);
-                            break;
-                        }
+                    auto pwh = std::make_unique<EPolygonWithHoles>();
+                    auto & data = pwh->shape;
+                    data.outline = shape->GetContour();
+                    for(const auto & hole : holes){
+                        data.holes.emplace_back(hole->GetContour());
                     }
-                }
-
-                for(size_t i = 0; i < idxPwh.size(); ++i) {
-                    if(tLayerShapes[i].first) continue;//skip holes
-                    if(idxPwh[i].empty()) {
-                        auto ePrim = mgr.CreateGeometry2D(layout, layerId, netId, std::move(tLayerShapes[i].second));
-                        GENERIC_ASSERT(ePrim != nullptr)
-                    }
-                    else {
-                        auto ePwh = std::make_unique<EPolygonWithHoles>();
-                        ePwh->shape.outline = std::move(contours[i]);
-                        for(auto index : idxPwh[i]) {
-                            ePwh->shape.holes.emplace_back(std::move(contours[i]));
-                        }
-                        auto ePrim = mgr.CreateGeometry2D(layout, layerId, netId, std::move(ePwh));
-                        GENERIC_ASSERT(ePrim != nullptr)
-                    }
-                }
-            }
-            else {
-                for(auto & tShape : tLayerShapes) {
-                    auto ePrim = mgr.CreateGeometry2D(layout, layerId, netId, std::move(tShape.second));
+                    auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(pwh));
                     GENERIC_ASSERT(ePrim != nullptr)
                 }
             }
@@ -456,14 +320,13 @@ ECAD_INLINE void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
 {
     auto & mgr = EDataMgr::Instance();
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
-    auto toEPoint2D = [this](const Point & p) { return EPoint2D(m_scale * p.x, m_scale * p.y); };
 
-    auto eShape = UPtr<EShape>();
+    auto shape = UPtr<EShape>();
     if(auto * polygon = boost::get<Polygon>(&(m_xflDB->boardGeom))) {
-        eShape = eShapeGetter(*polygon);
+        shape = eShapeGetter(*polygon);
     }
     else if(auto * composite = boost::get<Composite>(&(m_xflDB->boardGeom))) {
-        eShape = eShapeGetter(*composite);
+        shape = eShapeGetter(*composite);
     }
     else if(auto * boardShape = boost::get<BoardShape>(&(m_xflDB->boardGeom))) {
         auto temp = m_xflDB->GetTemplateShape(boardShape->shapeId);
@@ -472,22 +335,22 @@ ECAD_INLINE void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
             return;
         }
 
-        auto eShape = boost::apply_visitor(eShapeGetter, temp->shape);
+        auto shape = boost::apply_visitor(eShapeGetter, temp->shape);
         
         EMirror2D m = boardShape->mirror == 'N' ? EMirror2D::No : 
                      (boardShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
         if(boardShape->rotThenMirror) {
-            auto trans = makeETransform2D(1.0, math::Rad(boardShape->rot), toEPoint2D(boardShape->loc), m);
-            eShape->Transform(trans);
+            auto trans = makeETransform2D(1.0, math::Rad(boardShape->rot), makeEPoint2D(boardShape->loc), m);
+            shape->Transform(trans);
         }
         else {
-            eShape->Transform(makeETransform2D(1.0, 0.0, EPoint2D(0, 0), m));
-            auto trans = makeETransform2D(1.0, math::Rad(boardShape->rot), toEPoint2D(boardShape->loc));
-            eShape->Transform(trans);
+            shape->Transform(makeETransform2D(1.0, 0.0, EPoint2D(0, 0), m));
+            auto trans = makeETransform2D(1.0, math::Rad(boardShape->rot), makeEPoint2D(boardShape->loc));
+            shape->Transform(trans);
         }
     }
     auto ePolygon = std::make_unique<EPolygon>();
-    ePolygon->shape = eShape->GetContour();
+    ePolygon->shape = shape->GetContour();
     layout->SetBoundary(std::move(ePolygon));
 }
 
@@ -517,6 +380,77 @@ ECAD_INLINE std::string ECadExtXflHandler::GetNextPadstackInstName(const std::st
         index++;
     }
     return "";
+}
+
+//<layer, isVoid>
+ECAD_INLINE bool ECadExtXflHandler::isHole(const InstObject & instObj) const
+{
+    if(auto * instPolygon = boost::get<InstPolygon>(&instObj)) return instPolygon->isVoid;
+    else if(auto * instRect = boost::get<InstRectangle>(&instObj)) return instRect->isVoid;
+    else if(auto * instSquare = boost::get<InstSquare>(&instObj)) return instSquare->isVoid;
+    else if(auto * instDiamond = boost::get<InstDiamond>(&instObj)) return instDiamond->isVoid;
+    else if(auto * instCircle = boost::get<InstCircle>(&instObj)) return instCircle->isVoid;
+    else if(auto * instComp = boost::get<InstComposite>(&instObj)) return instComp->isVoid;
+    else if(auto * instShape = boost::get<InstShape>(&instObj)) return instShape->isVoid;
+    return false;
+}
+
+ECAD_INLINE std::pair<int, UPtr<EShape> > ECadExtXflHandler::makeEShapeFromInstObject(const EShapeGetter & eShapeGetter, const InstObject & instObj) const
+{
+    //inst polygon
+    if(auto * instPolygon = boost::get<InstPolygon>(&instObj)) {
+        auto shape = eShapeGetter(instPolygon->polygon);
+        return std::make_pair(instPolygon->layer, std::move(shape));
+    }
+    //inst rectangle
+    else if(auto * instRect = boost::get<InstRectangle>(&instObj)) {
+        auto shape = eShapeGetter(instRect->rectangle);
+        shape->Transform(makeETransform2D(1.0, 0.0, makeEPoint2D(instRect->loc)));
+        return std::make_pair(instRect->layer, std::move(shape));
+    }
+    //inst square
+    else if(auto * instSquare = boost::get<InstSquare>(&instObj)) {
+        auto shape = eShapeGetter(instSquare->square);
+        shape->Transform(makeETransform2D(1.0, 0.0, makeEPoint2D(instSquare->loc)));
+        return  std::make_pair(instSquare->layer, std::move(shape));
+    }
+    //inst diamond
+    else if(auto * instDiamond = boost::get<InstDiamond>(&instObj)) {
+        auto shape = eShapeGetter(instDiamond->diamond);
+        shape->Transform(makeETransform2D(1.0, 0.0, makeEPoint2D(instDiamond->loc)));
+        return std::make_pair(instDiamond->layer, std::move(shape));
+    }
+    //inst circle
+    else if(auto * instCircle = boost::get<InstCircle>(&instObj)) {
+        auto shape = eShapeGetter(instCircle->circle);
+        shape->Transform(makeETransform2D(1.0, 0.0, makeEPoint2D(instCircle->loc)));
+        return std::make_pair(instCircle->layer, std::move(shape));
+    }
+    //inst composite
+    else if(auto * instComp = boost::get<InstComposite>(&instObj)) {
+        auto shape = eShapeGetter(instComp->composite);
+        return std::make_pair(instComp->layer, std::move(shape));
+    }
+    //inst shape from template
+    else if(auto * instShape = boost::get<InstShape>(&instObj)) {
+        auto temp = m_xflDB->GetTemplateShape(instShape->shapeId);
+        if(nullptr == temp) return std::make_pair(instShape->layer, nullptr);
+
+        auto shape = boost::apply_visitor(eShapeGetter, temp->shape);
+        EMirror2D m = instShape->mirror == 'N' ? EMirror2D::No : 
+                     (instShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
+        if(instShape->rotThenMirror) {
+            shape->Transform(makeETransform2D(1.0, math::Rad(instShape->rot), makeEPoint2D(instShape->loc), m));
+        }
+        else {
+            shape->Transform(makeETransform2D(1.0, 0.0, EPoint2D(0, 0), m));
+            shape->Transform(makeETransform2D(1.0, math::Rad(instShape->rot), makeEPoint2D(instShape->loc)));
+        }
+        return std::make_pair(instShape->layer, std::move(shape));
+    }
+    else {
+        GENERIC_ASSERT(false)
+    }
 }
 
 }//namespace xfl

@@ -3,6 +3,7 @@
 #include "generic/geometry/Utility.hpp"
 #include "ECadCommon.h"
 #include "EShape.h"
+#include <boost/variant.hpp>
 #include <unordered_map>
 namespace ecad {
 
@@ -238,7 +239,6 @@ public:
         for(const auto & point : polygon){
             data << toEPoint2D(point);
         }
-
         return UPtr<EShape>(shape);
     }
 
@@ -270,7 +270,6 @@ public:
                 GENERIC_ASSERT(false)
             }
         }
-
         return UPtr<EShape>(shape);        
     }
 

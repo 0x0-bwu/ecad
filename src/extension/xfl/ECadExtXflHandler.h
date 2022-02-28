@@ -10,7 +10,7 @@ namespace xfl {
 class ECAD_API ECadExtXflHandler
 {
 public:
-    explicit ECadExtXflHandler(const std::string & xflFile, size_t circleDiv = 12);
+    explicit ECadExtXflHandler(const std::string & xflFile, size_t circleDiv = 32);
     SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:
@@ -29,6 +29,10 @@ private:
 
 private:
     std::string GetNextPadstackInstName(const std::string & defName);
+    std::pair<int, UPtr<EShape> > makeEShapeFromInstObject(const EShapeGetter & eShapeGetter, const InstObject & instObj) const;
+    bool isHole(const InstObject & instObj) const;
+    EPoint2D makeEPoint2D(const Point & p) const;
+
 
 private:
     // temporary data
@@ -41,6 +45,11 @@ private:
     std::unordered_map<std::string, std::string> m_matNameMap;
     std::unordered_set<std::string> m_padstackInstNames;
 };
+
+ECAD_ALWAYS_INLINE EPoint2D ECadExtXflHandler::makeEPoint2D(const Point & p) const
+{
+    return EPoint2D(m_scale * p.x, m_scale * p.y);
+}
 
 }//namespace xfl
 }//namespace ext

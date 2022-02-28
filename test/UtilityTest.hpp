@@ -70,7 +70,8 @@ void t_layout_polygon_merge()
 
     ELayoutPolygonMergeSettings settings;
     settings.threads = 4;
-    settings.outFile = ecad_test::GetTestDataPath() + "/ecad/testdata/domdmc/fccsp";
+    settings.outFile = ecad_test::GetTestDataPath() + "/vtk/fccsp";
+    // settings.selectNets = { ENetId(74) };
     BOOST_CHECK(layout->MergeLayerPolygons(settings));
 
     EDataMgr::Instance().ShutDown();
