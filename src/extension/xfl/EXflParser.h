@@ -308,12 +308,12 @@ struct EXflReader
 			;
 
 			padstackSection = lexeme[no_case[".padstack"]] >>
-				*padstack [phx::bind(&EXflGrammar::PadstackHandle, this, _1)] >>
+				*(padstack[phx::bind(&EXflGrammar::PadstackHandle, this, _1)]) >>
 				lexeme[no_case[".end padstack"]]
 			;
 
 			viaSection = lexeme[no_case[".via"]] >>
-				*via [phx::bind(&EXflGrammar::ViaHandle, this, _1)] >>
+				*(via[phx::bind(&EXflGrammar::ViaHandle, this, _1)]) >>
 				lexeme[no_case[".end via"]]
 			;
 
@@ -338,7 +338,7 @@ struct EXflReader
 			;
 
 			routeSection = lexeme[no_case[".route"]] >>
-				*route [phx::bind(&EXflGrammar::RouteHandle, this, _1)] >>
+				*(route[phx::bind(&EXflGrammar::RouteHandle, this, _1)]) >>
 				lexeme[no_case[".end route"]]
 			;
 
@@ -364,7 +364,7 @@ struct EXflReader
 			layer %= textDQ >> double_ >> char_("SDP") >> textDQ >> textDQ;
 
 			point %= double_ >> double_;
-			polygon = "{" >> *point [push_back(_val, _1)] >> "}";
+			polygon = "{" >> *(point[push_back(_val, _1)]) >> "}";
 			arc = (lexeme[no_case["ARC"]][at_c<0>(_val) = 0]
 				| lexeme[no_case["RARC"]][at_c<0>(_val) = 1]
 				| lexeme[no_case["ARC3"]][at_c<0>(_val) = 2] ) >>
@@ -404,8 +404,18 @@ struct EXflReader
 				)
 				;
 
-			pad %= int_ >> int_ >> double_ >> -(int_ >> double_);
-			padstack = int_[at_c<0>(_val) = _1] >> "{" >> *pad [push_back(at_c<1>(_val), _1)] >> "}";
+			pad = lexeme
+				[
+					int_[at_c<0>(_val) = _1] >> +char_(" ") >> 
+					int_[at_c<1>(_val) = _1] >> +char_(" ") >> 
+					double_[at_c<2>(_val) = _1] >> 
+					-(
+						+char_(" ") >> int_[at_c<3>(_val) = _1] >> 
+						+char_(" ") >> double_[at_c<4>(_val) = _1]
+					) >> *char_(" ") >> eol
+				]
+				;
+			padstack = int_[at_c<0>(_val) = _1] >> "{" >> *(pad[push_back(at_c<1>(_val), _1)]) >> "}";
 
 			via %= textNC >> int_ >> double_ >> int_ >> double_ >> -(double_ >> textNC);
 
@@ -416,7 +426,7 @@ struct EXflReader
 				int_[at_c<3>(_val) = _1] >>
 				int_[at_c<4>(_val) = _1] >>
 				int_[at_c<5>(_val) = _1] >>
-				"{" >> *node [push_back(at_c<6>(_val), _1)] >> "}"
+				"{" >> *(node[push_back(at_c<6>(_val), _1)]) >> "}"
 			;
 
 			instPath %= lexeme[no_case["path"]] >> int_ >> double_ >> composite;
