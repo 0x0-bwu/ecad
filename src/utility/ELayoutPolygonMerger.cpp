@@ -24,7 +24,6 @@ ECAD_INLINE ELayoutPolygonMerger::ELayoutPolygonMerger(Ptr<ILayoutView> layout)
         if(m_settings.skipTopBotDielectricLayers && type == ELayerType::DielectricLayer) {
             if(i == 0 || i == layers.size() - 1) continue;
         }
-
         m_mergers.insert(std::make_pair(layer->GetLayerId(), std::make_unique<LayerMerger>()));
     }
 }
@@ -40,13 +39,16 @@ ECAD_INLINE void ELayoutPolygonMerger::SetLayoutMergeSettings(ELayoutPolygonMerg
 
 ECAD_INLINE void ELayoutPolygonMerger::Merge()
 {
+    ECAD_EFFICIENCY_TRACK("layout polygon merge")
+
     FillPolygonsFromLayout();
+
+    MergeLayers();
 
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
     if(!m_settings.outFile.empty())
         WritePngFiles(m_settings.outFile);
 #endif//BOOST_GIL_IO_PNG_SUPPORT
-    MergeLayers();
 
     FillPolygonsBackToLayout();
 }

@@ -17,11 +17,11 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
 
     EMetalFractionMappingSettings settings;
     settings.threads = 16;
-    settings.grid = {25, 25};
-    settings.regionExtTop   = 0.47;//mm
-    settings.regionExtBot   = 0.47;//mm
-    settings.regionExtLeft  = 0.47;//mm
-    settings.regionExtRight = 0.47;//mm
+    settings.grid = {50, 50};
+    // settings.regionExtTop   = 0.47;//mm
+    // settings.regionExtBot   = 0.47;//mm
+    // settings.regionExtLeft  = 0.47;//mm
+    // settings.regionExtRight = 0.47;//mm
     settings.outFile = currentPath + "/test/ecad/testdata/simulation/result.mf";
 
     LayoutMetalFractionMapper mapper(settings);

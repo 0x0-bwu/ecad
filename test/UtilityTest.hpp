@@ -57,20 +57,20 @@ void t_connectivity_extraction()
 void t_layout_polygon_merge()
 {
     std::string err;
-    std::string fccspXfl = ecad_test::GetTestDataPath() + "/extension/xfl/fccsp.xfl";
-    auto fccsp = ext::CreateDatabaseFromXfl("test", fccspXfl, &err);
+    std::string qcomXfl = ecad_test::GetTestDataPath() + "/extension/xfl/qcom.xfl";
+    auto qcom = ext::CreateDatabaseFromXfl("qcom", qcomXfl, &err);
     BOOST_CHECK(err.empty());
-    BOOST_CHECK(fccsp != nullptr);
+    BOOST_CHECK(qcom != nullptr);
 
     std::vector<Ptr<ICell> > cells;
-    fccsp->GetCircuitCells(cells);
+    qcom->GetCircuitCells(cells);
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
 
     ELayoutPolygonMergeSettings settings;
     settings.threads = 4;
-    settings.outFile = ecad_test::GetTestDataPath() + "/vtk/fccsp";
+    settings.outFile = ecad_test::GetTestDataPath() + "/vtk/qcom";
     // settings.selectNets = { ENetId(74) };
     BOOST_CHECK(layout->MergeLayerPolygons(settings));
 

@@ -75,13 +75,13 @@ void t_thermal_network_extraction()
     using namespace generic::filesystem;
 
     std::string err;
-    std::string fccspXfl = ecad_test::GetTestDataPath() + "/extension/xfl/fccsp.xfl";
-    auto fccsp = ext::CreateDatabaseFromXfl("test", fccspXfl, &err);
+    std::string qcomXfl = ecad_test::GetTestDataPath() + "/extension/xfl/qcom.xfl";
+    auto qcom = ext::CreateDatabaseFromXfl("qcom", qcomXfl, &err);
     BOOST_CHECK(err.empty());
-    BOOST_CHECK(fccsp != nullptr);
+    BOOST_CHECK(qcom != nullptr);
 
     std::vector<Ptr<ICell> > cells;
-    fccsp->GetCircuitCells(cells);
+    qcom->GetCircuitCells(cells);
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
