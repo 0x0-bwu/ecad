@@ -40,6 +40,10 @@ public:
     bool RemoveDatabase(const std::string & name);
     void ShutDown(bool autoSave = true);
 
+    ///Thirdpart
+    SPtr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap = std::string{});
+    SPtr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl);
+
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     bool SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
     bool LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);

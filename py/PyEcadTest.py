@@ -69,9 +69,9 @@ def test_data_mgr() :
     assert(next == None)
 
     #create stackup layer
-    layer_m = mgr.create_stackup_layer("m", ecad.ELayerType.CONDUCTINGLAYER, 0, 10)
+    layer_m = mgr.create_stackup_layer_with_default_materials("m", ecad.ELayerType.CONDUCTINGLAYER, 0, 10)
     assert(layer_m.thickness == 10)
-    layer_v = mgr.create_stackup_layer("v", ecad.ELayerType.DIELECTRICLAYER, 0, 20)
+    layer_v = mgr.create_stackup_layer_with_default_materials("v", ecad.ELayerType.DIELECTRICLAYER, 0, 20)
     layer_v.elevation = -10
     assert(layer_v.elevation == -10)
 
@@ -839,7 +839,7 @@ def test_layer_collection() :
 ###ELayer
 def test_layer() :
     #create stackup layer
-    layer = ecad.EDataMgr.instance().create_stackup_layer("layer", ecad.ELayerType.CONDUCTINGLAYER, 0, 10)
+    layer = ecad.EDataMgr.instance().create_stackup_layer_with_default_materials("layer", ecad.ELayerType.CONDUCTINGLAYER, 0, 10)
 
     #id
     assert(layer.layer_id == ecad.ELayerId.NOLAYER)
@@ -921,7 +921,7 @@ def test_point() :
 
 ###ETransform
 def test_transform() :
-    trans = ecad.make_transform_2d(0.5, 0, EPoint2D(3, 5), True)
+    trans = ecad.make_transform_2d(0.5, 0, EPoint2D(3, 5), ecad.EMirror2D.Y)
     m = trans.get_transform()
     assert(m.a11 == -.5 and m.a13 == 3.0 and m.a22 == 0.5 and m.a23 == 5.0)
 
@@ -932,34 +932,61 @@ def test_polygon_data() :
     polygon.set_points(points)
     assert(polygon.size() == 4)
 
-def main() :
-    test_data_mgr()
+###Extension
+def test_extension() :
+    #instance
+    mgr = ecad.EDataMgr.instance()
+
+    #gds
+    gds_file = current_dir + '/../test/data/extension/gdsii/4004.gds'
+    gds_database = mgr.create_database_from_gds('4004', gds_file)
+    assert(gds_database)
+
+    #xfl
+    # xfl_file = current_dir + '/../test/data/extension/xfl/fccsp.xfl'
+    # xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
+    # assert(xfl_database)
+
+    mgr.shutdown()
+
+def test_objects() :
+    
     test_database()
-    test_cell_collection()
     test_cell()
     test_layout_view()
-    test_primitive_collection()
     test_primitive()
     test_geometry_2d()
     test_text()
-    test_cell_inst_collection()
     test_cell_inst()
-    test_hierarchy_obj_collection()
-    test_padstack_inst_collection()
     test_padstack_inst()
     test_padstack_def_data()
-    test_padstack_def_collection()
     test_padstack_def()
-    test_conn_obj_collection()
     test_layer_map()
-    test_layer_collection()
     test_layer()
-    test_net_collection()
     test_net()
     test_shape()
     test_point()
     test_transform()
     test_polygon_data()
+    
+def test_collections() :
+    
+    test_cell_collection()
+    test_primitive_collection()
+    test_cell_inst_collection()
+    test_hierarchy_obj_collection()
+    test_padstack_inst_collection()
+    test_padstack_def_collection()
+    test_conn_obj_collection()
+    test_layer_collection()
+    test_net_collection()
+    
+def main() :
+    test_data_mgr()
+    test_objects()
+    test_collections()
+    test_extension()
+
     print("every thing is fine")
 
 if __name__ == '__main__' :

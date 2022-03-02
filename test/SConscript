@@ -9,6 +9,8 @@ mfsolver_support = env['MFSOLVERSUPPORT']
 boost_library_path = env['BOOSTLIBRARYPATH']
 thirdpart_lib_path = env['THIRDPARTLIBPATH']
 linux_library_path = env['LINUXLIBRARYPATH']
+compile_ecad_as_lib = env['COMPILEECADASLIB']
+
 source_files = [
     'UnitTest.cpp'
 ]
@@ -49,7 +51,8 @@ if mfsolver_support :
         'ngcore'    
     ]   
 
-libs_name.append('Ecad')
+if compile_ecad_as_lib :
+    libs_name.append('Ecad')
 
 rpath = libs_path
 env.Program(program_name,source_files,LIBS=libs_name,LIBPATH=libs_path,RPATH=rpath)

@@ -4,6 +4,7 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python.hpp>
+#include "generic/common/Traits.hpp"
 #include "generic/tools/Format.hpp"
 #include "EHierarchyObjCollection.h"
 #include "EPadstackInstCollection.h"
@@ -34,19 +35,8 @@
 
 namespace ecad {
     using namespace boost::python;
-
-    template <typename Container, typename T>
-    auto append_to_std_container(Container & container, T && t, int) -> decltype(container.push_back(std::forward<T>(t)), void())
-    {
-        container.push_back(std::forward<T>(t));
-    }
-
-    template <typename Container, typename T>
-    void append_to_std_container(Container & container, T && t, ...)
-    {
-        container.insert(std::forward<T>(t));
-    }    
-
+    using namespace generic::common;
+  
     template <typename Container, typename T = typename Container::value_type,
               typename std::enable_if<std::is_same<typename Container::value_type, T>::value, bool>::type = true>
     Container py_list_to_std_container(const boost::python::list & bpl)
@@ -336,6 +326,11 @@ namespace ecad {
         return database.AddLayerMap(layerMap->Clone());
     }
 
+    UPtr<ILayer> EDataMgrCreateStackupLayerWrap(EDataMgr & mgr, const std::string & name, ELayerType type, FCoord elevation, ECoord thickness)
+    {
+        return mgr.CreateStackupLayer(name, type, elevation, thickness);
+    }
+
     Ptr<IPrimitive> EDataMgrCreateGeometry2DWrap(EDataMgr & mgr, Ptr<ILayoutView> layout, ELayerId layer, ENetId net, Ptr<EShape> shape)
     {
         //todo, enhance, copy issue here
@@ -356,6 +351,7 @@ namespace {
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrSaveDatabaseBin, EDataMgr::SaveDatabase, 2, 3)
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrLoadDatabaseBin, EDataMgr::LoadDatabase, 2, 3)
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrShutDownWithAutoSave, EDataMgr::ShutDown, 0, 1)
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrCreateDatabaseFromGdsWithoutLayrMap, EDataMgr::CreateDatabaseFromGds, 2, 3)
 
     BOOST_PYTHON_MODULE(ECAD_LIB_NAME)
     {           
@@ -1052,6 +1048,9 @@ namespace {
             .def("remove_database", &EDataMgr::RemoveDatabase)
             .def("shutdown", &EDataMgr::SaveDatabase)
             .def("shutdown", static_cast<void(EDataMgr::*)(bool)>(&EDataMgr::ShutDown), EDataMgrShutDownWithAutoSave())
+            .def("create_database_from_gds", &EDataMgr::CreateDatabaseFromGds)
+            .def("create_database_from_gds", static_cast<SPtr<IDatabase>(EDataMgr::*)(const std::string &, const std::string &, const std::string &)>(&EDataMgr::CreateDatabaseFromGds), EDataMgrCreateDatabaseFromGdsWithoutLayrMap())
+            .def("create_database_from_xfl", &EDataMgr::CreateDatabaseFromXfl)
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("save_database", &EDataMgr::SaveDatabase)
             .def("save_database", static_cast<bool(EDataMgr::*)(SPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::SaveDatabase), EDataMgrSaveDatabaseBin())
@@ -1062,6 +1061,7 @@ namespace {
             .def("find_cell_by_name", &EDataMgr::FindCellByName, return_internal_reference<>())
             .def("create_net", &EDataMgr::CreateNet, return_internal_reference<>())
             .def("create_stackup_layer", adapt_unique(&EDataMgr::CreateStackupLayer))
+            .def("create_stackup_layer_with_default_materials", adapt_unique(&EDataMgrCreateStackupLayerWrap))
             .def("create_layer_map", &EDataMgr::CreateLayerMap, return_internal_reference<>())
             .def("create_padstack_def", &EDataMgr::CreatePadstackDef, return_internal_reference<>())
             .def("create_padstack_def_data", adapt_unique(&EDataMgr::CreatePadstackDefData))

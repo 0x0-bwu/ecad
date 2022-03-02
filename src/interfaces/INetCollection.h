@@ -3,7 +3,7 @@
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "Protocol.h"
-#include "EcadDef.h"
+#include "ECadDef.h"
 #include <string>
 namespace ecad {
 class INet;

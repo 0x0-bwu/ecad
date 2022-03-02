@@ -2,6 +2,7 @@
 #include "EDataMgr.h"
 #endif
 
+#include "extension/ECadExtension.h"
 #include "EPadstackDefData.h"
 #include "EMaterialProp.h"
 #include "ELayoutView.h"
@@ -49,6 +50,30 @@ ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
     std::lock_guard<std::mutex> lock(m_databaseMutex);
     //todo
     m_databases.clear();
+}
+
+ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
+{
+    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    if(m_databases.count(name)) return nullptr;
+
+    auto database = ext::CreateDatabaseFromGds(name, gds, lyrMap);
+    if(database) {
+        m_databases.insert(std::make_pair(name, database));
+    }
+    return database;
+}
+
+ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & name, const std::string & xfl)
+{
+    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    if(m_databases.count(name)) return nullptr;
+
+    auto database = ext::CreateDatabaseFromXfl(name, xfl);
+    if(database) {
+        m_databases.insert(std::make_pair(name, database));
+    }
+    return database;
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
