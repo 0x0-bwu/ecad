@@ -10,7 +10,7 @@ namespace xfl {
 class ECAD_API ECadExtXflHandler
 {
 public:
-    explicit ECadExtXflHandler(const std::string & xflFile, size_t circleDiv = 32);
+    explicit ECadExtXflHandler(const std::string & xflFile, size_t circleDiv = 12);
     SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:

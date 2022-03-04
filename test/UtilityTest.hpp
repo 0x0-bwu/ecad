@@ -69,8 +69,8 @@ void t_layout_polygon_merge()
     auto layout = cells.front()->GetLayoutView();
 
     ELayoutPolygonMergeSettings settings;
-    settings.threads = 4;
-    settings.outFile = ecad_test::GetTestDataPath() + "/vtk/qcom";
+    settings.threads = 1;
+    settings.outFile = ecad_test::GetTestDataPath() + "/simulation/qcom";
     // settings.selectNets = { ENetId(74) };
     BOOST_CHECK(layout->MergeLayerPolygons(settings));
 

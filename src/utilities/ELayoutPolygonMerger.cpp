@@ -96,10 +96,15 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
 
 ECAD_INLINE void ELayoutPolygonMerger::MergeLayers()
 {
-    size_t threads = std::min(m_mergers.size(), m_settings.threads);
-    thread::ThreadPool pool(threads);
-    for(auto & merger : m_mergers) {
-        pool.Submit(std::bind(&ELayoutPolygonMerger::MergeOneLayer, this, merger.second.get()));
+    auto threads = std::min(m_mergers.size(), m_settings.threads);
+    if(threads > 1) {
+        thread::ThreadPool pool(threads);
+        for(auto & merger : m_mergers)
+            pool.Submit(std::bind(&ELayoutPolygonMerger::MergeOneLayer, this, merger.second.get()));
+    }
+    else {
+        for(auto & merger : m_mergers)
+            MergeOneLayer(merger.second.get());
     }
 }
 
