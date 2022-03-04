@@ -3,11 +3,12 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #endif
 
+#include "simulation/EThermalNetworkExtraction.h"
 #include "simulation/EMetalFractionMapping.h"
-#include "utility/ELayoutPolygonMerger.h"
-#include "utility/EBoundaryCalculator.h"
-#include "utility/ELayoutMergeUtility.h"
-#include "utility/ELayoutConnectivity.h"
+#include "utilities/ELayoutPolygonMerger.h"
+#include "utilities/EBoundaryCalculator.h"
+#include "utilities/ELayoutMergeUtility.h"
+#include "utilities/ELayoutConnectivity.h"
 #include "Interface.h"
 #include "EShape.h"
 
@@ -248,7 +249,7 @@ ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionM
     return mapper.GenerateMetalFractionMapping(this);
 }
 
-ECAD_INLINE void ELayoutView::ConnectivityExtraction()
+ECAD_INLINE void ELayoutView::ExtractConnectivity()
 {
     euti::ELayoutConnectivity::ConnectivityExtraction(this);
 }
@@ -259,6 +260,13 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
     merger.SetLayoutMergeSettings(settings);
     merger.Merge();
     return true;
+}
+
+ECAD_INLINE bool ELayoutView::ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) const
+{
+    esim::EThermalNetworkExtraction ne;
+    ne.SetExtractionSettings(settings);
+    return ne.GenerateThermalNetwork(this);
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)

@@ -95,10 +95,13 @@ public:
     virtual bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) const = 0;
 
     ///Connectivity Extraction
-    virtual void ConnectivityExtraction() = 0;
+    virtual void ExtractConnectivity() = 0;
 
     ///Layout Polygon Merge
     virtual bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) = 0;
+
+    ///Thermal Network Extraction
+    virtual bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) const = 0;
 
     ///Mapping
     virtual void Map(CPtr<ILayerMap> lyrMap) = 0;

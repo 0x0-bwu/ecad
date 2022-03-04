@@ -1,5 +1,5 @@
 #ifndef ECAD_HEADER_ONLY
-#include "utility/ELayoutConnectivity.h"
+#include "utilities/ELayoutConnectivity.h"
 #endif
 
 #include "generic/geometry/Connectivity.hpp"

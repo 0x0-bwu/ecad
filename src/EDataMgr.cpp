@@ -23,7 +23,7 @@ ECAD_INLINE EDataMgr::~EDataMgr()
 
 ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabase(const std::string & name)
 {
-    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    // std::lock_guard<std::mutex> lock(m_databaseMutex);
     if(m_databases.count(name)) return nullptr;
 
     auto database = std::make_shared<EDatabase>(name);
@@ -33,7 +33,7 @@ ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabase(const std::string & name)
 
 ECAD_INLINE SPtr<IDatabase> EDataMgr::OpenDatabase(const std::string & name)
 {
-    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    // std::lock_guard<std::mutex> lock(m_databaseMutex);
     if(!m_databases.count(name)) return nullptr;
 
     return m_databases[name];
@@ -41,20 +41,20 @@ ECAD_INLINE SPtr<IDatabase> EDataMgr::OpenDatabase(const std::string & name)
 
 ECAD_INLINE bool EDataMgr::RemoveDatabase(const std::string & name)
 {
-    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    // std::lock_guard<std::mutex> lock(m_databaseMutex);
     return m_databases.erase(name) > 0;
 }
 
 ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
 {
-    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    // std::lock_guard<std::mutex> lock(m_databaseMutex);
     //todo
     m_databases.clear();
 }
 
 ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
 {
-    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    //wbteststd::lock_guard<std::mutex> lock(m_databaseMutex);
     if(m_databases.count(name)) return nullptr;
 
     auto database = ext::CreateDatabaseFromGds(name, gds, lyrMap);
@@ -66,7 +66,7 @@ ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & 
 
 ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & name, const std::string & xfl)
 {
-    std::lock_guard<std::mutex> lock(m_databaseMutex);
+    //wbteststd::lock_guard<std::mutex> lock(m_databaseMutex);
     if(m_databases.count(name)) return nullptr;
 
     auto database = ext::CreateDatabaseFromXfl(name, xfl);

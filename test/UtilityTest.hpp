@@ -49,7 +49,7 @@ void t_connectivity_extraction()
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
-    layout->ConnectivityExtraction();
+    layout->ExtractConnectivity();
 
     EDataMgr::Instance().ShutDown();
 }

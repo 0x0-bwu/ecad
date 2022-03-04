@@ -18,7 +18,7 @@ public:
 }//namespace ecad
 
 #ifdef ECAD_HEADER_ONLY
-#include "utility/ELayoutConnectivity.cpp"
+#include "utilities/ELayoutConnectivity.cpp"
 #endif
 
 #endif//ECAD_EUTI_ELAYOUTCONNECTIVITY_H

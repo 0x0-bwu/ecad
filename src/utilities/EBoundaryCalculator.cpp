@@ -1,5 +1,5 @@
 #ifndef ECAD_HEADER_ONLY
-#include "utility/EBoundaryCalculator.h"
+#include "utilities/EBoundaryCalculator.h"
 #endif//ECAD_HEADER_ONLY
 
 #include "generic/geometry/Utility.hpp"

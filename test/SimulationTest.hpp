@@ -57,7 +57,7 @@ void t_metal_fraction_mapping_select_nets()
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
-    layout->ConnectivityExtraction();
+    layout->ExtractConnectivity();
 
     EMetalFractionMappingSettings settings;
     settings.threads = 16;

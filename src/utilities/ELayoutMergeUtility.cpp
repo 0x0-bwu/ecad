@@ -1,5 +1,5 @@
 #ifndef ECAD_HEADER_ONLY
-#include "utility/ELayoutMergeUtility.h"
+#include "utilities/ELayoutMergeUtility.h"
 #endif
 
 #include "Interface.h"

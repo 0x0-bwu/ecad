@@ -14,7 +14,7 @@ ECAD_API UPtr<EPolygon> CalculateBoundary(CPtr<ILayoutView> layout);
 }//nmmespace ecad
 
 #ifdef ECAD_HEADER_ONLY
-#include "utility/EBoundaryCalculator.cpp"
+#include "utilities/EBoundaryCalculator.cpp"
 #endif//ECAD_HEADER_ONLY
 
 #endif//ECAD_EUIT_EBOUNDARYCALCULATOR_H

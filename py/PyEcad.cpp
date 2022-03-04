@@ -958,7 +958,8 @@ namespace {
             .def("set_boundary", &ELayoutViewSetBoundaryWrap)
             .def("get_boundary", &ELayoutView::GetBoundary, return_internal_reference<>())//todo, should be immutable
             .def("generate_metal_fraction_mapping", &ELayoutView::GenerateMetalFractionMapping)
-            .def("connectivity_extraction", &ELayoutView::ConnectivityExtraction)
+            .def("connectivity_extraction", &ELayoutView::ExtractConnectivity)
+            .def("merge_layer_polygons", &ELayoutView::MergeLayerPolygons)
             .def("flatten", &ELayoutView::Flatten)
             .def("merge", &ELayoutView::Merge)
             .def("map", &ELayoutView::Map)
@@ -1076,7 +1077,7 @@ namespace {
             .staticmethod("instance")
         ;
 
-        //ESim
+        //ECadSettings
         class_<EMetalFractionMappingSettings>("EMetalFractionMappingSettings")
             .def_readwrite("threads", &EMetalFractionMappingSettings::threads)
             .def_readwrite("out_file", &EMetalFractionMappingSettings::outFile)
@@ -1095,6 +1096,17 @@ namespace {
             .add_property("select_nets", +[](const EMetalFractionMappingSettings & settings){ return std_container_to_py_list(settings.selectNets); },
                             make_function([](EMetalFractionMappingSettings & settings, const boost::python::list & l){ settings.selectNets = py_list_to_std_container<std::unordered_set<ENetId> >(l); },
                             default_call_policies(), boost::mpl::vector<void, EMetalFractionMappingSettings &, const boost::python::list &>()))
+            ;
+        
+        class_<ELayoutPolygonMergeSettings>("ELayoutPolygonMergeSettings")
+            .def_readwrite("threads", &ELayoutPolygonMergeSettings::threads)
+            .def_readwrite("out_file", &ELayoutPolygonMergeSettings::outFile)
+            .def_readwrite("include_padstack_inst", &ELayoutPolygonMergeSettings::includePadstackInst)
+            .def_readwrite("include_dielectric_layer", &ELayoutPolygonMergeSettings::includeDielectricLayer)
+            .def_readwrite("skip_top_bot_dielectric_layers", &ELayoutPolygonMergeSettings::skipTopBotDielectricLayers)
+            .add_property("select_nets", +[](const ELayoutPolygonMergeSettings & settings){ return std_container_to_py_list(settings.selectNets); },
+                            make_function([](ELayoutPolygonMergeSettings & settings, const boost::python::list & l){ settings.selectNets = py_list_to_std_container<std::unordered_set<ENetId> >(l); },
+                            default_call_policies(), boost::mpl::vector<void, ELayoutPolygonMergeSettings &, const boost::python::list &>()))
             ;
     }
 }

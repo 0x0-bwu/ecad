@@ -41,7 +41,7 @@ private:
 }//namespace ecad
 
 #ifdef ECAD_HEADER_ONLY
-#include "utility/EFlattenUtility.cpp"
+#include "utilities/EFlattenUtility.cpp"
 #endif
 
 #endif//ECAD_EUIT_EFLATTENUTILITY_H

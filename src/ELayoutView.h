@@ -87,10 +87,13 @@ public:
     bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) const;
 
     ///Connectivity Extraction
-    void ConnectivityExtraction();
+    void ExtractConnectivity();
 
     ///Layout Polygon Merge
     bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings);
+
+    ///Thermal Network Extraction
+    bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) const;
     
     ///Flatten
     void Flatten(const EFlattenOption & option);

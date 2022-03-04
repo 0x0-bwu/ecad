@@ -4,7 +4,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 #endif
 
 #include "generic/tools/FileSystem.hpp"
-#include "utility/EFlattenUtility.h"
+#include "utilities/EFlattenUtility.h"
 #include "EMaterialDefCollection.h"
 #include "EPadstackDefCollection.h"
 #include "ELayerMapCollection.h"

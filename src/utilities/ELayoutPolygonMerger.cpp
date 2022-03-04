@@ -1,5 +1,5 @@
 #ifndef ECAD_HEADER_ONLY
-#include "utility/ELayoutPolygonMerger.h"
+#include "utilities/ELayoutPolygonMerger.h"
 #endif
 
 #include "generic/geometry/PolygonMerge.hpp"

@@ -6,6 +6,16 @@
 #include <array>
 namespace ecad {
 
+struct ELayoutPolygonMergeSettings
+{
+    size_t threads = 1;
+    std::string outFile;
+    bool includePadstackInst = true;
+    bool includeDielectricLayer = true;
+    bool skipTopBotDielectricLayers = false;
+    std::unordered_set<ENetId> selectNets;
+};
+
 struct EMetalFractionMappingSettings
 {
     size_t threads = 1;
@@ -18,14 +28,20 @@ struct EMetalFractionMappingSettings
     std::unordered_set<ENetId> selectNets;
 };
 
-struct ELayoutPolygonMergeSettings
+struct EThermalNetworkExtractionSettings
 {
     size_t threads = 1;
-    std::string outFile;
-    bool includePadstackInst = true;
-    bool includeDielectricLayer = true;
-    bool skipTopBotDielectricLayers = false;
-    std::unordered_set<ENetId> selectNets;
+    std::string outDir;
+#ifdef BOOST_GIL_IO_PNG_SUPPORT
+    bool dumpHotmaps = false;
+#endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
+    bool dumpDensityFile = false;
+    bool dumpTemperatureFile = false;
+    EValue regionExtTop = 0;
+    EValue regionExtBot = 0;
+    EValue regionExtLeft = 0;
+    EValue regionExtRight = 0;
+    std::array<size_t, 2> grid = {1, 1};
 };
 
 }//namespace ecad

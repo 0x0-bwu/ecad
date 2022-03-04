@@ -9,6 +9,11 @@
 namespace ecad {
 namespace esim {
 
+ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetworkExtractionSettings settings)
+{
+    m_settings = std::move(settings);
+}
+
 ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("generate thermal network")
@@ -16,13 +21,12 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     std::string currentPath = generic::filesystem::CurrentPath();
 
     EMetalFractionMappingSettings settings;
-    settings.threads = 16;
-    settings.grid = {50, 50};
-    // settings.regionExtTop   = 0.47;//mm
-    // settings.regionExtBot   = 0.47;//mm
-    // settings.regionExtLeft  = 0.47;//mm
-    // settings.regionExtRight = 0.47;//mm
-    settings.outFile = currentPath + "/test/ecad/testdata/simulation/result.mf";
+    settings.threads = m_settings.threads;
+    settings.grid = m_settings.grid;
+    settings.regionExtTop = m_settings.regionExtTop;
+    settings.regionExtBot = m_settings.regionExtBot;
+    settings.regionExtLeft  = m_settings.regionExtLeft;
+    settings.regionExtRight = m_settings.regionExtRight;
 
     LayoutMetalFractionMapper mapper(settings);
     if(!mapper.GenerateMetalFractionMapping(layout)) return false;
@@ -31,9 +35,10 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     auto mfInfo = mapper.GetMetalFractionInfo();
     if(nullptr == mf || nullptr == mfInfo) return false;
 
-    //wbtest
-    std::string densityFile = currentPath + "/test/ecad/testdata/simulation/density.txt";
-    WriteThermalProfile(*mfInfo, *mf, densityFile);
+    if(!m_settings.outDir.empty() && m_settings.dumpDensityFile) {
+        auto densityFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "density.txt";
+        WriteThermalProfile(*mfInfo, *mf, densityFile);
+    }
 
     std::vector<Ptr<ILayer> > layers;
     layout->GetStackupLayers(layers);
@@ -45,7 +50,6 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     }
 
     auto [nx, ny] = mfInfo->grid;
-    std::cout << "x: " << nx << ", y: " << ny << std::endl;//wbtest
     size_t nz = (mfInfo->layers).size();
 
     m_modelSize = {nx + 1, ny + 1, nz + 1};
@@ -220,36 +224,43 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
         }
     }
 
-    auto min = *std::min_element(results.begin(), results.end());
-    auto max = *std::max_element(results.begin(), results.end());
-    std::cout << "min: " << min << ", max: " << max << std::endl;
-    auto delta = max - min;
     for(size_t i = 0; i < m_network->Size(); ++i){
         auto modelIndex = GetModelIndex(i);
-        // (*htMap)(modelIndex.x, modelIndex.y)[m_modelSize.z - modelIndex.z - 1] = results[i];
-        (*htMap)(modelIndex.x, modelIndex.y)[modelIndex.z] = (results[i] - min) / delta;//to 0~1
+        (*htMap)(modelIndex.x, modelIndex.y)[m_modelSize.z - modelIndex.z - 1] = results[i];
     }
 
     auto htMapInfo = *mfInfo;
     htMapInfo.grid[0] += 1;
     htMapInfo.grid[1] += 1;
-    std::string resultFile = currentPath + "/test/data/simulation/temperature.txt";
-    WriteThermalProfile(htMapInfo, *htMap, resultFile);
-
-#if defined(ECAD_DEBUG_MODE) && defined(BOOST_GIL_IO_PNG_SUPPORT)
-
-    size_t index = 0;
-    auto rgbaFunc = [&index](const std::vector<float> & d) {
-        int r, g, b, a = 255;
-        generic::color::RGBFromScalar(d[index], r, g, b);
-        return std::make_tuple(r, g, b, a);
-    };
-
-    for(index = 0; index < mfInfo->layers.size(); ++index){
-        std::string filepng = currentPath + "/test/ecad/testdata/simulation/heatmap/" + std::to_string(index) + ".png";
-        htMap->WriteImgProfile(filepng, rgbaFunc);
+    if(!m_settings.outDir.empty() && m_settings.dumpTemperatureFile) {
+        auto tFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "temperature.txt";
+        WriteThermalProfile(htMapInfo, *htMap, tFile);
     }
-#endif
+
+#ifdef BOOST_GIL_IO_PNG_SUPPORT
+
+    if(!m_settings.outDir.empty() && m_settings.dumpHotmaps) {
+        auto min = *std::min_element(results.begin(), results.end());
+        auto max = *std::max_element(results.begin(), results.end());
+        auto delta = max - min;
+        for(size_t i = 0; i < m_network->Size(); ++i){
+            auto modelIndex = GetModelIndex(i);
+            (*htMap)(modelIndex.x, modelIndex.y)[modelIndex.z] = (results[i] - min) / delta;//to 0~1
+        }
+
+        size_t index = 0;
+        auto rgbaFunc = [&index](const std::vector<float> & d) {
+            int r, g, b, a = 255;
+            generic::color::RGBFromScalar(d[index], r, g, b);
+            return std::make_tuple(r, g, b, a);
+        };
+        
+        for(index = 0; index < mfInfo->layers.size(); ++index){
+            std::string filepng = m_settings.outDir + GENERIC_FOLDER_SEPS + std::to_string(index) + ".png";
+            htMap->WriteImgProfile(filepng, rgbaFunc);
+        }
+    }
+#endif//BOOST_GIL_IO_PNG_SUPPORT
     return true;
 }
 

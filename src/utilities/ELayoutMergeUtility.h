@@ -16,7 +16,7 @@ public:
 }//namespace ecad
 
 #ifdef ECAD_HEADER_ONLY
-#include "utility/ELayoutMergeUtility.cpp"
+#include "utilities/ELayoutMergeUtility.cpp"
 #endif
 
 #endif//ECAD_EUIT_ELAYOUTMERGEUTILITY_H

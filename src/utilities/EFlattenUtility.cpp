@@ -1,5 +1,5 @@
 #ifndef ECAD_HEADER_ONLY
-#include "utility/EFlattenUtility.h"
+#include "utilities/EFlattenUtility.h"
 #endif
 
 #include "generic/thread/TaskFlow.hpp"

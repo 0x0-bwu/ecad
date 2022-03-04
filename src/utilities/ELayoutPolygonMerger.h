@@ -52,7 +52,7 @@ private:
 }//namespace ecad
 
 #ifdef ECAD_HEADER_ONLY
-#include "utility/ELayoutPolygonMerger.cpp"
+#include "utilities/ELayoutPolygonMerger.cpp"
 #endif
 
 #endif//ECAD_EUIT_ELAYOUTPOLYGONMERGER_H

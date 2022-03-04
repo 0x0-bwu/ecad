@@ -9,7 +9,15 @@ sys.path.append(ecad_lib_path)
 import PyEcad as ecad
 from PyEcad import EPoint2D
 
+def print_test_info(func) :
+    def wrapper(*args, **kwargs):
+        print(f"running: {func.__qualname__}")
+        return func(*args, **kwargs)
+
+    return wrapper
+
 ###EDataMgr
+@print_test_info
 def test_data_mgr() :
     #instance
     mgr = ecad.EDataMgr.instance()
@@ -127,6 +135,7 @@ def test_data_mgr() :
     mgr.shutdown()
 
 ###EDatabase
+@print_test_info
 def test_database() :
 
     #create database
@@ -243,6 +252,7 @@ def test_database() :
     assert(padstack_def_collection.size() == 0)
 
 ###ECellCollection
+@print_test_info
 def test_cell_collection() :
     #create database
     db_name = "test"
@@ -269,6 +279,7 @@ def test_cell_collection() :
     assert(len(cell_collection) == 0)
 
 ###ECell
+@print_test_info
 def test_cell() :
     #create database
     db_name = "test"
@@ -309,6 +320,7 @@ def test_cell() :
     assert(cell.suuid)
 
 ###ELayoutView
+@print_test_info
 def test_layout_view() :
 
      #create database
@@ -460,6 +472,7 @@ def test_layout_view() :
     layout.map(layer_map)
 
 ###EPrimitive Collection
+@print_test_info
 def test_primitive_collection() :
     
     #create primitive collection
@@ -496,6 +509,7 @@ def test_primitive_collection() :
     assert(len(collection) == 0)
 
 ###EPrimitve
+@print_test_info
 def test_primitive() :
         
     #create primitive collection
@@ -530,6 +544,7 @@ def test_primitive() :
     assert(ecad.EPrimitiveType.TEXT == text.get_primitive_type())
 
 ###EGeometry2D
+@print_test_info
 def test_geometry_2d() :
     #create geometry 2d
     geom = ecad.EGeometry2D(ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
@@ -550,6 +565,7 @@ def test_geometry_2d() :
     assert(shape.get_bbox().ll == EPoint2D(10, 10))
 
 ###EText
+@print_test_info
 def test_text() :
     #create text
     text = ecad.EText("text", ecad.ELayerId.NOLAYER, ecad.ENetId.NONET)
@@ -561,6 +577,7 @@ def test_text() :
     assert(text.get_position() == ecad.EPoint2D(0, 0))
     
 ###ECellInst Collection
+@print_test_info
 def test_cell_inst_collection() :
     #create cell inst collection
     collection = ecad.ECellInstCollection()
@@ -585,6 +602,7 @@ def test_cell_inst_collection() :
     assert(len(collection) == 0)
 
 ###ECellInst
+@print_test_info
 def test_cell_inst() :
     #create cell inst
     top_cell = ecad.ECircuitCell("top_cell", None)
@@ -606,6 +624,7 @@ def test_cell_inst() :
 
 
 ###EHierarchyObjCollection
+@print_test_info
 def test_hierarchy_obj_collection() :
     #create hierarchy obj collection
     collection = ecad.EHierarchyObjCollection()
@@ -622,6 +641,7 @@ def test_hierarchy_obj_collection() :
     assert(len(collection) == collection.size() == 0)
 
 ###EPadstackInstCollection
+@print_test_info
 def test_padstack_inst_collection() :
     #create padstack inst collection
     collection = ecad.EPadstackInstCollection()
@@ -648,6 +668,7 @@ def test_padstack_inst_collection() :
     assert(len(collection) == collection.size() == 2)
 
 ###EPadstackInst
+@print_test_info
 def test_padstack_inst() :
 
     #create padstack inst
@@ -677,6 +698,7 @@ def test_padstack_inst() :
     assert(padstack_inst.get_layer_shape(ecad.ELayerId(0)) == None)
 
 ###EPadstackDefData
+@print_test_info
 def test_padstack_def_data() :
     
     #create padstack def data
@@ -714,6 +736,7 @@ def test_padstack_def_data() :
     assert(def_data.get_via_shape() != None)
 
 ###EPadstackDef Collection
+@print_test_info
 def test_padstack_def_collection() :
     #create padstack def collection
     collection = ecad.EPadstackDefCollection()
@@ -729,6 +752,7 @@ def test_padstack_def_collection() :
     collection.clear()
 
 ###EPadstackDef
+@print_test_info
 def test_padstack_def() :
     #create padstack def
     padstack_def = ecad.EPadstackDef("padstack_def")
@@ -741,6 +765,7 @@ def test_padstack_def() :
     assert(padstack_def.get_padstack_def_data())
 
 ###ConnObj Collection
+@print_test_info
 def test_conn_obj_collection() :
     #create conn obj collection
     collection = ecad.EConnObjCollection()
@@ -759,6 +784,7 @@ def test_conn_obj_collection() :
     assert(iter.next() == None)
     
 ###ELayerMapCollection
+@print_test_info
 def test_conn_obj_collection() :
     #create conn obj collection
     collection = ecad.ELayerMapCollection()
@@ -771,6 +797,7 @@ def test_conn_obj_collection() :
     assert(iter.next() == None)
 
 ###ELayerMap
+@print_test_info
 def test_layer_map() :
     #create layer map
     layer_map = ecad.ELayerMap("layer_map", None)
@@ -798,6 +825,7 @@ def test_layer_map() :
     assert(layer_map.get_mapping_forward(ecad.ELayerId(1)) == ecad.ELayerId(0))
 
 ###ELayerCollection
+@print_test_info
 def test_layer_collection() :
     #create layer collection
     collection = ecad.ELayerCollection()
@@ -837,6 +865,7 @@ def test_layer_collection() :
     assert(collection.get_next_layer_name("layer1") == "layer11")
 
 ###ELayer
+@print_test_info
 def test_layer() :
     #create stackup layer
     layer = ecad.EDataMgr.instance().create_stackup_layer_with_default_materials("layer", ecad.ELayerType.CONDUCTINGLAYER, 0, 10)
@@ -861,6 +890,7 @@ def test_layer() :
     assert(layer.thickness == 10)
 
 ###ENetCollection
+@print_test_info
 def test_net_collection() :
     #create net collection
     collection = ecad.ENetCollection()
@@ -897,6 +927,7 @@ def test_net_collection() :
     assert(len(collection) == 0)
 
 ###ENet
+@print_test_info
 def test_net() :
     #create net
     net = ecad.ENet("net")
@@ -906,12 +937,14 @@ def test_net() :
     assert(net.net_id == ecad.ENetId(1))
 
 ###EShape
+@print_test_info
 def test_shape() :
     #create polygon with holes
     pwh = ecad.EPolygonWithHoles()
     assert(pwh.has_hole() == False)
 
 ###EPoint
+@print_test_info
 def test_point() :
     p = EPoint2D(2, 3)
     assert(p.x == 2 and p.y == 3)
@@ -920,12 +953,14 @@ def test_point() :
     assert(p.x == 3 and p.y == 2)
 
 ###ETransform
+@print_test_info
 def test_transform() :
     trans = ecad.make_transform_2d(0.5, 0, EPoint2D(3, 5), ecad.EMirror2D.Y)
     m = trans.get_transform()
     assert(m.a11 == -.5 and m.a13 == 3.0 and m.a22 == 0.5 and m.a23 == 5.0)
 
 ###EPolygonData
+@print_test_info
 def test_polygon_data() :
     points = [EPoint2D(0, 0), EPoint2D(10, 0), EPoint2D(10, 10), EPoint2D(0, 10)]
     polygon = ecad.EPolygonData()
@@ -933,6 +968,7 @@ def test_polygon_data() :
     assert(polygon.size() == 4)
 
 ###Extension
+@print_test_info
 def test_extension() :
     #instance
     mgr = ecad.EDataMgr.instance()
@@ -943,12 +979,37 @@ def test_extension() :
     assert(gds_database)
 
     #xfl
-    # xfl_file = current_dir + '/../test/data/extension/xfl/fccsp.xfl'
-    # xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
-    # assert(xfl_database)
+    xfl_file = current_dir + '/../test/data/extension/xfl/fccsp.xfl'
+    xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
+    assert(xfl_database)
 
     mgr.shutdown()
 
+###Utilities
+@print_test_info
+def test_utilities() :
+    #instance
+    mgr = ecad.EDataMgr.instance()
+
+    #xfl
+    xfl_file = current_dir + '/../test/data/extension/xfl/fccsp.xfl'
+    xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
+    assert(xfl_database)
+
+    top_cells = xfl_database.get_top_cells()
+    assert(len(top_cells) == 1)
+
+    layout = top_cells[0].get_layout_view()
+    assert(layout)
+    
+    mgr.shutdown()
+
+###Simulation
+@print_test_info
+def test_simulation() :
+    pass
+
+@print_test_info
 def test_objects() :
     
     test_database()
@@ -968,7 +1029,8 @@ def test_objects() :
     test_point()
     test_transform()
     test_polygon_data()
-    
+
+@print_test_info  
 def test_collections() :
     
     test_cell_collection()
@@ -986,6 +1048,8 @@ def main() :
     test_objects()
     test_collections()
     test_extension()
+    test_utilities()
+    test_simulation()
 
     print("every thing is fine")
 

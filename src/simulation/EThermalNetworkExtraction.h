@@ -1,6 +1,7 @@
 #ifndef ECAD_ESIM_ETHERMALNETWOKREXTRACTION_H
 #define ECAD_ESIM_ETHERMALNETWOKREXTRACTION_H
 #include "thermal/model/ThermalNetwork.hpp"
+#include "ECadSettings.h"
 #include "ECadCommon.h"
 namespace ecad {
 class ILayoutView;
@@ -22,6 +23,7 @@ class ECAD_API EThermalNetworkExtraction
     enum class Axis { PX, NX, PY, NY, PZ, NZ };
     enum class Quadrant { I = 1, II = 2, III = 3, IV = 4, V = 5, VI = 6, VII = 7, VIII = 8 };
 public:
+    void SetExtractionSettings(EThermalNetworkExtractionSettings settings);
     bool GenerateThermalNetwork(CPtr<ILayoutView> layout);
 private:
     size_t GetFlattenIndex(const ModelIndex & index) const;
@@ -34,6 +36,7 @@ private:
 private:
     ModelIndex m_modelSize;
     UPtr<ThermalNetwork> m_network;
+    EThermalNetworkExtractionSettings m_settings;
 };
 
 ECAD_ALWAYS_INLINE size_t EThermalNetworkExtraction::GetFlattenIndex(const ModelIndex & index) const
