@@ -17,7 +17,6 @@ public:
 private:
     ///cell and cell primitives
     void ImportOneCell(const EGdsCell & cell, Ptr<ICell> iCell);
-    void ImportOneLayer(EGdsObject::LayerId id);
     void ImportOnePolygon(CPtr<EGdsPolygon> polygon, Ptr<ILayoutView> iLayoutView);
     void ImportOnePath(CPtr<EGdsPath> path, Ptr<ILayoutView> iLayoutView);
     void ImportOneText(CPtr<EGdsText> text, Ptr<ILayoutView> iLayoutView);
@@ -35,7 +34,7 @@ private:
 private:
     // temporary data
     SPtr<IDatabase> m_database = nullptr;
-    std::map<EGdsObject::LayerId, ELayerId> m_layerIdMap;
+    std::map<EGdsObject::LayerId, std::set<ELayerId> > m_layerIdMap;
 };
 
 }//namespace gds

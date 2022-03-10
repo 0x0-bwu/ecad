@@ -97,22 +97,23 @@ ECAD_INLINE LayoutMetalFractionMapper::~LayoutMetalFractionMapper()
 {
 }
 
-ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(CPtr<ILayoutView> layout)
+ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("metal fraction mapping");
     
-    auto layoutCopy = layout->Clone();
-    ELayoutPolygonMergeSettings settings;
-    settings.threads = m_settings.threads;
-    settings.selectNets = m_settings.selectNets;
-    layoutCopy->MergeLayerPolygons(settings);
+    if(m_settings.mergeGeomBeforeMapping) {
+        ELayoutPolygonMergeSettings settings;
+        settings.threads = m_settings.threads;
+        settings.selectNets = m_settings.selectNets;
+        layout->MergeLayerPolygons(settings);
+    }
 
-    auto coordUnits = layoutCopy->GetCoordUnits();
+    auto coordUnits = layout->GetCoordUnits();
     m_mfInfo.reset(new MetalFractionInfo);
     m_mfInfo->grid = m_settings.grid;
     m_mfInfo->coordUnits = coordUnits;
     
-    auto boundary = layoutCopy->GetBoundary();
+    auto boundary = layout->GetBoundary();
     auto bbox = boundary->GetBBox();
 
     m_mfInfo->origin = bbox;
@@ -129,14 +130,14 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
     m_mfInfo->extension = bbox;
     m_result.reset(new LayoutMetalFraction(m_mfInfo->grid[0], m_mfInfo->grid[1]));
 
-    auto layerCollection = layoutCopy->GetLayerCollection();
+    auto layerCollection = layout->GetLayerCollection();
     auto layerSize = layerCollection->Size();
     auto resultSize = m_result->Size();
     for(size_t i = 0; i < resultSize; ++i)
         (*m_result)[i].assign(layerSize, 0);
 
     MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, m_settings.threads);
-    auto layerIter = layoutCopy->GetLayerIter();
+    auto layerIter = layout->GetLayerIter();
 
     //stackuplayer
     while(auto * layer = layerIter->Next()){
@@ -144,7 +145,7 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
         if(nullptr == stackupLayer) continue;
         bool isMetal = layer->GetLayerType() == ELayerType::ConductingLayer;
         LayerMetalFractionMapper mapper(m_settings, *m_result, layer->GetLayerId(), isMetal);
-        mapper.GenerateMetalFractionMapping(layoutCopy.get(), ctrl);
+        mapper.GenerateMetalFractionMapping(layout, ctrl);
 
         StackupLayerInfo lyrInfo{ isMetal, stackupLayer->GetElevation(), stackupLayer->GetThickness(), layer->GetName() };
         (m_mfInfo->layers).emplace_back(std::move(lyrInfo));

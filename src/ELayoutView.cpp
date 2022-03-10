@@ -243,7 +243,7 @@ ECAD_INLINE CPtr<EPolygon> ELayoutView::GetBoundary() const
     return m_boundary.get();
 }
 
-ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) const
+ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings)
 {
     esim::LayoutMetalFractionMapper mapper(settings);
     return mapper.GenerateMetalFractionMapping(this);
@@ -262,7 +262,7 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
     return true;
 }
 
-ECAD_INLINE bool ELayoutView::ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) const
+ECAD_INLINE bool ELayoutView::ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings)
 {
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(settings);

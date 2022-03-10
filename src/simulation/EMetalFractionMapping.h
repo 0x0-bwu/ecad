@@ -63,7 +63,7 @@ public:
     explicit LayoutMetalFractionMapper(EMetalFractionMappingSettings settings);
     virtual ~LayoutMetalFractionMapper();
 
-    bool GenerateMetalFractionMapping(CPtr<ILayoutView> layout);
+    bool GenerateMetalFractionMapping(Ptr<ILayoutView> layout);
     CPtr<LayoutMetalFraction> GetLayoutMetalFraction() const;
     CPtr<MetalFractionInfo> GetMetalFractionInfo() const;
 

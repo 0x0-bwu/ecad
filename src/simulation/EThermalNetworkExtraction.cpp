@@ -14,7 +14,7 @@ ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetwor
     m_settings = std::move(settings);
 }
 
-ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutView> layout)
+ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("generate thermal network")
 
@@ -27,6 +27,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(CPtr<ILayoutV
     settings.regionExtBot = m_settings.regionExtBot;
     settings.regionExtLeft  = m_settings.regionExtLeft;
     settings.regionExtRight = m_settings.regionExtRight;
+    settings.mergeGeomBeforeMapping = m_settings.mergeGeomBeforeMetalMapping;
 
     LayoutMetalFractionMapper mapper(settings);
     if(!mapper.GenerateMetalFractionMapping(layout)) return false;

@@ -24,7 +24,7 @@ class ECAD_API EThermalNetworkExtraction
     enum class Quadrant { I = 1, II = 2, III = 3, IV = 4, V = 5, VI = 6, VII = 7, VIII = 8 };
 public:
     void SetExtractionSettings(EThermalNetworkExtractionSettings settings);
-    bool GenerateThermalNetwork(CPtr<ILayoutView> layout);
+    bool GenerateThermalNetwork(Ptr<ILayoutView> layout);
 private:
     size_t GetFlattenIndex(const ModelIndex & index) const;
     ModelIndex GetModelIndex(size_t index) const;

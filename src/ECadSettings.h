@@ -24,6 +24,7 @@ struct EMetalFractionMappingSettings
     EValue regionExtBot = 0;
     EValue regionExtLeft = 0;
     EValue regionExtRight = 0;
+    bool mergeGeomBeforeMapping = true;
     std::array<size_t, 2> grid = {1, 1};
     std::unordered_set<ENetId> selectNets;
 };
@@ -42,6 +43,7 @@ struct EThermalNetworkExtractionSettings
     EValue regionExtLeft = 0;
     EValue regionExtRight = 0;
     std::array<size_t, 2> grid = {1, 1};
+    bool mergeGeomBeforeMetalMapping = true;
 };
 
 }//namespace ecad

@@ -53,7 +53,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
         auto gdsLayers = layerMap.GetAllLayers();
         for(const auto & gdsLayer  : gdsLayers){
             auto layer = eMgr.CreateStackupLayer(gdsLayer.name, gdsLayer.type, elevation, gdsLayer.thickness);
-            m_layerIdMap.insert(std::make_pair(gdsLayer.layerId, static_cast<ELayerId>(id++)));
+            m_layerIdMap.insert(std::make_pair(gdsLayer.layerId, std::set<ELayerId>{})).first->second.insert(static_cast<ELayerId>(id++));
             layers.push_back(std::move(layer));
             elevation -= gdsLayer.thickness;
         }
@@ -62,8 +62,8 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
         for(const auto & lyr : db.Layers()){
             std::string name = "layer_" + std::to_string(lyr);
             auto layer = eMgr.CreateStackupLayer(name, ELayerType::ConductingLayer, 0, 0);
+            m_layerIdMap.insert(std::make_pair(lyr, std::set<ELayerId>{})).first->second.insert(static_cast<ELayerId>(id++));
             layers.push_back(std::move(layer));
-            m_layerIdMap.insert(std::make_pair(lyr, static_cast<ELayerId>(id++)));
         }
     }
 
@@ -111,51 +111,48 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOneCell(const EGdsCell & cell, Ptr<ICe
     }
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportOneLayer(EGdsObject::LayerId id)
-{
-    auto & eMgr = EDataMgr::Instance();
-    auto eLyrId = static_cast<ELayerId>(id); 
-    m_layerIdMap.insert(std::make_pair(id, eLyrId));
-}
-
 ECAD_INLINE void ECadExtGdsHandler::ImportOnePolygon(CPtr<EGdsPolygon> polygon, Ptr<ILayoutView> iLayoutView)
 {
     if(nullptr == polygon) return;
 
-    if(!m_layerIdMap.count(polygon->layer))
-        ImportOneLayer(polygon->layer);
+    if(!m_layerIdMap.count(polygon->layer)) return;
 
     auto & eMgr = EDataMgr::Instance();
-    auto eLyrId = m_layerIdMap.at(polygon->layer);
-    auto eShape = UPtr<EShape>(new EPolygon(std::move(polygon->shape)));
-    eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, std::move(eShape));
+    const auto & eLyrIds = m_layerIdMap.at(polygon->layer);
+    for(auto eLyrId : eLyrIds) {
+        auto eShape = UPtr<EShape>(new EPolygon(std::move(polygon->shape)));
+        eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, std::move(eShape));
+    }
 }
 
 ECAD_INLINE void ECadExtGdsHandler::ImportOnePath(CPtr<EGdsPath> path, Ptr<ILayoutView> iLayoutView)
 {
     if(nullptr == path) return;
 
-    if(!m_layerIdMap.count(path->layer))
-        ImportOneLayer(path->layer);
+    if(!m_layerIdMap.count(path->layer)) return;
 
     auto & eMgr = EDataMgr::Instance();
-    auto eLyrId = m_layerIdMap.at(path->layer);
-    auto eShape = UPtr<EShape>(new EPath(std::move(path->shape)));
-    eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, std::move(eShape));
+    const auto & eLyrIds = m_layerIdMap.at(path->layer);
+    for(auto eLyrId : eLyrIds) {
+        auto eShape = UPtr<EShape>(new EPath(std::move(path->shape)));
+        eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, std::move(eShape));
+    }
 }
 
 ECAD_INLINE void ECadExtGdsHandler::ImportOneText(CPtr<EGdsText> text, Ptr<ILayoutView> iLayoutView)
 {
     if(nullptr == text) return;
 
-    if(!m_layerIdMap.count(text->layer))
-        ImportOneLayer(text->layer);
-    
+    if(!m_layerIdMap.count(text->layer)) return;
+
     auto & eMgr = EDataMgr::Instance();
-    auto eLyrId = m_layerIdMap.at(text->layer);
+    const auto & eLyrIds = m_layerIdMap.at(text->layer);
     auto transform = makeETransform2D(text->scale, text->rotation, text->position);
-    auto iText = eMgr.CreateText(iLayoutView, eLyrId, transform, text->text);
-    //todo other paras
+    
+    for(auto eLyrId : eLyrIds) {
+        auto iText = eMgr.CreateText(iLayoutView, eLyrId, transform, text->text);
+        //todo other paras
+    }
 }
 
 ECAD_INLINE void ECadExtGdsHandler::ImportCellReferences(const EGdsCell & cell, Ptr<ICell> iCell)

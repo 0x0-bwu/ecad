@@ -84,7 +84,7 @@ public:
     CPtr<EPolygon> GetBoundary() const;
 
     ///Metal Fraction Mapping
-    bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) const;
+    bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings);
 
     ///Connectivity Extraction
     void ExtractConnectivity();
@@ -93,7 +93,7 @@ public:
     bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings);
 
     ///Thermal Network Extraction
-    bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) const;
+    bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings);
     
     ///Flatten
     void Flatten(const EFlattenOption & option);
