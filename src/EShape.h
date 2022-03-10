@@ -25,6 +25,7 @@ public:
     virtual EPolygonWithHolesData GetPolygonWithHoles() const = 0;
     virtual void Transform(const ETransform2D & trans) = 0;
     virtual EShapeType GetShapeType() const = 0;
+    virtual bool isValid() const = 0;
 };
 
 class ECAD_API ERectangle : public EShape
@@ -41,6 +42,8 @@ public:
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
     EShapeType GetShapeType() const;
+    bool isValid() const;
+
 protected:
     ///Copy
     virtual Ptr<ERectangle> CloneImp() const override { return new ERectangle(*this); }
@@ -62,12 +65,38 @@ public:
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
     EShapeType GetShapeType() const;
+    bool isValid() const;
+
     void SetPoints(const std::vector<EPoint2D> & points);
     void SetType(int type);
     void SetWidth(ECoord width);
 protected:
     ///Copy
     virtual Ptr<EPath> CloneImp() const override { return new EPath(*this); }
+};
+
+class ECAD_API ECircle : public EShape
+{
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+    ECircle() = default;
+public:
+    ECoord r;
+    EPoint2D o;
+    size_t div;
+    ECircle(EPoint2D o, ECoord r, size_t div);
+    ~ECircle() = default;
+
+    bool hasHole() const;
+    EBox2D GetBBox() const;
+    EPolygonData GetContour() const;
+    EPolygonWithHolesData GetPolygonWithHoles() const;
+    void Transform(const ETransform2D & trans);
+    EShapeType GetShapeType() const;
+    bool isValid() const;
+
+protected:
+    ///Copy
+    virtual Ptr<ECircle> CloneImp() const override { return new ECircle(*this); }
 };
 
 class ECAD_API EPolygon : public EShape
@@ -84,6 +113,8 @@ public:
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
     EShapeType GetShapeType() const;
+    bool isValid() const;
+
     void SetPoints(const std::vector<EPoint2D> & points);
     EPolygon ConvexHull(const EPolygon & other);
 protected:
@@ -104,10 +135,34 @@ public:
     EPolygonWithHolesData GetPolygonWithHoles() const;
     void Transform(const ETransform2D & trans);
     EShapeType GetShapeType() const;
-    void SetVoid(bool isVoid);
+    bool isValid() const;
+
 protected:
     ///Copy
     virtual Ptr<EPolygonWithHoles> CloneImp() const override { return new EPolygonWithHoles(*this); }
+};
+
+class ECAD_API EShapeFromTemplate : public EShape
+{
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+    using Template = ETemplateShape;
+    ETransform2D m_transform;
+    Template m_template = nullptr;
+    EShapeFromTemplate() = default;
+public:
+    EShapeFromTemplate(Template ts);
+    ~EShapeFromTemplate() = default;
+    bool hasHole() const;
+    EBox2D GetBBox() const;
+    EPolygonData GetContour() const;
+    EPolygonWithHolesData GetPolygonWithHoles() const;
+    void Transform(const ETransform2D & trans);
+    EShapeType GetShapeType() const;
+    bool isValid() const;
+
+protected:
+    ///Copy
+    virtual Ptr<EShapeFromTemplate> CloneImp() const override { return new EShapeFromTemplate(*this); }
 };
 
 }//namespace ecad

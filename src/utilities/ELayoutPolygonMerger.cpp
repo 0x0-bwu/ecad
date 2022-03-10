@@ -152,6 +152,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
 ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layerId, Ptr<EShape> shape)
 {
     if(nullptr == shape) return false;
+    if(!shape->isValid()) return false;
     auto merger = m_mergers.find(layerId);
     if(merger == m_mergers.end()) return false;
     if(m_settings.selectNets.size() && !m_settings.selectNets.count(netId)) return false;
@@ -163,8 +164,11 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
             break;
         }
         case EShapeType::Path : {
-            auto path = dynamic_cast<Ptr<EPath> >(shape);
-            merger->second->AddObject(netId, path->GetContour());
+            merger->second->AddObject(netId, shape->GetContour());
+            break;
+        }
+        case EShapeType::Circle : {
+            merger->second->AddObject(netId, shape->GetContour());
             break;
         }
         case EShapeType::Polygon : {
@@ -176,6 +180,11 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
             auto pwh = dynamic_cast<Ptr<EPolygonWithHoles> >(shape);
             merger->second->AddObject(netId, pwh->shape);
             break;
+        }
+        case EShapeType::FromTemplate : {
+            if(shape->hasHole())
+                merger->second->AddObject(netId, shape->GetPolygonWithHoles());
+            else merger->second->AddObject(netId, shape->GetContour());
         }
         default : {
             GENERIC_ASSERT(false)

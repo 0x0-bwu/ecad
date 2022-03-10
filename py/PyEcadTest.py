@@ -992,7 +992,7 @@ def test_utilities() :
     mgr = ecad.EDataMgr.instance()
 
     #xfl
-    xfl_file = current_dir + '/../test/data/extension/xfl/qcom.xfl'
+    xfl_file = current_dir + '/../test/data/extension/xfl/pop.xfl'
     xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
     assert(xfl_database)
 

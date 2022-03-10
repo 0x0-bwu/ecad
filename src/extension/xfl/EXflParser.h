@@ -423,9 +423,11 @@ struct EXflReader
 			net = textDQ[at_c<0>(_val) = _1] >>
 				char_("SPG")[at_c<1>(_val) = _1] >>
 				int_[at_c<2>(_val) = _1] >>
-				int_[at_c<3>(_val) = _1] >>
-				int_[at_c<4>(_val) = _1] >>
-				int_[at_c<5>(_val) = _1] >>
+				-(
+					int_[at_c<3>(_val) = _1] >>
+					int_[at_c<4>(_val) = _1] >>
+					int_[at_c<5>(_val) = _1]
+				 ) >>
 				"{" >> *(node[push_back(at_c<6>(_val), _1)]) >> "}"
 			;
 

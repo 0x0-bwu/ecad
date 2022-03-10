@@ -25,7 +25,6 @@ class IMaterialProp;
 class IPadstackInst;
 class IPadstackDefData;
 class IMaterialPropValue;
-
 using namespace generic::geometry;
 
 class ECAD_API EDataMgr
@@ -95,6 +94,7 @@ public:
     UPtr<EShape> CreateShapePolygon(std::vector<EPoint2D> points);
     UPtr<EShape> CreateShapePolygon(Polygon2D<ECoord> polygon);
     UPtr<EShape> CreateShapePolygonWithHoles(PolygonWithHoles2D<ECoord> pwh);
+    UPtr<EShape> CreateShapeFromTemplate(ETemplateShape ts);
 
     ///Text
     Ptr<IText> CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text);

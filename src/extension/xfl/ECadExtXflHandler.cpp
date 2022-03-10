@@ -31,8 +31,6 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     EXflReader reader(*m_xflDB);
     if(!reader(m_xflFile)) return nullptr;
 
-    m_xflDB->BuildLUTs();
-
     //reset temporary data
     m_database = mgr.CreateDatabase(name);
     if(nullptr == m_database) return nullptr;
@@ -41,6 +39,10 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     ECoordUnits coordUnits(m_xflDB->unit);
     m_database->SetCoordUnits(coordUnits);
     m_scale = coordUnits.Scale2Coord() / m_xflDB->scale;
+
+    //build xfl look up tables
+    EShapeGetter eShapeGetter(m_scale, m_circleDiv);
+    m_xflDB->BuildLUTs(eShapeGetter);
 
     //import material
     ImportMaterialDefs();
@@ -107,8 +109,8 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
             continue;
         }
 
-        auto xflShape = m_xflDB->GetTemplateShape(xflVia.shapeId);
-        if(nullptr == xflShape){
+        auto ts = m_xflDB->GetTemplateShape(xflVia.shapeId);
+        if(nullptr == ts){
             //todo, error handle
             continue;
         }
@@ -123,7 +125,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
             psDefData->SetMaterial(m_matNameMap.at(xflVia.material));
         }
 
-        auto shape = boost::apply_visitor(eShapeGetter, xflShape->shape);
+        auto shape = mgr.CreateShapeFromTemplate(ts);
         GENERIC_ASSERT(shape != nullptr)
 
         psDefData->SetViaParameters(std::move(shape), EPoint2D(0, 0), math::Rad(xflVia.shapeRot));
@@ -136,12 +138,12 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
         psDefData->SetLayers(padLayers);
         for(size_t i = 0; i < xflPs->pads.size(); ++i){
             const auto & xflPad = xflPs->pads.at(i);
-            xflShape = m_xflDB->GetTemplateShape(xflPad.shapeId);
-            if(nullptr == xflShape){
+            ts = m_xflDB->GetTemplateShape(xflPad.shapeId);
+            if(nullptr == ts){
                 //todo, error handle
                 continue;
             }
-            shape = boost::apply_visitor(eShapeGetter, xflShape->shape);
+            auto shape = mgr.CreateShapeFromTemplate(ts);
             GENERIC_ASSERT(shape != nullptr)
 
             psDefData->SetPadParameters(static_cast<ELayerId>(i), std::move(shape), EPoint2D(0, 0), math::Rad(xflPad.shapeRot));
@@ -282,7 +284,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
             else {
                 //ignore if first shape is hole
                 if(isHole(instObj)) continue;
-                auto [lyr, shape] = makeEShapeFromInstObject(eShapeGetter, instObj);
+                auto [lyr, shape] = makeEShapeFromInstObject(&mgr, eShapeGetter, instObj);
                 auto layer = m_metalLyrIdMap.find(lyr);
                 if(layer == m_metalLyrIdMap.end()) {
                     //todo, error handle
@@ -293,7 +295,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 while(i < route.objects.size()) {
                     const auto & instHole = route.objects[i++];
                     if(!isHole(instHole)) { i--; break; }
-                    auto [nextLyr, nextShape] = makeEShapeFromInstObject(eShapeGetter, instHole);
+                    auto [nextLyr, nextShape] = makeEShapeFromInstObject(&mgr, eShapeGetter, instHole);
                     if(nextLyr != lyr || nullptr == nextShape) { i--; break; }
                     holes.emplace_back(std::move(nextShape));
                 }
@@ -329,14 +331,13 @@ ECAD_INLINE void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
         shape = eShapeGetter(*composite);
     }
     else if(auto * boardShape = boost::get<BoardShape>(&(m_xflDB->boardGeom))) {
-        auto temp = m_xflDB->GetTemplateShape(boardShape->shapeId);
-        if(nullptr == temp) {
+        auto ts = m_xflDB->GetTemplateShape(boardShape->shapeId);
+        if(nullptr == ts) {
             //todo, error handle
             return;
         }
 
-        auto shape = boost::apply_visitor(eShapeGetter, temp->shape);
-        
+        auto shape = mgr.CreateShapeFromTemplate(ts);
         EMirror2D m = boardShape->mirror == 'N' ? EMirror2D::No : 
                      (boardShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
         if(boardShape->rotThenMirror) {
@@ -395,7 +396,7 @@ ECAD_INLINE bool ECadExtXflHandler::isHole(const InstObject & instObj) const
     return false;
 }
 
-ECAD_INLINE std::pair<int, UPtr<EShape> > ECadExtXflHandler::makeEShapeFromInstObject(const EShapeGetter & eShapeGetter, const InstObject & instObj) const
+ECAD_INLINE std::pair<int, UPtr<EShape> > ECadExtXflHandler::makeEShapeFromInstObject(EDataMgr * mgr, const EShapeGetter & eShapeGetter, const InstObject & instObj) const
 {
     //inst polygon
     if(auto * instPolygon = boost::get<InstPolygon>(&instObj)) {
@@ -433,10 +434,10 @@ ECAD_INLINE std::pair<int, UPtr<EShape> > ECadExtXflHandler::makeEShapeFromInstO
     }
     //inst shape from template
     else if(auto * instShape = boost::get<InstShape>(&instObj)) {
-        auto temp = m_xflDB->GetTemplateShape(instShape->shapeId);
-        if(nullptr == temp) return std::make_pair(instShape->layer, nullptr);
+        auto ts = m_xflDB->GetTemplateShape(instShape->shapeId);
+        if(nullptr == ts) return std::make_pair(instShape->layer, nullptr);
 
-        auto shape = boost::apply_visitor(eShapeGetter, temp->shape);
+        auto shape = mgr->CreateShapeFromTemplate(ts);
         EMirror2D m = instShape->mirror == 'N' ? EMirror2D::No : 
                      (instShape->mirror == 'X' ? EMirror2D::X  : EMirror2D::Y);
         if(instShape->rotThenMirror) {

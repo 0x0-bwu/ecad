@@ -36,6 +36,9 @@ using FBox3D = generic::geometry::Box3D<FCoord>;
 
 using EUuid = boost::uuids::uuid;
 
+class EShape;
+using ETemplateShape = SPtr<const EShape>;
+
 ECAD_ALWAYS_INLINE static constexpr char sPadstack[] = "padstack";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";

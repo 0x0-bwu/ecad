@@ -4,6 +4,9 @@
 #include "ECadCommon.h"
 #include "Interface.h"
 namespace ecad {
+
+class EDataMgr;
+
 namespace ext {
 namespace xfl {
 
@@ -29,7 +32,7 @@ private:
 
 private:
     std::string GetNextPadstackInstName(const std::string & defName);
-    std::pair<int, UPtr<EShape> > makeEShapeFromInstObject(const EShapeGetter & eShapeGetter, const InstObject & instObj) const;
+    std::pair<int, UPtr<EShape> > makeEShapeFromInstObject(EDataMgr * mgr, const EShapeGetter & eShapeGetter, const InstObject & instObj) const;
     bool isHole(const InstObject & instObj) const;
     EPoint2D makeEPoint2D(const Point & p) const;
 

@@ -224,6 +224,12 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygonWithHoles(EPolygonWithHoles
     return UPtr<EShape>(shape);
 }
 
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeFromTemplate(ETemplateShape ts)
+{
+    auto shape = new EShapeFromTemplate(ts);
+    return UPtr<EShape>(shape);
+}
+
 ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text)
 {
     return layout->CreateText(layer, transform, text);

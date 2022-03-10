@@ -143,89 +143,6 @@ struct Route
     std::vector<InstObject> objects;
 };
 
-struct EXflDB
-{
-    Unit unit;
-    double scale;
-    Version version;
-    BoardGeom boardGeom;
-    std::string designType;
-    std::vector<Net> nets;
-    std::vector<Via> vias;
-    std::vector<Layer> layers;
-    std::vector<Route> routes;
-    std::vector<Material> materials;
-    std::vector<Padstack> padstacks;
-    std::vector<TemplateShape> templates;
-
-    void Clear()
-    {
-        ClearLUTs();
-        nets.clear();
-        vias.clear();
-        layers.clear();
-        routes.clear();
-        materials.clear();
-        padstacks.clear();
-        templates.clear();
-    }
-
-    void BuildLUTs()
-    {
-        ClearLUTs();
-        for(const auto & net : nets)
-            m_nets.insert(std::make_pair(net.name, &net));
-        
-        for(const auto & via : vias)
-            m_vias.insert(std::make_pair(via.name, &via));
-
-        for(const auto & temp : templates)
-            m_templates.insert(std::make_pair(temp.id, &temp));
-
-        for(const auto & padstack : padstacks)
-            m_padstacks.insert(std::make_pair(padstack.id, &padstack));
-
-        m_lutsBuilded = true;
-    }
-
-    CPtr<Net> GetNet(const std::string & name)
-    {
-        if(!m_lutsBuilded) BuildLUTs();
-        auto iter = m_nets.find(name);
-        return iter == m_nets.end() ? nullptr : iter->second;
-    }
-
-    CPtr<Padstack> GetPadstack(int id)
-    {
-        if(!m_lutsBuilded) BuildLUTs();
-        auto iter = m_padstacks.find(id);
-        return iter == m_padstacks.end() ? nullptr : iter->second;
-    }
-
-    CPtr<TemplateShape> GetTemplateShape(int id)
-    {
-        if(!m_lutsBuilded) BuildLUTs();
-        auto iter = m_templates.find(id);
-        return iter == m_templates.end() ? nullptr : iter->second;
-    }
-
-private:
-    void ClearLUTs()
-    {
-        m_nets.clear();
-        m_vias.clear();
-        m_padstacks.clear();
-        m_templates.clear();
-        m_lutsBuilded = false;
-    }
-
-    bool m_lutsBuilded = false;
-    std::unordered_map<std::string, CPtr<Net> > m_nets;
-    std::unordered_map<std::string, CPtr<Via> > m_vias;
-    std::unordered_map<int, CPtr<Padstack> > m_padstacks;
-    std::unordered_map<int, CPtr<TemplateShape> > m_templates;
-};
-
 class EShapeGetter : public boost::static_visitor<UPtr<EShape> >
 {
 public:
@@ -313,11 +230,7 @@ public:
     UPtr<EShape> operator() (const Circle & circle) const
     {
         using namespace generic;
-        auto shape = new EPolygon;
-        auto & data = shape->shape;
-        ECoord radius = 0.5 * circle.diameter * m_scale;
-        data = geometry::InscribedPolygon(geometry::Circle<ECoord>(EPoint2D(0, 0), radius), m_circleDiv);
-
+        auto shape = new ECircle(EPoint2D(0, 0), 0.5 * circle.diameter, m_circleDiv);
         return UPtr<EShape>(shape);    
     }
 
@@ -422,6 +335,85 @@ private:
 private:
     double m_scale = 1.0;
     size_t m_circleDiv = 12;
+};
+
+struct EXflDB
+{
+    Unit unit;
+    double scale;
+    Version version;
+    BoardGeom boardGeom;
+    std::string designType;
+    std::vector<Net> nets;
+    std::vector<Via> vias;
+    std::vector<Layer> layers;
+    std::vector<Route> routes;
+    std::vector<Material> materials;
+    std::vector<Padstack> padstacks;
+    std::vector<TemplateShape> templates;
+
+    void Clear()
+    {
+        ClearLUTs();
+        nets.clear();
+        vias.clear();
+        layers.clear();
+        routes.clear();
+        materials.clear();
+        padstacks.clear();
+        templates.clear();
+    }
+
+    void BuildLUTs(const EShapeGetter & eShapeGetter)
+    {
+        ClearLUTs();
+        for(const auto & net : nets)
+            m_nets.insert(std::make_pair(net.name, &net));
+        
+        for(const auto & via : vias)
+            m_vias.insert(std::make_pair(via.name, &via));
+
+        for(const auto & padstack : padstacks)
+            m_padstacks.insert(std::make_pair(padstack.id, &padstack));
+    
+        for(const auto & t : templates){
+            auto  s = boost::apply_visitor(eShapeGetter, t.shape);
+            auto ts = ETemplateShape(std::move(s));
+            m_templates.insert(std::make_pair(t.id, ts));
+        }
+    }
+
+    CPtr<Net> GetNet(const std::string & name)
+    {
+        auto iter = m_nets.find(name);
+        return iter == m_nets.end() ? nullptr : iter->second;
+    }
+
+    CPtr<Padstack> GetPadstack(int id)
+    {
+        auto iter = m_padstacks.find(id);
+        return iter == m_padstacks.end() ? nullptr : iter->second;
+    }
+
+    ETemplateShape GetTemplateShape(int id)
+    {
+        auto iter = m_templates.find(id);
+        return iter == m_templates.end() ? nullptr : iter->second;
+    }
+
+private:
+    void ClearLUTs()
+    {
+        m_nets.clear();
+        m_vias.clear();
+        m_padstacks.clear();
+        m_templates.clear();
+    }
+
+    std::unordered_map<std::string, CPtr<Net> > m_nets;
+    std::unordered_map<std::string, CPtr<Via> > m_vias;
+    std::unordered_map<int, CPtr<Padstack> > m_padstacks;
+    std::unordered_map<int, ETemplateShape > m_templates;
 };
 
 }//namespace xfl   

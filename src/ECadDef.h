@@ -75,8 +75,10 @@ enum class EShapeType
     Invalid = -1,
     Rectangle,
     Path,
+    Circle,
     Polygon,
     PolygonWithHoles,
+    FromTemplate
 };
 
 enum class EPadType
