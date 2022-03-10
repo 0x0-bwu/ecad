@@ -38,15 +38,10 @@ void t_extension_gds()
 {
     std::string err;
     std::string ringoGds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
-    auto ringo = ext::CreateDatabaseFromGds("ringo", ringoGds, std::string{}, &err);
+    std::string layerMap = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.elm";
+    auto ringo = ext::CreateDatabaseFromGds("ringo", ringoGds, layerMap, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(ringo != nullptr);
-
-    std::string testGds = ecad_test::GetTestDataPath() + "/extension/gdsii/test.gds";
-    std::string testLyrMap = ecad_test::GetTestDataPath() + "/extension/gdsii/test.layermap";
-    auto test = ext::CreateDatabaseFromGds("test", testGds, testLyrMap, &err);
-    // BOOST_CHECK(err.empty());
-    // BOOST_CHECK(test != nullptr);//wbtest
 
     EDataMgr::Instance().ShutDown();
 }

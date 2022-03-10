@@ -13,9 +13,10 @@ struct ECAD_API EGdsLayer
 {
     std::string name;
     std::string purpose;
-    int layerId = -1;
-    int dataType = -1;
     ELayerType type = ELayerType::Invalid;
+    int layerId = -1;
+    int dataType = 0;
+    double thickness;
 };
 
 class ECAD_API EGdsLayerMap
@@ -36,24 +37,16 @@ class ECAD_API EGdsLayerMapParser
 {
 public:
     EGdsLayerMapParser(EGdsLayerMap & layerMap);
-    virtual ~EGdsLayerMapParser() = default;
+    virtual ~EGdsLayerMapParser();
 
-    virtual bool operator() (const std::string & filename) = 0;
-    virtual bool operator() (std::istream & fp) = 0;
+    virtual bool operator() (const std::string & filename);
+    virtual bool operator() (std::istream & fp);
 
 protected:
+    virtual bool ParseOneLine(const std::string & line, EGdsLayer & layer);
+    
+protected:
     EGdsLayerMap & m_layerMap;
-};
-
-class ECAD_API EGdsHelicLayerMapParser : public EGdsLayerMapParser
-{
-public:
-    EGdsHelicLayerMapParser(EGdsLayerMap & layerMap);
-    bool operator() (const std::string & filename);
-    bool operator() (std::istream & fp);
-
-private:
-    bool ParseOneLine(const std::string & line, EGdsLayer & layer);
 };
 
 }//namespace gds   

@@ -39,12 +39,11 @@ ECAD_INLINE EGdsLayerMapParser::EGdsLayerMapParser(EGdsLayerMap & layerMap)
 {
 }
 
-ECAD_INLINE EGdsHelicLayerMapParser::EGdsHelicLayerMapParser(EGdsLayerMap & layerMap)
- : EGdsLayerMapParser(layerMap)
+ECAD_INLINE EGdsLayerMapParser::~EGdsLayerMapParser()
 {
 }
 
-ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (const std::string & filename)
+ECAD_INLINE bool EGdsLayerMapParser::operator() (const std::string & filename)
 {
     std::ifstream fp(filename.c_str());
     if(!fp.good()) return false;
@@ -55,7 +54,7 @@ ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (const std::string & filena
     return res;
 }
 
-ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (std::istream & fp)
+ECAD_INLINE bool EGdsLayerMapParser::operator() (std::istream & fp)
 {
     std::string line;
     while(!fp.eof()){
@@ -71,16 +70,18 @@ ECAD_INLINE bool EGdsHelicLayerMapParser::operator() (std::istream & fp)
     return true;
 }
 
-ECAD_INLINE bool EGdsHelicLayerMapParser::ParseOneLine(const std::string & line, EGdsLayer & layer)
+ECAD_INLINE bool EGdsLayerMapParser::ParseOneLine(const std::string & line, EGdsLayer & layer)
 {
     using namespace generic::str;
     using namespace generic::parser;
+
+    //name m/v layertype datatype thickness
     auto split = Split(line, char(32));
-    if(split.size() != 4) return false;
+    if(split.size() != 5) return false;
     
     auto name = split[0];
-    auto type = StartsWith<CaseInsensitive>(name, "m") ? ELayerType::ConductingLayer : ELayerType::DielectricLayer;
-    layer = EGdsLayer{ name, split[1], std::stoi(split[2]), std::stoi(split[3]) };
+    auto type = StartsWith<CaseInsensitive>(split[1], "m") ? ELayerType::ConductingLayer : ELayerType::DielectricLayer;
+    layer = EGdsLayer{ name, std::string{}, type, std::stoi(split[2]), std::stoi(split[3]), std::stod(split[4]) };
     return true;
 }
 

@@ -1007,6 +1007,23 @@ def test_utilities() :
     settings.out_file = current_dir + '/../test/data/simulation/xfl'
     layout.merge_layer_polygons(settings)
     
+    #gds
+    gds_file = current_dir + '/../test/data/extension/gdsii/4004.gds'
+    lyr_file = ''#current_dir + '/../test/data/extension/gdsii/ringo.elm'
+    gds_database = mgr.create_database_from_gds('ringo', gds_file, lyr_file)
+    assert(gds_database)
+
+    top_cells = gds_database.get_top_cells()
+    assert(len(top_cells) == 1)
+
+    flattened_layout = top_cells[0].get_flattened_layout_view()
+    assert(flattened_layout)
+
+    settings = ecad.ELayoutPolygonMergeSettings()
+    settings.threads = 4
+    settings.out_file = current_dir + '/../test/data/simulation/gds'
+    flattened_layout.merge_layer_polygons(settings)
+
     mgr.shutdown()
 
 ###Simulation

@@ -44,16 +44,18 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
     std::vector<UPtr<ILayer> > layers;
     if(!m_lyrMapFile.empty()){
         EGdsLayerMap layerMap;
-        bool res = EGdsHelicLayerMapParser(layerMap)(m_lyrMapFile);
+        bool res = EGdsLayerMapParser(layerMap)(m_lyrMapFile);
         if(!res){
             if(err) *err = fmt::Format2String("Error: failed to parse layer map file %1%.", m_lyrMapFile);
             return nullptr;
         }
+        FCoord elevation = 0.0;
         auto gdsLayers = layerMap.GetAllLayers();
         for(const auto & gdsLayer  : gdsLayers){
-            auto layer = eMgr.CreateStackupLayer(gdsLayer.name, gdsLayer.type, 0, 0);
-            layers.push_back(std::move(layer));
+            auto layer = eMgr.CreateStackupLayer(gdsLayer.name, gdsLayer.type, elevation, gdsLayer.thickness);
             m_layerIdMap.insert(std::make_pair(gdsLayer.layerId, static_cast<ELayerId>(id++)));
+            layers.push_back(std::move(layer));
+            elevation -= gdsLayer.thickness;
         }
     }
     else{
