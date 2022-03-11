@@ -224,9 +224,9 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygonWithHoles(EPolygonWithHoles
     return UPtr<EShape>(shape);
 }
 
-ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeFromTemplate(ETemplateShape ts)
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeFromTemplate(ETemplateShape ts, ETransform2D trans)
 {
-    auto shape = new EShapeFromTemplate(ts);
+    auto shape = new EShapeFromTemplate(ts, trans);
     return UPtr<EShape>(shape);
 }
 

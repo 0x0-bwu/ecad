@@ -96,7 +96,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
 
 ECAD_INLINE void ELayoutPolygonMerger::MergeLayers()
 {
-    auto threads = std::min(m_mergers.size(), m_settings.threads);
+    auto threads = m_settings.threads;
     if(threads > 1) {
         thread::ThreadPool pool(threads);
         for(auto & merger : m_mergers)
@@ -185,6 +185,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
             if(shape->hasHole())
                 merger->second->AddObject(netId, shape->GetPolygonWithHoles());
             else merger->second->AddObject(netId, shape->GetContour());
+            break;
         }
         default : {
             GENERIC_ASSERT(false)

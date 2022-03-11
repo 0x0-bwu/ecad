@@ -230,7 +230,12 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto shape = eShapeGetter(instPath->path);
-                auto ePath = mgr.CreateShapePath(shape->GetContour().GetPoints(), instPath->width * m_scale);
+                auto polygon = dynamic_cast<Ptr<EPolygon> >(shape.get());
+                if(!polygon || polygon->shape.Size() == 0){
+                    //todo, error handle
+                    continue;
+                }
+                auto ePath = mgr.CreateShapePath(polygon->shape.GetPoints(), instPath->width * m_scale);
                 auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(ePath));
                 GENERIC_ASSERT(ePrim != nullptr)
             }
@@ -276,6 +281,10 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
                 auto shape = eShapeGetter(instAnnular->annular);
+                if(!shape->isValid()) {
+                    //todo, error handle
+                    continue;
+                }
                 shape->Transform(makeETransform2D(1.0, 0.0, makeEPoint2D(instAnnular->loc)));
                 auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(shape));
                 GENERIC_ASSERT(ePrim != nullptr)
@@ -300,6 +309,10 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     holes.emplace_back(std::move(nextShape));
                 }
                 if(holes.empty()) {
+                    if(!shape->isValid()) {
+                        //todo, error handle
+                        continue;
+                    }
                     auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(shape));
                     GENERIC_ASSERT(ePrim != nullptr)
                 }
@@ -309,6 +322,10 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     data.outline = shape->GetContour();
                     for(const auto & hole : holes){
                         data.holes.emplace_back(hole->GetContour());
+                    }
+                    if(!pwh->isValid()) {
+                        //todo, error handle
+                        continue;
                     }
                     auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(pwh));
                     GENERIC_ASSERT(ePrim != nullptr)

@@ -57,7 +57,7 @@ void t_connectivity_extraction()
 void t_layout_polygon_merge()
 {
     std::string err;
-    std::string qcomXfl = ecad_test::GetTestDataPath() + "/extension/xfl/qcom.xfl";
+    std::string qcomXfl = ecad_test::GetTestDataPath() + "/extension/xfl/pop.xfl";
     auto qcom = ext::CreateDatabaseFromXfl("qcom", qcomXfl, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(qcom != nullptr);

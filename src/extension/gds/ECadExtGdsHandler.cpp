@@ -116,13 +116,17 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOnePolygon(CPtr<EGdsPolygon> polygon, 
     if(nullptr == polygon) return;
 
     if(!m_layerIdMap.count(polygon->layer)) return;
+    auto eShape = UPtr<EShape>(new EPolygon(std::move(polygon->shape)));
 
     auto & eMgr = EDataMgr::Instance();
     const auto & eLyrIds = m_layerIdMap.at(polygon->layer);
-    for(auto eLyrId : eLyrIds) {
-        auto eShape = UPtr<EShape>(new EPolygon(std::move(polygon->shape)));
-        eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, std::move(eShape));
+    
+    if(eLyrIds.size() > 1){
+        auto eTShape = eMgr.CreateShapeFromTemplate(std::move(eShape));
+        for(auto eLyrId : eLyrIds)
+            eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, eTShape->Clone());
     }
+    else eMgr.CreateGeometry2D(iLayoutView, *(eLyrIds.begin()), noNet, std::move(eShape));
 }
 
 ECAD_INLINE void ECadExtGdsHandler::ImportOnePath(CPtr<EGdsPath> path, Ptr<ILayoutView> iLayoutView)
@@ -130,13 +134,17 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOnePath(CPtr<EGdsPath> path, Ptr<ILayo
     if(nullptr == path) return;
 
     if(!m_layerIdMap.count(path->layer)) return;
+    auto eShape = UPtr<EShape>(new EPath(std::move(path->shape)));
 
     auto & eMgr = EDataMgr::Instance();
     const auto & eLyrIds = m_layerIdMap.at(path->layer);
-    for(auto eLyrId : eLyrIds) {
-        auto eShape = UPtr<EShape>(new EPath(std::move(path->shape)));
-        eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, std::move(eShape));
+
+    if(eLyrIds.size() > 1){
+        auto eTShape = eMgr.CreateShapeFromTemplate(std::move(eShape));
+        for(auto eLyrId : eLyrIds)
+            eMgr.CreateGeometry2D(iLayoutView, eLyrId, noNet, eTShape->Clone());
     }
+    else eMgr.CreateGeometry2D(iLayoutView, *(eLyrIds.begin()), noNet, std::move(eShape));
 }
 
 ECAD_INLINE void ECadExtGdsHandler::ImportOneText(CPtr<EGdsText> text, Ptr<ILayoutView> iLayoutView)

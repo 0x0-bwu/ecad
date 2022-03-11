@@ -356,7 +356,11 @@ ECAD_INLINE bool EPolygonWithHoles::isValid() const
 }
 
 ///EShapeFromTemplate
-ECAD_INLINE EShapeFromTemplate::EShapeFromTemplate(Template ts) : m_template(ts) {}
+ECAD_INLINE EShapeFromTemplate::EShapeFromTemplate(Template ts, ETransform2D trans)
+ : m_transform(std::move(trans))
+ , m_template(ts)
+{
+}
 
 ECAD_INLINE bool EShapeFromTemplate::hasHole() const
 {

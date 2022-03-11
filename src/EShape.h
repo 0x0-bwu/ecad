@@ -150,7 +150,7 @@ class ECAD_API EShapeFromTemplate : public EShape
     Template m_template = nullptr;
     EShapeFromTemplate() = default;
 public:
-    EShapeFromTemplate(Template ts);
+    explicit EShapeFromTemplate(Template ts, ETransform2D trans = ETransform2D{});
     ~EShapeFromTemplate() = default;
     bool hasHole() const;
     EBox2D GetBBox() const;
