@@ -342,6 +342,7 @@ struct EXflDB
     Unit unit;
     double scale;
     Version version;
+    bool hasBoardGeom;
     BoardGeom boardGeom;
     std::string designType;
     std::vector<Net> nets;
@@ -362,6 +363,7 @@ struct EXflDB
         materials.clear();
         padstacks.clear();
         templates.clear();
+        hasBoardGeom = false;
     }
 
     void BuildLUTs(const EShapeGetter & eShapeGetter)

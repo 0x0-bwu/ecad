@@ -261,7 +261,8 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                     continue;
                 }
 
-                EMirror2D mirror = instVia->mirror == 'Y' ? EMirror2D::Y : EMirror2D::No;
+                const auto & m = instVia->mirror;
+                EMirror2D mirror = (m == 'Y' || m == '1') ? EMirror2D::Y : EMirror2D::No;
                 auto trans = makeETransform2D(1.0, math::Rad(instVia->rot), makeEPoint2D(instVia->loc), mirror);
                 
                 auto name = GetNextPadstackInstName(instVia->name);
@@ -337,6 +338,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
 
 ECAD_INLINE void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
 {
+    if(!m_xflDB->hasBoardGeom) return;
     auto & mgr = EDataMgr::Instance();
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
 

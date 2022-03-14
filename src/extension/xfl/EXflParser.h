@@ -122,7 +122,7 @@ struct ErrorHandler
 struct EXflReader
 {
     EXflDB & db;
-    explicit EXflReader(EXflDB & db) : db(db) {}
+    explicit EXflReader(EXflDB & db) : db(db) { db.Clear(); }
     
     bool operator() (const std::string & xflFile)
     {
@@ -297,7 +297,7 @@ struct EXflReader
 			;
 			
 			boardGeomSection = lexeme[no_case[".board_geom"]] >>
-				(
+				-(
 					  (lexeme[no_case["polygon"]] >> polygon) [phx::bind(&EXflGrammar::BoardPolygonHandle, this, _1)]
 					| (lexeme[no_case["composite"]] >> composite) [phx::bind(&EXflGrammar::BoardCompositeHandle, this, _1)]
 					| (lexeme[no_case["shape"]] >> int_ >> point >> double_ >> char_("XYN")) [phx::bind(&EXflGrammar::BoardShapeWithRotMirrorHandle, this, _1, _2, _3, _4)]
@@ -356,9 +356,11 @@ struct EXflReader
 			textDQ = lexeme['"' >> + (char_ - '"') >> '"'];
 			textEOL = lexeme[+(char_ - eol) >> eol];
 
-			material = (lexeme[no_case["C"]][at_c<0>(_val) = true] >> textDQ[at_c<1>(_val) = _1] >> double_[at_c<2>(_val) = _1])
-					| (lexeme[no_case["D"]][at_c<0>(_val) = false] >> textDQ[at_c<1>(_val) = _1] >> double_[at_c<2>(_val) = _1] >>
-					double_[at_c<3>(_val) = _1] >> double_[at_c<4>(_val) = _1] >> double_[at_c<5>(_val) = _1] >> int_[at_c<6>(_val) = _1])
+			material = (lexeme[no_case["C"]][at_c<0>(_val) = true] >> textDQ[at_c<1>(_val) = _1] >> double_[at_c<2>(_val) = _1]) |
+				(
+					lexeme[no_case["D"]][at_c<0>(_val) = false] >> textDQ[at_c<1>(_val) = _1] >> double_[at_c<2>(_val) = _1] >>
+					double_[at_c<3>(_val) = _1] >> double_[at_c<4>(_val) = _1] >> -(double_[at_c<5>(_val) = _1] >> int_[at_c<6>(_val) = _1])
+				)
 			;
 
 			layer %= textDQ >> double_ >> char_("SDP") >> textDQ >> textDQ;
@@ -402,7 +404,7 @@ struct EXflReader
 					| (lexeme[no_case["finger"]] >> finger		[at_c<1>(_val) = _1])
 					| (lexeme[no_case["composite"]] >> composite[at_c<1>(_val) = _1])
 				)
-				;
+			;
 
 			pad = lexeme
 				[
@@ -414,15 +416,24 @@ struct EXflReader
 						+char_(" ") >> double_[at_c<4>(_val) = _1]
 					) >> *char_(" ") >> eol
 				]
-				;
+			;
 			padstack = int_[at_c<0>(_val) = _1] >> "{" >> *(pad[push_back(at_c<1>(_val), _1)]) >> "}";
 
-			via %= textNC >> int_ >> double_ >> int_ >> double_ >> -(double_ >> textNC);
+			via = lexeme
+				[
+					+char_("a-zA-Z_0-9.-")[push_back(at_c<0>(_val), _1)] >> +char_(" ") >> int_[at_c<1>(_val) = _1] >> +char_(" ") >>
+					double_[at_c<2>(_val) = _1] >> +char_(" ") >> int_[at_c<3>(_val) = _1] >> +char_(" ") >>
+					double_[at_c<4>(_val) = _1] >>
+					-(
+						+char_(" ") >> double_[at_c<5>(_val) = _1] >> +char_(" ") >> +char_("a-zA-Z_0-9.-")[push_back(at_c<6>(_val), _1)]
+					) >> *char_(" ") >> eol
+				]
+			;
 
 			node = textNC[at_c<0>(_val) = _1] >> textNC[at_c<1>(_val) = _1] >> text[at_c<2>(_val) = _1] >>
 				-( int_[at_c<3>(_val) = _1] >> int_[at_c<4>(_val) = _1] ) >>
 				"{" >> point[at_c<5>(_val) = _1] >> int_[at_c<6>(_val) = _1] >> "}"
-				;
+			;
 
 			net = textDQ[at_c<0>(_val) = _1] >>
 				char_("SPG")[at_c<1>(_val) = _1] >>
@@ -438,7 +449,7 @@ struct EXflReader
 			instPath %= lexeme[no_case["path"]] >> int_ >> double_ >> composite;
 			instVia = lexeme[no_case["via"]] >> int_[at_c<0>(_val) = _1] >> int_[at_c<1>(_val) = _1] >>
 				textNC[at_c<2>(_val) = _1] >> point[at_c<3>(_val) = _1] >> double_[at_c<4>(_val) = _1] >>
-				-char_("NY")[at_c<5>(_val) = _1]
+				-char_("NY01")[at_c<5>(_val) = _1]
 			;
 			instBondwire %= lexeme[no_case["bondwire"]] >> int_ >> int_ >> int_ >> point >> point >> -(textNC >> textNC);
 			instPolygon = (lexeme[no_case["polygon"]][at_c<0>(_val) = false] |
@@ -558,24 +569,28 @@ struct EXflReader
 		{
 			//std::cout << "Board Geom Polygon Size: " << polygon.size() << std::endl;
 			db.boardGeom = std::move(polygon);
+			db.hasBoardGeom = true;
 		}
 
 		void BoardCompositeHandle(Composite composite)
 		{
 			//std::cout << "Board Geom Composite Size: " << composite.size() << std::endl;
 			db.boardGeom = std::move(composite);
+			db.hasBoardGeom = true;
 		}
 
 		void BoardShapeWithRotMirrorHandle(int id, const Point & loc, double rot, char mirror)//rot-unit: degree, mirror: X-axisX, Y-axisY, N-no
 		{
 			//std::cout << "Board Shape ID: " << id << ", Loc: " << loc.x << ", " << loc.y << ", Rot: " << rot << ", Mirror: " << mirror << std::endl;
 			db.boardGeom = BoardShape{id, loc, rot, mirror, true};
+			db.hasBoardGeom = true;
 		}
 
 		void BoardShapeWithMirrorRotHandle(int id, const Point & loc, char mirror, double rot)//rot-unit: degree, mirror: X-axisX, Y-axisY, N-no
 		{
 			//std::cout << "Board Shape ID: " << id << ", Loc: " << loc.x << ", " << loc.y << ", Mirror: " << mirror << ", Rot: " << rot << std::endl;
 			db.boardGeom = BoardShape{id, loc, rot, mirror, false};
+			db.hasBoardGeom = true;
 		}
 
 		void PadstackHandle(Padstack padstack)
@@ -605,7 +620,7 @@ struct EXflReader
 		void UnknownSectionHandle(const std::string & unknown)
 		{
 			ECAD_UNUSED(unknown)
-			//std::cout << "Unknow Section: " << unknown << std::endl;
+			// std::cout << "Unknow Section: " << unknown << std::endl;
 		}
 
 		void UnrecognizedHandle(const std::string & unrecognized)
