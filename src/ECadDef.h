@@ -25,6 +25,7 @@ enum class ECollectionType
     Definition,
     MaterialDef,
     PadstackDef,
+    ComponentDef,
     HierarchyObj,
     PadstackInst,
     Collection
@@ -53,6 +54,17 @@ enum EMaterialPropId
     YoungsModulus = 39,
     PoissonsRatio = 40,
     ThermalExpansionCoefficient = 42,
+};
+
+enum EComponentType
+{
+    Invalid = -1,
+    Other = 0,
+    Resistor,
+    Inductor,
+    Capacitor,
+    IC,
+    IO
 };
 
 enum class ELayerType
@@ -91,6 +103,7 @@ enum class EPadType
 enum class EDefinitionType
 {
     Invalid = -1,
+    ComponentDef,
     PadstackDef,
     MaterialDef,
     LayerMap,
@@ -114,7 +127,9 @@ ECAD_ALWAYS_INLINE std::string toString(EDefinitionType type)
     switch(type)
     {
         case EDefinitionType::Invalid : return "Invalid";
+        case EDefinitionType::ComponentDef : return "Component Def";
         case EDefinitionType::PadstackDef : return "Padstack Def";
+        case EDefinitionType::MaterialDef : return "Material Def";
         case EDefinitionType::LayerMap : return "Layer Map";
         case EDefinitionType::Cell : return "Cell";
         default : return std::string{};

@@ -12,6 +12,7 @@ class ILayerMap;
 class IPrimitive;
 class IMaterialDef;
 class IPadstackDef;
+class IComponentDef;
 class IHierarchyObj;
 class IPadstackInst;
 template <typename T>
@@ -34,6 +35,7 @@ using LayerMapIter = UPtr<IIterator<ILayerMap> >;
 using PrimitiveIter = UPtr<IIterator<IPrimitive> >;
 using MaterialDefIter = UPtr<IIterator<IMaterialDef> >;
 using PadstackDefIter = UPtr<IIterator<IPadstackDef> >;
+using ComponentDefIter = UPtr<IIterator<IComponentDef> >;
 using HierarchyObjIter = UPtr<IIterator<IHierarchyObj> >;
 using PadstackInstIter = UPtr<IIterator<IPadstackInst> >;
 }//namespace ecad

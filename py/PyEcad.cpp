@@ -390,7 +390,9 @@ namespace {
 
         enum_<EDefinitionType>("EDefinitionType")
             .value("INVALID", EDefinitionType::Invalid)
+            .value("COMPONENTDEF", EDefinitionType::ComponentDef)
             .value("PADSTACKDEF", EDefinitionType::PadstackDef)
+            .value("MATERIALDEF", EDefinitionType::MaterialDef)
             .value("LAYERMAP", EDefinitionType::LayerMap)
             .value("CELL", EDefinitionType::Cell)
         ;

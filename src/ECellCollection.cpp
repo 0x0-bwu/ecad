@@ -55,7 +55,7 @@ ECAD_INLINE Ptr<IDefinitionCollection> ECellCollection::AddDefinitionCollection(
 
 ECAD_INLINE Ptr<IDefinitionCollection> ECellCollection::GetDefinitionCollection(EDefinitionType type) const
 {
-    if(type == EDefinitionType::LayerMap) return const_cast<Ptr<ECellCollection> >(this);
+    if(type == EDefinitionType::Cell) return const_cast<Ptr<ECellCollection> >(this);
     return nullptr;
 }
 

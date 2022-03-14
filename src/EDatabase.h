@@ -5,15 +5,6 @@
 #include <string>
 namespace ecad {
 
-class ICell;
-class ILayerMap;
-class IDefinition;
-class IPadstackDef;
-class ILayerMapCollection;
-class IDefinitionCollection;
-class IMaterialDefCollection;
-class IPadstackDefCollection;
-using CellCollection = EUnorderedMapCollection<std::string, UPtr<ICell> >;
 class ECAD_API EDatabase : public EDefinitionCollection, public IDatabase
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
@@ -37,6 +28,7 @@ public:
     std::string GetNextDefName(const std::string & base, EDefinitionType type) const;
     Ptr<IDefinitionCollection> GetDefinitionCollection();
 
+    ///Cell
     Ptr<ICellCollection> GetCellCollection() const;
     Ptr<ICell> CreateCircuitCell(const std::string & name);
     Ptr<ICell> FindCellByName(const std::string & name);
@@ -48,6 +40,11 @@ public:
     Ptr<IMaterialDefCollection> GetMaterialCollection() const;
     Ptr<IMaterialDef> CreateMaterialDef(const std::string & name);
     Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const;
+
+    ///ComponentDef
+    Ptr<IComponentDefCollection> GetComponentDefCollection() const;
+    Ptr<IComponentDef> CreateComponentDef(const std::string & name);
+    Ptr<IComponentDef> FindComponentDefByName(const std::string & name);
 
     ///LayerMap
     Ptr<ILayerMapCollection> GetLayerMapCollection() const;

@@ -5,10 +5,12 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 
 #include "generic/tools/FileSystem.hpp"
 #include "utilities/EFlattenUtility.h"
+#include "EComponentDefCollection.h"
 #include "EMaterialDefCollection.h"
 #include "EPadstackDefCollection.h"
 #include "ELayerMapCollection.h"
 #include "ECellCollection.h"
+#include "EComponentDef.h"
 #include "EMaterialDef.h"
 #include "EPadstackDef.h"
 #include "ELayerMap.h"
@@ -54,7 +56,9 @@ ECAD_INLINE EDatabase::EDatabase()
 ECAD_INLINE EDatabase::EDatabase(std::string name)
  : EDefinitionCollection(std::move(name))
 {
+    EDefinitionCollection::AddDefinitionCollection(EDefinitionType::ComponentDef);
     EDefinitionCollection::AddDefinitionCollection(EDefinitionType::PadstackDef);
+    EDefinitionCollection::AddDefinitionCollection(EDefinitionType::MaterialDef);
     EDefinitionCollection::AddDefinitionCollection(EDefinitionType::LayerMap);
     EDefinitionCollection::AddDefinitionCollection(EDefinitionType::Cell);
 }
@@ -213,6 +217,25 @@ ECAD_INLINE Ptr<IMaterialDef> EDatabase::FindMaterialDefByName(const std::string
 {
     auto material = EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef);
     return dynamic_cast<Ptr<IMaterialDef> >(material);
+}
+
+ECAD_INLINE Ptr<IComponentDefCollection> EDatabase::GetComponentDefCollection() const
+{
+    return dynamic_cast<Ptr<IComponentDefCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::ComponentDef));
+}
+
+ECAD_INLINE Ptr<IComponentDef> EDatabase::CreateComponentDef(const std::string & name)
+{
+    if(EDefinitionCollection::GetDefinition(name, EDefinitionType::ComponentDef)) return nullptr;
+
+    auto compDef = new EComponentDef(name);
+    return dynamic_cast<Ptr<IComponentDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(compDef)));
+}
+
+ECAD_INLINE Ptr<IComponentDef> EDatabase::FindComponentDefByName(const std::string & name)
+{
+    auto compDef = EDefinitionCollection::GetDefinition(name, EDefinitionType::ComponentDef);
+    return dynamic_cast<Ptr<IComponentDef> >(compDef);
 }
 
 ECAD_INLINE Ptr<ILayerMapCollection> EDatabase::GetLayerMapCollection() const

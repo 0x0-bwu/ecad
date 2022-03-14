@@ -12,9 +12,12 @@ class ILayerMap;
 class IDefinition;
 class IMaterialDef;
 class IPadstackDef;
+class IComponentDef;
 class ILayerMapCollection;
 class IDefinitionCollection;
 class IMaterialDefCollection;
+class IPadstackDefCollection;
+class IComponentDefCollection;
 class ECAD_API IDatabase : public Clonable<IDatabase>
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
@@ -42,6 +45,9 @@ public:
 
     virtual Ptr<IMaterialDef> CreateMaterialDef(const std::string & name) = 0;
     virtual Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const = 0;
+
+    virtual Ptr<IComponentDef> CreateComponentDef(const std::string & name) = 0;
+    virtual Ptr<IComponentDef> FindComponentDefByName(const std::string & name) = 0;
 
     virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const = 0;
     virtual Ptr<ILayerMap> CreateLayerMap(const std::string & name) = 0;
