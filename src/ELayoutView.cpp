@@ -245,7 +245,7 @@ ECAD_INLINE CPtr<EPolygon> ELayoutView::GetBoundary() const
 
 ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings)
 {
-    esim::LayoutMetalFractionMapper mapper(settings);
+    esim::ELayoutMetalFractionMapper mapper(settings);
     return mapper.GenerateMetalFractionMapping(this);
 }
 

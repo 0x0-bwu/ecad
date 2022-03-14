@@ -29,7 +29,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     settings.regionExtRight = m_settings.regionExtRight;
     settings.mergeGeomBeforeMapping = m_settings.mergeGeomBeforeMetalMapping;
 
-    LayoutMetalFractionMapper mapper(settings);
+    ELayoutMetalFractionMapper mapper(settings);
     if(!mapper.GenerateMetalFractionMapping(layout)) return false;
 
     auto mf = mapper.GetLayoutMetalFraction();
@@ -218,7 +218,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     thermal::solver::ThermalNetworkSolver solver(*m_network);
     auto results = solver.Solve(20);
 
-    auto htMap = std::unique_ptr<LayoutMetalFraction>(new LayoutMetalFraction(m_modelSize.x, m_modelSize.y));
+    auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction(m_modelSize.x, m_modelSize.y));
     for(size_t i = 0; i < m_modelSize.x; ++i){
         for(size_t j = 0; j < m_modelSize.y; ++j){
             (*htMap)(i, j).resize(m_modelSize.z);

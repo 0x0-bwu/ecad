@@ -15,7 +15,7 @@ namespace ecad {
 namespace esim {
 using namespace generic::geometry;
 
-ECAD_INLINE LayerMetalFractionMapper::LayerMetalFractionMapper(const Setting & settings, LayoutMetalFraction & fraction, ELayerId layerId, bool isMetal)
+ECAD_INLINE ELayerMetalFractionMapper::ELayerMetalFractionMapper(const Setting & settings, ELayoutMetalFraction & fraction, ELayerId layerId, bool isMetal)
  : m_id(layerId)
  , m_bMetal(isMetal)
  , m_settings(settings)
@@ -23,11 +23,11 @@ ECAD_INLINE LayerMetalFractionMapper::LayerMetalFractionMapper(const Setting & s
 {
 }
 
-ECAD_INLINE LayerMetalFractionMapper::~LayerMetalFractionMapper()
+ECAD_INLINE ELayerMetalFractionMapper::~ELayerMetalFractionMapper()
 {
 }
 
-ECAD_INLINE void LayerMetalFractionMapper::GenerateMetalFractionMapping(CPtr<ILayoutView> layout, const MapCtrl & ctrl)
+ECAD_INLINE void ELayerMetalFractionMapper::GenerateMetalFractionMapping(CPtr<ILayoutView> layout, const MapCtrl & ctrl)
 {
     m_solids.clear();
     m_holes.clear();
@@ -62,11 +62,11 @@ ECAD_INLINE void LayerMetalFractionMapper::GenerateMetalFractionMapping(CPtr<ILa
     Mapping(ctrl);
 }
 
-ECAD_INLINE void LayerMetalFractionMapper::Mapping(const MapCtrl & ctrl)
+ECAD_INLINE void ELayerMetalFractionMapper::Mapping(const MapCtrl & ctrl)
 {
     const auto id = m_id;
-    auto solidBlend = [&id](typename LayoutMetalFraction::ResultType & res, const Product & p) { res[id] += p.ratio; };
-    auto holeBlend =  [&id](typename LayoutMetalFraction::ResultType & res, const Product & p) { res[id] -= p.ratio; };
+    auto solidBlend = [&id](typename ELayoutMetalFraction::ResultType & res, const Product & p) { res[id] += p.ratio; };
+    auto holeBlend =  [&id](typename ELayoutMetalFraction::ResultType & res, const Product & p) { res[id] -= p.ratio; };
 
     std::vector<CPtr<IntPolygon> > solids(m_solids.size());
     std::vector<CPtr<IntPolygon> > holes(m_holes.size());
@@ -88,16 +88,16 @@ ECAD_INLINE void LayerMetalFractionMapper::Mapping(const MapCtrl & ctrl)
     }
 }
 
-ECAD_INLINE LayoutMetalFractionMapper::LayoutMetalFractionMapper(EMetalFractionMappingSettings settings)
+ECAD_INLINE ELayoutMetalFractionMapper::ELayoutMetalFractionMapper(EMetalFractionMappingSettings settings)
  : m_settings(settings)
 {
 }
 
-ECAD_INLINE LayoutMetalFractionMapper::~LayoutMetalFractionMapper()
+ECAD_INLINE ELayoutMetalFractionMapper::~ELayoutMetalFractionMapper()
 {
 }
 
-ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<ILayoutView> layout)
+ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("metal fraction mapping");
     
@@ -109,7 +109,7 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<ILa
     }
 
     auto coordUnits = layout->GetCoordUnits();
-    m_mfInfo.reset(new MetalFractionInfo);
+    m_mfInfo.reset(new EMetalFractionInfo);
     m_mfInfo->grid = m_settings.grid;
     m_mfInfo->coordUnits = coordUnits;
     
@@ -128,7 +128,7 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<ILa
     bbox[1][0] = bbox[0][0] + m_mfInfo->stride[0] * m_mfInfo->grid[0];
     bbox[1][1] = bbox[0][1] + m_mfInfo->stride[1] * m_mfInfo->grid[1];
     m_mfInfo->extension = bbox;
-    m_result.reset(new LayoutMetalFraction(m_mfInfo->grid[0], m_mfInfo->grid[1]));
+    m_result.reset(new ELayoutMetalFraction(m_mfInfo->grid[0], m_mfInfo->grid[1]));
 
     auto layerCollection = layout->GetLayerCollection();
     auto layerSize = layerCollection->Size();
@@ -144,29 +144,29 @@ ECAD_INLINE bool LayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<ILa
         auto * stackupLayer = layer->GetStackupLayerFromLayer();
         if(nullptr == stackupLayer) continue;
         bool isMetal = layer->GetLayerType() == ELayerType::ConductingLayer;
-        LayerMetalFractionMapper mapper(m_settings, *m_result, layer->GetLayerId(), isMetal);
+        ELayerMetalFractionMapper mapper(m_settings, *m_result, layer->GetLayerId(), isMetal);
         mapper.GenerateMetalFractionMapping(layout, ctrl);
 
-        StackupLayerInfo lyrInfo{ isMetal, stackupLayer->GetElevation(), stackupLayer->GetThickness(), layer->GetName() };
+        EStackupLayerInfo lyrInfo{ isMetal, stackupLayer->GetElevation(), stackupLayer->GetThickness(), layer->GetName() };
         (m_mfInfo->layers).emplace_back(std::move(lyrInfo));
     }    
     //return WriteResult2File(coordUnits.Scale2Unit());
     return true; 
 }
 
-ECAD_INLINE CPtr<LayoutMetalFraction> LayoutMetalFractionMapper::GetLayoutMetalFraction() const
+ECAD_INLINE CPtr<ELayoutMetalFraction> ELayoutMetalFractionMapper::GetLayoutMetalFraction() const
 {
     if(nullptr == m_result) return nullptr;
     return m_result.get();
 }
 
-ECAD_INLINE CPtr<MetalFractionInfo> LayoutMetalFractionMapper::GetMetalFractionInfo() const
+ECAD_INLINE CPtr<EMetalFractionInfo> ELayoutMetalFractionMapper::GetMetalFractionInfo() const
 {
     if(nullptr == m_mfInfo) return nullptr;
     return m_mfInfo.get();
 }
 
-ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File(double scale)
+ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
 {
     //LAYERS 7
     //LAYNERNAME ISMETAL ELEVATION(m) THICKNESS(m)
@@ -239,7 +239,7 @@ ECAD_INLINE bool LayoutMetalFractionMapper::WriteResult2File(double scale)
     return true;
 }
 
-ECAD_INLINE bool WriteThermalProfile(const MetalFractionInfo & info, const LayoutMetalFraction & mf, const std::string & filename)
+ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, const std::string & filename)
 {
     ECAD_ASSERT(info.grid[0] == mf.Width())
     ECAD_ASSERT(info.grid[1] == mf.Height())
