@@ -15,6 +15,7 @@ class IPadstackDef;
 class IComponentDef;
 class IHierarchyObj;
 class IPadstackInst;
+class IComponentDefPin;
 template <typename T>
 class ECAD_API IIterator
 {
@@ -38,5 +39,6 @@ using PadstackDefIter = UPtr<IIterator<IPadstackDef> >;
 using ComponentDefIter = UPtr<IIterator<IComponentDef> >;
 using HierarchyObjIter = UPtr<IIterator<IHierarchyObj> >;
 using PadstackInstIter = UPtr<IIterator<IPadstackInst> >;
+using ComponentDefPinIter = UPtr<IIterator<IComponentDefPin> >;
 }//namespace ecad
 #endif//ECAD_IITERATOR_H

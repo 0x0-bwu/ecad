@@ -22,6 +22,7 @@ ECAD_INLINE void EPadstackInst::save(Archive & ar, const unsigned int version) c
     ar & boost::serialization::make_nvp("top_layer", m_topLyr);
     ar & boost::serialization::make_nvp("bot_layer", m_botLyr);
     ar & boost::serialization::make_nvp("transform", m_transform);
+    ar & boost::serialization::make_nvp("is_layout_pin", m_isLayoutPin);
 }
 
 template <typename Archive>
@@ -35,6 +36,7 @@ ECAD_INLINE void EPadstackInst::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("top_layer", m_topLyr);
     ar & boost::serialization::make_nvp("bot_layer", m_botLyr);
     ar & boost::serialization::make_nvp("transform", m_transform);
+    ar & boost::serialization::make_nvp("is_layout_pin", m_isLayoutPin);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackInst)
@@ -103,6 +105,16 @@ ECAD_INLINE void EPadstackInst::GetLayerRange(ELayerId & top, ELayerId & bot) co
 ECAD_INLINE CPtr<IPadstackDef> EPadstackInst::GetPadstackDef() const
 {
     return m_def;
+}
+
+ECAD_INLINE bool EPadstackInst::isLayoutPin() const
+{
+    return m_isLayoutPin;
+}
+
+ECAD_INLINE void EPadstackInst::SetIsLayoutPin(bool isPin)
+{
+    m_isLayoutPin = isPin;
 }
 
 ECAD_INLINE UPtr<EShape> EPadstackInst::GetLayerShape(ELayerId lyr) const

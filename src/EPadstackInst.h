@@ -35,7 +35,10 @@ public:
 
     CPtr<IPadstackDef> GetPadstackDef() const;
 
-        /**
+    bool isLayoutPin() const;
+    void SetIsLayoutPin(bool isPin);
+
+    /**
      * @brief get shape at stackup layer
      */
     UPtr<EShape> GetLayerShape(ELayerId lyr) const;
@@ -51,6 +54,7 @@ protected:
     CPtr<ILayerMap> m_layerMap;
     ELayerId m_topLyr, m_botLyr;
     ETransform2D m_transform;
+    bool m_isLayoutPin = false;
 };
 
 }//namespace ecad

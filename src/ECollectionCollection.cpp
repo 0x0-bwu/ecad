@@ -3,9 +3,12 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECollectionCollection)
 #endif
 
+#include "EComponentDefPinCollection.h"
 #include "EPadstackInstCollection.h"
 #include "EHierarchyObjCollection.h"
+#include "EComponentDefCollection.h"
 #include "EPadstackDefCollection.h"
+#include "EMaterialDefCollection.h"
 #include "EDefinitionCollection.h"
 #include "EPrimitiveCollection.h"
 #include "ELayerMapCollection.h"
@@ -71,6 +74,10 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::AddCollection(ECollectionTyp
     Ptr<ICollection> collection = nullptr;
     switch(type)
     {
+        case ECollectionType::ComponentDefPin : {
+            collection = new EComponentDefPinCollection;
+            break;
+        }
         case ECollectionType::PadstackInst : {
             collection = new EPadstackInstCollection;
             break;
@@ -79,8 +86,16 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::AddCollection(ECollectionTyp
             collection = new EHierarchyObjCollection;
             break;
         }
+        case ECollectionType::ComponentDef : {
+            collection = new EComponentDefCollection;
+            break;
+        }
         case ECollectionType::PadstackDef : {
             collection = new EPadstackDefCollection;
+            break;
+        }
+        case ECollectionType::MaterialDef : {
+            collection = new EMaterialDefCollection;
             break;
         }
         case ECollectionType::Definition : {
@@ -175,10 +190,22 @@ ECAD_INLINE Ptr<IDefinitionCollection> ECollectionCollection::GetDefinitionColle
     return dynamic_cast<Ptr<IDefinitionCollection> >(res);
 }
 
+ECAD_INLINE Ptr<IMaterialDefCollection> ECollectionCollection::GetMaterialDefCollection() const
+{
+    auto res = GetCollection(ECollectionType::MaterialDef);
+    return dynamic_cast<Ptr<IMaterialDefCollection> >(res);
+}
+
 ECAD_INLINE Ptr<IPadstackDefCollection> ECollectionCollection::GetPadstackDefCollection() const
 {
     auto res = GetCollection(ECollectionType::PadstackDef);
     return dynamic_cast<Ptr<IPadstackDefCollection> >(res);
+}
+
+ECAD_INLINE Ptr<IComponentDefCollection> ECollectionCollection::GetComponentDefCollection() const
+{
+    auto res = GetCollection(ECollectionType::ComponentDef);
+    return dynamic_cast<Ptr<IComponentDefCollection> >(res);
 }
 
 ECAD_INLINE Ptr<IHierarchyObjCollection> ECollectionCollection::GetHierarchyObjCollection() const
@@ -191,6 +218,12 @@ ECAD_INLINE Ptr<IPadstackInstCollection> ECollectionCollection::GetPadstackInstC
 {
     auto res = GetCollection(ECollectionType::PadstackInst);
     return dynamic_cast<Ptr<IPadstackInstCollection> >(res);
+}
+
+ECAD_INLINE Ptr<IComponentDefPinCollection> ECollectionCollection::GetComponentDefPinCollection() const
+{
+    auto res = GetCollection(ECollectionType::ComponentDefPin);
+    return dynamic_cast<Ptr<IComponentDefPinCollection> >(res);
 }
 
 ECAD_INLINE size_t ECollectionCollection::Size() const

@@ -28,6 +28,7 @@ enum class ECollectionType
     ComponentDef,
     HierarchyObj,
     PadstackInst,
+    ComponentDefPin,
     Collection
 };
 

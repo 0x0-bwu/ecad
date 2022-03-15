@@ -23,6 +23,10 @@ public:
     virtual CPtr<ILayerMap> GetLayerMap() const = 0;
 
     virtual CPtr<IPadstackDef> GetPadstackDef() const = 0;
+
+    virtual bool isLayoutPin() const = 0;
+    virtual void SetIsLayoutPin(bool isPin) = 0;
+
     virtual UPtr<EShape> GetLayerShape(ELayerId lyr) const = 0;
 };
 }//namespace ecad

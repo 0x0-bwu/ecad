@@ -6,17 +6,6 @@
 #include <string>
 namespace ecad {
 
-class INetCollection;
-class ICellCollection;
-class ILayerCollection;
-class IConnObjCollection;
-class ICellInstCollection;
-class ILayerMapCollection;
-class IPrimitiveCollection;
-class IDefinitionCollection;
-class IPadstackDefCollection;
-class IHierarchyObjCollection;
-class IPadstackInstCollection;
 class ECAD_API ECollectionCollection : public EUnorderedMapCollection<ECollectionType, UPtr<ICollection> >, public ICollectionCollection
 {
     using BaseCollection = EUnorderedMapCollection<ECollectionType, UPtr<ICollection> >;
@@ -41,9 +30,12 @@ public:
     virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const;
     virtual Ptr<IPrimitiveCollection> GetPrimitiveCollection() const;
     virtual Ptr<IDefinitionCollection> GetDefinitionCollection() const;
+    virtual Ptr<IMaterialDefCollection> GetMaterialDefCollection() const;
     virtual Ptr<IPadstackDefCollection> GetPadstackDefCollection() const;
+    virtual Ptr<IComponentDefCollection> GetComponentDefCollection() const;
     virtual Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const;
     virtual Ptr<IPadstackInstCollection> GetPadstackInstCollection() const;
+    virtual Ptr<IComponentDefPinCollection> GetComponentDefPinCollection() const;
 
     size_t Size() const;
 

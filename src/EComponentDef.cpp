@@ -12,6 +12,7 @@ ECAD_INLINE void EComponentDef::save(Archive & ar, const unsigned int version) c
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDef, IComponentDef>();
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
     ar & boost::serialization::make_nvp("type", m_type);
 }
@@ -21,6 +22,7 @@ ECAD_INLINE void EComponentDef::load(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDef, IComponentDef>();
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
     ar & boost::serialization::make_nvp("type", m_type);
 }
@@ -36,6 +38,8 @@ ECAD_INLINE EComponentDef::EComponentDef()
 ECAD_INLINE EComponentDef::EComponentDef(const std::string & name)
  : EDefinition(name)
 {
+    for(auto type : m_collectionTypes) 
+        AddCollection(type);
 }
 
 ECAD_INLINE EComponentDef::~EComponentDef()

@@ -780,6 +780,7 @@ namespace {
                             make_function(&EPadstackInst::GetLayerMap, return_value_policy<reference_existing_object>()),
                             &EPadstackInst::SetLayerMap)
             .def("get_padstack_def", &EPadstackInst::GetPadstackDef, return_internal_reference<>())
+            .add_property("is_layout_pin", &EPadstackInst::isLayoutPin, &EPadstackInst::SetIsLayoutPin)
             .def("get_layer_shape", adapt_unique(&EPadstackInst::GetLayerShape))
         ;
 

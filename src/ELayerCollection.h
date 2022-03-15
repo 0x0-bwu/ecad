@@ -3,7 +3,6 @@
 #include "interfaces/ILayerCollection.h"
 #include "interfaces/IIterator.h"
 #include "EBaseCollections.h"
-#include "EUidGenerator.h"
 namespace ecad {
 
 class ILayerMap;
