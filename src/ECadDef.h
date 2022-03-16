@@ -57,7 +57,7 @@ enum EMaterialPropId
     ThermalExpansionCoefficient = 42,
 };
 
-enum EComponentType
+enum class EComponentType
 {
     Invalid = -1,
     Other = 0,
@@ -65,7 +65,18 @@ enum EComponentType
     Inductor,
     Capacitor,
     IC,
-    IO
+    IO,
+    Molding
+};
+
+enum class EPinIOType
+{
+    Invalid = -1,
+    Driver,
+    Receiver,
+    BiDirectional,
+    DirverTerminator,
+    ReceiverTerminator
 };
 
 enum class ELayerType

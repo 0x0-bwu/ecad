@@ -337,6 +337,28 @@ private:
     size_t m_circleDiv = 12;
 };
 
+struct Pin
+{
+    std::string name;
+    std::string ioType;
+    Point loc;
+    int padstackId = 0;
+    int relativeLayer = 0;
+};
+
+struct Part
+{
+    char type;
+    char shape;
+    bool noFlip = false;
+    double value;
+    double height;
+    Point  ll, ur;
+    std::string name;
+    std::string material;
+    std::vector<Pin> pins;
+};
+
 struct EXflDB
 {
     Unit unit;
@@ -347,6 +369,7 @@ struct EXflDB
     std::string designType;
     std::vector<Net> nets;
     std::vector<Via> vias;
+    std::vector<Part> parts;
     std::vector<Layer> layers;
     std::vector<Route> routes;
     std::vector<Material> materials;
@@ -358,6 +381,7 @@ struct EXflDB
         ClearLUTs();
         nets.clear();
         vias.clear();
+        parts.clear();
         layers.clear();
         routes.clear();
         materials.clear();

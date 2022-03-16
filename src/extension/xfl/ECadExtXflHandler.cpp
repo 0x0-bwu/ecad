@@ -44,6 +44,9 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
     m_xflDB->BuildLUTs(eShapeGetter);
 
+    //import compdef
+    ImportComponentDefs();
+
     //import material
     ImportMaterialDefs();
 
@@ -67,6 +70,12 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     ImportBoardGeom(layout);
 
     return m_database;
+}
+
+ECAD_INLINE void ECadExtXflHandler::ImportComponentDefs()
+{
+    auto & mgr = EDataMgr::Instance();
+    //todo
 }
 
 ECAD_INLINE void ECadExtXflHandler::ImportMaterialDefs()

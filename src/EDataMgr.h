@@ -21,8 +21,10 @@ class IPrimitive;
 class ILayoutView;
 class IMaterialDef;
 class IPadstackDef;
+class IComponentDef;
 class IMaterialProp;
 class IPadstackInst;
+class IComponentDefPin;
 class IPadstackDefData;
 class IMaterialPropValue;
 using namespace generic::geometry;
@@ -61,6 +63,10 @@ public:
                                     const std::string & conductingMat = sDefaultConductingMat,
                                     const std::string & dirlectricMat = sDefaultDielectricMat);
     
+    ///ComponentDef
+    Ptr<IComponentDef> CreateComponentDef(SPtr<IDatabase> database, const std::string & name);
+    Ptr<IComponentDef> FindComponentDefByName(SPtr<IDatabase> database, const std::string & name);
+
     ///Material
     Ptr<IMaterialDef> CreateMaterialDef(SPtr<IDatabase> database, const std::string & name);
     Ptr<IMaterialDef> FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name);
@@ -98,6 +104,9 @@ public:
 
     ///Text
     Ptr<IText> CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text);
+
+    ///ComponentDefPin
+    Ptr<IComponentDefPin> CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
 
     static EDataMgr & Instance();
 

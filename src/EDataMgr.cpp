@@ -4,6 +4,7 @@
 
 #include "extension/ECadExtension.h"
 #include "EPadstackDefData.h"
+#include "EComponentDef.h"
 #include "EMaterialProp.h"
 #include "ELayoutView.h"
 #include "EDatabase.h"
@@ -79,32 +80,38 @@ ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 ECAD_INLINE bool EDataMgr::SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
 {
+    if(nullptr == database) return false;
     return database->Save(archive, fmt);
 }
     
 ECAD_INLINE bool EDataMgr::LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
 {
+    if(nullptr == database) return false;
     return database->Load(archive, fmt);
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE Ptr<ICell> EDataMgr::CreateCircuitCell(SPtr<IDatabase> database, const std::string & name)
 {
+    if(nullptr == database) return nullptr;
     return database->CreateCircuitCell(name);
 }
 
 ECAD_INLINE Ptr<ICell> EDataMgr::FindCellByName(SPtr<IDatabase> database, const std::string & name)
 {
+    if(nullptr == database) return nullptr;
     return database->FindCellByName(name);
 }
 
 ECAD_INLINE Ptr<INet> EDataMgr::CreateNet(Ptr<ILayoutView> layout, const std::string & name)
 {
+    if(nullptr == layout) return nullptr;
     return layout->CreateNet(name);
 }
 
 ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std::string & name)
 {
+    if(nullptr == layout) return nullptr;
     return layout->FindNetByName(name);
 }
 
@@ -119,13 +126,27 @@ ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, 
     return UPtr<ILayer>(stackupLayer);
 }
 
+ECAD_INLINE Ptr<IComponentDef> EDataMgr::CreateComponentDef(SPtr<IDatabase> database, const std::string & name)
+{
+    if(nullptr == database) return nullptr;
+    return database->CreateComponentDef(name);
+}
+
+ECAD_INLINE Ptr<IComponentDef> EDataMgr::FindComponentDefByName(SPtr<IDatabase> database, const std::string & name)
+{
+    if(nullptr == database) return nullptr;
+    return database->FindComponentDefByName(name);
+}
+
 ECAD_INLINE Ptr<IMaterialDef> EDataMgr::CreateMaterialDef(SPtr<IDatabase> database, const std::string & name)
 {
+    if(nullptr == database) return nullptr;
     return database->CreateMaterialDef(name);
 }
 
 ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name)
 {
+    if(nullptr == database) return nullptr;
     return database->FindMaterialDefByName(name);
 }
 
@@ -152,21 +173,25 @@ ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::arr
 
 ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(SPtr<IDatabase> database, const std::string & name)
 {
+    if(nullptr == database) return nullptr;
     return database->CreateLayerMap(name);
 }
 
 ECAD_INLINE Ptr<ILayerMap> EDataMgr::FindLayerMapByName(SPtr<IDatabase> database, const std::string & name)
 {
+    if(nullptr == database) return nullptr;
     return database->FindLayerMapByName(name);
 }
 
 ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(SPtr<IDatabase> database, const std::string & name)
 {
+    if(nullptr == database) return nullptr;
     return database->CreatePadstackDef(name);
 }
 
 ECAD_INLINE Ptr<IPadstackDef> EDataMgr::FindPadstackDefByName(SPtr<IDatabase> database, const std::string & name) const
 {
+    if(nullptr == database) return nullptr;
     return database->FindPadstackDefByName(name);
 }
 
@@ -180,17 +205,20 @@ ECAD_INLINE Ptr<IPadstackInst> EDataMgr::CreatePadstackInst(Ptr<ILayoutView> lay
                                                             ELayerId topLyr, ELayerId botLyr, CPtr<ILayerMap> layerMap,
                                                             const ETransform2D & transform)
 {
+    if(nullptr == layout) return nullptr;
     return layout->CreatePadstackInst(name, def, net, topLyr, botLyr, layerMap, transform);
 }
 
 ECAD_INLINE Ptr<ICellInst> EDataMgr::CreateCellInst(Ptr<ILayoutView> layout, const std::string & name,
                                                     Ptr<ILayoutView> defLayout, const ETransform2D & transform)
 {
+    if(nullptr == layout) return nullptr;
     return layout->CreateCellInst(name, defLayout, transform);
 }
 
 ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape)
 {
+    if(nullptr == layout) return nullptr;
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 
@@ -232,7 +260,15 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeFromTemplate(ETemplateShape ts, ET
 
 ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text)
 {
+    if(nullptr == layout) return nullptr;
     return layout->CreateText(layer, transform, text);
+}
+
+
+ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
+{
+    if(nullptr == compDef) return nullptr;
+    return compDef->CreatePin(pinName, loc, type, psDef, lyr);
 }
 
 ECAD_INLINE EDataMgr & EDataMgr::Instance()

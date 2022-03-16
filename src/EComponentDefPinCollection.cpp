@@ -2,7 +2,8 @@
 #include "EComponentDefPinCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentDefPinCollection)
 #endif
-#include "interfaces/IComponentDefPin.h"
+
+#include "EComponentDefPin.h"
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -44,6 +45,22 @@ ECAD_INLINE EComponentDefPinCollection & EComponentDefPinCollection::operator= (
 {
     BaseCollection::operator=(other);
     return *this;
+}
+
+ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::AddPin(UPtr<IComponentDefPin> pin)
+{
+    Append(std::move(pin));
+    return Back().get();
+}
+    
+ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
+{
+    auto pin = new EComponentDefPin(name);
+    pin->SetLocation(loc);
+    pin->SetIOType(type);
+    pin->SetPadstackDef(psDef);
+    pin->SetLayerId(lyr);
+    return AddPin(UPtr<IComponentDefPin>(pin));
 }
 
 ECAD_INLINE ComponentDefPinIter EComponentDefPinCollection::GetComponentDefPinIter() const

@@ -17,6 +17,7 @@ public:
     SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:
+    void ImportComponentDefs();
     void ImportMaterialDefs();
     void ImportPadstackDefs();
     void ImportLayers(Ptr<ILayoutView> layout);

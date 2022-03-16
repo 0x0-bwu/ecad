@@ -3,6 +3,8 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentDef)
 #endif
 
+#include "interfaces/IComponentDefPinCollection.h"
+
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -15,6 +17,9 @@ ECAD_INLINE void EComponentDef::save(Archive & ar, const unsigned int version) c
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
     ar & boost::serialization::make_nvp("type", m_type);
+    ar & boost::serialization::make_nvp("bounding_box", m_bondingBox);
+    ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("material", m_material);
 }
 
 template <typename Archive>
@@ -25,6 +30,9 @@ ECAD_INLINE void EComponentDef::load(Archive & ar, const unsigned int version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
     ar & boost::serialization::make_nvp("type", m_type);
+    ar & boost::serialization::make_nvp("bounding_box", m_bondingBox);
+    ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("material", m_material);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDef)
@@ -61,5 +69,21 @@ ECAD_INLINE EDefinitionType EComponentDef::GetDefinitionType() const
 {
     return EDefinitionType::ComponentDef;
 }
+
+ECAD_INLINE void EComponentDef::SetComponentType(EComponentType type)
+{
+    m_type = type;
+}
+    
+ECAD_INLINE EComponentType EComponentDef::GetComponentType() const
+{
+    return m_type;
+}
+
+ECAD_INLINE Ptr<IComponentDefPin> EComponentDef::CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
+{
+    return GetComponentDefPinCollection()->CreatePin(name, loc, type, psDef, lyr);
+}
+
 
 }//namespace ecad

@@ -4,6 +4,7 @@
 #include "EObject.h"
 namespace ecad {
 
+class IPadstackDef;
 class ECAD_API EComponentDefPin : public EObject, public IComponentDefPin
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
@@ -18,11 +19,27 @@ public:
 
     const std::string & GetName() const;
 
+    void SetIOType(EPinIOType type);
+    EPinIOType GetIOType() const;
+
+    void SetLocation(EPoint2D location);
+    const EPoint2D & GetLocation() const;
+
+    void SetPadstackDef(CPtr<IPadstackDef> def);
+    CPtr<IPadstackDef> GetPadstackDef() const;
+
+    void SetLayerId(ELayerId lyrId);
+    ELayerId GetLayerId() const;
+
 protected:
     ///Copy
     virtual Ptr<EComponentDefPin> CloneImp() const override { return new EComponentDefPin(*this); }
 
 protected:
+    EPinIOType m_type;
+    EPoint2D m_location;
+    CPtr<IPadstackDef> m_padstackDef = nullptr;
+    ELayerId m_layer = ELayerId::noLayer;
 };
 
 ECAD_ALWAYS_INLINE const std::string & EComponentDefPin::GetName() const

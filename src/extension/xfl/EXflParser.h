@@ -45,7 +45,8 @@ BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstAnnular, (int, layer) (ecad::ext::
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstComposite, (bool, isVoid) (int, layer) (ecad::ext::xfl::Composite, composite))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::InstShape, (bool, isVoid) (int, layer) (int, shapeId) (ecad::ext::xfl::Point, loc) (double, rot) (char, mirror) (bool, rotThenMirror))
 BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Route, (std::string, net) (std::vector<ecad::ext::xfl::InstObject>, objects))
-
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Part, (char, type) (char, shape) (bool, noFlip) (double, value) (double, height) (ecad::ext::xfl::Point, ll) (ecad::ext::xfl::Point, ur) (std::string, name) (std::string, material) (std::vector<ecad::ext::xfl::Pin>, pins))
+BOOST_FUSION_ADAPT_STRUCT(ecad::ext::xfl::Pin, (std::string, name) (std::string, ioType) (ecad::ext::xfl::Point, loc) (int, padstackId) (int, relativeLayer))
 namespace ecad {
 namespace ext {
 namespace xfl {
@@ -218,6 +219,8 @@ struct EXflReader
 		qi::rule<Iterator, InstComposite(), Skipper> instComposite;
 		qi::rule<Iterator, InstShape(), Skipper> instShape;
 		qi::rule<Iterator, Route(), Skipper> route;
+		qi::rule<Iterator, Pin(), Skipper> pin;
+		qi::rule<Iterator, Part(), Skipper> part;
 
         EXflDB & db;
         EXflGrammar(EXflDB & db, ErrorHandler<Iterator> & errorHandler)
@@ -318,7 +321,8 @@ struct EXflReader
 			;
 
 			partSection = lexeme[no_case[".part"]] >>
-				*(char_ - lexeme[no_case[".end part"]]) >>//todo
+				*(char_ - lexeme[no_case[".end component"]]) >>//todo
+				// *(part[phx::bind(&EXflGrammar::PartHandle, this, _1)]) >>
 				lexeme[no_case[".end part"]]
 			;
 
@@ -506,6 +510,19 @@ struct EXflReader
 				) >> "}"
 			;
 
+			pin = textNC[at_c<0>(_val) = _1] >> point[at_c<2>(_val) = _1] >> text[at_c<1>(_val) = _1] >> -(int_[at_c<3>(_val) = _1] >> int_[at_c<4>(_val) = _1]);
+
+			part = textDQ[at_c<7>(_val) = _1] >>
+				-(
+					char_("RCD")[at_c<1>(_val) = _1] >> point[at_c<5>(_val) = _1] >> point[at_c<6>(_val) = _1] >> double_[at_c<4>(_val) = _1] >>
+					-(
+						char_("RLCSDMO")[at_c<0>(_val) = _1] >> double_[at_c<3>(_val) = _1] >>
+						-lexeme[no_case["noflip"]][at_c<2>(_val) = true] >> -textDQ[at_c<8>(_val) = _1]
+					) 
+				) >>
+				"{" >> *(pin[push_back(at_c<9>(_val), _1)]) >> "}"
+			;
+				
             expression.name("XFL Expression");
             others.name("XFL Block Others");
 			text.name("XFL Text");
@@ -603,6 +620,12 @@ struct EXflReader
 		{
 			// std::cout << "Via Name: " << via.name << ", Padstack ID: " << via.padstackId << ", Material: " << via.material << std::endl;
 			db.vias.emplace_back(std::move(via));
+		}
+
+		void PartHandle(Part part)
+		{
+			std::cout << "Part Name: " << part.name << ", Pins: " << part.pins.size() << std::endl;
+			db.parts.emplace_back(std::move(part));
 		}
 
 		void NetHandle(Net net)
