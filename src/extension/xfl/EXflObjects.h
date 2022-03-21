@@ -359,6 +359,15 @@ struct Part
     std::vector<Pin> pins;
 };
 
+struct Component
+{
+    std::string name;
+    std::string part;
+    Point location;
+    int layer;
+    double rotation;//unit: deg
+};
+
 struct EXflDB
 {
     Unit unit;

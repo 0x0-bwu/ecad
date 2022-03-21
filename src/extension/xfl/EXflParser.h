@@ -321,8 +321,7 @@ struct EXflReader
 			;
 
 			partSection = lexeme[no_case[".part"]] >>
-				*(char_ - lexeme[no_case[".end component"]]) >>//todo
-				// *(part[phx::bind(&EXflGrammar::PartHandle, this, _1)]) >>
+				*(part[phx::bind(&EXflGrammar::PartHandle, this, _1)]) >>
 				lexeme[no_case[".end part"]]
 			;
 
@@ -512,12 +511,12 @@ struct EXflReader
 
 			pin = textNC[at_c<0>(_val) = _1] >> point[at_c<2>(_val) = _1] >> text[at_c<1>(_val) = _1] >> -(int_[at_c<3>(_val) = _1] >> int_[at_c<4>(_val) = _1]);
 
-			part = textDQ[at_c<7>(_val) = _1] >>
+			part = textNC[at_c<7>(_val) = _1] >>
 				-(
 					char_("RCD")[at_c<1>(_val) = _1] >> point[at_c<5>(_val) = _1] >> point[at_c<6>(_val) = _1] >> double_[at_c<4>(_val) = _1] >>
 					-(
 						char_("RLCSDMO")[at_c<0>(_val) = _1] >> double_[at_c<3>(_val) = _1] >>
-						-lexeme[no_case["noflip"]][at_c<2>(_val) = true] >> -textDQ[at_c<8>(_val) = _1]
+						-lexeme[no_case["noflip"]][at_c<2>(_val) = true] >> -textNC[at_c<8>(_val) = _1]
 					) 
 				) >>
 				"{" >> *(pin[push_back(at_c<9>(_val), _1)]) >> "}"
@@ -643,13 +642,13 @@ struct EXflReader
 		void UnknownSectionHandle(const std::string & unknown)
 		{
 			ECAD_UNUSED(unknown)
-			// std::cout << "Unknow Section: " << unknown << std::endl;
+			std::cout << "Unknow Section: " << unknown << std::endl;
 		}
 
 		void UnrecognizedHandle(const std::string & unrecognized)
 		{
 			ECAD_UNUSED(unrecognized)
-			// std::cout << "Unrecogized: " << unrecognized << std::endl;
+			std::cout << "Unrecogized: " << unrecognized << std::endl;
 		}
     };
 };
