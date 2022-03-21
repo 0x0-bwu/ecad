@@ -12,7 +12,8 @@ namespace esim {
 using namespace generic::geometry;
 
 using IntPolygon = Polygon2D<ECoord>;
-using ELayoutMetalFraction = OccupancyGridMap<std::vector<float> >;
+using ELayerMetalFraction = OccupancyGridMap<float>;
+using ELayoutMetalFraction = std::vector<SPtr<ELayerMetalFraction> >;
 using ELayoutMetalFractionMapCtrl = typename OccupancyGridMappingFactory::GridCtrl<ECoord>;
 class ECAD_API ELayerMetalFractionMapper
 {
@@ -22,7 +23,7 @@ public:
     using MapCtrl = ELayoutMetalFractionMapCtrl;
     using Product = typename Factory::Product<Property>;
     using Setting = EMetalFractionMappingSettings;
-    explicit ELayerMetalFractionMapper(const Setting & settings, ELayoutMetalFraction & fraction, ELayerId layerId, bool isMetal);
+    explicit ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId, bool isMetal);
     virtual ~ELayerMetalFractionMapper();
 
     void GenerateMetalFractionMapping(CPtr<ILayoutView> layout, const MapCtrl & ctrl);
@@ -31,10 +32,10 @@ private:
     void Mapping(const MapCtrl & ctrl);
 
 private:
-    ELayerId m_id;
     bool m_bMetal;
+    ELayerId m_layerId;
     const Setting & m_settings;
-    ELayoutMetalFraction & m_fraction;
+    ELayerMetalFraction & m_fraction;
     std::vector<IntPolygon> m_solids;
     std::vector<IntPolygon> m_holes;
 };
@@ -59,7 +60,6 @@ struct EMetalFractionInfo
 
 class ECAD_API ELayoutMetalFractionMapper
 {
-    static constexpr char suffix[] = ".mf";
     using MapCtrl = ELayoutMetalFractionMapCtrl;
 public:
     explicit ELayoutMetalFractionMapper(EMetalFractionMappingSettings settings);

@@ -3,6 +3,7 @@
 *.os
 *.a
 *.so
+*.mf
 *.exe
 *.png
 *.txt

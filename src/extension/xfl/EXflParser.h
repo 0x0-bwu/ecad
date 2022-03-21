@@ -642,13 +642,13 @@ struct EXflReader
 		void UnknownSectionHandle(const std::string & unknown)
 		{
 			ECAD_UNUSED(unknown)
-			std::cout << "Unknow Section: " << unknown << std::endl;
+			// std::cout << "Unknow Section: " << unknown << std::endl;
 		}
 
 		void UnrecognizedHandle(const std::string & unrecognized)
 		{
 			ECAD_UNUSED(unrecognized)
-			std::cout << "Unrecogized: " << unrecognized << std::endl;
+			// std::cout << "Unrecogized: " << unrecognized << std::endl;
 		}
     };
 };

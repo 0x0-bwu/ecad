@@ -59,13 +59,13 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
 
     double kCu = 400;//W/k.m
     double kFr4 = 0.294;//W/k.m
-    auto equivK = [&kCu, &kFr4](double mf)
+    auto equivK = [&kCu, &kFr4](double composite)
     {
-        if(mf < 0.0) mf = 0.0;
-        if(mf > 1.0) mf = 1.0;
-        return mf * kCu + (1.0 - mf) * kFr4;
+        if(composite < 0.0) composite = 0.0;
+        if(composite > 1.0) composite = 1.0;
+        return composite * kCu + (1.0 - composite) * kFr4;
     };
-    auto blockF = [&mf, &nz](const ModelIndex & mfIndex) { return (*mf)(mfIndex.x, mfIndex.y)[nz - mfIndex.z - 1]; };
+    auto blockF = [&mf, &nz](const ModelIndex & mfIndex) { return (*(mf->at(nz - mfIndex.z - 1)))(mfIndex.x, mfIndex.y); };
 
     double k = 0;
     double area = 0;
@@ -218,16 +218,14 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     thermal::solver::ThermalNetworkSolver solver(*m_network);
     auto results = solver.Solve(20);
 
-    auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction(m_modelSize.x, m_modelSize.y));
-    for(size_t i = 0; i < m_modelSize.x; ++i){
-        for(size_t j = 0; j < m_modelSize.y; ++j){
-            (*htMap)(i, j).resize(m_modelSize.z);
-        }
-    }
+    auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
+    for(size_t i = 0; i < m_modelSize.z; ++i)
+        htMap->push_back(std::make_shared<ELayerMetalFraction>(m_modelSize.x, m_modelSize.y));
 
     for(size_t i = 0; i < m_network->Size(); ++i){
         auto modelIndex = GetModelIndex(i);
-        (*htMap)(modelIndex.x, modelIndex.y)[m_modelSize.z - modelIndex.z - 1] = results[i];
+        auto lyrHtMap = htMap->at(m_modelSize.z - modelIndex.z - 1);
+        (*lyrHtMap)(modelIndex.x, modelIndex.y) = results[i];
     }
 
     auto htMapInfo = *mfInfo;
@@ -246,19 +244,20 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         auto delta = max - min;
         for(size_t i = 0; i < m_network->Size(); ++i){
             auto modelIndex = GetModelIndex(i);
-            (*htMap)(modelIndex.x, modelIndex.y)[modelIndex.z] = (results[i] - min) / delta;//to 0~1
+            auto lyrHtMap = htMap->at(modelIndex.z);
+            (*lyrHtMap)(modelIndex.x, modelIndex.y) = (results[i] - min) / delta;//to 0~1
         }
 
-        size_t index = 0;
-        auto rgbaFunc = [&index](const std::vector<float> & d) {
+        auto rgbaFunc = [](float d) {
             int r, g, b, a = 255;
-            generic::color::RGBFromScalar(d[index], r, g, b);
+            generic::color::RGBFromScalar(d, r, g, b);
             return std::make_tuple(r, g, b, a);
         };
         
+        size_t index = 0;
         for(index = 0; index < mfInfo->layers.size(); ++index){
             std::string filepng = m_settings.outDir + GENERIC_FOLDER_SEPS + std::to_string(index) + ".png";
-            htMap->WriteImgProfile(filepng, rgbaFunc);
+            htMap->at(index)->WriteImgProfile(filepng, rgbaFunc);
         }
     }
 #endif//BOOST_GIL_IO_PNG_SUPPORT

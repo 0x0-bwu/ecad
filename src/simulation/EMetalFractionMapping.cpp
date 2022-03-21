@@ -15,9 +15,9 @@ namespace ecad {
 namespace esim {
 using namespace generic::geometry;
 
-ECAD_INLINE ELayerMetalFractionMapper::ELayerMetalFractionMapper(const Setting & settings, ELayoutMetalFraction & fraction, ELayerId layerId, bool isMetal)
- : m_id(layerId)
- , m_bMetal(isMetal)
+ECAD_INLINE ELayerMetalFractionMapper::ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId, bool isMetal)
+ : m_bMetal(isMetal)
+ , m_layerId(layerId)
  , m_settings(settings)
  , m_fraction(fraction)
 {
@@ -38,7 +38,7 @@ ECAD_INLINE void ELayerMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
     while(auto primitive = primIter->Next()){
         auto layer = primitive->GetLayer();
         if(noLayer == layer) continue;
-        if(m_id != layer) continue;
+        if(m_layerId != layer) continue;
 
         auto netId = primitive->GetNet();
         if(bSelNet && !selNets.count(netId)) continue;
@@ -64,9 +64,8 @@ ECAD_INLINE void ELayerMetalFractionMapper::GenerateMetalFractionMapping(CPtr<IL
 
 ECAD_INLINE void ELayerMetalFractionMapper::Mapping(const MapCtrl & ctrl)
 {
-    const auto id = m_id;
-    auto solidBlend = [&id](typename ELayoutMetalFraction::ResultType & res, const Product & p) { res[id] += p.ratio; };
-    auto holeBlend =  [&id](typename ELayoutMetalFraction::ResultType & res, const Product & p) { res[id] -= p.ratio; };
+    auto solidBlend = [](typename ELayerMetalFraction::ResultType & res, const Product & p) { res += p.ratio; };
+    auto holeBlend =  [](typename ELayerMetalFraction::ResultType & res, const Product & p) { res -= p.ratio; };
 
     std::vector<CPtr<IntPolygon> > solids(m_solids.size());
     std::vector<CPtr<IntPolygon> > holes(m_holes.size());
@@ -81,7 +80,7 @@ ECAD_INLINE void ELayerMetalFractionMapper::Mapping(const MapCtrl & ctrl)
     auto height = m_fraction.Height();
     for(auto i = 0; i < width; ++i){
         for(auto j = 0; j < height; ++j){
-            auto & res = m_fraction(i, j)[id];
+            auto & res = m_fraction(i, j);
             if(res < 0.0f) res = 0.0f;
             if(res > 1.0f) res = 1.0f;
         }
@@ -128,30 +127,31 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
     bbox[1][0] = bbox[0][0] + m_mfInfo->stride[0] * m_mfInfo->grid[0];
     bbox[1][1] = bbox[0][1] + m_mfInfo->stride[1] * m_mfInfo->grid[1];
     m_mfInfo->extension = bbox;
-    m_result.reset(new ELayoutMetalFraction(m_mfInfo->grid[0], m_mfInfo->grid[1]));
 
-    auto layerCollection = layout->GetLayerCollection();
-    auto layerSize = layerCollection->Size();
-    auto resultSize = m_result->Size();
-    for(size_t i = 0; i < resultSize; ++i)
-        (*m_result)[i].assign(layerSize, 0);
 
+    m_result.reset(new ELayoutMetalFraction);
     MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, m_settings.threads);
+    
     auto layerIter = layout->GetLayerIter();
-
     //stackuplayer
     while(auto * layer = layerIter->Next()){
         auto * stackupLayer = layer->GetStackupLayerFromLayer();
         if(nullptr == stackupLayer) continue;
         bool isMetal = layer->GetLayerType() == ELayerType::ConductingLayer;
-        ELayerMetalFractionMapper mapper(m_settings, *m_result, layer->GetLayerId(), isMetal);
+        auto layerFraction = std::make_shared<ELayerMetalFraction>(m_mfInfo->grid[0], m_mfInfo->grid[1], 0.0);
+        ELayerMetalFractionMapper mapper(m_settings, *layerFraction, layer->GetLayerId(), isMetal);
         mapper.GenerateMetalFractionMapping(layout, ctrl);
+        m_result->push_back(layerFraction);
 
         EStackupLayerInfo lyrInfo{ isMetal, stackupLayer->GetElevation(), stackupLayer->GetThickness(), layer->GetName() };
-        (m_mfInfo->layers).emplace_back(std::move(lyrInfo));
-    }    
-    //return WriteResult2File(coordUnits.Scale2Unit());
-    return true; 
+        m_mfInfo->layers.emplace_back(std::move(lyrInfo));
+    }
+
+    bool res = true;
+    if(!m_settings.outFile.empty())    
+        res = WriteResult2File(coordUnits.Scale2Unit());
+
+    return res;
 }
 
 ECAD_INLINE CPtr<ELayoutMetalFraction> ELayoutMetalFractionMapper::GetLayoutMetalFraction() const
@@ -209,7 +209,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
         for(size_t j = 0; j < info.grid[1]; ++j){
             ss << i << sp << j;
             for(size_t k = 0; k < layers; ++k){
-                ss << sp << (*m_result)(i, j)[k];
+                ss << sp << (*(m_result->at(k)))(i, j);
             }
             ss << std::endl;
         }
@@ -222,9 +222,9 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
 #if defined(ECAD_DEBUG_MODE) && defined(BOOST_GIL_IO_PNG_SUPPORT)
 
     size_t index = 0;
-    auto rgbaFunc = [&index](const std::vector<float> & d) {
+    auto rgbaFunc = [](float d) {
         int r, g, b, a = 255;
-        generic::color::RGBFromScalar(d[index], r, g, b);
+        generic::color::RGBFromScalar(d, r, g, b);
         return std::make_tuple(r, g, b, a);
     };
 
@@ -232,7 +232,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
     std::string fileName = generic::filesystem::FileName(m_settings.outFile);
     for(index = 0; index < layers; ++index){
         std::string filepng = dirPath + GENERIC_FOLDER_SEPS + fileName + "_" + info.layers[index].name + ".png";
-        m_result->WriteImgProfile(filepng, rgbaFunc);
+        m_result->at(index)->WriteImgProfile(filepng, rgbaFunc);
     }
 #endif
 
@@ -241,8 +241,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
 
 ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, const std::string & filename)
 {
-    ECAD_ASSERT(info.grid[0] == mf.Width())
-    ECAD_ASSERT(info.grid[1] == mf.Height())
+    if(info.layers.size() != mf.size()) return false;
 
     auto dir = generic::filesystem::DirName(filename);
     if(!generic::filesystem::PathExists(dir))
@@ -279,8 +278,8 @@ ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELay
 
     auto index = 1;
     auto ref = bbox[0];
-    auto width = mf.Width();
-    auto height = mf.Height();
+    auto width = info.grid[0];
+    auto height = info.grid[1];
     for(auto i = 0; i < width; ++i){
         for(auto j = 0; j < height; ++j){
             auto ll = ref + EPoint2D(info.stride[0] * i, info.stride[1] * j);
@@ -293,11 +292,9 @@ ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELay
             out << sp << unit.toUnit(box[1][0], um);
             out << sp << unit.toUnit(box[1][1], um);
 
-            const auto & values = mf(i, j);
             for(auto k = 0; k < layerSize; ++k){
                 out << sp;
-                if(k < values.size()) out << values[k];
-                else out << 0;
+                out << (*mf[k])(i, j);
             }
             out << std::endl;
         }
