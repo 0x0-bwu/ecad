@@ -12,7 +12,7 @@
 #include "generic/tools/Format.hpp"
 #include "Interface.h"
 namespace ecad {
-namespace esim {
+namespace eutils {
 using namespace generic::geometry;
 
 ECAD_INLINE ELayerMetalFractionMapper::ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId, bool isMetal)
@@ -302,5 +302,5 @@ ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELay
     return true;
 }
 
-}//namespace esim
+}//namespace eutils
 }//namespace ecad

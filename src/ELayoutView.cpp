@@ -4,7 +4,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #endif
 
 #include "simulation/EThermalNetworkExtraction.h"
-#include "simulation/EMetalFractionMapping.h"
+#include "utilities/EMetalFractionMapping.h"
 #include "utilities/ELayoutPolygonMerger.h"
 #include "utilities/EBoundaryCalculator.h"
 #include "utilities/ELayoutMergeUtility.h"
@@ -239,24 +239,24 @@ ECAD_INLINE void ELayoutView::SetBoundary(UPtr<EPolygon> boundary)
 ECAD_INLINE CPtr<EPolygon> ELayoutView::GetBoundary() const
 {
     if(nullptr == m_boundary) 
-        m_boundary = std::move(euti::CalculateBoundary(const_cast<Ptr<ELayoutView> >(this)));
+        m_boundary = std::move(eutils::CalculateBoundary(const_cast<Ptr<ELayoutView> >(this)));
     return m_boundary.get();
 }
 
 ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings)
 {
-    esim::ELayoutMetalFractionMapper mapper(settings);
+    eutils::ELayoutMetalFractionMapper mapper(settings);
     return mapper.GenerateMetalFractionMapping(this);
 }
 
 ECAD_INLINE void ELayoutView::ExtractConnectivity()
 {
-    euti::ELayoutConnectivity::ConnectivityExtraction(this);
+    eutils::ELayoutConnectivity::ConnectivityExtraction(this);
 }
 
 ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings)
 {
-    euti::ELayoutPolygonMerger merger(this);
+    eutils::ELayoutPolygonMerger merger(this);
     merger.SetLayoutMergeSettings(settings);
     merger.Merge();
     return true;
@@ -284,7 +284,7 @@ ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)
 
 ECAD_INLINE void ELayoutView::Merge(CPtr<ILayoutView> other, const ETransform2D & transform)
 {
-    euti::ELayoutMergeUtility::Merge(this, other, transform);
+    eutils::ELayoutMergeUtility::Merge(this, other, transform);
 }
 
 ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)

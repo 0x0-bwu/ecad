@@ -1,5 +1,5 @@
-#ifndef ECAD_EUIT_ELAYOUTPOLYGONMERGER_H
-#define ECAD_EUIT_ELAYOUTPOLYGONMERGER_H
+#ifndef ECAD_EUTLIS_ELAYOUTPOLYGONMERGER_H
+#define ECAD_EUTLIS_ELAYOUTPOLYGONMERGER_H
 #include "ECadSettings.h"
 #include <unordered_map>
 #include <fstream>
@@ -14,7 +14,7 @@ namespace ecad {
 
 class EShape;
 class ILayoutView;
-namespace euti {
+namespace eutils {
 
 class ECAD_API ELayoutPolygonMerger
 {
@@ -48,11 +48,11 @@ private:
     std::unordered_map<ELayerId, UPtr<LayerMerger> > m_mergers;
 };
 
-}//namespace euti
+}//namespace eutils
 }//namespace ecad
 
 #ifdef ECAD_HEADER_ONLY
 #include "utilities/ELayoutPolygonMerger.cpp"
 #endif
 
-#endif//ECAD_EUIT_ELAYOUTPOLYGONMERGER_H
+#endif//ECAD_EUTLIS_ELAYOUTPOLYGONMERGER_H

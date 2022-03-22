@@ -8,7 +8,7 @@
 #include "interfaces/ICellInst.h"
 #include "interfaces/ICell.h"
 namespace ecad {
-namespace euti {
+namespace eutils {
 
 ECAD_INLINE bool EFlattenUtility::Flatten(Ptr<IDatabase> database, Ptr<ICell> cell, size_t threads)
 {
@@ -89,5 +89,5 @@ ECAD_INLINE void EFlattenUtility::FlattenOneCell(Ptr<ICell> cell)
     cell->GetFlattenedLayoutView();
 }
 
-}//namespace euti
+}//namespace eutils
 }//namespace ecad

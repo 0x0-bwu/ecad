@@ -1,5 +1,5 @@
-#ifndef ECAD_EUIT_EFLATTENUTILITY_H
-#define ECAD_EUIT_EFLATTENUTILITY_H
+#ifndef ECAD_EUTILS_EFLATTENUTILITY_H
+#define ECAD_EUTILS_EFLATTENUTILITY_H
 #include "ECadCommon.h"
 #include <unordered_map>
 #include <mutex>
@@ -8,7 +8,7 @@ namespace generic { namespace thread { namespace taskflow { class TaskNode; clas
 namespace ecad {
 class ICell;
 class IDatabase;
-namespace euti {
+namespace eutils {
 class ECAD_API ECellNode
 {
 public:
@@ -44,4 +44,4 @@ private:
 #include "utilities/EFlattenUtility.cpp"
 #endif
 
-#endif//ECAD_EUIT_EFLATTENUTILITY_H
+#endif//ECAD_EUTILS_EFLATTENUTILITY_H

@@ -5,7 +5,7 @@
 #include "generic/geometry/Connectivity.hpp"
 #include "Interface.h"
 namespace ecad {
-namespace euti {
+namespace eutils {
 
 ECAD_INLINE void ELayoutConnectivity::ConnectivityExtraction(Ptr<ILayoutView> layout)
 {
@@ -113,5 +113,5 @@ ECAD_INLINE void ELayoutConnectivity::ConnectivityExtraction(Ptr<ILayoutView> la
     }
 }
 
-}//namespace euti
+}//namespace eutils
 }//namespace ecad

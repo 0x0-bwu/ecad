@@ -1,5 +1,5 @@
-#ifndef ECAD_ESIM_EMATELFRACTIONMAPPING_H
-#define ECAD_ESIM_EMATELFRACTIONMAPPING_H
+#ifndef ECAD_EUTILS_EMATELFRACTIONMAPPING_H
+#define ECAD_EUTILS_EMATELFRACTIONMAPPING_H
 #include "generic/geometry/OccupancyGridMap.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "ECadSettings.h"
@@ -7,7 +7,7 @@
 namespace ecad {
 
 class ILayoutView;
-namespace esim {
+namespace eutils {
 
 using namespace generic::geometry;
 
@@ -81,11 +81,11 @@ private:
 
 ECAD_API bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, const std::string & filename);
 
-}//namespace esim
+}//namespace eutils
 }//namespace ecad
 
 #ifdef ECAD_HEADER_ONLY
 #include "EMetalFractionMapping.cpp"
 #endif
 
-#endif//ECAD_ESIM_EMATELFRACTIONMAPPING_H
+#endif//ECAD_EUTILS_EMATELFRACTIONMAPPING_H

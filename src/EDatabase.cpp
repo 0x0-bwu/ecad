@@ -191,12 +191,12 @@ ECAD_INLINE bool EDatabase::GetCircuitCells(std::vector<Ptr<ICell> > & cells) co
 
 ECAD_INLINE bool EDatabase::GetTopCells(std::vector<Ptr<ICell> > & cells) const
 {
-    return euti::EFlattenUtility::GetTopCells(const_cast<Ptr<EDatabase> >(this), cells);
+    return eutils::EFlattenUtility::GetTopCells(const_cast<Ptr<EDatabase> >(this), cells);
 }
 
 ECAD_INLINE bool EDatabase::Flatten(Ptr<ICell> cell) const
 {
-    euti::EFlattenUtility utility;
+    eutils::EFlattenUtility utility;
     return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, DefaultThreads());
 }
 

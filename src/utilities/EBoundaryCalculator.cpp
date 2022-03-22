@@ -6,7 +6,7 @@
 #include "Interface.h"
 #include <unordered_map>
 namespace ecad {
-namespace euti {
+namespace eutils {
 
 ECAD_INLINE UPtr<EPolygon> CalculateBoundary(CPtr<ILayoutView> layout)
 {
@@ -51,5 +51,5 @@ ECAD_INLINE UPtr<EPolygon> CalculateBoundary(CPtr<ILayoutView> layout)
     return std::move(boundary);
 }
 
-}//namespace euti
+}//namespace eutils
 }//namespace ecad

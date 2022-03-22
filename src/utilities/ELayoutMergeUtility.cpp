@@ -5,7 +5,7 @@
 #include "Interface.h"
 #include <unordered_map>
 namespace ecad {
-namespace euti {
+namespace eutils {
 
 ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayoutView> other, const ETransform2D & transform)
 {
@@ -87,5 +87,5 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     }
 }
 
-}//namespace euti
+}//namespace eutils
 }//namespace ecad

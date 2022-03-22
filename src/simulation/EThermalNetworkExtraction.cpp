@@ -3,12 +3,13 @@
 #endif
 
 #include "thermal/solver/ThermalNetworkSolver.hpp"
-#include "simulation/EMetalFractionMapping.h"
+#include "utilities/EMetalFractionMapping.h"
 #include "generic/tools/FileSystem.hpp"
 #include "Interface.h"
 namespace ecad {
 namespace esim {
 
+using namespace eutils;
 ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetworkExtractionSettings settings)
 {
     m_settings = std::move(settings);
@@ -238,26 +239,20 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
 
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
 
-    if(!m_settings.outDir.empty() && m_settings.dumpHotmaps) {
-        auto min = *std::min_element(results.begin(), results.end());
-        auto max = *std::max_element(results.begin(), results.end());
-        auto delta = max - min;
-        for(size_t i = 0; i < m_network->Size(); ++i){
-            auto modelIndex = GetModelIndex(i);
-            auto lyrHtMap = htMap->at(modelIndex.z);
-            (*lyrHtMap)(modelIndex.x, modelIndex.y) = (results[i] - min) / delta;//to 0~1
-        }
-
-        auto rgbaFunc = [](float d) {
-            int r, g, b, a = 255;
-            generic::color::RGBFromScalar(d, r, g, b);
-            return std::make_tuple(r, g, b, a);
-        };
-        
-        size_t index = 0;
-        for(index = 0; index < mfInfo->layers.size(); ++index){
+    using ValueType = typename ELayerMetalFraction::ResultType;
+    if(!m_settings.outDir.empty() && m_settings.dumpHotmaps) {        
+        for(auto index = 0; index < mfInfo->layers.size(); ++index){
+            auto lyr = htMap->at(index);
+            auto min = lyr->MaxOccupancy(std::less<ValueType>());
+            auto max = lyr->MaxOccupancy(std::greater<ValueType>());
+            auto range = max - min;
+            auto rgbaFunc = [&min, &range](ValueType d) {
+                int r, g, b, a = 255;
+                generic::color::RGBFromScalar((d - min) / range, r, g, b);
+                return std::make_tuple(r, g, b, a);
+            };   
             std::string filepng = m_settings.outDir + GENERIC_FOLDER_SEPS + std::to_string(index) + ".png";
-            htMap->at(index)->WriteImgProfile(filepng, rgbaFunc);
+            lyr->WriteImgProfile(filepng, rgbaFunc);
         }
     }
 #endif//BOOST_GIL_IO_PNG_SUPPORT

@@ -7,7 +7,7 @@
 #include "generic/tools/FileSystem.hpp"
 #include "Interface.h"
 namespace ecad {
-namespace euti {
+namespace eutils {
 
 using namespace generic;
 using namespace generic::geometry;
@@ -323,5 +323,5 @@ ECAD_INLINE void ELayoutPolygonMerger::WriteDomDmcForOneLayer(std::fstream & dom
         writeOnePolygonData(polygon);
 }
 
-}//namespace euti
+}//namespace eutils
 }//namespace ecad
