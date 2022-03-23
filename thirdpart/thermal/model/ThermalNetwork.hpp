@@ -1,7 +1,6 @@
 #ifndef THERMAL_MODEL_THERMALNETWORK_HPP
 #define THERMAL_MODEL_THERMALNETWORK_HPP
 
-#include "generic/thread/ThreadPool.hpp"
 #include "generic/math/MathUtility.hpp"
 #include "generic/topology/IndexGraph.hpp"
 #include <boost/graph/adjacency_list.hpp>
@@ -10,39 +9,26 @@
 #include <unordered_map>
 #include <queue>
 #include <map>
-// namespace boost {
-//     enum vertex_thermal_heat_flux_t { vertex_thermal_heat_flux = 10001 };
-//     enum vertex_thermal_heat_transfor_coeff_t { vertex_thermal_heat_transfor_coeff = 10002 };
-//     enum edge_thermal_resistance_coeff_t { edge_thermal_resistance_coeff = 10003 };
 
-//     BOOST_INSTALL_PROPERTY(vertex, thermal_heat_flux);
-//     BOOST_INSTALL_PROPERTY(vertex, thermal_heat_transfor_coeff);
-//     BOOST_INSTALL_PROPERTY(edge, thermal_resistance_coeff);
-// }
 namespace thermal {
 namespace model {
 
-// using ThermalNetwork =  boost::adjacency_list<
-//                         boost::setS,
-//                         boost::vecS,
-//                         boost::undirectedS,
-//                         //vertex properties
-//                         boost::property<boost::vertex_index_t, size_t, 
-//                         boost::property<boost::vertex_thermal_heat_flux_t, double,
-//                         boost::property<boost::vertex_thermal_heat_transfor_coeff_t, double> > >,
-//                         //edge property
-//                         boost::property<boost::edge_thermal_resistance_coeff_t, double>
-//                         >;
+template <typename num_type>
+class ThermalNetworkMatrixBuilder;
 
+template <typename num_type>
 class ThermalNetwork
 {
+    friend class ThermalNetworkMatrixBuilder<num_type>;
 public:
+    inline static constexpr num_type unknownT = std::numeric_limits<num_type>::max();
     struct Node
     {
-        double hf = 0;
-        double htc = 0;
+        num_type t = unknownT;
+        num_type hf = 0;
+        num_type htc = 0;
         std::vector<size_t> ns;
-        std::vector<double> rs;
+        std::vector<num_type> rs;
         size_t Freedom() const
         {
             return 6 - ns.size();
@@ -52,13 +38,15 @@ public:
     struct Edge
     {
         size_t x, y;
-        double r;
+        num_type  r;
     };
 
     explicit ThermalNetwork(size_t nodes)
     {
+        m_unknowTNodeCount = nodes;
         m_nodes.assign(nodes, Node{});
     }
+
     virtual ~ThermalNetwork() = default;
 
     size_t Size() const
@@ -76,27 +64,39 @@ public:
         return m_nodes[node].Freedom();
     }
 
-    void SetHF(size_t node, double hf)
+    void SetT(size_t node, num_type t)
+    {
+        if(m_nodes[node].t == unknownT)
+            m_unknowTNodeCount--;
+        m_nodes[node].t = t;
+    }
+
+    num_type GetT(size_t node) const
+    {
+        return m_nodes[node].t;
+    }
+
+    void SetHF(size_t node, num_type hf)
     {
         m_nodes[node].hf = hf;
     }
 
-    double GetHF(size_t node) const
+    num_type GetHF(size_t node) const
     {
         return m_nodes[node].hf;
     }
 
-    void SetHTC(size_t node, double htc)
+    void SetHTC(size_t node, num_type htc)
     {
         m_nodes[node].htc = htc;
     }
 
-    double GetHTC(size_t node) const
+    num_type GetHTC(size_t node) const
     {
         return m_nodes[node].htc;
     }
 
-    void SetR(size_t node1, size_t node2, double r)
+    void SetR(size_t node1, size_t node2, num_type r)
     {
         m_nodes[node1].ns.push_back(node2);
         m_nodes[node1].rs.push_back(r);
@@ -105,89 +105,150 @@ public:
         m_nodes[node2].rs.push_back(r);
     }
 
-    double GetDiagCoeff(size_t index) const
+    const std::vector<Node> & GetNodes() const
     {
-        double coeff = 0;
-        for(const auto & r : m_nodes[index].rs)
+        return m_nodes;
+    }
+
+private:
+    size_t m_unknowTNodeCount;
+    std::vector<Node> m_nodes;
+};
+
+template <typename num_type>
+class ThermalNetworkMatrixBuilder
+{
+    using Edge = typename ThermalNetwork<num_type>::Edge;
+public:
+    explicit ThermalNetworkMatrixBuilder(const ThermalNetwork<num_type> & network)
+     : m_network(network) { BuildMatrixIndicesMap(); }
+    
+    num_type GetMatrixSize() const
+    {
+        return m_mnMap.size();
+    }
+
+    num_type GetDiagCoeff(size_t mIndex) const
+    {
+        size_t nIndex = m_mnMap.at(mIndex);
+        return GetDiagCoeffInternal(nIndex);
+    }
+
+    num_type GetCoeff(size_t mRow, size_t mCol) const
+    {
+        size_t nRow = m_mnMap.at(mRow);
+        size_t nCol = m_mnMap.at(mCol);
+        return GetCoeffInternal(nRow, nCol);
+    }
+
+    num_type GetRhs(size_t mIndex, const num_type & refT) const
+    {
+        size_t nIndex = m_mnMap.at(mIndex);
+        return GetRhsInternal(nIndex, refT);
+    }
+
+    void GetCoeffs(std::list<Edge> & edges) const
+    {
+        edges.clear();
+        auto mSize = GetMatrixSize();
+        auto mark = std::unique_ptr<std::vector<bool> >(new std::vector<bool>(mSize, false));
+        GetCoeffsBFS(m_mnMap.begin()->first, *mark, edges);
+    }
+    
+    void GetDiagCoeffs(std::vector<num_type> & diagCoeffs) const
+    {
+        auto mSize = GetMatrixSize();
+        diagCoeffs.resize(mSize);
+        for(size_t mIdx = 0; mIdx < mSize; ++mIdx)
+            diagCoeffs[mIdx] = GetDiagCoeff(mIdx);
+    }
+
+    const std::unordered_map<size_t, size_t> & GetMatrixNodeIndicesMap() const
+    {
+        return m_mnMap;
+    }
+
+    const std::unordered_map<size_t, size_t> & GetNodeMatrixIndicesMap() const
+    {
+        return m_nmMap;
+    }
+
+private:
+    void BuildMatrixIndicesMap()
+    {
+        size_t index = 0;
+        for(size_t i = 0; i < m_network.m_nodes.size(); ++i) {
+            const auto & node = m_network.m_nodes.at(i);
+            if(node.t != ThermalNetwork<num_type>::unknownT) continue;
+            m_mnMap.insert(std::make_pair(index, i));
+            m_nmMap.insert(std::make_pair(i, index));
+            index++;
+        }
+    }
+
+    num_type GetDiagCoeffInternal(size_t nIndex) const
+    {
+        num_type coeff = 0;
+        const auto & nodes = m_network.m_nodes;
+        for(const auto & r : nodes[nIndex].rs)
             coeff += r;
-        coeff += m_nodes[index].htc;
+        coeff += nodes[nIndex].htc;
         return coeff;
     }
 
-    double GetCoeff(size_t row, size_t col) const
+    num_type GetCoeffInternal(size_t nRow, size_t nCol) const
     {
-        const auto & ns = m_nodes[row].ns;
+        const auto & nodes = m_network.m_nodes;
+        const auto & ns = nodes[nRow].ns;
         for(size_t i = 0; i < ns.size(); ++i){
-            if(ns[i] == col) return -(m_nodes[row].rs[i]);
+            if(ns[i] == nCol) return -(nodes[nRow].rs[i]);
         }
         return 0;
     }
 
-    double GetRhs(size_t node, const double & refT) const
+    num_type GetRhsInternal(size_t nIndex, const num_type & refT) const
     {
-        return m_nodes[node].hf + m_nodes[node].htc * refT;
+        const auto & nodes = m_network.m_nodes;
+        num_type rhs = nodes[nIndex].hf + nodes[nIndex].htc * refT;
+        const auto & ns = nodes[nIndex].ns;
+        for(auto n : ns) {
+            if(nodes[n].t != ThermalNetwork<num_type>::unknownT)
+                rhs -= GetCoeffInternal(nIndex, n) * nodes[n].t;
+        }
+        return rhs;
     }
 
-    void GetCoeffsBFS(std::list<Edge> & edges) const
+    void GetCoeffsBFS(size_t mIndex, std::vector<bool> & mark, std::list<Edge> & edges) const
     {
-        edges.clear();
-        auto size = m_nodes.size();
-        auto mark = std::unique_ptr<std::vector<bool> >(new std::vector<bool>(size, false));
-        GetCoeffsBFS(0, *mark, edges);
-    }
-
-    void GetCoeffsBFS(size_t node, std::vector<bool> & mark, std::list<Edge> & edges) const
-    {
+        const auto & nodes = m_network.m_nodes;
         auto queue = std::unique_ptr<std::queue<size_t> >(new std::queue<size_t>{});
-        mark[node] = true;
-        queue->push(node);
+        mark[mIndex] = true;
+        queue->push(mIndex);
         while(!(queue->empty())){
-            size_t v = queue->front();
+            auto mv = queue->front();
+            auto nv = m_mnMap.at(mv);
             queue->pop();
-            const auto & ns = m_nodes[v].ns;
-            const auto & rs = m_nodes[v].rs;
+            const auto & ns = nodes[nv].ns;
+            const auto & rs = nodes[nv].rs;
             for(size_t i = 0; i < ns.size(); ++i){
-                edges.push_back(Edge{v, ns[i], -rs[i]});
-                if(!mark[ns[i]]){
-                    mark[ns[i]] = true;
-                    queue->push(ns[i]);
+                auto nw = ns[i];
+                if(nodes[nw].t != ThermalNetwork<num_type>::unknownT) continue;
+                auto mw = m_nmMap.at(ns[i]);
+                edges.push_back(Edge{mv, mw, -rs[i]});
+                if(!mark[mw]){
+                    mark[mw] = true;
+                    queue->push(mw);
                 }
             }
         }
     }
-    
-    void GetDiagCoeffsMT(std::vector<double> & diagCoeffs) const
-    {
-        size_t size = m_nodes.size();
-        diagCoeffs.resize(size);
-
-        generic::thread::ThreadPool pool;
-        size_t blocks = pool.Threads();
-        if(0 == blocks) blocks = 1;
-        size_t blockSize = size / blocks;
-
-        size_t begin = 0, end = 0;
-        for(size_t i = 0; i < blocks && blockSize > 0; ++i){
-            end = begin + blockSize;
-            pool.Submit(std::bind(&ThermalNetwork::GetDiagCoeffs, this, std::ref(diagCoeffs), begin, end));
-            begin = end;
-        }
-        end = size;
-        if(begin != end)
-            pool.Submit(std::bind(&ThermalNetwork::GetDiagCoeffs, this, std::ref(diagCoeffs), begin, end));
-        
-        pool.Wait();
-    }
-
-    void GetDiagCoeffs(std::vector<double> & diagCoeffs, size_t begin, size_t end) const
-    {
-        for(size_t i = begin; i < end; ++i)
-            diagCoeffs[i] = GetDiagCoeff(i);
-    }
 
 private:
-    std::vector<Node> m_nodes;
+    std::unordered_map<size_t, size_t> m_mnMap;//matrix index->node index;
+    std::unordered_map<size_t, size_t> m_nmMap;//node index->matrix index;
+    const ThermalNetwork<num_type> & m_network;
 };
+
 
 }//namespace model
 }//namespace thermal

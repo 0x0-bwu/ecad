@@ -19,30 +19,39 @@
 namespace thermal {
 namespace solver {
 
-using namespace thermal::model;
+using namespace model;
+
+template <typename num_type> 
 class ThermalNetworkSolver
 {
 public:
-    explicit ThermalNetworkSolver(const ThermalNetwork & network)
+    explicit ThermalNetworkSolver(const ThermalNetwork<num_type> & network)
      : m_network(network){}
 
     virtual ~ThermalNetworkSolver() = default;
 
 #ifdef MFSOLVER_SUPPORT
-    std::vector<double> Solve(double refT) const
+    std::vector<num_type> Solve(num_type refT) const
     {
-        size_t size = m_network.Size();
-        auto diagCoeffs = std::unique_ptr<std::vector<double> >(new std::vector<double>{}) ;
-        auto edges = std::unique_ptr<std::list<ThermalNetwork::Edge> >(new std::list<ThermalNetwork::Edge>{});
+    
+        ThermalNetworkMatrixBuilder<num_type> builder(m_network);
+        auto diagCoeffs = std::unique_ptr<std::vector<num_type> >(new std::vector<num_type>{}) ;
+        auto edges = std::unique_ptr<std::list<ThermalNetwork<num_type>::Edge> >(new std::list<ThermalNetwork<num_type>::Edge>{});
+        auto size = builder.GetMatrixSize();
 
         {
             std::cout << "get coeffs" << std::endl;
             generic::tools::ProgressTimer t;
-            m_network.GetCoeffsBFS(*edges);
-            m_network.GetDiagCoeffsMT(*diagCoeffs);
+
+            builder.GetCoeffs(*edges);
+            builder.GetDiagCoeffs(*diagCoeffs);
         }
+
         GENERIC_ASSERT((edges->size() % 2) == 0)
         size_t nZero = diagCoeffs->size() + edges->size() / 2;
+
+        const auto & mnMap = builder.GetMatrixNodeIndicesMap();
+        const auto & nmMap = builder.GetNodeMatrixIndicesMap();
 
         mfs_options myOptions;
         // myOptions.SetReduceMatrix(2);//specifyareductiontype2.
@@ -66,9 +75,9 @@ public:
         size_t count;
         for(size_t i = 0; i < size; ++i){
             count = 1;
-            const auto & ns = m_network.NS(i);
+            const auto & ns = m_network.NS(mnMap.at(i));
             for(const auto & n : ns){
-                if(n < i) count++;
+                if(nmMap.at(n) < i) count++;
             }
             IA[i + 1] = IA[i] + count;
         }
@@ -80,13 +89,14 @@ public:
         JA = (int *) malloc ( NzA * sizeof (int));
         for(size_t i = 0; i < size; ++i){
             JA[jaIndex++] = i;
-            AA[aaIndex++] = m_network.GetDiagCoeff(i);
-            const auto & ns = m_network.NS(i);
+            AA[aaIndex++] = builder.GetDiagCoeff(i);
+            const auto & ns = m_network.NS(mnMap.at(i));
             // std::sort(ns.begin(), ns.end(), std::less<size_t>());
             for(const auto & n : ns){
-                if(n < i){
-                    JA[jaIndex++] = n;
-                    AA[aaIndex++] = m_network.GetCoeff(n, i);
+                auto j = nmMap.at(n);
+                if(j < i){
+                    JA[jaIndex++] = j;
+                    AA[aaIndex++] = builder.GetCoeff(j, i);
                 }
             }
         }
@@ -102,7 +112,7 @@ public:
         //int numRhs=1;
         double*b=(double*)malloc(dimb * Nrhs * sizeof(double));
         for(size_t i = 0; i < size; ++i){
-            b[i] = m_network.GetRhs(i, refT);
+            b[i] = builder.GetRhs(i, refT);
         }
         //6.2.Initializeb-rhstodesiredvalue.
         //6.3.Pre-initializeFBS.
@@ -110,30 +120,38 @@ public:
         //6.4.DoFBS.
         //error=mf.FindSolutions(dimA,IA,JA,AA,Nrhs,(void**)&b);
         error=mf.FindSolutions(dimA,nullptr,nullptr,nullptr,Nrhs,(void**)&b);
-        std::vector<double> results(dimb);
-        for(size_t i = 0; i < dimb; ++i) results[i] = b[i];
+        
+        const auto & nodes = network.GetNodes();
+        std::vector<num_type> results(network.Size());
+        for(size_t i = 0; i < dimb; ++i) results[mnMap.at(i)] = b[i];
+        for(size_t i = 0; i < network.Size(); ++i) {
+            if(!nmMap.count(i)) results[i] = nodes[i].t;
+        }
         return results;
     }
 #else
-    std::vector<double> Solve(double refT) const
+    std::vector<num_type> Solve(num_type refT) const
     {
-        size_t size = m_network.Size();
+
+        ThermalNetworkMatrixBuilder<num_type> builder(m_network);
+        size_t size = builder.GetMatrixSize();
+        const auto & mnMap = builder.GetMatrixNodeIndicesMap();
+        const auto & nmMap = builder.GetNodeMatrixIndicesMap();
+
         Eigen::SparseMatrix<double> spMat(size, size);
         {
             std::cout << "build matrix" << std::endl;
             generic::tools::ProgressTimer t;
 
             spMat.reserve(Eigen::VectorXi::Constant(size, 10));
-            double coeff = 0;
-
-            auto diagCoeffs = std::unique_ptr<std::vector<double> >(new std::vector<double>{}) ;
-            auto edges = std::unique_ptr<std::list<ThermalNetwork::Edge> >(new std::list<ThermalNetwork::Edge>{});
+            auto diagCoeffs = std::unique_ptr<std::vector<num_type> >(new std::vector<num_type>{}) ;
+            auto edges = std::unique_ptr<std::list<typename ThermalNetwork<num_type>::Edge> >(new std::list<typename ThermalNetwork<num_type>::Edge>{});
 
             {
                 std::cout << "get coeffs" << std::endl;
                 generic::tools::ProgressTimer t;
-                m_network.GetCoeffsBFS(*edges);
-                m_network.GetDiagCoeffsMT(*diagCoeffs);
+                builder.GetCoeffs(*edges);
+                builder.GetDiagCoeffs(*diagCoeffs);
             }
 
             {
@@ -156,7 +174,7 @@ public:
             std::cout << "build rhs" << std::endl;
             generic::tools::ProgressTimer t;
             for(size_t i = 0; i < size; ++i){
-                b[i] = m_network.GetRhs(i, refT);
+                b[i] = builder.GetRhs(i, refT);
             }
         }
 
@@ -192,13 +210,17 @@ public:
             }
         }
 
-        std::vector<double> results(size);
-        for(size_t i = 0; i < size; ++i) results[i] = x[i];
+        const auto & nodes = m_network.GetNodes();
+        std::vector<num_type> results(m_network.Size());
+        for(size_t i = 0; i < size; ++i) results[mnMap.at(i)] = x[i];
+        for(size_t i = 0; i < m_network.Size(); ++i) {
+            if(!nmMap.count(i)) results[i] = nodes[i].t;
+        }
         return results;
     }
 #endif//MFSOLVER_SUPPORT
 private:
-    const ThermalNetwork & m_network;
+    const ThermalNetwork<num_type> & m_network;
 };
 
 }//namespace solver

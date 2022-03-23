@@ -18,7 +18,6 @@ ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetwor
 ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("generate thermal network")
-
     std::string currentPath = generic::filesystem::CurrentPath();
 
     EMetalFractionMappingSettings settings;
@@ -56,7 +55,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
 
     m_modelSize = {nx + 1, ny + 1, nz + 1};
     size_t size = m_modelSize.x * m_modelSize.y * m_modelSize.z;
-    m_network.reset(new ThermalNetwork(size));
+    m_network.reset(new ThermalNetwork<float_t>(size));
 
     double kCu = 400;//W/k.m
     double kFr4 = 0.294;//W/k.m
@@ -216,8 +215,8 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     }
 
     ECAD_EFFICIENCY_TRACK("thermal network solve")
-    thermal::solver::ThermalNetworkSolver solver(*m_network);
-    auto results = solver.Solve(20);
+    thermal::solver::ThermalNetworkSolver<float_t> solver(*m_network);
+    auto results = solver.Solve(20.0);
 
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
     for(size_t i = 0; i < m_modelSize.z; ++i)
@@ -250,7 +249,8 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
                 int r, g, b, a = 255;
                 generic::color::RGBFromScalar((d - min) / range, r, g, b);
                 return std::make_tuple(r, g, b, a);
-            };   
+            };
+            std::cout << "layer: " << index + 1 << ", min: " << min << ", max: " << max << std::endl;   
             std::string filepng = m_settings.outDir + GENERIC_FOLDER_SEPS + std::to_string(index) + ".png";
             lyr->WriteImgProfile(filepng, rgbaFunc);
         }

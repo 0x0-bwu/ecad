@@ -10,6 +10,8 @@ namespace esim {
 using namespace thermal::model;
 class ECAD_API EThermalNetworkExtraction
 {
+    using float_t = double;
+
     struct ModelIndex
     {
         size_t x = invalidIndex;
@@ -35,7 +37,7 @@ private:
     
 private:
     ModelIndex m_modelSize;
-    UPtr<ThermalNetwork> m_network;
+    UPtr<ThermalNetwork<float_t> > m_network;
     EThermalNetworkExtractionSettings m_settings;
 };
 
