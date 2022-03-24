@@ -8,6 +8,58 @@
 
 namespace ecad {
 
+struct ESize2D
+{
+    size_t x = 0, y = 0;
+    ESize2D(size_t x, size_t y) : x(x), y(y) {}
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void save(Archive & ar, const unsigned int version) const
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("x", x);
+        ar & boost::serialization::make_nvp("y", y);
+    }
+
+    template <typename Archive>
+    void load(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("x", x);
+        ar & boost::serialization::make_nvp("y", y);
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+};
+
+struct ESize3D
+{
+    size_t x = 0, y = 0, z = 0;
+    ESize3D(size_t x, size_t y, size_t z) : x(x), y(y), z(z) {}
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void save(Archive & ar, const unsigned int version) const
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("x", x);
+        ar & boost::serialization::make_nvp("y", y);
+        ar & boost::serialization::make_nvp("z", z);
+    }
+
+    template <typename Archive>
+    void load(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("x", x);
+        ar & boost::serialization::make_nvp("y", y);
+        ar & boost::serialization::make_nvp("z", z);
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+};
+
 class ECoordUnits
 {
     EValue unit = 1e-3;
