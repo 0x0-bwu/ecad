@@ -9,7 +9,124 @@
 namespace ecad {
 namespace esim {
 
+using namespace emodel;
 using namespace eutils;
+
+ECAD_INLINE EGridThermalNetworkBuilder::EGridThermalNetworkBuilder(const EGridThermalModel & model)
+ : m_model(model), m_size(model.ModelSize())
+{
+}
+
+ECAD_INLINE EGridThermalNetworkBuilder::~EGridThermalNetworkBuilder()
+{
+}
+
+ECAD_INLINE UPtr<ThermalNetwork<EThermalNetworkNumType> > EGridThermalNetworkBuilder::Build(const std::vector<float_t> & iniT)
+{
+    const size_t size = m_model.TotalGrids(); 
+    if(iniT.size() != size) return nullptr;
+
+    auto network = std::make_unique<ThermalNetwork<float_t> >(size);
+
+    //power
+    bool success;
+    const auto & layers = m_model.GetLayers();
+    for(size_t z = 0; z < layers.size(); ++z) {
+        const auto & layer = layers.at(z);
+        auto pwrModel = layer.GetPowerModel();
+        if(nullptr == pwrModel) continue;
+        for(size_t x = 0; x < m_size.x; ++x) {
+            for(size_t y = 0; y < m_size.y; ++y) {
+                ESize3D gridIndex {x, y, z};
+                auto index = GetFlattenIndex(gridIndex);
+                auto pwr = pwrModel->Query(iniT.at(index), x, y, &success);
+                if(success) network->SetHF(index, pwr);
+            }
+        }
+    }
+
+    //r
+    for(size_t index = 0; index < size; ++index) {
+        auto gridIndex = GetGridIndex(index);
+        auto topNb = GetNeighbor(gridIndex, Orientation::Top);
+        if(isValid(topNb)){
+            auto topIndex = GetFlattenIndex(topNb);
+
+        }
+    }
+    return nullptr;//wbtest
+}
+
+ECAD_INLINE std::array<EThermalNetworkNumType, 3> EGridThermalNetworkBuilder::GetConductingMatK(size_t layer, float_t refT) const
+{
+    //todo
+    return std::array<float_t, 3>{400, 400, 400};
+}
+
+ECAD_INLINE std::array<EThermalNetworkNumType, 3> EGridThermalNetworkBuilder::GetDielectircMatK(size_t layer, float_t refT) const
+{
+    //todo
+    return std::array<float_t, 3>{0.294, 0.294, 0.294};
+}
+
+ECAD_INLINE ESize3D EGridThermalNetworkBuilder::GetNeighbor(size_t index, Orientation o) const
+{
+    return GetNeighbor(GetGridIndex(index), o);
+}
+
+ECAD_INLINE ESize3D EGridThermalNetworkBuilder::GetNeighbor(ESize3D index, Orientation o) const
+{
+    switch(o) {
+        case Orientation::Top : {
+            if(index.z == 0)
+                index.z = invalidIndex;
+            else index.z += 1;
+            break;
+        }
+        case Orientation::Bot : {
+            if(index.z == (m_size.z - 1))
+                index.z = invalidIndex;
+            else index.z -= 1;
+            break;
+        }
+        case Orientation::Left : {
+            if(index.x == 0)
+                index.x = invalidIndex;
+            else index.x -= 1;
+            break;
+        }
+        case Orientation::Right : {
+            if(index.x == (m_size.x - 1))
+                index.x = invalidIndex;
+            else index.x += 1;
+            break;
+        }
+        case Orientation::Front : {
+            if(index.y == 0)
+                index.y = invalidIndex;
+            else index.y -= 1;
+            break;
+        }
+        case Orientation::Back : {
+            if(index.y == (m_size.y - 1))
+                index.y = invalidIndex;
+            else index.y += 1;
+            break;
+        }
+    }
+    return index;
+}
+
+ECAD_INLINE size_t EGridThermalNetworkBuilder::GetFlattenNeighbor(size_t index, Orientation o) const
+{
+    return GetFlattenNeighbor(GetGridIndex(index), o);
+}
+
+ECAD_INLINE size_t EGridThermalNetworkBuilder::GetFlattenNeighbor(ESize3D index, Orientation o) const
+{
+    return GetFlattenIndex(GetNeighbor(index, o));
+}
+
 ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetworkExtractionSettings settings)
 {
     m_settings = std::move(settings);

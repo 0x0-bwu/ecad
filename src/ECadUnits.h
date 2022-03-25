@@ -11,7 +11,19 @@ namespace ecad {
 struct ESize2D
 {
     size_t x = 0, y = 0;
+    ESize2D() = default;
     ESize2D(size_t x, size_t y) : x(x), y(y) {}
+
+    bool operator== (const ESize2D & other) const
+    {
+        return x == other.x && y == other.y;
+    }
+
+    bool operator!= (const ESize2D & other) const
+    {
+        return !(*this == other);
+    }
+
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
     template <typename Archive>
@@ -36,7 +48,19 @@ struct ESize2D
 struct ESize3D
 {
     size_t x = 0, y = 0, z = 0;
+    ESize3D() = default;
     ESize3D(size_t x, size_t y, size_t z) : x(x), y(y), z(z) {}
+
+    bool operator== (const ESize3D & other) const
+    {
+        return x == other.x && y == other.y && z == other.z;
+    }
+
+    bool operator!= (const ESize3D & other) const
+    {
+        return !(*this == other);
+    }
+
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
     template <typename Archive>
