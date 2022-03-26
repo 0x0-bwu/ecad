@@ -12,7 +12,7 @@ using namespace eutils;
 using namespace generic::math;
 using namespace generic::geometry;
 
-using EGridDataNumType = float;
+using EGridDataNumType = EMetalFractionNumType;
 using EGridData = OccupancyGridMap<EGridDataNumType>;
 using EGridInterpolator = OccupancyGridMap<Interpolation<EGridDataNumType> >;
 
@@ -57,6 +57,9 @@ public:
 
     bool SetPowerModel(SPtr<EGridPowerModel> pwrModel);
     CPtr<EGridPowerModel> GetPowerModel() const;
+
+    EMetalFractionNumType GetMetalFraction(size_t x, size_t y) const;
+
     ESize2D GetSize() const;
 
 private:
@@ -78,8 +81,8 @@ public:
 
 class ECAD_API EGridThermalModel : public EThermalModel
 {
-    enum class BCType { HTC, HeatFlux, Temperature };
 public:
+    enum class BCType { HTC, HeatFlux, Temperature };
     explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), FCoord elevation = 0);
     virtual ~EGridThermalModel();
 
@@ -93,12 +96,18 @@ public:
 
     bool SetResolution(FCoord x, FCoord y);
     void GetResolution(FCoord & x, FCoord & y) const;
+    const std::array<FCoord, 2> & GetResolution() const;
 
     bool AppendLayer(EGridThermalLayer layer);
     const std::vector<EGridThermalLayer> & GetLayers() const; 
 
+    bool SetPowerModel(size_t layer, SPtr<EGridPowerModel> pwrModel);
+
     bool SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot);
+    void GetTopBotBCModel(SPtr<EGridBCModel> & top, SPtr<EGridBCModel> & bot) const;
+
     void SetTopBotBCType(BCType top, BCType bot);
+    void GetTopBotBCType(BCType & top, BCType & bot) const;
 
 private:
     ESize2D m_size;

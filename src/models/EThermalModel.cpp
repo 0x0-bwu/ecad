@@ -6,6 +6,7 @@
 namespace ecad {
 namespace emodel {
 
+using namespace eutils;
 ECAD_INLINE EGridDataTable::EGridDataTable(const ESize2D & size)
  : m_size(size)
 {
@@ -135,6 +136,11 @@ ECAD_INLINE CPtr<EGridPowerModel> EGridThermalLayer::GetPowerModel() const
     return m_powerModel.get();
 }
 
+ECAD_INLINE EMetalFractionNumType EGridThermalLayer::GetMetalFraction(size_t x, size_t y) const
+{
+    return (*m_metalFraction)(x, y);
+}
+
 ECAD_INLINE ESize2D EGridThermalLayer::GetSize() const
 {
     auto w = m_metalFraction->Width();
@@ -201,6 +207,11 @@ ECAD_INLINE void EGridThermalModel::GetResolution(FCoord & x, FCoord & y) const
     y = m_resolution[1];
 }
 
+ECAD_INLINE const std::array<FCoord, 2> & EGridThermalModel::GetResolution() const
+{
+    return m_resolution;
+}
+
 ECAD_INLINE bool EGridThermalModel::AppendLayer(EGridThermalLayer layer)
 {
     if(math::LT<FCoord>(layer.GetThickness(), 0)) return false;
@@ -214,6 +225,12 @@ ECAD_INLINE const std::vector<EGridThermalLayer> & EGridThermalModel::GetLayers(
     return m_stackupLayers;
 }
 
+ECAD_INLINE bool EGridThermalModel::SetPowerModel(size_t layer, SPtr<EGridPowerModel> pwrModel)
+{
+    if(layer >= m_stackupLayers.size()) return false;
+    return m_stackupLayers.at(layer).SetPowerModel(pwrModel);
+}
+
 ECAD_INLINE bool EGridThermalModel::SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot)
 {
     if(top && top->GetTableSize() != m_size) return false;
@@ -222,10 +239,22 @@ ECAD_INLINE bool EGridThermalModel::SetTopBotBCModel(SPtr<EGridBCModel> top, SPt
     return true;
 }
 
+ECAD_INLINE void EGridThermalModel::GetTopBotBCModel(SPtr<EGridBCModel> & top, SPtr<EGridBCModel> & bot) const
+{
+    top = m_bcTopBot[0];
+    bot = m_bcTopBot[1];
+}
+
 ECAD_INLINE void EGridThermalModel::SetTopBotBCType(BCType top, BCType bot)
 {
     m_bcTypeTopBot[0] = top;
     m_bcTypeTopBot[1] = bot;
+}
+
+ECAD_INLINE void EGridThermalModel::GetTopBotBCType(BCType & top, BCType & bot) const
+{
+    top = m_bcTypeTopBot[0];
+    bot = m_bcTypeTopBot[1];
 }
 
 }//namespace emodel
