@@ -182,16 +182,16 @@ ECAD_INLINE const ESize2D & EGridThermalModel::GridSize() const
     return m_size;
 }
 
-ECAD_INLINE bool EGridThermalModel::SetScale(FCoord scale)
+ECAD_INLINE bool EGridThermalModel::SetScaleH(FCoord scaleH)
 {
-    if(math::LT<FCoord>(scale, 0)) return false;
-    m_scale = scale;
+    if(math::LT<FCoord>(scaleH, 0)) return false;
+    m_scaleH = scaleH;
     return true;
 }
 
-ECAD_INLINE FCoord EGridThermalModel::GetSCale() const
+ECAD_INLINE FCoord EGridThermalModel::GetScaleH() const
 {
-    return m_scale;
+    return m_scaleH;
 }
 
 ECAD_INLINE bool EGridThermalModel::SetResolution(FCoord x, FCoord y)

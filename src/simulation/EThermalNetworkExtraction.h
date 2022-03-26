@@ -54,12 +54,12 @@ private:
 
 ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetXGridLength() const
 {
-    return m_model.GetResolution().at(0);
+    return m_model.GetResolution().at(0) * m_model.GetScaleH();
 }
 
 ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetYGridLength() const
 {
-    return m_model.GetResolution().at(1);
+    return m_model.GetResolution().at(1) * m_model.GetScaleH();
 }
 
 ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetZGridLength(size_t layer) const

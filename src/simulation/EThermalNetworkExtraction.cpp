@@ -72,6 +72,7 @@ ECAD_INLINE UPtr<ThermalNetwork<EThermalNetworkNumType> > EGridThermalNetworkBui
             auto a1 = 1.0 / z1, a2 = 1.0 / z2;
             auto kz = (a1 * k1[2] + a2 * k2[2]) / (a1 + a2);
             auto r = kz * GetZGridArea() / (0.5 * z1 + 0.5 * z2);
+            network->SetR(index1, index2, r);
         }
     }
 
@@ -165,13 +166,13 @@ ECAD_INLINE ESize3D EGridThermalNetworkBuilder::GetNeighbor(ESize3D index, Orien
         case Orientation::Top : {
             if(index.z == 0)
                 index.z = invalidIndex;
-            else index.z += 1;
+            else index.z -= 1;
             break;
         }
         case Orientation::Bot : {
             if(index.z == (m_size.z - 1))
                 index.z = invalidIndex;
-            else index.z -= 1;
+            else index.z += 1;
             break;
         }
         case Orientation::Left : {
@@ -242,14 +243,19 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         WriteThermalProfile(*mfInfo, *mf, densityFile);
     }
 
+    const auto & coordUnits = layout->GetCoordUnits();
+
     auto [nx, ny] = mfInfo->grid;
     EGridThermalModel model(ESize2D(nx, ny));
+
+    auto rx = coordUnits.toUnit(mfInfo->stride[0], ECoordUnits::Unit::Meter);
+    auto ry = coordUnits.toUnit(mfInfo->stride[1], ECoordUnits::Unit::Meter);
+    model.SetResolution(rx, ry);
 
     std::vector<Ptr<ILayer> > layers;
     layout->GetStackupLayers(layers);
     GENERIC_ASSERT(layers.size() == mf->size());
 
-    const auto & coordUnits = layout->GetCoordUnits();
     for(size_t i = 0; i < layers.size(); ++i) {
         auto name = layers.at(i)->GetName();
         auto stackupLayer = layers.at(i)->GetStackupLayerFromLayer();

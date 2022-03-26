@@ -91,8 +91,8 @@ public:
     ESize3D ModelSize() const;
     const ESize2D & GridSize() const;
 
-    bool SetScale(FCoord scale);
-    FCoord GetSCale() const;
+    bool SetScaleH(FCoord scaleH);
+    FCoord GetScaleH() const;
 
     bool SetResolution(FCoord x, FCoord y);
     void GetResolution(FCoord & x, FCoord & y) const;
@@ -113,7 +113,7 @@ private:
     ESize2D m_size;
     FPoint2D m_ref;
     FCoord m_elevation;
-    FCoord m_scale = 1.0;//only apply for horizontal
+    FCoord m_scaleH = 1.0;//only apply for horizontal
     std::array<FCoord, 2> m_resolution = {0, 0};//unit: m
     std::vector<EGridThermalLayer> m_stackupLayers;
     std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
