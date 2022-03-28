@@ -46,5 +46,11 @@ struct EThermalNetworkExtractionSettings
     bool mergeGeomBeforeMetalMapping = true;
 };
 
+struct EThermalNetworkSolveSettings
+{
+    size_t iteration = 10;
+    EValue residual = 0.1;
+};
+
 }//namespace ecad
 #endif//ECAD_ECADSETTINGS_H

@@ -12,7 +12,7 @@ using namespace eutils;
 using namespace generic::math;
 using namespace generic::geometry;
 
-using EGridDataNumType = EMetalFractionNumType;
+using EGridDataNumType = ESimVal;
 using EGridData = OccupancyGridMap<EGridDataNumType>;
 using EGridInterpolator = OccupancyGridMap<Interpolation<EGridDataNumType> >;
 
@@ -58,7 +58,7 @@ public:
     bool SetPowerModel(SPtr<EGridPowerModel> pwrModel);
     CPtr<EGridPowerModel> GetPowerModel() const;
 
-    EMetalFractionNumType GetMetalFraction(size_t x, size_t y) const;
+    ESimVal GetMetalFraction(size_t x, size_t y) const;
 
     ESize2D GetSize() const;
 
@@ -109,6 +109,9 @@ public:
     void SetTopBotBCType(BCType top, BCType bot);
     void GetTopBotBCType(BCType & top, BCType & bot) const;
 
+    size_t GetFlattenIndex(const ESize3D & index) const;
+    ESize3D GetGridIndex(size_t index) const;
+
 private:
     ESize2D m_size;
     FPoint2D m_ref;
@@ -119,6 +122,22 @@ private:
     std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
     std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
 };
+
+ECAD_ALWAYS_INLINE size_t EGridThermalModel::GetFlattenIndex(const ESize3D & index) const
+{
+    return m_size.x * m_size.y * index.z + m_size.y * index.x + index.y;
+}
+
+ECAD_ALWAYS_INLINE ESize3D EGridThermalModel::GetGridIndex(size_t index) const
+{
+    ESize3D gridIndex;
+    size_t tmp = m_size.x * m_size.y;
+    gridIndex.z = index / tmp;
+    tmp = index % tmp;
+    gridIndex.y = tmp % m_size.y;
+    gridIndex.x = tmp / m_size.y;
+    return gridIndex;
+}
 
 }//namesapce emodel
 }//namespace ecad

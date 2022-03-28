@@ -136,7 +136,7 @@ ECAD_INLINE CPtr<EGridPowerModel> EGridThermalLayer::GetPowerModel() const
     return m_powerModel.get();
 }
 
-ECAD_INLINE EMetalFractionNumType EGridThermalLayer::GetMetalFraction(size_t x, size_t y) const
+ECAD_INLINE ESimVal EGridThermalLayer::GetMetalFraction(size_t x, size_t y) const
 {
     return (*m_metalFraction)(x, y);
 }

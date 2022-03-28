@@ -36,7 +36,7 @@ void t_thermal_network_extraction()
 #endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
     settings.dumpDensityFile = true;
     settings.dumpTemperatureFile = true;
-    settings.grid = {50, 50};
+    settings.grid = {25, 25};
     settings.mergeGeomBeforeMetalMapping = true;
 
     esim::EThermalNetworkExtraction ne;

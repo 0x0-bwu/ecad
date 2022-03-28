@@ -23,6 +23,7 @@ using UPtr = std::unique_ptr<T, Deleter>;
 using ECoord = int64_t;
 using FCoord = double;
 using EValue = double;
+using ESimVal = float;
 
 using EPoint2D = generic::geometry::Point2D<ECoord>;
 using FPoint2D = generic::geometry::Point2D<FCoord>;
