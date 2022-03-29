@@ -1,12 +1,11 @@
 #ifndef ECAD_ESOLVER_ETHERMALNETWORKBUILDER_HPP
 #define ECAD_ESOLVER_ETHERMALNETWORKBUILDER_HPP
+#include "models/thermal/EGridThermalModel.h"
 #include "thermal/model/ThermalNetwork.hpp"
-#include "models/EThermalModel.h"
-#include "ECadCommon.h"
 namespace ecad {
 namespace esolver {
 
-using namespace emodel;
+using namespace emodel::etherm;
 using namespace thermal::model;
 class ECAD_API EGridThermalNetworkBuilder
 {

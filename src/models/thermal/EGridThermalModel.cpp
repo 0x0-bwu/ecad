@@ -1,10 +1,11 @@
 #ifndef ECAD_HEADER_ONLY
-#include "models/EThermalModel.h"
+#include "models/thermal/EGridThermalModel.h"
 #endif
 
 #include "interfaces/IMaterialDef.h"
 namespace ecad {
 namespace emodel {
+namespace etherm {
 
 using namespace eutils;
 ECAD_INLINE EGridDataTable::EGridDataTable(const ESize2D & size)
@@ -26,7 +27,7 @@ ECAD_INLINE const ESize2D & EGridDataTable::GetTableSize() const
     return m_size;
 }
 
-ECAD_INLINE bool EGridDataTable::AddSample(EGridDataNumType key, EGridData data)
+ECAD_INLINE bool EGridDataTable::AddSample(ESimVal key, EGridData data)
 {
     if(data.Width() != m_size.x || data.Height() != m_size.y) return false;
 
@@ -35,16 +36,16 @@ ECAD_INLINE bool EGridDataTable::AddSample(EGridDataNumType key, EGridData data)
     return true;
 }
 
-ECAD_INLINE EGridDataNumType EGridDataTable::Query(EGridDataNumType key, size_t x, size_t y, bool * success) const
+ECAD_INLINE ESimVal EGridDataTable::Query(ESimVal key, size_t x, size_t y, bool * success) const
 {
     if(success) *success = true;
     if(x >= m_size.x || y >= m_size.y) {
         if(success) *success = false;
-        return EGridDataNumType(0);
+        return 0;
     }
     else if(m_dataTable.empty()) {
         if(success) *success = false;
-        return EGridDataNumType(0);
+        return 0;
     }
     else if(m_dataTable.size() == 1) {
         return (m_dataTable.cbegin()->second)(x, y);
@@ -60,7 +61,7 @@ ECAD_INLINE void EGridDataTable::BuildInterpolater() const
     if(m_interpolator) return;
     m_interpolator.reset(new EGridInterpolator(m_size.x, m_size.y));
 
-    std::vector<EGridDataNumType> x, y;
+    std::vector<ESimVal> x, y;
     x.reserve(GetSampleSize());
     for(const auto & data : m_dataTable)
         x.push_back(data.first);
@@ -146,10 +147,6 @@ ECAD_INLINE ESize2D EGridThermalLayer::GetSize() const
     auto w = m_metalFraction->Width();
     auto h = m_metalFraction->Height();
     return ESize2D{w, h};
-}
-
-ECAD_INLINE EThermalModel::~EThermalModel()
-{
 }
 
 ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPoint2D & ref, FCoord elevation)
@@ -257,5 +254,6 @@ ECAD_INLINE void EGridThermalModel::GetTopBotBCType(BCType & top, BCType & bot) 
     bot = m_bcTypeTopBot[1];
 }
 
+}//namespace etherm
 }//namespace emodel
 }//namespace ecad

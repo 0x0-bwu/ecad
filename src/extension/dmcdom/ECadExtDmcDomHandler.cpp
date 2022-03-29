@@ -3,6 +3,7 @@
 #endif
 
 #include "generic/geometry/Utility.hpp"
+#include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Parser.hpp"
 #include "generic/tools/Format.hpp"
@@ -18,7 +19,7 @@ namespace ext {
 
 namespace dmcdom {
 
-namespace psr = generic::parser;
+using namespace generic;
 namespace fmt = generic::format;
 namespace phx = boost::phoenix;
 namespace qi = boost::spirit::qi;
@@ -48,7 +49,7 @@ ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & 
     {
         if(viaLayer.size() < 1) return false;
         if(viaLayer.size() == 1) { lyr1 = lyr2 = -1; return true; }
-        auto res = psr::Split(viaLayer.substr(1), '-');
+        auto res = str::Split(viaLayer.substr(1), "-");
         if(res.size() != 2) return false;
         lyr1 = std::stoi(res[0]);
         lyr2 = std::stoi(res[1]);

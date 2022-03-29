@@ -76,7 +76,7 @@ ECAD_INLINE bool EGdsLayerMapParser::ParseOneLine(const std::string & line, EGds
     using namespace generic::parser;
 
     //name m/v layertype datatype thickness
-    auto split = Split(line, char(32));
+    auto split = Split(line, std::string(1, char(32)));
     if(split.size() != 5) return false;
     
     auto name = split[0];

@@ -1,20 +1,20 @@
-#ifndef ECAD_EMODEL_ETHERMALMODEL_HPP
-#define ECAD_EMODEL_ETHERMALMODEL_HPP
+#ifndef ECAD_EMODEL_ETHERM_EGRIDTHERMALMODEL_HPP
+#define ECAD_EMODEL_ETHERM_EGRIDTHERMALMODEL_HPP
 #include "utilities/EMetalFractionMapping.h"
 #include "generic/math/Interpolation.hpp"
-#include "ECadCommon.h"
+#include "EThermalModel.h"
 namespace ecad {
 
 class IMaterialDef;
 namespace emodel {
+namespace etherm {
 
 using namespace eutils;
 using namespace generic::math;
 using namespace generic::geometry;
 
-using EGridDataNumType = ESimVal;
-using EGridData = OccupancyGridMap<EGridDataNumType>;
-using EGridInterpolator = OccupancyGridMap<Interpolation<EGridDataNumType> >;
+using EGridData = OccupancyGridMap<ESimVal>;
+using EGridInterpolator = OccupancyGridMap<Interpolation<ESimVal> >;
 
 class ECAD_API EGridDataTable
 {
@@ -25,8 +25,8 @@ public:
     size_t GetSampleSize() const;
     const ESize2D & GetTableSize() const;
 
-    bool AddSample(EGridDataNumType key, EGridData data);
-    EGridDataNumType Query(EGridDataNumType key, size_t x, size_t y, bool * success = nullptr) const;
+    bool AddSample(ESimVal key, EGridData data);
+    ESimVal Query(ESimVal key, size_t x, size_t y, bool * success = nullptr) const;
 
 private:
     void BuildInterpolater() const;
@@ -34,12 +34,13 @@ private:
 
 private:
     ESize2D m_size;
-    std::map<EGridDataNumType, EGridData> m_dataTable;//<key, table>
+    std::map<ESimVal, EGridData> m_dataTable;//<key, table>
     mutable UPtr<EGridInterpolator> m_interpolator = nullptr;
 };
 
 using EGridBCModel = EGridDataTable;
 using EGridPowerModel = EGridDataTable;
+
 class ECAD_API EGridThermalLayer
 {
 public:
@@ -71,12 +72,6 @@ private:
     CPtr<IMaterialDef> m_dielectricMat = nullptr;
     SPtr<EGridPowerModel> m_powerModel = nullptr;
     SPtr<ELayerMetalFraction> m_metalFraction = nullptr;
-};
-
-class ECAD_API EThermalModel
-{
-public:
-    virtual ~EThermalModel();
 };
 
 class ECAD_API EGridThermalModel : public EThermalModel
@@ -139,11 +134,12 @@ ECAD_ALWAYS_INLINE ESize3D EGridThermalModel::GetGridIndex(size_t index) const
     return gridIndex;
 }
 
+}//namespace etherm
 }//namesapce emodel
 }//namespace ecad
 
 #ifdef ECAD_HEADER_ONLY
-#include "EThermalModel.cpp"
+#include "EGridThermalModel.cpp"
 #endif
 
-#endif//ECAD_EMODEL_ETHERMALMODEL_HPP
+#endif//ECAD_EMODEL_ETHERM_EGRIDTHERMALMODEL_HPP

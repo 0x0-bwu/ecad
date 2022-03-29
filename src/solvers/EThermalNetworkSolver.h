@@ -1,12 +1,12 @@
 #ifndef ECAD_ESOLVER_ETHERMALNETWORKSOLVER_HPP
 #define ECAD_ESOLVER_ETHERMALNETWORKSOLVER_HPP
-#include "models/EThermalModel.h"
+#include "models/thermal/EGridThermalModel.h"
 #include "ECadSettings.h"
 #include "ECadCommon.h"
 namespace ecad {
 namespace esolver {
 using namespace emodel;
-
+using namespace emodel::etherm;
 ECAD_API ESimVal CalculateResidual(const std::vector<ESimVal> & v1, const std::vector<ESimVal> & v2);
 
 class ECAD_API EThermalNetworkSolver

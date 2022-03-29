@@ -3,6 +3,7 @@
 #include "EXflObjects.h"
 #include "ECadAlias.h"
 #include "generic/tools/StringHelper.hpp"
+#include "generic/tools/Parser.hpp"
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/phoenix_bind.hpp>
 #include <boost/spirit/include/qi_no_case.hpp>
@@ -52,73 +53,11 @@ namespace ext {
 namespace xfl {
 
 using namespace generic;
+using namespace generic::parser;
 namespace qi = boost::spirit::qi;
 namespace phx = boost::phoenix;
 namespace spirit = boost::spirit;
 namespace ascii = boost::spirit::ascii;
-
-///@brief print line number and line content if error is met 
-template <typename Iterator>
-struct ErrorHandler
-{
-	template <typename, typename, typename>
-	struct result { using type = void; };
-
-	ErrorHandler(Iterator first, Iterator last, std::ostream & os = std::cout)
-	  : first(first), last(last), os(os) {}
-
-	template <typename Message, typename What>
-	void operator() (const Message & message, const What & what, Iterator errPos) const
-	{
-		int line;
-		Iterator lineStart = GetPos(errPos, line);
-		if (errPos != last) {
-			os << message << what << " line " << line << ':' << std::endl;
-			os << GetLine(lineStart) << std::endl;
-			for (; lineStart != errPos; ++lineStart)
-				os << ' ';
-			os << '^' << std::endl;
-		}
-		else {
-			os << "Unexpected end of file. ";
-			os << message << what << " line " << line << std::endl;
-		}
-	}
-
-	Iterator GetPos(Iterator errPos, int & line) const
-	{
-		line = 1;
-		Iterator i = first;
-		Iterator lineStart = first;
-		while (i != errPos) {
-			bool eol = false;
-			if (i != errPos && *i == '\r') {// CR
-				eol = true;
-				lineStart = ++i;
-			}
-			if (i != errPos && *i == '\n') {// LF
-				eol = true;
-				lineStart = ++i;
-			}
-			if (eol) ++line;
-			else ++i;
-		}
-		return lineStart;
-	}
-
-	std::string GetLine(Iterator errPos) const
-	{
-		Iterator i = errPos;
-		// position i to the next EOL
-		while (i != last && (*i != '\r' && *i != '\n')) { ++i; }
-		return std::string(errPos, i);
-	}
-
-	Iterator first;
-	Iterator last;
-	std::vector<Iterator> iters;
-    std::ostream & os;
-};
 
 struct EXflReader
 {
