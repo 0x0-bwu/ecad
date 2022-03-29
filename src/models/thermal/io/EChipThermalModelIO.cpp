@@ -25,10 +25,59 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
 
     auto model = std::make_unique<EChipThermalModelV1>();
 
+    //header
     auto headerFile = dir + GENERIC_FOLDER_SEPS + "CTM_header.txt";
     if(!ParseCTMv1HeaderFile(headerFile, model->header, err)) return nullptr;
-    return nullptr;//wbtest
+    
+    //power
+    auto tiles = model->header.tiles;
+    model->powers = std::make_unique<EGridPowerModel>(tiles);
+    for(size_t i = 0; i < model->header.temperatures.size(); ++i) {
+        auto temperature = model->header.temperatures.at(i);
+        auto powerFile = dir + GENERIC_FOLDER_SEPS + Format2String("power_T[%1%].ctm", i + 1);
+        EGridData powers(tiles.x, tiles.y);
+        if(!ParseCTMv1PowerFile(powerFile, powers, err)) return nullptr;
+        model->powers->AddSample(temperature, std::move(powers));
+    }
+
+    //density
+    std::vector<UPtr<EGridData> > density;
+    for(size_t i = 0; i < model->header.layers.size(); ++i)
+        density.push_back(std::make_unique<EGridData>(tiles.x, tiles.y));
+    auto densityFile = dir + GENERIC_FOLDER_SEPS + "metal_density.ctm";
+    if(!ParseCTMv1DensityFile(densityFile, tiles.x * tiles.y, density, err)) return nullptr;
+    for(size_t i = 0; i < model->header.layers.size(); ++i)
+        model->densities.insert(std::make_pair(model->header.layers[i].name, std::move(density[i])));
+
+    return model;
 }
+
+#ifdef BOOST_GIL_IO_PNG_SUPPORT
+ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, const std::string & dirName, std::string * err)
+{
+    using namespace detail;
+    if(!PathExists(dirName)) MakeDir(dirName);
+
+    //power
+    if(model.powers) {
+        size_t size = std::min(model.header.temperatures.size(), model.powers->GetSampleSize());
+        for(size_t i = 0; i < size; ++i) {
+            auto t = model.header.temperatures.at(i);
+            auto table = model.powers->GetTable(t);
+            if(nullptr == table) continue;
+            std::string filename = dirName + GENERIC_FOLDER_SEPS + "power_" + std::to_string(t) + "c.png";
+            if(!GenerateImageProfile(filename, *table)) continue;
+        }
+    }
+    //density
+    for(const auto & density : model.densities) {
+        if(nullptr == density.second) continue;
+        std::string filename = dirName + GENERIC_FOLDER_SEPS + "layer_" + density.first + ".png";
+        if(!GenerateImageProfile(filename, *(density.second))) continue;
+    }
+    return true;
+}
+#endif//BOOST_GIL_IO_PNG_SUPPORT
 
 namespace detail {
 ECAD_INLINE std::string UntarCTMv1File(const std::string & filename, std::string * err)
@@ -55,7 +104,7 @@ ECAD_INLINE std::string UntarCTMv1File(const std::string & filename, std::string
 
 ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header & header, std::string * err)
 {
-    std::ifstream fp(filename.c_str());
+    std::ifstream fp(filename.c_str(), std::ios::in);
     if(!fp.good()) {
         if(err) *err = Format2String("Error: failed to open file %1%!", filename);
         return false;
@@ -73,6 +122,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
     size_t count = 0;
     std::string line;
     std::vector<std::string> items;
+    const size_t maxTileNum = 1e5;
     while(!fp.eof()) {
         count++;
         line.clear();
@@ -85,9 +135,8 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
             if(Contains<CaseInsensitive>(header.head, "Encrypted"))
                 header.encrypted = true;
         }
-
         //LAYER
-        if(StartsWith(line, "LAYER")) {
+        else if(StartsWith(line, "LAYER")) {
             Split(line, items);
             if(items.size() < 2) {
                 if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
@@ -100,14 +149,13 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
             }
             for(size_t i = 0; i < lyrNum; ++i) {
                 ECTMv1Layer layer;
-                layer.name = items[i * 2 + 2];
+                layer.name = std::move(items[i * 2 + 2]);
                 layer.thickness = header.encrypted ? decrypt(items[i * 2 + 3], layer.name.size()) : std::stod(items[i * 2 + 3]);
                 header.layers.emplace_back(std::move(layer));
             }
         }
-
         //DIE and DIE_ORIG
-        if(StartsWith(line, "DIE")) {
+        else if(StartsWith(line, "DIE")) {
             Split(line, items);
             if(items.size() != 5) {
                 if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
@@ -121,9 +169,8 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
                 header.origin = box;
             else header.size = box;
         }
-
         //TEMP
-        if(StartsWith(line, "TEMP")) {
+        else if(StartsWith(line, "TEMP")) {
             Split(line, items);
             for(size_t i = 1; i < items.size(); ++i)
                 header.temperatures.push_back(std::stod(items[i]));
@@ -132,10 +179,8 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
                 return false;
             }
         }
-
         //TILE
-        const size_t maxTileNum = 1e5;
-        if(StartsWith(line, "TILE")) {
+        else if(StartsWith(line, "TILE")) {
             Split(line, items);
             if(items.size() != 3) {
                 if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
@@ -148,9 +193,8 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
                 return false;
             }
         }
-
         //RESOLUTION
-        if(StartsWith(line, "RESOLUTION")) {
+        else if(StartsWith(line, "RESOLUTION")) {
             Split(line, items);
             if(items.size() != 2) {
                 if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
@@ -158,9 +202,8 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
             }
             header.resolution = std::stod(items[1]);
         }
-
         //SCALE_FACTOR
-        if(StartsWith(line, "SCALE_FACTOR")) {
+        else if(StartsWith(line, "SCALE_FACTOR")) {
             Split(line, items);
             if(items.size() != 2) {
                 if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
@@ -168,9 +211,8 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
             }
             header.scale = std::stod(items[1]);
         }
-
         //ALL_LAYERS
-        if(StartsWith(line, "ALL_LAYERS")) {
+        else if(StartsWith(line, "ALL_LAYERS")) {
             Split(line, items);
             if(items.size() < 2) {
                 if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
@@ -184,13 +226,122 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
             for(size_t i = 0; i < lyrNum; ++i)
                 header.techLayers.emplace_back(std::move(items[i + 2]));
         }
-
         //METAL_LAYERS
-          
+        else if(StartsWith(line, "METAL_LAYERS")) {
+            while(!fp.eof()) {
+                count++;
+                line.clear();
+                std::getline(fp, line);
+                if(line.empty()) continue;
+                if(StartsWith(line, "#")) continue;
+                if(StartsWith(Trim(line), "}")) break;
+
+                Split(line, items);
+                if(items.size() != 3) {
+                    if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                    return false;
+                }
+
+                ECTMv1MetalLayer mLayer;
+                mLayer.name = std::move(items[0]);
+                mLayer.thickness = header.encrypted ? decrypt(items[1], mLayer.name.size()) : std::stod(items[1]);
+                mLayer.elevation = header.encrypted ? decrypt(items[2], mLayer.name.size()) : std::stod(items[2]);
+                header.metalLayers.emplace_back(std::move(mLayer));
+            }
+        }
+        //VIA_LAYERS
+        else if(StartsWith(line, "VIA_LAYERS")) {
+            while(!fp.eof()) {
+                count++;
+                line.clear();
+                std::getline(fp, line);
+                if(line.empty()) continue;
+                if(StartsWith(line, "#")) continue;
+                if(StartsWith(Trim(line), "}")) break;
+
+                Split(line, items);
+                if(items.size() != 3) {
+                    if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                    return false;
+                }
+
+                ECTMv1ViaLayer vLayer;
+                vLayer.name = std::move(items[0]);
+                vLayer.botLayer = std::move(items[1]);
+                vLayer.topLayer = std::move(items[2]);
+                header.viaLayers.emplace_back(std::move(vLayer));
+            }
+        }  
     }
 
-    return false;
+    fp.close();
+    return true;
 }
+
+ECAD_INLINE bool ParseCTMv1PowerFile(const std::string & filename, EGridData & powers, std::string * err)
+{
+    std::ifstream fp(filename.c_str(), std::ios::in | std::ios::binary);
+    if(!fp.good()) {
+        if(err) *err = Format2String("Error: failed to open file %1%!", filename);
+        return false;
+    }
+
+    float f;
+    size_t i = 0, size = powers.Size();
+    while(fp.read(reinterpret_cast<char*>(&f), sizeof(float)) && i < size) { powers[i++] = f; }
+    
+    fp.close();
+    return true;
+}
+
+ECAD_API bool ParseCTMv1DensityFile(const std::string & filename, const size_t size, std::vector<UPtr<EGridData> > & density, std::string * err)
+{
+    std::ifstream fp(filename.c_str(), std::ios::in | std::ios::binary);
+    if(!fp.good()) {
+        if(err) *err = Format2String("Error: failed to open file %1%!", filename);
+        return false;
+    }
+
+    int id;
+    float f;
+    size_t i = 0;
+    while(!fp.eof() && i < size) {
+        //id
+        fp.read(reinterpret_cast<char*>(&id), sizeof(int));
+
+        //4 float number for tile box
+        for(size_t j = 0; j < 4; ++j)
+            fp.read(reinterpret_cast<char*>(&f), sizeof(float));
+        
+        //density of all layers in LAYER section
+        for(size_t j = 0; j < density.size(); ++j) {
+            fp.read(reinterpret_cast<char*>(&f), sizeof(float));
+            (*density[j])[i] = f;
+        }
+
+        i++;
+    }
+
+    fp.close();
+    return true;
+}
+
+#ifdef BOOST_GIL_IO_PNG_SUPPORT
+ECAD_INLINE bool GenerateImageProfile(const std::string & filename, const EGridData & data)
+{
+    using NumType = typename EGridData::ResultType;
+    auto min = data.MaxOccupancy(std::less<NumType>());
+    auto max = data.MaxOccupancy(std::greater<NumType>());
+    auto range = max - min;
+    auto rgbaFunc = [&min, &range](NumType d) {
+        int r, g, b, a = 255;
+        generic::color::RGBFromScalar((d - min) / range, r, g, b);
+        return std::make_tuple(r, g, b, a);
+    };
+
+    return data.WriteImgProfile(filename, rgbaFunc);
+}
+#endif//BOOST_GIL_IO_PNG_SUPPORT
 
 }//namespace detail
 }//namespace ctm

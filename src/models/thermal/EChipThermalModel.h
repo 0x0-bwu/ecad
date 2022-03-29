@@ -1,8 +1,7 @@
 #ifndef ECAD_EMODEL_ETHERM_ECHIPTHERMALMODEL_HPP
 #define ECAD_EMODEL_ETHERM_ECHIPTHERMALMODEL_HPP
 #include "EGridThermalModel.h"
-#include <map>
-#include <set>
+#include <unordered_map>
 namespace ecad {
 namespace emodel {
 namespace etherm {
@@ -35,11 +34,17 @@ struct ECTMv1Header
     FBox2D size = FBox2D(0.0, 0.0, 0.0, 0.0);//unit um
     FBox2D origin = FBox2D(0.0, 0.0, 0.0, 0.0);//unit um
     ESize2D tiles = ESize2D(0, 0);
-    std::vector<EValue> temperatures = { 25.0, 50.0, 75.0, 100.0, 125.0 };
+    std::vector<EValue> temperatures;// = { 25.0, 50.0, 75.0, 100.0, 125.0 };
     std::vector<ECTMv1Layer> layers;
     std::vector<std::string> techLayers;
     std::vector<ECTMv1ViaLayer> viaLayers;
     std::vector<ECTMv1MetalLayer> metalLayers;
+};
+
+struct ECTMv1LayerStackup
+{
+    std::vector<UPtr<ECTMv1Layer> > layers;//bot->top
+    std::vector<std::list<std::string> > names;
 };
 
 class EChipThermalModelV1 : public EThermalModel
@@ -47,8 +52,15 @@ class EChipThermalModelV1 : public EThermalModel
 public:
     ECTMv1Header header;
     UPtr<EGridPowerModel> powers = nullptr;
-    std::map<std::string, UPtr<EGridData> > densities;
+    std::unordered_map<std::string, UPtr<EGridData> > densities;
     virtual ~EChipThermalModelV1();
+    bool GetLayerHeightThickness(const std::string & name, EValue & height, EValue & thickness) const;
+
+private:
+    void BuildLayerStackup(std::string * info = nullptr);
+
+private:
+    mutable UPtr<ECTMv1LayerStackup> m_layerStackup = nullptr;
 };
 
 }//namespace etherm

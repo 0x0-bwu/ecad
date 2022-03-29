@@ -12,7 +12,12 @@ namespace io {
 
 ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std::string & filename, std::string * err)
 {
-    auto dir = ctm::detail::UntarCTMv1File(filename, err);
+    auto ctm = ctm::makeChipThermalModelFromCTMv1File(filename, err);
+    if(nullptr == ctm) return nullptr;
+
+    auto dir = generic::filesystem::DirName(filename);
+    ctm::GenerateCTMv1ImageProfiles(*ctm, dir + "/export");
+
     return nullptr;//wbtest
 }
 

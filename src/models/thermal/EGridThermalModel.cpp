@@ -56,6 +56,13 @@ ECAD_INLINE ESimVal EGridDataTable::Query(ESimVal key, size_t x, size_t y, bool 
     }
 }
 
+ECAD_INLINE CPtr<EGridData> EGridDataTable::GetTable(ESimVal key) const
+{
+    auto iter = m_dataTable.find(key);
+    if(iter != m_dataTable.cend()) return &(iter->second);
+    return nullptr;
+}
+
 ECAD_INLINE void EGridDataTable::BuildInterpolater() const
 {
     if(m_interpolator) return;
