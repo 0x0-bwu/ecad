@@ -2,6 +2,7 @@
 #define ECAD_EMODEL_ETHERM_ECHIPTHERMALMODEL_HPP
 #include "EGridThermalModel.h"
 #include <unordered_map>
+#include <unordered_set>
 namespace ecad {
 namespace emodel {
 namespace etherm {
@@ -10,16 +11,16 @@ struct ECTMv1Layer
 {
     virtual ~ECTMv1Layer() = default;
     std::string name;
+    EValue elevation = 0;//unit: um
     EValue thickness = 0;//unit: um
 };
 
 struct ECTMv1MetalLayer : public ECTMv1Layer
 {
     virtual ~ECTMv1MetalLayer() = default;
-    EValue elevation = 0;//unit: um
 };
 
-struct ECTMv1ViaLayer : public ECTMv1MetalLayer
+struct ECTMv1ViaLayer : public ECTMv1Layer
 {
     std::string topLayer;
     std::string botLayer;
@@ -43,21 +44,26 @@ struct ECTMv1Header
 
 struct ECTMv1LayerStackup
 {
-    std::vector<UPtr<ECTMv1Layer> > layers;//bot->top
-    std::vector<std::list<std::string> > names;
+    std::vector<ECTMv1Layer> layers;//top->bot
+    std::vector<std::unordered_set<std::string> > names;
+
+    friend std::ostream & operator<< (std::ostream & os, const ECTMv1LayerStackup & stackup);
 };
 
 class EChipThermalModelV1 : public EThermalModel
 {
 public:
     ECTMv1Header header;
-    UPtr<EGridPowerModel> powers = nullptr;
-    std::unordered_map<std::string, UPtr<EGridData> > densities;
+    SPtr<EGridPowerModel> powers = nullptr;
+    std::unordered_map<std::string, SPtr<EGridData> > densities;
     virtual ~EChipThermalModelV1();
+    std::string GetLastMatelLayerInStackup() const;
     bool GetLayerHeightThickness(const std::string & name, EValue & height, EValue & thickness) const;
+    CPtr<ECTMv1LayerStackup> GetLayerStackup(std::string * info = nullptr) const;
 
 private:
-    void BuildLayerStackup(std::string * info = nullptr);
+    bool isMetalLayer(const std::string & name) const;
+    void BuildLayerStackup(std::string * info = nullptr) const;
 
 private:
     mutable UPtr<ECTMv1LayerStackup> m_layerStackup = nullptr;

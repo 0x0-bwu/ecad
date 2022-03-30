@@ -9,5 +9,6 @@
 *.png
 *.txt
 *.xml
+*.ctm
 build
 .sconsign.dblite

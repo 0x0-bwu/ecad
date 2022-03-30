@@ -31,7 +31,7 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
     
     //power
     auto tiles = model->header.tiles;
-    model->powers = std::make_unique<EGridPowerModel>(tiles);
+    model->powers = std::make_shared<EGridPowerModel>(tiles);
     for(size_t i = 0; i < model->header.temperatures.size(); ++i) {
         auto temperature = model->header.temperatures.at(i);
         auto powerFile = dir + GENERIC_FOLDER_SEPS + Format2String("power_T[%1%].ctm", i + 1);
@@ -41,13 +41,13 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
     }
 
     //density
-    std::vector<UPtr<EGridData> > density;
+    std::vector<SPtr<EGridData> > density;
     for(size_t i = 0; i < model->header.layers.size(); ++i)
-        density.push_back(std::make_unique<EGridData>(tiles.x, tiles.y));
+        density.push_back(std::make_shared<EGridData>(tiles.x, tiles.y));
     auto densityFile = dir + GENERIC_FOLDER_SEPS + "metal_density.ctm";
     if(!ParseCTMv1DensityFile(densityFile, tiles.x * tiles.y, density, err)) return nullptr;
     for(size_t i = 0; i < model->header.layers.size(); ++i)
-        model->densities.insert(std::make_pair(model->header.layers[i].name, std::move(density[i])));
+        model->densities.insert(std::make_pair(model->header.layers[i].name, density[i]));
 
     return model;
 }
@@ -294,7 +294,7 @@ ECAD_INLINE bool ParseCTMv1PowerFile(const std::string & filename, EGridData & p
     return true;
 }
 
-ECAD_API bool ParseCTMv1DensityFile(const std::string & filename, const size_t size, std::vector<UPtr<EGridData> > & density, std::string * err)
+ECAD_API bool ParseCTMv1DensityFile(const std::string & filename, const size_t size, std::vector<SPtr<EGridData> > & density, std::string * err)
 {
     std::ifstream fp(filename.c_str(), std::ios::in | std::ios::binary);
     if(!fp.good()) {
