@@ -123,7 +123,7 @@ public:
     explicit ThermalNetworkMatrixBuilder(const ThermalNetwork<num_type> & network)
      : m_network(network) { BuildMatrixIndicesMap(); }
     
-    num_type GetMatrixSize() const
+    size_t GetMatrixSize() const
     {
         return m_mnMap.size();
     }

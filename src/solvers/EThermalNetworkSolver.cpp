@@ -42,7 +42,7 @@ ECAD_INLINE bool EThermalNetworkSolver::Solve(ESimVal refT, std::vector<ESimVal>
     ECAD_EFFICIENCY_TRACK("thermal network solve")
 
     auto size = m_model.TotalGrids();
-    results = std::vector<ESimVal>(size, refT);
+    results.assign(size, refT);
     if(m_settings.iteration > 0 && math::GT<EValue>(m_settings.residual, 0)) {
 
         EValue residual = m_settings.residual;
