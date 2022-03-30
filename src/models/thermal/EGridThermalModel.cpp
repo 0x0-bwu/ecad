@@ -8,6 +8,7 @@ namespace emodel {
 namespace etherm {
 
 using namespace eutils;
+
 ECAD_INLINE EGridDataTable::EGridDataTable(const ESize2D & size)
  : m_size(size)
 {
@@ -50,10 +51,24 @@ ECAD_INLINE ESimVal EGridDataTable::Query(ESimVal key, size_t x, size_t y, bool 
     else if(m_dataTable.size() == 1) {
         return (m_dataTable.cbegin()->second)(x, y);
     }
+    else if(math::LE<ESimVal>(key, m_dataTable.cbegin()->first)) {
+        return (m_dataTable.cbegin()->second)(x, y);
+    }
+    else if(math::GE<ESimVal>(key, m_dataTable.crbegin()->first)) {
+        return (m_dataTable.crbegin()->second)(x, y);
+    }
     else {
         BuildInterpolater();
         return ((*m_interpolator)(x, y))(key);
     }
+}
+
+ECAD_INLINE std::list<ESimVal> EGridDataTable::GetAllKeys() const
+{
+    std::list<ESimVal> keys;
+    for(const auto & sample : m_dataTable)
+        keys.push_back(sample.first);
+    return keys;
 }
 
 ECAD_INLINE CPtr<EGridData> EGridDataTable::GetTable(ESimVal key) const

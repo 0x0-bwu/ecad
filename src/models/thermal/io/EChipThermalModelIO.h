@@ -1,5 +1,5 @@
-#ifndef ECAD_EMODEL_ETHERM_IO_CTM_ETHERMALMODELIO_HPP
-#define ECAD_EMODEL_ETHERM_IO_CTM_ETHERMALMODELIO_HPP
+#ifndef ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP
+#define ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP
 #include "models/thermal/EChipThermalModel.h"
 #include "generic/tools/StringHelper.hpp"
 #include <set>
@@ -8,7 +8,6 @@ namespace ecad {
 namespace emodel {
 namespace etherm {
 namespace io {
-namespace ctm {
 
 ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::string & filename, std::string * err = nullptr);
 
@@ -29,7 +28,6 @@ ECAD_API bool GenerateImageProfile(const std::string & filename, const EGridData
 #endif//BOOST_GIL_IO_PNG_SUPPORT
 
 }//namespace detail
-}//namespace ctm
 }//namespace io
 }//namespace etherm
 }//namespace emodel
@@ -39,4 +37,4 @@ ECAD_API bool GenerateImageProfile(const std::string & filename, const EGridData
 #include "EChipThermalModelIO.cpp"
 #endif
 
-#endif//ECAD_EMODEL_ETHERM_IO_CTM_ETHERMALMODELIO_HPP
+#endif//ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP

@@ -46,8 +46,6 @@ struct ECTMv1LayerStackup
 {
     std::vector<ECTMv1Layer> layers;//top->bot
     std::vector<std::unordered_set<std::string> > names;
-
-    friend std::ostream & operator<< (std::ostream & os, const ECTMv1LayerStackup & stackup);
 };
 
 class EChipThermalModelV1 : public EThermalModel

@@ -7,7 +7,7 @@ namespace emodel {
 namespace etherm {
 namespace io {
 
-ECAD_API UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std::string & filename, std::string * err = nullptr);
+ECAD_API UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std::string & filename, size_t reduceOrder = 0, std::string * err = nullptr);
 
 }//namespace io
 }//namespace etherm

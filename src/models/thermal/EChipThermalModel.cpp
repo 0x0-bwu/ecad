@@ -10,16 +10,6 @@ namespace etherm {
 
 using namespace generic::format;
 
-ECAD_INLINE std::ostream & operator<< (std::ostream & os, const ECTMv1LayerStackup & stackup)
-{
-    os << std::setiosflags(std::ios::left);
-    os << std::fixed << std::setprecision(6);
-    os << std::setw(16) << "Name"<< std::setw(16) << "Height" << std::setw(16) << "Thickness" << GENERIC_DEFAULT_EOL;
-    for(const auto & layer : stackup.layers) {
-        os << std::setw(16) << layer.name << std::setw(16) << layer.elevation << std::setw(16) << layer.thickness << GENERIC_DEFAULT_EOL;
-    }
-}
-
 ECAD_INLINE EChipThermalModelV1::~EChipThermalModelV1()
 {
 }

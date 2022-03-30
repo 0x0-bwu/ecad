@@ -16,11 +16,13 @@ ECAD_INLINE EGridThermalNetworkBuilder::~EGridThermalNetworkBuilder()
 {
 }
 
-ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(const std::vector<ESimVal> & iniT)
+ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(const std::vector<ESimVal> & iniT) const
 {
     const size_t size = m_model.TotalGrids(); 
     if(iniT.size() != size) return nullptr;
 
+    summary.Reset();
+    summary.totalNodes = size;
     auto network = std::make_unique<ThermalNetwork<ESimVal> >(size);
 
     //power
@@ -95,14 +97,18 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyBoundaryConditionForLayer(cons
             if(!success) continue;
             switch(type) {
                 case EGridThermalModel::BCType::HTC : {
+                    summary.boundaryNodes += 1;
                     network.SetHTC(index, GetZGridArea() * val);
                     break;
                 }
                 case EGridThermalModel::BCType::HeatFlux : {
+                    if(val > 0) summary.iHeatFlow += val;
+                    else summary.oHeatFlow -= val;
                     network.SetHF(index, val);
                     break;
                 }
                 case EGridThermalModel::BCType::Temperature : {
+                    summary.fixedTNodes += 1;
                     network.SetT(index, val);
                     break;
                 }

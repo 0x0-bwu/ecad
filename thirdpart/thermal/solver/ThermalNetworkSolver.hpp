@@ -35,21 +35,7 @@ public:
     {
     
         ThermalNetworkMatrixBuilder<num_type> builder(m_network);
-        auto diagCoeffs = std::unique_ptr<std::vector<num_type> >(new std::vector<num_type>{}) ;
-        auto edges = std::unique_ptr<std::list<ThermalNetwork<num_type>::Edge> >(new std::list<ThermalNetwork<num_type>::Edge>{});
         auto size = builder.GetMatrixSize();
-
-        {
-            std::cout << "get coeffs" << std::endl;
-            generic::tools::ProgressTimer t;
-
-            builder.GetCoeffs(*edges);
-            builder.GetDiagCoeffs(*diagCoeffs);
-        }
-
-        GENERIC_ASSERT((edges->size() % 2) == 0)
-        size_t nZero = diagCoeffs->size() + edges->size() / 2;
-
         const auto & mnMap = builder.GetMatrixNodeIndicesMap();
         const auto & nmMap = builder.GetNodeMatrixIndicesMap();
 
@@ -82,7 +68,6 @@ public:
             IA[i + 1] = IA[i] + count;
         }
         size_t NzA = IA[dimA];
-        GENERIC_ASSERT(NzA == nZero)
         size_t aaIndex = 0;
         size_t jaIndex = 0;
         AA = ( double *) malloc (NzA * sizeof ( double ));
@@ -121,10 +106,10 @@ public:
         //error=mf.FindSolutions(dimA,IA,JA,AA,Nrhs,(void**)&b);
         error=mf.FindSolutions(dimA,nullptr,nullptr,nullptr,Nrhs,(void**)&b);
         
-        const auto & nodes = network.GetNodes();
-        std::vector<num_type> results(network.Size());
+        const auto & nodes = ,m_network.GetNodes();
+        std::vector<num_type> results(m_network.Size());
         for(size_t i = 0; i < dimb; ++i) results[mnMap.at(i)] = b[i];
-        for(size_t i = 0; i < network.Size(); ++i) {
+        for(size_t i = 0; i < m_network.Size(); ++i) {
             if(!nmMap.count(i)) results[i] = nodes[i].t;
         }
         return results;

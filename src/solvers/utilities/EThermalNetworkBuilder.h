@@ -7,15 +7,26 @@ namespace esolver {
 
 using namespace emodel::etherm;
 using namespace thermal::model;
+
+struct EGridThermalNetworkBuildSummary
+{
+    size_t totalNodes = 0;
+    size_t fixedTNodes = 0;
+    size_t boundaryNodes = 0;
+    double iHeatFlow = 0, oHeatFlow = 0;
+    void Reset() { *this = EGridThermalNetworkBuildSummary{}; }
+};
+
 class ECAD_API EGridThermalNetworkBuilder
 {
     enum class Axis { X = 0, Y = 1, Z = 2};
 public:
+    mutable EGridThermalNetworkBuildSummary summary;
     enum class Orientation { Top, Bot, Left, Right, Front, Back };
     explicit EGridThermalNetworkBuilder(const EGridThermalModel & model);
     virtual ~EGridThermalNetworkBuilder();
 
-    UPtr<ThermalNetwork<ESimVal> > Build(const std::vector<ESimVal> & iniT);
+    UPtr<ThermalNetwork<ESimVal> > Build(const std::vector<ESimVal> & iniT) const;
 
 private:
     void ApplyBoundaryConditionForLayer(const std::vector<ESimVal> & iniT, const EGridDataTable & dataTable, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const;

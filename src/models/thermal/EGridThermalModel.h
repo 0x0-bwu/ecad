@@ -28,6 +28,7 @@ public:
     bool AddSample(ESimVal key, EGridData data);
     ESimVal Query(ESimVal key, size_t x, size_t y, bool * success = nullptr) const;
 
+    std::list<ESimVal> GetAllKeys() const;
     CPtr<EGridData> GetTable(ESimVal key) const;
 
 private:

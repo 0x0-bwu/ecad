@@ -8,7 +8,6 @@ namespace ecad {
 namespace emodel {
 namespace etherm {
 namespace io {
-namespace ctm {
 
 using namespace generic::str;
 using namespace generic::format;
@@ -344,7 +343,6 @@ ECAD_INLINE bool GenerateImageProfile(const std::string & filename, const EGridD
 #endif//BOOST_GIL_IO_PNG_SUPPORT
 
 }//namespace detail
-}//namespace ctm
 }//namespace io
 }//namespace etherm
 }//namespace emodel

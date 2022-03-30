@@ -2,6 +2,7 @@
 #include "models/thermal/io/EThermalModelIO.h"
 #endif
 
+#include "models/thermal/utilities/EThermalModelReduction.h"
 #include "models/thermal/io/EChipThermalModelIO.h"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"
@@ -10,9 +11,9 @@ namespace emodel {
 namespace etherm {
 namespace io {
 
-ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std::string & filename, std::string * err)
+ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std::string & filename, size_t reduceOrder, std::string * err)
 {
-    auto ctm = ctm::makeChipThermalModelFromCTMv1File(filename, err);
+    auto ctm = makeChipThermalModelFromCTMv1File(filename, err);
     if(nullptr == ctm) return nullptr;
 
     auto stackup = ctm->GetLayerStackup();
@@ -20,6 +21,12 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std:
 
     std::string devLyr = ctm->GetLastMatelLayerInStackup();
     if(devLyr.empty()) return nullptr;
+
+    utils::EChipThermalModelV1Reduction reduction(*ctm);
+    while(reduceOrder > 0) {
+        reduction.Reduce();
+        reduceOrder--;
+    }
 
     const auto & tiles = ctm->header.tiles;
     auto model = std::make_unique<EGridThermalModel>(tiles);
@@ -56,11 +63,10 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std:
         EGridThermalLayer gridLayer(layer.name, mf);
         gridLayer.SetThickness(layer.thickness * 1e-6);//um to m
 
-        if(layer.name == devLyr) {
-            GENERIC_ASSERT(gridLayer.SetPowerModel(ctm->powers))
-        }
+        if(layer.name == devLyr)
+            gridLayer.SetPowerModel(ctm->powers);
 
-        GENERIC_ASSERT(model->AppendLayer(std::move(gridLayer)));
+        model->AppendLayer(std::move(gridLayer));
     }
 
     model->SetScaleH(ctm->header.scale);

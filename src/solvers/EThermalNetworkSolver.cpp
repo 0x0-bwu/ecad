@@ -52,6 +52,9 @@ ECAD_INLINE bool EThermalNetworkSolver::Solve(ESimVal refT, std::vector<ESimVal>
             std::vector<ESimVal> lastRes(results);
             auto network = builder.Build(lastRes);
             if(nullptr == network) return false;
+
+            std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
+            std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
             
             ThermalNetworkSolver<ESimVal> solver(*network);
             results = solver.Solve(refT);
