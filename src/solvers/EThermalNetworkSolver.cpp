@@ -57,7 +57,11 @@ ECAD_INLINE bool EThermalNetworkSolver::Solve(ESimVal refT, std::vector<ESimVal>
             std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
             
             ThermalNetworkSolver<ESimVal> solver(*network);
-            results = solver.Solve(refT);
+            solver.Solve(refT);
+
+            const auto & nodes = network->GetNodes();
+            for(size_t n = 0; n < nodes.size(); ++n)
+                results[n] = nodes[n].t;
 
             residual = CalculateResidual(results, lastRes);
             iteration -= 1;
@@ -69,6 +73,5 @@ ECAD_INLINE bool EThermalNetworkSolver::Solve(ESimVal refT, std::vector<ESimVal>
 
     return true;
 }
-
 }//namespace esolver
 }//namespace ecad

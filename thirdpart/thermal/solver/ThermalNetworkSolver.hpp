@@ -25,13 +25,13 @@ template <typename num_type>
 class ThermalNetworkSolver
 {
 public:
-    explicit ThermalNetworkSolver(const ThermalNetwork<num_type> & network)
+    explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network)
      : m_network(network){}
 
     virtual ~ThermalNetworkSolver() = default;
 
 #ifdef MFSOLVER_SUPPORT
-    std::vector<num_type> Solve(num_type refT) const
+    void Solve(num_type refT) const
     {
     
         ThermalNetworkMatrixBuilder<num_type> builder(m_network);
@@ -106,16 +106,12 @@ public:
         //error=mf.FindSolutions(dimA,IA,JA,AA,Nrhs,(void**)&b);
         error=mf.FindSolutions(dimA,nullptr,nullptr,nullptr,Nrhs,(void**)&b);
         
-        const auto & nodes = ,m_network.GetNodes();
-        std::vector<num_type> results(m_network.Size());
-        for(size_t i = 0; i < dimb; ++i) results[mnMap.at(i)] = b[i];
-        for(size_t i = 0; i < m_network.Size(); ++i) {
-            if(!nmMap.count(i)) results[i] = nodes[i].t;
-        }
-        return results;
+        auto & nodes = m_network.GetNodes();
+        for(size_t i = 0; i < dimb; ++i)
+            nodes[mnMap.at(i)].t = b[i];
     }
 #else
-    std::vector<num_type> Solve(num_type refT) const
+    void Solve(num_type refT) const
     {
 
         ThermalNetworkMatrixBuilder<num_type> builder(m_network);
@@ -155,12 +151,8 @@ public:
         }
 
         Eigen::VectorXd b(size);
-        {
-            std::cout << "build rhs" << std::endl;
-            generic::tools::ProgressTimer t;
-            for(size_t i = 0; i < size; ++i){
-                b[i] = builder.GetRhs(i, refT);
-            }
+        for(size_t i = 0; i < size; ++i){
+            b[i] = builder.GetRhs(i, refT);
         }
 
         Eigen::setNbThreads(8);
@@ -195,17 +187,13 @@ public:
             }
         }
 
-        const auto & nodes = m_network.GetNodes();
-        std::vector<num_type> results(m_network.Size());
-        for(size_t i = 0; i < size; ++i) results[mnMap.at(i)] = x[i];
-        for(size_t i = 0; i < m_network.Size(); ++i) {
-            if(!nmMap.count(i)) results[i] = nodes[i].t;
-        }
-        return results;
+        auto & nodes = m_network.GetNodes();
+        for(size_t i = 0; i < size; ++i)
+            nodes[mnMap.at(i)].t = x[i];
     }
 #endif//MFSOLVER_SUPPORT
 private:
-    const ThermalNetwork<num_type> & m_network;
+    ThermalNetwork<num_type> & m_network;
 };
 
 }//namespace solver

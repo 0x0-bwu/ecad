@@ -105,6 +105,11 @@ public:
         m_nodes[node2].rs.push_back(r);
     }
 
+    std::vector<Node> & GetNodes()
+    {
+        return m_nodes;
+    }
+    
     const std::vector<Node> & GetNodes() const
     {
         return m_nodes;

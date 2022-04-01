@@ -30,7 +30,7 @@ void t_grid_thermal_model_solver_test()
     //htc
     ESimVal iniT = 25.0;
     auto bcModel = std::make_shared<EGridBCModel>(ESize2D(size.x, size.y));
-    bcModel->AddSample(iniT, EGridData(size.x, size.y, 200));
+    bcModel->AddSample(iniT, EGridData(size.x, size.y, 200000));
 
     model->SetTopBotBCModel(bcModel, bcModel);
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
