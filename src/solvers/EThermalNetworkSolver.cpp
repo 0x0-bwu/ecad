@@ -21,12 +21,6 @@ ECAD_INLINE ESimVal CalculateResidual(const std::vector<ESimVal> & v1, const std
     return residual;
 }
 
-
-ECAD_INLINE EThermalNetworkSolver::EThermalNetworkSolver(const EGridThermalModel & model)
- : m_model(model)
-{
-}
-
 ECAD_INLINE EThermalNetworkSolver::~EThermalNetworkSolver()
 {
 }
@@ -36,7 +30,16 @@ ECAD_INLINE void EThermalNetworkSolver::SetSolveSettings(const EThermalNetworkSo
     m_settings = settings;
 }
 
-ECAD_INLINE bool EThermalNetworkSolver::Solve(ESimVal refT, std::vector<ESimVal> & results)
+ECAD_INLINE EGridThermalNetworkSolver::EGridThermalNetworkSolver(const EGridThermalModel & model)
+ : m_model(model)
+{
+}
+
+ECAD_INLINE EGridThermalNetworkSolver::~EGridThermalNetworkSolver()
+{
+}
+
+ECAD_INLINE bool EGridThermalNetworkSolver::Solve(ESimVal refT, std::vector<ESimVal> & results)
 {
     using namespace thermal::solver;
     ECAD_EFFICIENCY_TRACK("thermal network solve")

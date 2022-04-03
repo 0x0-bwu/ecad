@@ -32,7 +32,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
         const auto & layer = layers.at(z);
         auto pwrModel = layer.GetPowerModel();
         if(nullptr == pwrModel) continue;
-        ApplyBoundaryConditionForLayer(iniT, *pwrModel, EGridThermalModel::BCType::HeatFlux, z, *network);
+        ApplyBoundaryConditionForLayer(iniT, *pwrModel, EGridThermalModel::BCType::HeatFlow, z, *network);
     }
 
     //r
@@ -101,7 +101,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyBoundaryConditionForLayer(cons
                     network.SetHTC(index, GetZGridArea() * val);
                     break;
                 }
-                case EGridThermalModel::BCType::HeatFlux : {
+                case EGridThermalModel::BCType::HeatFlow : {
                     if(val > 0) summary.iHeatFlow += val;
                     else summary.oHeatFlow -= val;
                     network.SetHF(index, val);

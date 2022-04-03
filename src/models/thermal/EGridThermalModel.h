@@ -44,8 +44,11 @@ private:
 using EGridBCModel = EGridDataTable;
 using EGridPowerModel = EGridDataTable;
 
+namespace utils {
+class EGridThermalModelReduction; }//namespace utils;
 class ECAD_API EGridThermalLayer
 {
+    friend class utils::EGridThermalModelReduction;
 public:
     explicit EGridThermalLayer(std::string name, SPtr<ELayerMetalFraction> metalFraction);
     virtual ~EGridThermalLayer();
@@ -79,8 +82,9 @@ private:
 
 class ECAD_API EGridThermalModel : public EThermalModel
 {
+    friend class utils::EGridThermalModelReduction;
 public:
-    enum class BCType { HTC, HeatFlux, Temperature };
+    enum class BCType { HTC, HeatFlow, Temperature };
     explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), FCoord elevation = 0);
     virtual ~EGridThermalModel();
 

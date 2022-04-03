@@ -12,15 +12,25 @@ ECAD_API ESimVal CalculateResidual(const std::vector<ESimVal> & v1, const std::v
 class ECAD_API EThermalNetworkSolver
 {
 public:
-    explicit EThermalNetworkSolver(const EGridThermalModel & model);
     virtual ~EThermalNetworkSolver();
-
     void SetSolveSettings(const EThermalNetworkSolveSettings & settings);
-    bool Solve(ESimVal refT, std::vector<ESimVal> & results);
-
-private:
+protected:
     EThermalNetworkSolveSettings m_settings;
+};
+
+class ECAD_API EGridThermalNetworkSolver : public EThermalNetworkSolver
+{
+public:
+    explicit EGridThermalNetworkSolver(const EGridThermalModel & model);
+    virtual ~EGridThermalNetworkSolver();
+    bool Solve(ESimVal refT, std::vector<ESimVal> & results);
+private:
     const EGridThermalModel & m_model;
+};
+
+class ECAD_API EGridThermalNetworkReductionSolver : public EThermalNetworkSolver
+{
+
 };
 
 }//namesapce esolver

@@ -96,7 +96,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<float_t> results;
-    EThermalNetworkSolver solver(model);
+    EGridThermalNetworkSolver solver(model);
     if(!solver.Solve(iniT, results)) return false;
     
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);

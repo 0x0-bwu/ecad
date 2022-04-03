@@ -20,17 +20,31 @@ public:
     explicit EChipThermalModelV1Reduction(EChipThermalModelV1 & model);
     virtual ~EChipThermalModelV1Reduction();
 
-    void Reduce();
+    bool Reduce();
 
 private:
     EChipThermalModelV1 & m_model;
 };
 
+class ECAD_API EGridThermalModelReduction : public EThermalModelReduction
+{
+public:
+    explicit EGridThermalModelReduction(EGridThermalModel & model);
+    virtual ~EGridThermalModelReduction();
+
+    bool Reduce();
+
+private:
+    EGridThermalModel & m_model;
+};
+
+ECAD_API UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel & model);
+
 namespace detail {
 
 ECAD_API ESize2D Reduce(const ESize2D & size, ReduceIndexMethod method);
 ECAD_API EGridData Reduce(const EGridData & data, ReduceValueMethod method);
-ECAD_API UPtr<EGridDataTable> Reduce(const EGridDataTable & data, ReduceValueMethod method);
+ECAD_API UPtr<EGridDataTable> Reduce(SPtr<EGridDataTable> data, ReduceValueMethod method);
 
 }//namespace detail
 

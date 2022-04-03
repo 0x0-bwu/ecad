@@ -48,8 +48,11 @@ struct ECTMv1LayerStackup
     std::vector<std::unordered_set<std::string> > names;
 };
 
-class EChipThermalModelV1 : public EThermalModel
+namespace utils {
+class EChipThermalModelV1Reduction; }//namespace utils;
+class ECAD_API EChipThermalModelV1 : public EThermalModel
 {
+    friend class utils::EChipThermalModelV1Reduction;
 public:
     ECTMv1Header header;
     SPtr<EGridPowerModel> powers = nullptr;

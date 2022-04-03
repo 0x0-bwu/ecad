@@ -6,6 +6,7 @@
 #include "generic/tools/FileSystem.hpp"
 #include "solvers/EThermalNetworkSolver.h"
 #include "models/thermal/io/EThermalModelIO.h"
+#include "models/thermal/utilities/EThermalModelReduction.h"
 #include "TestData.hpp"
 using namespace boost::unit_test;
 using namespace ecad;
@@ -16,16 +17,18 @@ void t_grid_thermal_model_solver_test()
     std::string err;
     std::string ctm = ecad_test::GetTestDataPath() + "/extension/ctm/rhsc_ctm5.tar.gz";
     std::string ctmFolder = ecad_test::GetTestDataPath() + "/extension/ctm/rhsc_ctm5";
-    auto model = io::makeGridThermalModelFromCTMv1File(ctm, 2, &err);
+    auto model = io::makeGridThermalModelFromCTMv1File(ctm, 1, &err);
     BOOST_CHECK(generic::filesystem::PathExists(ctmFolder));
     generic::filesystem::RemoveDir(ctmFolder);
     BOOST_CHECK(model);
 
+    etherm::utils::EGridThermalModelReduction r(*model);
+    BOOST_CHECK(r.Reduce());
+    
     auto size = model->ModelSize();
+    BOOST_CHECK(size.x == 16 && size.y == 16);
     std::cout << "size: (" << size.x << ", " << size.y << ", " << size.z << ")" << std::endl;
     std::cout << "total nodes: " << model->TotalGrids() << std::endl;
-    std::cout << "total layers: " << model->TotalLayers() << std::endl; 
-
 
     //htc
     ESimVal iniT = 25.0;
@@ -36,7 +39,7 @@ void t_grid_thermal_model_solver_test()
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<ESimVal> results;
-    EThermalNetworkSolver solver(*model);
+    EGridThermalNetworkSolver solver(*model);
     BOOST_CHECK(solver.Solve(iniT, results));
     
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
@@ -59,18 +62,28 @@ void t_grid_thermal_model_solver_test()
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
 
     using ValueType = typename ELayerMetalFraction::ResultType;
-    if(!outDir.empty()) {        
+    if(!outDir.empty()) { 
+        ValueType min = std::numeric_limits<ValueType>::max(), max = -min;
         for(auto index = 0; index < size.z; ++index){
             auto lyr = htMap->at(index);
-            auto min = lyr->MaxOccupancy(std::less<ValueType>());
-            auto max = lyr->MaxOccupancy(std::greater<ValueType>());
-            auto range = max - min;
+            min = std::min(min, lyr->MaxOccupancy(std::less<ValueType>()));
+            max = std::max(max, lyr->MaxOccupancy(std::greater<ValueType>()));
+        }
+        auto range = max - min;
+        std::cout << "min: " << min << ", max: " << max << std::endl;
+        //min: 175.204, max: 520.823
+
+        for(auto index = 0; index < size.z; ++index){
+            auto lyr = htMap->at(index);
+            // auto min = lyr->MaxOccupancy(std::less<ValueType>());
+            // auto max = lyr->MaxOccupancy(std::greater<ValueType>());
+            // auto range = max - min;
             auto rgbaFunc = [&min, &range](ValueType d) {
                 int r, g, b, a = 255;
                 generic::color::RGBFromScalar((d - min) / range, r, g, b);
                 return std::make_tuple(r, g, b, a);
             };
-            std::cout << "layer: " << index + 1 << ", min: " << min << ", max: " << max << std::endl;   
+            // std::cout << "layer: " << index + 1 << ", min: " << min << ", max: " << max << std::endl;   
             std::string filepng = outDir + GENERIC_FOLDER_SEPS + std::to_string(index) + ".png";
             lyr->WriteImgProfile(filepng, rgbaFunc);
         }
