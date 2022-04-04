@@ -104,6 +104,7 @@ public:
     const std::vector<EGridThermalLayer> & GetLayers() const; 
 
     bool SetPowerModel(size_t layer, SPtr<EGridPowerModel> pwrModel);
+    CPtr<EGridPowerModel> GetPowerModel(size_t layer) const;
 
     bool SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot);
     void GetTopBotBCModel(SPtr<EGridBCModel> & top, SPtr<EGridBCModel> & bot) const;
@@ -113,6 +114,8 @@ public:
 
     size_t GetFlattenIndex(const ESize3D & index) const;
     ESize3D GetGridIndex(size_t index) const;
+    bool isValid(const ESize2D & index) const;
+    bool isValid(const ESize3D & index) const;
 
 private:
     ESize2D m_size;
@@ -139,6 +142,16 @@ ECAD_ALWAYS_INLINE ESize3D EGridThermalModel::GetGridIndex(size_t index) const
     gridIndex.y = tmp % m_size.y;
     gridIndex.x = tmp / m_size.y;
     return gridIndex;
+}
+
+ECAD_ALWAYS_INLINE bool EGridThermalModel::isValid(const ESize2D & index) const
+{
+    return index.x < m_size.x && index.y < m_size.y;
+}
+
+ECAD_ALWAYS_INLINE bool EGridThermalModel::isValid(const ESize3D & index) const
+{
+    return index.x < m_size.x && index.y < m_size.y && index.z < m_stackupLayers.size();
 }
 
 }//namespace etherm

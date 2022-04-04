@@ -39,7 +39,7 @@ void t_grid_thermal_model_solver_test()
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<ESimVal> results;
-    EGridThermalNetworkSolver solver(*model);
+    EGridThermalNetworkDirectSolver solver(*model);
     BOOST_CHECK(solver.Solve(iniT, results));
     
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);

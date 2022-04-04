@@ -22,7 +22,7 @@ class ECAD_API EGridThermalNetworkBuilder
     enum class Axis { X = 0, Y = 1, Z = 2};
 public:
     mutable EGridThermalNetworkBuildSummary summary;
-    enum class Orientation { Top, Bot, Left, Right, Front, Back };
+    enum class Orientation { Top, Bot, Left, Right, Front, End };
     explicit EGridThermalNetworkBuilder(const EGridThermalModel & model);
     virtual ~EGridThermalNetworkBuilder();
 
@@ -31,8 +31,8 @@ public:
 private:
     void ApplyBoundaryConditionForLayer(const std::vector<ESimVal> & iniT, const EGridDataTable & dataTable, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const;
 
-private:
-    ESimVal GetMetalComposite(const ESize3D & indexm) const;
+public:
+    ESimVal GetMetalComposite(const ESize3D & index) const;
     std::array<ESimVal, 3> GetCompositeMatK(const ESize3D & index, ESimVal refT) const;
     std::array<ESimVal, 3> GetConductingMatK(const ESize3D & index, ESimVal refT) const;
     std::array<ESimVal, 3> GetDielectricMatK(const ESize3D & index, ESimVal refT) const;
@@ -103,6 +103,18 @@ ECAD_ALWAYS_INLINE bool EGridThermalNetworkBuilder::isValid(const ESize3D & inde
     return index.x != invalidIndex && index.y != invalidIndex && index.z != invalidIndex;
 }
 
+
+// class ECAD_API EGridSubThermalNetworkBuilder
+// {
+// public:
+//     explicit EGridSubThermalNetworkBuilder(const EGridThermalModel & model);
+//     virtual ~EGridSubThermalNetworkBuilder();
+
+//     UPtr<ThermalNetwork<ESimVal> > Build(size_t layer, const ESize2D & index, const std::vector<ESimVal> & iniT) const;
+// private:
+//     const EGridThermalModel & m_model;
+//     const ESize3D m_size;
+// };
 }//namesapce esolver
 }//namespace ecad
 

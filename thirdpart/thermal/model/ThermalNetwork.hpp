@@ -43,7 +43,6 @@ public:
 
     explicit ThermalNetwork(size_t nodes)
     {
-        m_unknowTNodeCount = nodes;
         m_nodes.assign(nodes, Node{});
     }
 
@@ -52,6 +51,14 @@ public:
     size_t Size() const
     {
         return m_nodes.size();
+    }
+
+    size_t AppendNode(num_type t = unknownT)
+    {
+        size_t index = Size();
+        m_nodes.push_back(Node());
+        m_nodes.back().t = t;
+        return index;
     }
 
     const std::vector<size_t> & NS(size_t node) const
@@ -66,8 +73,6 @@ public:
 
     void SetT(size_t node, num_type t)
     {
-        if(m_nodes[node].t == unknownT)
-            m_unknowTNodeCount--;
         m_nodes[node].t = t;
     }
 
@@ -116,7 +121,6 @@ public:
     }
 
 private:
-    size_t m_unknowTNodeCount;
     std::vector<Node> m_nodes;
 };
 

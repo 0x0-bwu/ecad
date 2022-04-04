@@ -250,6 +250,12 @@ ECAD_INLINE bool EGridThermalModel::SetPowerModel(size_t layer, SPtr<EGridPowerM
     return m_stackupLayers.at(layer).SetPowerModel(pwrModel);
 }
 
+ECAD_INLINE CPtr<EGridPowerModel> EGridThermalModel::GetPowerModel(size_t layer) const
+{
+    if(layer >= m_stackupLayers.size()) return nullptr;
+    return m_stackupLayers.at(layer).GetPowerModel();
+}
+
 ECAD_INLINE bool EGridThermalModel::SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot)
 {
     if(top && top->GetTableSize() != m_size) return false;

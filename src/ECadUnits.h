@@ -50,6 +50,7 @@ struct ESize3D
     size_t x = 0, y = 0, z = 0;
     ESize3D() = default;
     ESize3D(size_t x, size_t y, size_t z) : x(x), y(y), z(z) {}
+    ESize3D(const ESize2D & size, size_t z) : x(size.x), y(size.y), z(z) {}
 
     bool operator== (const ESize3D & other) const
     {

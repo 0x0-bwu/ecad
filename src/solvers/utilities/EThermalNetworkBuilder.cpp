@@ -51,7 +51,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
             network->SetR(index1, index2, r);
         }
         //back
-        grid2 = GetNeighbor(grid1, Orientation::Back);
+        grid2 = GetNeighbor(grid1, Orientation::End);
         if(isValid(grid2)) {
             auto index2 = GetFlattenIndex(grid2);
             auto k2 = GetCompositeMatK(grid2, iniT.at(index2));
@@ -194,7 +194,7 @@ ECAD_INLINE ESize3D EGridThermalNetworkBuilder::GetNeighbor(ESize3D index, Orien
             else index.y -= 1;
             break;
         }
-        case Orientation::Back : {
+        case Orientation::End : {
             if(index.y == (m_size.y - 1))
                 index.y = invalidIndex;
             else index.y += 1;
@@ -213,6 +213,15 @@ ECAD_INLINE size_t EGridThermalNetworkBuilder::GetFlattenNeighbor(ESize3D index,
 {
     return GetFlattenIndex(GetNeighbor(index, o));
 }
+
+// ECAD_INLINE EGridSubThermalNetworkBuilder::EGridSubThermalNetworkBuilder(const EGridThermalModel & model)
+//  : m_model(model), m_size(model.ModelSize())
+// {
+// }
+
+// ECAD_INLINE EGridSubThermalNetworkBuilder::~EGridSubThermalNetworkBuilder()
+// {
+// }
 
 }//namespace esolver
 }//namespace ecad
