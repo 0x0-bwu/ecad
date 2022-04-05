@@ -21,6 +21,7 @@ class ECAD_API EGridThermalNetworkBuilder
 {
     enum class Axis { X = 0, Y = 1, Z = 2};
 public:
+    enum class RMethod { Arithmetic, Harmonic };
     mutable EGridThermalNetworkBuildSummary summary;
     enum class Orientation { Top, Bot, Left, Right, Front, End };
     explicit EGridThermalNetworkBuilder(const EGridThermalModel & model);
@@ -33,6 +34,7 @@ private:
 
 public:
     ESimVal GetMetalComposite(const ESize3D & index) const;
+    ESimVal GetR(ESimVal k1, FCoord z1, ESimVal k2, FCoord z2, FCoord area, RMethod m = RMethod::Harmonic) const;
     std::array<ESimVal, 3> GetCompositeMatK(const ESize3D & index, ESimVal refT) const;
     std::array<ESimVal, 3> GetConductingMatK(const ESize3D & index, ESimVal refT) const;
     std::array<ESimVal, 3> GetDielectricMatK(const ESize3D & index, ESimVal refT) const;

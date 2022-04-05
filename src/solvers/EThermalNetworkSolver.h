@@ -41,7 +41,7 @@ struct EGridThermalModelResultPair
 class ECAD_API EGridThermalNetworkReductionSolver : public EThermalNetworkSolver
 {
 public:
-    explicit EGridThermalNetworkReductionSolver(const EGridThermalModel & model);
+    explicit EGridThermalNetworkReductionSolver(const EGridThermalModel & model, size_t reduceOrder = 0);
     virtual ~EGridThermalNetworkReductionSolver();
     bool Solve(ESimVal refT, std::vector<ESimVal> & results);
 
@@ -55,6 +55,7 @@ private:
 
 private:
     const EGridThermalModel & m_model;
+    size_t m_reduceOrder = 0;
 };
 
 }//namesapce esolver

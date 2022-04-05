@@ -120,72 +120,43 @@ public:
         const auto & nmMap = builder.GetNodeMatrixIndicesMap();
 
         Eigen::SparseMatrix<double> spMat(size, size);
-        {
-            std::cout << "build matrix" << std::endl;
-            generic::tools::ProgressTimer t;
+        spMat.reserve(Eigen::VectorXi::Constant(size, 10));
 
-            spMat.reserve(Eigen::VectorXi::Constant(size, 10));
-            auto diagCoeffs = std::unique_ptr<std::vector<num_type> >(new std::vector<num_type>{}) ;
-            auto edges = std::unique_ptr<std::list<typename ThermalNetwork<num_type>::Edge> >(new std::list<typename ThermalNetwork<num_type>::Edge>{});
+        auto diagCoeffs = std::unique_ptr<std::vector<num_type> >(new std::vector<num_type>{}) ;
+        auto edges = std::unique_ptr<std::list<typename ThermalNetwork<num_type>::Edge> >(new std::list<typename ThermalNetwork<num_type>::Edge>{});
 
-            {
-                std::cout << "get coeffs" << std::endl;
-                generic::tools::ProgressTimer t;
-                builder.GetCoeffs(*edges);
-                builder.GetDiagCoeffs(*diagCoeffs);
-            }
+        builder.GetCoeffs(*edges);
+        builder.GetDiagCoeffs(*diagCoeffs);
+        for(size_t i = 0; i < size; ++i)
+            spMat.insert(i, i) = (*diagCoeffs)[i];
 
-            {
-                std::cout << "insert coeffs" << std::endl;
-                generic::tools::ProgressTimer t;
-                for(size_t i = 0; i < size; ++i)
-                    spMat.insert(i, i) = (*diagCoeffs)[i];
-
-                for(const auto & edge : *edges){
-                    spMat.insert(edge.x, edge.y) = edge.r;
-                }
-            }
-            edges.reset();
-            diagCoeffs.reset();
-            spMat.makeCompressed();
-        }
+        for(const auto & edge : *edges)
+            spMat.insert(edge.x, edge.y) = edge.r;
+        
+        edges.reset();
+        diagCoeffs.reset();
+        spMat.makeCompressed();
 
         Eigen::VectorXd b(size);
-        for(size_t i = 0; i < size; ++i){
+        for(size_t i = 0; i < size; ++i)
             b[i] = builder.GetRhs(i, refT);
-        }
 
         Eigen::setNbThreads(8);
-        std::cout << "Eigen threads: " << Eigen::nbThreads() << std::endl;//wbtest
         
         Eigen::VectorXd x;
-        {
-            std::cout << "solving" << std::endl;
-            generic::tools::ProgressTimer t;
+        //iterator
+        // Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> solver;
+        // solver.compute(spMat);
+        // x = solver.solve(b);
+        // std::cout << "#iterations:     " << solver.iterations() << std::endl;
+        // std::cout << "estimated error: " << solver.error()      << std::endl;
 
-            //iterator
-            // Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> solver;
-            // solver.compute(spMat);
-            // x = solver.solve(b);
-            // std::cout << "#iterations:     " << solver.iterations() << std::endl;
-            // std::cout << "estimated error: " << solver.error()      << std::endl;
-
-            //direct
-            Eigen::SparseLU<Eigen::SparseMatrix<double> > solver;
-            // Eigen::SimplicialCholesky<Eigen::SparseMatrix<double> > solver;
-            {
-                std::cout << "analyzePattern and factorize" << std::endl;
-                generic::tools::ProgressTimer t;
-                solver.analyzePattern(spMat);
-                solver.factorize(spMat);
-            }
-
-            {
-                std::cout << "solve" << std::endl;
-                generic::tools::ProgressTimer t; 
-                x = solver.solve(b); 
-            }
-        }
+        //direct
+        Eigen::SparseLU<Eigen::SparseMatrix<double> > solver;
+        // Eigen::SimplicialCholesky<Eigen::SparseMatrix<double> > solver;
+        solver.analyzePattern(spMat);
+        solver.factorize(spMat);
+        x = solver.solve(b); 
 
         auto & nodes = m_network.GetNodes();
         for(size_t i = 0; i < size; ++i)
