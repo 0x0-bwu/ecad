@@ -22,11 +22,10 @@ void t_grid_thermal_model_solver_test()
     generic::filesystem::RemoveDir(ctmFolder);
     BOOST_CHECK(model);
 
-    etherm::utils::EGridThermalModelReduction r(*model);
-    BOOST_CHECK(r.Reduce());
+    // etherm::utils::EGridThermalModelReduction r(*model);
+    // BOOST_CHECK(r.Reduce());
     
     auto size = model->ModelSize();
-    // BOOST_CHECK(size.x == 32 && size.y == 32);
     std::cout << "size: (" << size.x << ", " << size.y << ", " << size.z << ")" << std::endl;
     std::cout << "total nodes: " << model->TotalGrids() << std::endl;
 
@@ -39,11 +38,11 @@ void t_grid_thermal_model_solver_test()
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<ESimVal> results;
-    EGridThermalNetworkDirectSolver solver(*model);
-    BOOST_CHECK(solver.Solve(iniT, results));
-
-    // EGridThermalNetworkReductionSolver solver(*model, 1);
+    // EGridThermalNetworkDirectSolver solver(*model);
     // BOOST_CHECK(solver.Solve(iniT, results));
+
+    EGridThermalNetworkReductionSolver solver(*model, 2);
+    BOOST_CHECK(solver.Solve(iniT, results));
    
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
     for(size_t z = 0; z < size.z; ++z)

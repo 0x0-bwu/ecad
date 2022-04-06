@@ -228,14 +228,5 @@ ECAD_INLINE size_t EGridThermalNetworkBuilder::GetFlattenNeighbor(ESize3D index,
     return GetFlattenIndex(GetNeighbor(index, o));
 }
 
-// ECAD_INLINE EGridSubThermalNetworkBuilder::EGridSubThermalNetworkBuilder(const EGridThermalModel & model)
-//  : m_model(model), m_size(model.ModelSize())
-// {
-// }
-
-// ECAD_INLINE EGridSubThermalNetworkBuilder::~EGridSubThermalNetworkBuilder()
-// {
-// }
-
 }//namespace esolver
 }//namespace ecad

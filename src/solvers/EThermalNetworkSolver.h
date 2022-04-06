@@ -28,15 +28,22 @@ private:
     const EGridThermalModel & m_model;
 };
 
-struct EGridThermalModelResultPair
+class ECAD_API EGridThermalNetworkIterativeSolver : public EThermalNetworkSolver
 {
-    const EGridThermalModel & model;
-    std::vector<ESimVal> & resultsT;
+public:
+    explicit EGridThermalNetworkIterativeSolver(const EGridThermalModel & model, std::vector<ESimVal> iniT);
+    virtual ~EGridThermalNetworkIterativeSolver();
+    bool Solve(ESimVal refT, std::vector<ESimVal> & results);
 
-    EGridThermalModelResultPair(const EGridThermalModel & model, std::vector<ESimVal> & resultsT)
-     : model(model), resultsT(resultsT) {}
-    virtual ~EGridThermalModelResultPair() = default;
+private:
+    void SolveOneIteration(ESimVal refT, std::vector<ESimVal> & results);
+    void SolveOneLayer(size_t z, ESimVal refT, std::vector<ESimVal> & results) const;
+
+private:
+    std::vector<ESimVal> m_iniT;
+    const EGridThermalModel & m_model;
 };
+
 
 class ECAD_API EGridThermalNetworkReductionSolver : public EThermalNetworkSolver
 {
@@ -49,7 +56,7 @@ private:
     bool SolveRecursively(const EGridThermalModel & model, ESimVal refT, std::vector<ESimVal> & results, size_t reduceOrder);
     bool SolveDirectly(const EGridThermalModel & model, ESimVal refT, std::vector<ESimVal> & results);
 
-private:
+public:
     static ESize2D LowLeftIndexFromReducedModelIndex(const ESize2D & index);
     static ESize2D ReducedModelIndexFromModelIndex(const ESize2D & index);
 

@@ -9,12 +9,12 @@
 #ifdef MFSOLVER_SUPPORT
 #include "mfsolver64_lib.h"
 #include "mfsolver64def.h"
-#else
+#endif//MFSOLVER_SUPPORT
+
 #include "Eigen/IterativeLinearSolvers"
 #include "Eigen/SparseCholesky"
 #include "Eigen/SparseLU"
 #include "Eigen/Sparse"
-#endif//MFSOLVER_SUPPORT
 
 namespace thermal {
 namespace solver {
@@ -25,13 +25,22 @@ template <typename num_type>
 class ThermalNetworkSolver
 {
 public:
-    explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network)
-     : m_network(network){}
+    explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network, size_t threads = 1)
+     : m_threads(threads), m_network(network) {}
 
     virtual ~ThermalNetworkSolver() = default;
 
-#ifdef MFSOLVER_SUPPORT
     void Solve(num_type refT) const
+    {
+#ifdef MFSOLVER_SUPPORT
+        SolveMF(refT);
+#else
+        SolveEigen(refT);
+#endif//MFSOLVER_SUPPORT
+    }
+
+#ifdef MFSOLVER_SUPPORT
+    void SolveMF(num_type refT) const
     {
     
         ThermalNetworkMatrixBuilder<num_type> builder(m_network);
@@ -46,8 +55,8 @@ public:
         myOptions.SetMetis51(true);//UseMETIS5.1
         myOptions.SetCheckSolution(false);//Donotchecksolution.
         myOptions.SetMultithread(true);//Toenablemultithreading.
-        myOptions.SetNcpu(32);//Enable4threads.
-        myOptions.SetNcpuFbs(32);//Solverfor4RHS.
+        myOptions.SetNcpu(std::max<size_t>(1, m_threads));//Enable4threads.
+        myOptions.SetNcpuFbs(std::max<size_t>(1, m_threads));//Solverfor4RHS.
         myOptions.SetCudaMode(MfCudaAuto);//MfCudaAuto(autoselectGPUmode).
         // myOptions.quiet = true;
         mfsolver64lib :: MfsolverLib mf( solver_type :: REAL_SYM );
@@ -110,8 +119,8 @@ public:
         for(size_t i = 0; i < dimb; ++i)
             nodes[mnMap.at(i)].t = b[i];
     }
-#else
-    void Solve(num_type refT) const
+#endif//MFSOLVER_SUPPORT
+    void SolveEigen(num_type refT) const
     {
 
         ThermalNetworkMatrixBuilder<num_type> builder(m_network);
@@ -141,7 +150,7 @@ public:
         for(size_t i = 0; i < size; ++i)
             b[i] = builder.GetRhs(i, refT);
 
-        Eigen::setNbThreads(8);
+        Eigen::setNbThreads(std::max<size_t>(1, m_threads));
         
         Eigen::VectorXd x;
         //iterator
@@ -162,8 +171,8 @@ public:
         for(size_t i = 0; i < size; ++i)
             nodes[mnMap.at(i)].t = x[i];
     }
-#endif//MFSOLVER_SUPPORT
 private:
+    size_t m_threads = 1;
     ThermalNetwork<num_type> & m_network;
 };
 

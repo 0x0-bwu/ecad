@@ -48,8 +48,9 @@ struct EThermalNetworkExtractionSettings
 
 struct EThermalNetworkSolveSettings
 {
+    size_t threads = 8;
     size_t iteration = 10;
-    EValue residual = 0.1;
+    EValue residual = 0.5;
 };
 
 }//namespace ecad

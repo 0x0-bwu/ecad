@@ -98,6 +98,7 @@
         "xutility": "cpp",
         "coroutine": "cpp",
         "resumable": "cpp",
-        "sparse": "cpp"
+        "sparse": "cpp",
+        "sparselu": "cpp"
     }
 }
