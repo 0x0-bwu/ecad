@@ -78,6 +78,19 @@ ECAD_INLINE CPtr<EGridData> EGridDataTable::GetTable(ESimVal key) const
     return nullptr;
 }
 
+ECAD_INLINE bool EGridDataTable::NeedInterpolation() const
+{
+    if(m_dataTable.size() <= 1) return false;
+    
+    auto start = m_dataTable.cbegin();
+    auto iter = start; iter++;
+    for(; iter != m_dataTable.cend(); ++iter) {
+        if(start->second != iter->second)
+            return true;
+    }
+    return false;
+} 
+
 ECAD_INLINE void EGridDataTable::BuildInterpolater() const
 {
     if(m_interpolator) return;
@@ -115,6 +128,20 @@ ECAD_INLINE EGridThermalLayer::~EGridThermalLayer()
 {
 }
 
+ECAD_INLINE const std::string & EGridThermalLayer::GetName() const
+{
+    return m_name;
+}
+
+ECAD_INLINE void EGridThermalLayer::SetIsMetal(bool isMetal)
+{
+    m_isMetal = isMetal;
+}
+ECAD_INLINE bool EGridThermalLayer::isMetalLayer() const
+{
+    return m_isMetal;
+}
+
 ECAD_INLINE void EGridThermalLayer::SetThickness(FCoord thickness)
 {
     m_thickness = thickness;
@@ -123,6 +150,26 @@ ECAD_INLINE void EGridThermalLayer::SetThickness(FCoord thickness)
 ECAD_INLINE FCoord EGridThermalLayer::GetThickness() const
 {
     return m_thickness;
+}
+
+ECAD_INLINE void EGridThermalLayer::SetTopLayer(const std::string & name)
+{
+    m_topLayer = name;
+}
+
+ECAD_INLINE const std::string & EGridThermalLayer::GetTopLayer() const
+{
+    return m_topLayer;
+}
+
+ECAD_INLINE void EGridThermalLayer::SetBotLayer(const std::string & name)
+{
+    m_botLayer = name;
+}
+
+ECAD_INLINE const std::string & EGridThermalLayer::GetBotLayer() const
+{
+    return m_botLayer;
 }
 
 ECAD_INLINE void EGridThermalLayer::SetConductingMaterial(CPtr<IMaterialDef> material)
@@ -164,6 +211,11 @@ ECAD_INLINE ESimVal EGridThermalLayer::GetMetalFraction(size_t x, size_t y) cons
     return (*m_metalFraction)(x, y);
 }
 
+ECAD_INLINE SPtr<ELayerMetalFraction> EGridThermalLayer::GetMetalFraction() const
+{
+    return m_metalFraction;
+}
+
 ECAD_INLINE ESize2D EGridThermalLayer::GetSize() const
 {
     auto w = m_metalFraction->Width();
@@ -179,6 +231,14 @@ ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPo
 
 ECAD_INLINE EGridThermalModel::~EGridThermalModel()
 {
+}
+
+ECAD_INLINE FCoord EGridThermalModel::TotalThickness() const
+{
+    FCoord thickness = 0.0;
+    for(const auto & layer : m_stackupLayers)
+        thickness += layer.GetThickness();
+    return thickness;
 }
 
 ECAD_INLINE size_t EGridThermalModel::TotalLayers() const
@@ -235,6 +295,11 @@ ECAD_INLINE bool EGridThermalModel::AppendLayer(EGridThermalLayer layer)
 {
     if(math::LT<FCoord>(layer.GetThickness(), 0)) return false;
     if(layer.GetSize() != m_size) return false;
+    if(!m_stackupLayers.empty()) {
+        auto & botLayer = m_stackupLayers.back();
+        botLayer.SetBotLayer(layer.GetName());
+        layer.SetTopLayer(botLayer.GetName());
+    }
     m_stackupLayers.emplace_back(std::move(layer));
     return true;
 }
@@ -280,6 +345,18 @@ ECAD_INLINE void EGridThermalModel::GetTopBotBCType(BCType & top, BCType & bot) 
 {
     top = m_bcTypeTopBot[0];
     bot = m_bcTypeTopBot[1];
+}
+
+ECAD_INLINE bool EGridThermalModel::NeedIteration() const
+{
+    for(auto bc : m_bcTopBot)
+        if(bc && bc->NeedInterpolation()) return true;
+
+    for(const auto & layer : m_stackupLayers) {
+        auto pwr = layer.GetPowerModel();
+        if(pwr && pwr->NeedInterpolation()) return true;
+    }
+    return false;
 }
 
 }//namespace etherm

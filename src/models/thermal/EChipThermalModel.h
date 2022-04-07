@@ -57,7 +57,17 @@ public:
     ECTMv1Header header;
     SPtr<EGridPowerModel> powers = nullptr;
     std::unordered_map<std::string, SPtr<EGridData> > densities;
+    EChipThermalModelV1() = default;
     virtual ~EChipThermalModelV1();
+
+    ///Copy
+    EChipThermalModelV1(const EChipThermalModelV1 & other);
+    EChipThermalModelV1 & operator= (const EChipThermalModelV1 & other);
+
+    ///Move
+    EChipThermalModelV1(EChipThermalModelV1 && other);
+    EChipThermalModelV1 & operator= (EChipThermalModelV1 && other);
+
     std::string GetLastMatelLayerInStackup() const;
     bool GetLayerHeightThickness(const std::string & name, EValue & height, EValue & thickness) const;
     CPtr<ECTMv1LayerStackup> GetLayerStackup(std::string * info = nullptr) const;

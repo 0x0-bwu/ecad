@@ -14,6 +14,45 @@ ECAD_INLINE EChipThermalModelV1::~EChipThermalModelV1()
 {
 }
 
+ECAD_INLINE EChipThermalModelV1::EChipThermalModelV1(const EChipThermalModelV1 & other)
+{
+    *this = other;
+}
+    
+ECAD_INLINE EChipThermalModelV1 & EChipThermalModelV1::operator= (const EChipThermalModelV1 & other)
+{
+    EThermalModel::operator=(other);
+    header = other.header;
+    powers = other.powers;
+    densities = other.densities;
+    if(other.m_layerStackup)
+        m_layerStackup = std::make_unique<ECTMv1LayerStackup>(*(other.m_layerStackup));
+    return *this;
+}
+
+ECAD_INLINE EChipThermalModelV1::EChipThermalModelV1(EChipThermalModelV1 && other)
+{
+    *this = other;
+}
+
+ECAD_INLINE EChipThermalModelV1 & EChipThermalModelV1::operator= (EChipThermalModelV1 && other)
+{
+    if(this != &other) {
+        header = std::move(other.header);
+        powers = std::move(other.powers);
+        other.powers = nullptr;
+
+        densities = std::move(other.densities);
+
+        if(other.m_layerStackup) {
+            m_layerStackup = std::move(other.m_layerStackup);
+            other.m_layerStackup = nullptr;
+        }
+    }
+    return *this;
+}
+
+
 ECAD_INLINE std::string EChipThermalModelV1::GetLastMatelLayerInStackup() const
 {
     auto stackup = GetLayerStackup();

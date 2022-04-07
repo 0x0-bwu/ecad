@@ -58,7 +58,7 @@ public:
         myOptions.SetNcpu(std::max<size_t>(1, m_threads));//Enable4threads.
         myOptions.SetNcpuFbs(std::max<size_t>(1, m_threads));//Solverfor4RHS.
         myOptions.SetCudaMode(MfCudaAuto);//MfCudaAuto(autoselectGPUmode).
-        // myOptions.quiet = true;
+        myOptions.quiet = true;
         mfsolver64lib :: MfsolverLib mf( solver_type :: REAL_SYM );
         mf.SetOptions (&myOptions);
 
@@ -118,6 +118,9 @@ public:
         auto & nodes = m_network.GetNodes();
         for(size_t i = 0; i < dimb; ++i)
             nodes[mnMap.at(i)].t = b[i];
+
+        //7.Free data
+        free(AA); free(IA); free(JA); free(b);
     }
 #endif//MFSOLVER_SUPPORT
     void SolveEigen(num_type refT) const

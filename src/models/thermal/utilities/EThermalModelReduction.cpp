@@ -89,12 +89,26 @@ ECAD_INLINE bool EGridThermalModelReduction::Reduce()
     return true;
 }
 
-ECAD_INLINE UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel & model)
+ECAD_INLINE UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel & model, size_t order)
 {
     auto copy = model;
-    EGridThermalModelReduction r(copy);
-    if(!r.Reduce()) return nullptr;
+    while(order != 0) {
+        EGridThermalModelReduction r(copy);
+        if(!r.Reduce()) return nullptr;
+        order--;
+    }
     return std::make_unique<EGridThermalModel>(std::move(copy));
+}
+
+ECAD_INLINE UPtr<EChipThermalModelV1> makeReductionModel(const EChipThermalModelV1 & model, size_t order)
+{
+    auto copy = model;
+    while(order != 0) {
+        EChipThermalModelV1Reduction r(copy);
+        if(!r.Reduce()) return nullptr;
+        order--;
+    }
+    return std::make_unique<EChipThermalModelV1>(std::move(copy));
 }
 
 namespace detail {

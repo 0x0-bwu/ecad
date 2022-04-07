@@ -38,7 +38,8 @@ private:
     EGridThermalModel & m_model;
 };
 
-ECAD_API UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel & model);
+ECAD_API UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel & model, size_t order = 1);
+ECAD_API UPtr<EChipThermalModelV1> makeReductionModel(const EChipThermalModelV1 & model, size_t order = 1);
 
 namespace detail {
 

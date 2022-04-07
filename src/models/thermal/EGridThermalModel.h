@@ -30,6 +30,7 @@ public:
 
     std::list<ESimVal> GetAllKeys() const;
     CPtr<EGridData> GetTable(ESimVal key) const;
+    bool NeedInterpolation() const;
 
 private:
     void BuildInterpolater() const;
@@ -53,8 +54,19 @@ public:
     explicit EGridThermalLayer(std::string name, SPtr<ELayerMetalFraction> metalFraction);
     virtual ~EGridThermalLayer();
 
+    const std::string & GetName() const;
+
+    void SetIsMetal(bool isMetal);
+    bool isMetalLayer() const;
+
     void SetThickness(FCoord thickness);
     FCoord GetThickness() const;
+
+    void SetTopLayer(const std::string & name);
+    const std::string & GetTopLayer() const;
+
+    void SetBotLayer(const std::string & name);
+    const std::string & GetBotLayer() const;
 
     void SetConductingMaterial(CPtr<IMaterialDef> material);
     CPtr<IMaterialDef> GetConductingMaterial() const;
@@ -66,10 +78,12 @@ public:
     CPtr<EGridPowerModel> GetPowerModel() const;
 
     ESimVal GetMetalFraction(size_t x, size_t y) const;
+    SPtr<ELayerMetalFraction> GetMetalFraction() const;
 
     ESize2D GetSize() const;
 
 private:
+    bool m_isMetal = false;
     FCoord m_thickness = 0;//unit: m
     std::string m_name;
     std::string m_topLayer;
@@ -88,6 +102,7 @@ public:
     explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), FCoord elevation = 0);
     virtual ~EGridThermalModel();
 
+    FCoord TotalThickness() const;
     size_t TotalLayers() const;
     size_t TotalGrids() const;
     ESize3D ModelSize() const;
@@ -116,6 +131,8 @@ public:
     ESize3D GetGridIndex(size_t index) const;
     bool isValid(const ESize2D & index) const;
     bool isValid(const ESize3D & index) const;
+
+    bool NeedIteration() const;
 
 private:
     ESize2D m_size;

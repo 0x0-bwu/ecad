@@ -24,12 +24,12 @@ void t_additional()
 test_suite *
 init_unit_test_suite( int argc, char* argv[] )
 {
-    framework::master_test_suite().add(create_ecad_function_test_suite());
-    framework::master_test_suite().add(create_ecad_extension_test_suite());
-    framework::master_test_suite().add(create_ecad_serialization_test_suite());
-    framework::master_test_suite().add(create_ecad_simulation_test_suite());
+    // framework::master_test_suite().add(create_ecad_function_test_suite());
+    // framework::master_test_suite().add(create_ecad_extension_test_suite());
+    // framework::master_test_suite().add(create_ecad_serialization_test_suite());
+    // framework::master_test_suite().add(create_ecad_simulation_test_suite());
     framework::master_test_suite().add(create_ecad_solver_test_suite());
-    framework::master_test_suite().add(create_ecad_utility_test_suite());
+    // framework::master_test_suite().add(create_ecad_utility_test_suite());
     framework::master_test_suite().add(BOOST_TEST_CASE(&t_additional));
     return 0;
 }

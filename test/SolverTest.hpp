@@ -41,7 +41,7 @@ void t_grid_thermal_model_solver_test()
     // EGridThermalNetworkDirectSolver solver(*model);
     // BOOST_CHECK(solver.Solve(iniT, results));
 
-    EGridThermalNetworkReductionSolver solver(*model, 2);
+    EGridThermalNetworkReductionSolver solver(*model,3);
     BOOST_CHECK(solver.Solve(iniT, results));
    
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);

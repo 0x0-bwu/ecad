@@ -51,6 +51,68 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
     return model;
 }
 
+ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModelV1 & model, const std::string & dirName, const std::string & filename, std::string * err)
+{
+    auto ctmDir = dirName + GENERIC_FOLDER_SEPS + filename;
+    if(!PathExists(ctmDir)) MakeDir(ctmDir);
+    if(!PathExists(ctmDir) || !isDirWritable(ctmDir)) {
+        if(err) *err = Format2String("Error: unwritable folder: %1%.", ctmDir);
+        return false;
+    }
+    
+    using namespace detail;
+    if(model.header.temperatures.size() < 5) {
+        if(err) *err = "Error: at least 5 temperature points needed in ctm header!";
+        return false;
+    }
+
+    //header
+    std::string headerFile = ctmDir + GENERIC_FOLDER_SEPS + "CTM_header.txt";
+    if(!WriteCTMv1HeaderFile(headerFile, model.header, err)) return false;
+
+    //power
+    if(!model.powers) {
+        if(err) *err = "Error: missing power data in ctm model!";
+        return false;
+    }
+    const auto & powers = *(model.powers);
+    for(size_t i = 0; i < model.header.temperatures.size(); ++i) {
+        auto temperature = model.header.temperatures.at(i);
+        auto table = powers.GetTable(temperature);
+        if(nullptr == table) {
+            if(err) *err = Format2String("Error: failed to get power table at temperature: %1%", temperature);
+            return false;
+        }
+        std::string powerFile = ctmDir + GENERIC_FOLDER_SEPS + Format2String("power_T[%1%].ctm", i + 1);
+        if(!WriteCTMv1PowerFile(powerFile, *table, err)) return false;
+    }
+
+    //density
+    std::vector<SPtr<EGridData> > density;
+    for(const auto & layer : model.header.layers) {
+        auto iter = model.densities.find(layer.name);
+        if(iter == model.densities.end() || nullptr == iter->second) {
+            if(err) *err = Format2String("Error: failed to get metal density data of layer: %1%!", layer.name);
+            return false;
+        }
+        density.push_back(iter.second);
+    }//wbtest, todo
+    if(density.size() != model.header.layers.size()) {
+        if(err) *err = "Error: metal density data mismatch with layer size!";
+        return false;
+    }
+    FPoint2D rf = model.header.size[0];
+    size_t size = model.header.tiles.x * model.header.tiles.y;
+    std::string densityFile = ctmDir + GENERIC_FOLDER_SEPS + "metal_density.ctm";
+    if(!WriteCTMv1DensityFile(densityFile, size, model.header.resolution, rf, density, err)) return false;
+
+    //make package
+    std::string ctmFile = dirName + GENERIC_FOLDER_SEPS + filename + ".tar.gz";
+    if(!GenerateCTMv1Package(ctmDir, ctmFile, false, err)) return false;
+
+    return true;
+}
+
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
 ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, const std::string & dirName, std::string * err)
 {
@@ -323,6 +385,154 @@ ECAD_API bool ParseCTMv1DensityFile(const std::string & filename, const size_t s
 
     fp.close();
     return true;
+}
+
+ECAD_INLINE bool WriteCTMv1HeaderFile(const std::string & filename, const ECTMv1Header & header, std::string * err)
+{
+    std::ofstream out(filename);
+    if(!out.is_open()) {
+        if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
+        return false;
+    }
+
+    auto encryptFunc = [](std::string s, size_t len) {
+        std::for_each(s.begin(), s.end(), [&](char & c) {c += 3 * len + 22; });
+        return s;
+    };
+
+    out << std::setiosflags(std::ios::fixed) << std::setprecision(6);
+
+    char sp(32);
+    out << header.head << sp << (header.encrypted ? "(encrypted)" : "") << GENERIC_DEFAULT_EOL;
+    out << "LAYER" << sp << header.layers.size();
+    for(const auto & layer : header.layers) {
+        out << sp << layer.name << sp;
+        if(!header.encrypted) out << layer.thickness;
+        else out << encryptFunc(std::to_string(layer.thickness), layer.name.size());
+    }
+    out << GENERIC_DEFAULT_EOL;
+
+    const auto & size = header.size;
+    out << "DIE" << sp << size[0][0] << sp << size[0][1] << sp << size[1][0] << sp << size[1][1] << GENERIC_DEFAULT_EOL;
+    out << "TEMP";
+    for(const auto & t : header.temperatures) out << sp << t;
+    out << GENERIC_DEFAULT_EOL;
+    out << "TILE" << sp << header.tiles.x << sp << header.tiles.y << GENERIC_DEFAULT_EOL;
+    out << "RESOLUTION" << sp << header.resolution << GENERIC_DEFAULT_EOL;
+    out << "DIE_ORIG" << sp << size[0][0] << sp << size[0][1] << sp << size[1][0] << sp << size[1][1] << GENERIC_DEFAULT_EOL;
+    out << "SCALE_FACTOR" << sp << header.scale << GENERIC_DEFAULT_EOL;
+    out << "ALL_LAYERS" << sp << header.techLayers.size();
+    for(const auto & name : header.techLayers) out << sp << name;
+    out << GENERIC_DEFAULT_EOL;
+    out << GENERIC_DEFAULT_EOL;
+    
+    out << std::left;
+    out << "METAL_LAYERS {" << GENERIC_DEFAULT_EOL;
+    out << "#<layer>        <thickness>        <height>" << GENERIC_DEFAULT_EOL;
+    for(const auto & mLayer : header.metalLayers) {
+        out << sp << sp;
+        out << std::setw(21) << mLayer.name;
+        if(!header.encrypted) {
+            out << std::setw(21) << mLayer.thickness;
+            out << std::setw(21) << mLayer.elevation;
+        }
+        else {
+            out << std::setw(21) << encryptFunc(std::to_string(mLayer.thickness), mLayer.name.size());
+            out << std::setw(21) << encryptFunc(std::to_string(mLayer.elevation), mLayer.name.size());
+        }
+        out << GENERIC_DEFAULT_EOL;
+    }
+    out << "}" << GENERIC_DEFAULT_EOL;
+
+    out << "VIA_LAYERS {" << GENERIC_DEFAULT_EOL;
+    out << "#<layer>        <bottom_layer>        <top_layer>" << GENERIC_DEFAULT_EOL;
+    for(const auto & vLayer : header.viaLayers) {
+        out << sp << sp;
+        out << std::setw(21) << vLayer.name;
+        out << std::setw(21) << vLayer.botLayer;
+        out << std::setw(21) << vLayer.topLayer;
+        out << GENERIC_DEFAULT_EOL;
+    }
+    out << "}" << GENERIC_DEFAULT_EOL;
+
+    out.close();
+    return true;
+}
+
+ECAD_INLINE bool WriteCTMv1PowerFile(const std::string & filename, const EGridData & powers, std::string * err)
+{
+    std::ofstream out(filename, std::ios::out |std::ios::binary);
+    if(!out.is_open()) {
+        if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
+        return false;
+    }
+
+    float temp;
+    for(size_t i = 0; i < powers.Size(); ++i) {
+        temp = powers[i];
+        out.write(reinterpret_cast<char*>(&temp), sizeof(float)); 
+    }
+    out.close();
+    return true;
+}
+
+ECAD_INLINE bool WriteCTMv1DensityFile(const std::string & filename, const size_t size, FCoord res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err)
+{
+    if(density.empty()) return false;
+    for(const auto & layer : density) {
+        if(nullptr == layer) {
+            if(err) *err = "Error: missing data in metal density!";
+            return false;
+        }
+        if(layer->Size() != size) {
+            if(err) *err = "Error: metal density data mismatch with size!";
+            return false;
+        }
+    } 
+
+    std::ofstream out(filename, std::ios::out |std::ios::binary);
+    if(!out.is_open()) {
+        if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
+        return false;
+    }
+
+    int id = 0;
+    float temp;
+    auto nx = density.front()->Width();
+    auto ny = density.front()->Height();
+    for(size_t x = 0; x < nx; ++x) {
+        float x0 = ref[0] + x * res, x1 = x0 + res;
+        for(size_t y = 0; y < ny; ++y) {
+            id++;
+            float y0 = ref[1] + y * res, y1 = y0 + res;
+            out.write(reinterpret_cast<char*>(&id), sizeof(int));
+            out.write(reinterpret_cast<char*>(&x0), sizeof(float));
+            out.write(reinterpret_cast<char*>(&y0), sizeof(float));
+            out.write(reinterpret_cast<char*>(&x1), sizeof(float));
+            out.write(reinterpret_cast<char*>(&y1), sizeof(float));         
+
+            for(auto layer : density) {
+                temp = (*layer)(x, y);
+                out.write(reinterpret_cast<char*>(&temp), sizeof(float));         
+            }
+        }
+    }
+
+    out.close();
+    return true;
+}
+
+ECAD_INLINE bool GenerateCTMv1Package(const std::string & dirName, const std::string & packName, bool removeDir, std::string * err)
+{
+    std::string cmd = Format2String("tar zcf %1% -C %2% .", packName, dirName);
+    int res = std::system(cmd.c_str());
+    if(res == 0 && FileExists(packName)) {
+        if(removeDir) RemoveDir(dirName);
+        return true;
+    }
+
+    if(err) *err = Format2String("Error: failed to generate ctm package: %1%.", packName);
+    return false;
 }
 
 #ifdef BOOST_GIL_IO_PNG_SUPPORT

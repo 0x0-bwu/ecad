@@ -46,14 +46,14 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
     using namespace thermal::solver;
     ECAD_EFFICIENCY_TRACK("thermal network solve")
 
-    auto size = m_model.TotalGrids();
-    results.assign(size, refT);
+    results.assign(m_model.TotalGrids(), refT);
+    bool needIteration = m_model.NeedIteration();
     if(m_settings.iteration > 0 && math::GT<EValue>(m_settings.residual, 0)) {
 
         EValue residual = m_settings.residual;
         size_t iteration = m_settings.iteration;
         EGridThermalNetworkBuilder builder(m_model);
-        while(iteration != 0 && math::GE(residual, m_settings.residual)) {
+        do {
             std::vector<ESimVal> lastRes(results);
             auto network = builder.Build(lastRes);
             if(nullptr == network) return false;
@@ -68,12 +68,13 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             for(size_t n = 0; n < nodes.size(); ++n)
                 results[n] = nodes[n].t;
 
-            residual = CalculateResidual(results, lastRes);
             iteration -= 1;
+            if(!needIteration || iteration == 0) break;
 
-            std::cout << "Residual: " << residual << ", Remain Iteration: ";
-            std::cout << (math::GE(residual, m_settings.residual) ? iteration : 0) << std::endl;//wbtest; 
-        }
+            residual = CalculateResidual(results, lastRes);
+            needIteration = math::GE(residual, m_settings.residual);
+            std::cout << "Residual: " << residual << ", Remain Iteration: " << (needIteration ? iteration : 0) << std::endl;
+        } while(needIteration);
     }
 
     return true;
@@ -97,12 +98,12 @@ ECAD_INLINE bool EGridThermalNetworkIterativeSolver::Solve(ESimVal refT, std::ve
         // size_t iteration = m_settings.iteration;
         size_t iteration = std::numeric_limits<size_t>::max();
         do {
-            SolveOneIteration(refT, results);
+            SolveOneIteration(refT, results);            
             residual = CalculateResidual(m_iniT, results);
             iteration -= 1;
 
             std::cout << "Iterative Residual: " << residual << ", Remain Iteration: ";
-            std::cout << (math::GE(residual, m_settings.residual) ? iteration : 0) << std::endl;//wbtest; 
+            std::cout << (math::GE(residual, m_settings.residual) ? iteration : 0) << std::endl;
 
             m_iniT = results;
         } while(iteration != 0 && math::GE(residual, m_settings.residual));
@@ -127,7 +128,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneIteration(ESimVal r
     }
 }
 
-ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESimVal refT, std::vector<ESimVal> & results) const
+ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESimVal refT, std::vector<ESimVal> & results)
 {
     EGridThermalNetworkBuilder builder(m_model);
 
@@ -142,11 +143,19 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
     using namespace thermal::solver;
     using Orient = typename EGridThermalNetworkBuilder::Orientation;
 
+    auto getT = [this, &results](const ESize3D & grid) {
+        size_t i = m_model.GetFlattenIndex(grid);
+        return m_iniT[i];
+    };
+
     size_t node;
     size_t index;
     bool success;
     ESimVal temperature;
     auto pwrModel = m_model.GetPowerModel(z);
+    pwrModel = nullptr;//wbtest
+    topBC = nullptr;//wbtest
+    botBC = nullptr;//wbtest
     auto xGridArea = builder.GetXGridArea(z);
     auto yGridArea = builder.GetYGridArea(z);
     auto halfXGridLen = 0.5 * builder.GetXGridLength();
@@ -154,28 +163,25 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
     auto size = utils::detail::Reduce(m_model.GridSize(), utils::ReduceIndexMethod::Ceil);
     for(size_t x = 0; x < size.x; ++x) {
         for(size_t y = 0; y < size.y; ++y) {
-            ESize3D rdGrid(x, y, z);
             ESize2D ll = EGridThermalNetworkReductionSolver::LowLeftIndexFromReducedModelIndex(ESize2D(x, y));
             ESize2D lr = ESize2D(ll.x + 1, ll.y);
             ESize2D ul = ESize2D(ll.x, ll.y + 1);
             ESize2D ur = ESize2D(ll.x + 1, ll.y + 1);
             if(!m_model.isValid(lr) && !m_model.isValid(ul)) {
                 ESize3D grid(ll, z);
-                temperature = m_iniT[m_model.GetFlattenIndex(grid)];
+                temperature = getT(grid);
                 auto k = builder.GetCompositeMatK(grid, temperature);
 
                 ThermalNetwork<ESimVal> network(1);
                 
                 //power
                 if(pwrModel) {
-                    temperature = m_iniT[m_model.GetFlattenIndex(grid)];
                     auto p = pwrModel->Query(temperature, grid.x, grid.y, &success);
                     if(success) network.SetHF(0, p);
                 }
 
                 //bc
                 if(z == 0 && topBC) {
-                    temperature = m_iniT[m_model.GetFlattenIndex(grid)];
                     auto val = topBC->Query(temperature, grid.x, grid.y, &success);
                     if(success) {
                         switch(topT) {
@@ -196,7 +202,6 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 }
 
                 if(z == (m_model.TotalLayers() - 1) && botBC) {
-                    temperature = m_iniT[m_model.GetFlattenIndex(grid)];
                     auto val = botBC->Query(temperature, grid.x, grid.y, &success);
                     if(success) {
                         switch(botT) {
@@ -219,7 +224,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto left = builder.GetNeighbor(grid, Orient::Left);
                 if(m_model.isValid(left)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(left)];
+                    temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
                     auto r0L = builder.GetR(k[0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
@@ -230,48 +235,49 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto front = builder.GetNeighbor(grid, Orient::Front);
                 if(m_model.isValid(front)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(front)];
+                    temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
                     auto r0F = builder.GetR(k[1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0F);
                 }
 
-                //top
-                auto top = builder.GetNeighbor(grid, Orient::Top);
-                if(m_model.isValid(top)) {
-                    temperature = m_iniT[builder.GetFlattenIndex(top)];
-                    auto zN = builder.GetZGridLength(z);
-                    auto zT = builder.GetZGridLength(top.z);
-                    auto kTN = builder.GetConductingMatK(top, temperature);
-                    auto rNT = builder.GetR(k[2], zN, kTN[2], zT, builder.GetZGridArea());
-                    node = network.AppendNode(temperature);
-                    network.SetR(0, node, rNT);
-                }
+                // //top
+                // auto top = builder.GetNeighbor(grid, Orient::Top);
+                // if(m_model.isValid(top)) {
+                //     temperature = getT(top);
+                //     auto zN = builder.GetZGridLength(z);
+                //     auto zT = builder.GetZGridLength(top.z);
+                //     auto kTN = builder.GetConductingMatK(top, temperature);
+                //     auto rNT = builder.GetR(k[2], zN, kTN[2], zT, builder.GetZGridArea());
+                //     node = network.AppendNode(temperature);
+                //     network.SetR(0, node, rNT);
+                // }
 
-                //bot
-                auto bot = builder.GetNeighbor(grid, Orient::Bot);
-                if(m_model.isValid(bot)) {
-                    temperature = m_iniT[builder.GetFlattenIndex(bot)];
-                    auto zN = builder.GetZGridLength(z);
-                    auto zB = builder.GetZGridLength(bot.z);
-                    auto kBN = builder.GetConductingMatK(bot, temperature);
-                    auto rNB = builder.GetR(k[2], zN, kBN[2], zB, builder.GetZGridArea());
-                    node = network.AppendNode(temperature);
-                    network.SetR(0, node, rNB);
-                }
+                // //bot
+                // auto bot = builder.GetNeighbor(grid, Orient::Bot);
+                // if(m_model.isValid(bot)) {
+                //     temperature = getT(bot);
+                //     auto zN = builder.GetZGridLength(z);
+                //     auto zB = builder.GetZGridLength(bot.z);
+                //     auto kBN = builder.GetConductingMatK(bot, temperature);
+                //     auto rNB = builder.GetR(k[2], zN, kBN[2], zB, builder.GetZGridArea());
+                //     node = network.AppendNode(temperature);
+                //     network.SetR(0, node, rNB);
+                // }
                 ThermalNetworkSolver solver(network);
                 solver.SolveEigen(refT);
 
                 const auto & nodes = network.GetNodes();
-                results[m_model.GetFlattenIndex(grid)] = nodes.front().t;
+                index = m_model.GetFlattenIndex(grid);
+                results[index] = nodes.front().t;
             }
             else if(m_model.isValid(lr) && !m_model.isValid(ul)) {
                 std::array<ESize2D, 2> tiles {ll, lr};
                 std::array<std::array<ESimVal, 3>, 2> k;
                 for(size_t n = 0; n < k.size(); ++n) {
                     ESize3D grid(tiles[n], z);
-                    temperature = m_iniT[m_model.GetFlattenIndex(grid)];
+                    temperature = getT(grid);
                     k[n] = builder.GetCompositeMatK(grid, temperature);
                 }
 
@@ -281,7 +287,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(pwrModel) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto p = pwrModel->Query(temperature, curr.x, curr.y, &success);
                         if(success) network.SetHF(n, p);
                     }
@@ -291,7 +297,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(z == 0 && topBC) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto val = topBC->Query(temperature, curr.x, curr.y, &success);
                         if(!success) continue;
                         switch(topT) {
@@ -314,7 +320,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(z == (m_model.TotalLayers() - 1) && botBC) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto val = botBC->Query(temperature, curr.x, curr.y, &success);
                         if(!success) continue;
                         switch(botT) {
@@ -342,7 +348,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto left = builder.GetNeighbor(ESize3D(ll, z), Orient::Left);
                 if(m_model.isValid(left)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(left)];
+                    temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
                     auto r0L = builder.GetR(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
@@ -353,7 +359,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto front = builder.GetNeighbor(ESize3D(ll, z), Orient::Front);
                 if(m_model.isValid(front)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(front)];
+                    temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
                     auto r0F = builder.GetR(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
@@ -361,7 +367,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
 
                     //1
                     front = builder.GetNeighbor(ESize3D(lr, z), Orient::Front);
-                    temperature = m_iniT[m_model.GetFlattenIndex(front)];
+                    temperature = getT(front);
                     auto kF1 = builder.GetCompositeMatK(front, temperature);
                     auto r1F = builder.GetR(k[1][1], halfYGridLen, kF1[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
@@ -372,44 +378,44 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto right = builder.GetNeighbor(ESize3D(lr, z), Orient::Right);
                 if(m_model.isValid(right)) {
                     //1
-                    temperature = m_iniT[m_model.GetFlattenIndex(right)];
+                    temperature = getT(right);
                     auto kR1 = builder.GetCompositeMatK(right, temperature);
                     auto r1R = builder.GetR(k[1][0], halfXGridLen, kR1[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(1, node, r1R);
                 }
 
-                //top
-                auto top = builder.GetNeighbor(ESize3D(ll, z), Orient::Top);
-                if(m_model.isValid(top)) {
-                    for(size_t n = 0; n < tiles.size(); ++n) {
-                        const auto & curr = tiles[n];
-                        top = builder.GetNeighbor(ESize3D(curr, z), Orient::Top);
-                        temperature = m_iniT[builder.GetFlattenIndex(top)];
-                        auto zN = builder.GetZGridLength(z);
-                        auto zT = builder.GetZGridLength(top.z);
-                        auto kTN = builder.GetConductingMatK(top, temperature);
-                        auto rNT = builder.GetR(k[n][2], zN, kTN[2], zT, builder.GetZGridArea());
-                        node = network.AppendNode(temperature);
-                        network.SetR(n, node, rNT);
-                    }
-                }
+                // //top
+                // auto top = builder.GetNeighbor(ESize3D(ll, z), Orient::Top);
+                // if(m_model.isValid(top)) {
+                //     for(size_t n = 0; n < tiles.size(); ++n) {
+                //         const auto & curr = tiles[n];
+                //         top = builder.GetNeighbor(ESize3D(curr, z), Orient::Top);
+                //         temperature = getT(top);
+                //         auto zN = builder.GetZGridLength(z);
+                //         auto zT = builder.GetZGridLength(top.z);
+                //         auto kTN = builder.GetConductingMatK(top, temperature);
+                //         auto rNT = builder.GetR(k[n][2], zN, kTN[2], zT, builder.GetZGridArea());
+                //         node = network.AppendNode(temperature);
+                //         network.SetR(n, node, rNT);
+                //     }
+                // }
 
-                //bot
-                auto bot = builder.GetNeighbor(ESize3D(ll, z), Orient::Bot);
-                if(m_model.isValid(bot)) {
-                    for(size_t n = 0; n < tiles.size(); ++n) {
-                        const auto & curr = tiles[n];
-                        bot = builder.GetNeighbor(ESize3D(curr, z), Orient::Bot);
-                        temperature = m_iniT[builder.GetFlattenIndex(bot)];
-                        auto zN = builder.GetZGridLength(z);
-                        auto zB = builder.GetZGridLength(bot.z);
-                        auto kBN = builder.GetConductingMatK(bot, temperature);
-                        auto rNB = builder.GetR(k[n][2], zN, kBN[2], zB, builder.GetZGridArea());
-                        node = network.AppendNode(temperature);
-                        network.SetR(n, node, rNB);
-                    }
-                }
+                // //bot
+                // auto bot = builder.GetNeighbor(ESize3D(ll, z), Orient::Bot);
+                // if(m_model.isValid(bot)) {
+                //     for(size_t n = 0; n < tiles.size(); ++n) {
+                //         const auto & curr = tiles[n];
+                //         bot = builder.GetNeighbor(ESize3D(curr, z), Orient::Bot);
+                //         temperature = getT(bot);
+                //         auto zN = builder.GetZGridLength(z);
+                //         auto zB = builder.GetZGridLength(bot.z);
+                //         auto kBN = builder.GetConductingMatK(bot, temperature);
+                //         auto rNB = builder.GetR(k[n][2], zN, kBN[2], zB, builder.GetZGridArea());
+                //         node = network.AppendNode(temperature);
+                //         network.SetR(n, node, rNB);
+                //     }
+                // }
                 ThermalNetworkSolver solver(network);
                 solver.SolveEigen(refT);
 
@@ -424,7 +430,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 std::array<std::array<ESimVal, 3>, 2> k;
                 for(size_t n = 0; n < k.size(); ++n) {
                     ESize3D grid(tiles[n], z);
-                    temperature = m_iniT[m_model.GetFlattenIndex(grid)];
+                    temperature = getT(grid);
                     k[n] = builder.GetCompositeMatK(grid, temperature);
                 }
 
@@ -433,7 +439,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(pwrModel) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto p = pwrModel->Query(temperature, curr.x, curr.y, &success);
                         if(success) network.SetHF(n, p);
                     }
@@ -443,7 +449,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(z == 0 && topBC) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto val = topBC->Query(temperature, curr.x, curr.y, &success);
                         if(!success) continue;
                         switch(topT) {
@@ -466,7 +472,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(z == (m_model.TotalLayers() - 1) && botBC) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto val = botBC->Query(temperature, curr.x, curr.y, &success);
                         if(!success) continue;
                         switch(botT) {
@@ -494,14 +500,14 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto left = builder.GetNeighbor(ESize3D(ll, z), Orient::Left);
                 if(m_model.isValid(left)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(left)];
+                    temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
                     auto r0L = builder.GetR(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0L);
                     //1
                     left = builder.GetNeighbor(ESize3D(ul, z), Orient::Left);
-                    temperature = m_iniT[m_model.GetFlattenIndex(left)];
+                    temperature = getT(left);
                     auto kL1 = builder.GetCompositeMatK(left, temperature);
                     auto r1L = builder.GetR(k[1][0], halfXGridLen, kL1[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
@@ -512,7 +518,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto front = builder.GetNeighbor(ESize3D(ll, z), Orient::Front);
                 if(m_model.isValid(front)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(front)];
+                    temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
                     auto r0F = builder.GetR(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
@@ -522,44 +528,44 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto end = builder.GetNeighbor(ESize3D(ul, z), Orient::End);
                 if(m_model.isValid(end)) {
                     //1
-                    temperature = m_iniT[m_model.GetFlattenIndex(end)];
+                    temperature = getT(end);
                     auto kE1 = builder.GetCompositeMatK(end, temperature);
                     auto r1E = builder.GetR(k[1][1], halfYGridLen, kE1[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(2, node, r1E);
                 }
 
-                //top
-                auto top = builder.GetNeighbor(ESize3D(ll, z), Orient::Top);
-                if(m_model.isValid(top)) {
-                    for(size_t n = 0; n < tiles.size(); ++n) {
-                        const auto & curr = tiles[n];
-                        top = builder.GetNeighbor(ESize3D(curr, z), Orient::Top);
-                        temperature = m_iniT[builder.GetFlattenIndex(top)];
-                        auto zN = builder.GetZGridLength(z);
-                        auto zT = builder.GetZGridLength(top.z);
-                        auto kTN = builder.GetConductingMatK(top, temperature);
-                        auto rNT = builder.GetR(k[n][2], zN, kTN[2], zT, builder.GetZGridArea());
-                        node = network.AppendNode(temperature);
-                        network.SetR(n, node, rNT);
-                    }
-                }
+                // //top
+                // auto top = builder.GetNeighbor(ESize3D(ll, z), Orient::Top);
+                // if(m_model.isValid(top)) {
+                //     for(size_t n = 0; n < tiles.size(); ++n) {
+                //         const auto & curr = tiles[n];
+                //         top = builder.GetNeighbor(ESize3D(curr, z), Orient::Top);
+                //         temperature = getT(top);
+                //         auto zN = builder.GetZGridLength(z);
+                //         auto zT = builder.GetZGridLength(top.z);
+                //         auto kTN = builder.GetConductingMatK(top, temperature);
+                //         auto rNT = builder.GetR(k[n][2], zN, kTN[2], zT, builder.GetZGridArea());
+                //         node = network.AppendNode(temperature);
+                //         network.SetR(n, node, rNT);
+                //     }
+                // }
 
-                //bot
-                auto bot = builder.GetNeighbor(ESize3D(ll, z), Orient::Bot);
-                if(m_model.isValid(bot)) {
-                    for(size_t n = 0; n < tiles.size(); ++n) {
-                        const auto & curr = tiles[n];
-                        bot = builder.GetNeighbor(ESize3D(curr, z), Orient::Bot);
-                        temperature = m_iniT[builder.GetFlattenIndex(bot)];
-                        auto zN = builder.GetZGridLength(z);
-                        auto zB = builder.GetZGridLength(bot.z);
-                        auto kBN = builder.GetConductingMatK(bot, temperature);
-                        auto rNB = builder.GetR(k[n][2], zN, kBN[2], zB, builder.GetZGridArea());
-                        node = network.AppendNode(temperature);
-                        network.SetR(n, node, rNB);
-                    }
-                }
+                // //bot
+                // auto bot = builder.GetNeighbor(ESize3D(ll, z), Orient::Bot);
+                // if(m_model.isValid(bot)) {
+                //     for(size_t n = 0; n < tiles.size(); ++n) {
+                //         const auto & curr = tiles[n];
+                //         bot = builder.GetNeighbor(ESize3D(curr, z), Orient::Bot);
+                //         temperature = getT(bot);
+                //         auto zN = builder.GetZGridLength(z);
+                //         auto zB = builder.GetZGridLength(bot.z);
+                //         auto kBN = builder.GetConductingMatK(bot, temperature);
+                //         auto rNB = builder.GetR(k[n][2], zN, kBN[2], zB, builder.GetZGridArea());
+                //         node = network.AppendNode(temperature);
+                //         network.SetR(n, node, rNB);
+                //     }
+                // }
                 ThermalNetworkSolver solver(network);
                 solver.SolveEigen(refT);
 
@@ -574,7 +580,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 std::array<std::array<ESimVal, 3>, 4> k;
                 for(size_t n = 0; n < k.size(); ++n) {
                     ESize3D grid(tiles[n], z);
-                    temperature = m_iniT[m_model.GetFlattenIndex(grid)];
+                    temperature = getT(grid);
                     k[n] = builder.GetCompositeMatK(grid, temperature);
                 }
 
@@ -584,7 +590,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(pwrModel) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto p = pwrModel->Query(temperature, curr.x, curr.y, &success);
                         if(success) network.SetHF(n, p);
                     }
@@ -594,7 +600,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(z == 0 && topBC) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto val = topBC->Query(temperature, curr.x, curr.y, &success);
                         if(!success) continue;
                         switch(topT) {
@@ -617,7 +623,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 if(z == (m_model.TotalLayers() - 1) && botBC) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
-                        temperature = m_iniT[m_model.GetFlattenIndex(ESize3D(curr, z))];
+                        temperature = getT(ESize3D(curr, z));
                         auto val = botBC->Query(temperature, curr.x, curr.y, &success);
                         if(!success) continue;
                         switch(botT) {
@@ -654,14 +660,14 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto left = builder.GetNeighbor(ESize3D(ll, z), Orient::Left);
                 if(m_model.isValid(left)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(left)];
+                    temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
                     auto r0L = builder.GetR(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0L);
                     //2
                     left = builder.GetNeighbor(ESize3D(ul, z), Orient::Left);
-                    temperature = m_iniT[m_model.GetFlattenIndex(left)];
+                    temperature = getT(left);
                     auto kL2 = builder.GetCompositeMatK(left, temperature);
                     auto r2L = builder.GetR(k[2][0], halfXGridLen, kL2[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
@@ -672,7 +678,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto front = builder.GetNeighbor(ESize3D(ll, z), Orient::Front);
                 if(m_model.isValid(front)) {
                     //0
-                    temperature = m_iniT[m_model.GetFlattenIndex(front)];
+                    temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
                     auto r0F = builder.GetR(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
@@ -680,7 +686,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
 
                     //1
                     front = builder.GetNeighbor(ESize3D(lr, z), Orient::Front);
-                    temperature = m_iniT[m_model.GetFlattenIndex(front)];
+                    temperature = getT(front);
                     auto kF1 = builder.GetCompositeMatK(front, temperature);
                     auto r1F = builder.GetR(k[1][1], halfYGridLen, kF1[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
@@ -691,7 +697,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto right = builder.GetNeighbor(ESize3D(lr, z), Orient::Right);
                 if(m_model.isValid(right)) {
                     //1
-                    temperature = m_iniT[m_model.GetFlattenIndex(right)];
+                    temperature = getT(right);
                     auto kR1 = builder.GetCompositeMatK(right, temperature);
                     auto r1R = builder.GetR(k[1][0], halfXGridLen, kR1[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
@@ -699,7 +705,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     
                     //3
                     right = builder.GetNeighbor(ESize3D(ur, z), Orient::Right);
-                    temperature = m_iniT[m_model.GetFlattenIndex(right)];
+                    temperature = getT(right);
                     auto kR3 = builder.GetCompositeMatK(right, temperature);
                     auto r3R = builder.GetR(k[3][0], halfXGridLen, kR3[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
@@ -710,7 +716,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 auto end = builder.GetNeighbor(ESize3D(ul, z), Orient::End);
                 if(m_model.isValid(end)) {
                     //2
-                    temperature = m_iniT[m_model.GetFlattenIndex(end)];
+                    temperature = getT(end);
                     auto kE2 = builder.GetCompositeMatK(end, temperature);
                     auto r2E = builder.GetR(k[2][1], halfYGridLen, kE2[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
@@ -718,44 +724,44 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
 
                     //3
                     end = builder.GetNeighbor(ESize3D(ur, z), Orient::End);
-                    temperature = m_iniT[m_model.GetFlattenIndex(end)];
+                    temperature = getT(end);
                     auto kE3 = builder.GetCompositeMatK(end, temperature);
                     auto r3E = builder.GetR(k[3][1], halfYGridLen, kE3[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(3, node, r3E);
                 }
 
-                //top
-                auto top = builder.GetNeighbor(ESize3D(ll, z), Orient::Top);
-                if(m_model.isValid(top)) {
-                    for(size_t n = 0; n < tiles.size(); ++n) {
-                        const auto & curr = tiles[n];
-                        top = builder.GetNeighbor(ESize3D(curr, z), Orient::Top);
-                        temperature = m_iniT[builder.GetFlattenIndex(top)];
-                        auto zN = builder.GetZGridLength(z);
-                        auto zT = builder.GetZGridLength(top.z);
-                        auto kTN = builder.GetConductingMatK(top, temperature);
-                        auto rNT = builder.GetR(k[n][2], zN, kTN[2], zT, builder.GetZGridArea());
-                        node = network.AppendNode(temperature);
-                        network.SetR(n, node, rNT);
-                    }
-                }
+                // //top
+                // auto top = builder.GetNeighbor(ESize3D(ll, z), Orient::Top);
+                // if(m_model.isValid(top)) {
+                //     for(size_t n = 0; n < tiles.size(); ++n) {
+                //         const auto & curr = tiles[n];
+                //         top = builder.GetNeighbor(ESize3D(curr, z), Orient::Top);
+                //         temperature = getT(top);
+                //         auto zN = builder.GetZGridLength(z);
+                //         auto zT = builder.GetZGridLength(top.z);
+                //         auto kTN = builder.GetConductingMatK(top, temperature);
+                //         auto rNT = builder.GetR(k[n][2], zN, kTN[2], zT, builder.GetZGridArea());
+                //         node = network.AppendNode(temperature);
+                //         network.SetR(n, node, rNT);
+                //     }
+                // }
 
-                //bot
-                auto bot = builder.GetNeighbor(ESize3D(ll, z), Orient::Bot);
-                if(m_model.isValid(bot)) {
-                    for(size_t n = 0; n < tiles.size(); ++n) {
-                        const auto & curr = tiles[n];
-                        bot = builder.GetNeighbor(ESize3D(curr, z), Orient::Bot);
-                        temperature = m_iniT[builder.GetFlattenIndex(bot)];
-                        auto zN = builder.GetZGridLength(z);
-                        auto zB = builder.GetZGridLength(bot.z);
-                        auto kBN = builder.GetConductingMatK(bot, temperature);
-                        auto rNB = builder.GetR(k[n][2], zN, kBN[2], zB, builder.GetZGridArea());
-                        node = network.AppendNode(temperature);
-                        network.SetR(n, node, rNB);
-                    }
-                }
+                // //bot
+                // auto bot = builder.GetNeighbor(ESize3D(ll, z), Orient::Bot);
+                // if(m_model.isValid(bot)) {
+                //     for(size_t n = 0; n < tiles.size(); ++n) {
+                //         const auto & curr = tiles[n];
+                //         bot = builder.GetNeighbor(ESize3D(curr, z), Orient::Bot);
+                //         temperature = getT(bot);
+                //         auto zN = builder.GetZGridLength(z);
+                //         auto zB = builder.GetZGridLength(bot.z);
+                //         auto kBN = builder.GetConductingMatK(bot, temperature);
+                //         auto rNB = builder.GetR(k[n][2], zN, kBN[2], zB, builder.GetZGridArea());
+                //         node = network.AppendNode(temperature);
+                //         network.SetR(n, node, rNB);
+                //     }
+                // }
                 ThermalNetworkSolver solver(network);
                 solver.SolveEigen(refT);
 

@@ -11,4 +11,5 @@
 *.xml
 *.ctm
 build
+.VSCodeCounter
 .sconsign.dblite

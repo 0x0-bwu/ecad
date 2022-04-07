@@ -3,6 +3,7 @@
 #include "models/thermal/EGridThermalModel.h"
 #include "ECadSettings.h"
 #include "ECadCommon.h"
+#include <atomic>
 namespace ecad {
 namespace esolver {
 using namespace emodel;
@@ -37,13 +38,12 @@ public:
 
 private:
     void SolveOneIteration(ESimVal refT, std::vector<ESimVal> & results);
-    void SolveOneLayer(size_t z, ESimVal refT, std::vector<ESimVal> & results) const;
-
+    void SolveOneLayer(size_t z, ESimVal refT, std::vector<ESimVal> & results);
+    
 private:
     std::vector<ESimVal> m_iniT;
     const EGridThermalModel & m_model;
 };
-
 
 class ECAD_API EGridThermalNetworkReductionSolver : public EThermalNetworkSolver
 {

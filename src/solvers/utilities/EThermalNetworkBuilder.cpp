@@ -167,7 +167,7 @@ ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetConductingMatK
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDielectircMatK(size_t layer, ESimVal refT) const
 {
     //todo
-    return std::array<ESimVal, 3>{0.294, 0.294, 0.294};
+    return std::array<ESimVal, 3>{148, 148, 148};
 }
 
 ECAD_INLINE ESize3D EGridThermalNetworkBuilder::GetNeighbor(size_t index, Orientation o) const
