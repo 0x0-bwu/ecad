@@ -134,6 +134,29 @@ void t_metal_fraction_mapping_select_nets()
     EDataMgr::Instance().ShutDown();
 }
 
+void t_layout_to_ctm()
+{
+    std::string err;
+    std::string popXfl = ecad_test::GetTestDataPath() + "/extension/xfl/pop.xfl";
+    auto pop = ext::CreateDatabaseFromXfl("pop", popXfl, &err);
+    BOOST_CHECK(err.empty());
+    BOOST_CHECK(pop != nullptr);
+
+    std::vector<Ptr<ICell> > cells;
+    pop->GetCircuitCells(cells);
+    BOOST_CHECK(cells.size() == 1);
+    
+    auto layout = cells.front()->GetLayoutView();
+
+    ELayout2CtmSettings settings;
+    settings.threads = 8;
+    settings.dirName = ecad_test::GetTestDataPath() + "/simulation/ctm";
+    settings.filename = "pop";
+    BOOST_CHECK(layout->GenerateCTMv1File(settings));
+
+    EDataMgr::Instance().ShutDown();
+}
+
 test_suite * create_ecad_utility_test_suite()
 {
     test_suite * utility_suite = BOOST_TEST_SUITE("s_utility_test");
@@ -143,6 +166,7 @@ test_suite * create_ecad_utility_test_suite()
     utility_suite->add(BOOST_TEST_CASE(&t_layout_polygon_merge));
     utility_suite->add(BOOST_TEST_CASE(&t_metal_fraction_mapping));
     utility_suite->add(BOOST_TEST_CASE(&t_metal_fraction_mapping_select_nets));
+    utility_suite->add(BOOST_TEST_CASE(&t_layout_to_ctm));
     //
     return utility_suite;
 }

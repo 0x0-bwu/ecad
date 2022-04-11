@@ -94,6 +94,9 @@ public:
     ///Metal Fraction Mapping
     virtual bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) = 0;
 
+    ///Layout to CTMv1
+    virtual bool GenerateCTMv1File(const ELayout2CtmSettings & settings) = 0;
+
     ///Connectivity Extraction
     virtual void ExtractConnectivity() = 0;
 

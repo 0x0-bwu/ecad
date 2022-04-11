@@ -78,6 +78,16 @@ ECAD_INLINE CPtr<EGridData> EGridDataTable::GetTable(ESimVal key) const
     return nullptr;
 }
 
+ECAD_INLINE std::pair<ESimVal, ESimVal> EGridDataTable::GetRange() const
+{
+    ESimVal min = std::numeric_limits<ESimVal>::max(), max = -min;
+    for(const auto & sample : m_dataTable) {
+        min = std::min(min, sample.second.MaxOccupancy(std::less<ESimVal>()));
+        max = std::max(max, sample.second.MaxOccupancy(std::greater<ESimVal>()));
+    }
+    return std::make_pair(min, max);
+}
+
 ECAD_INLINE bool EGridDataTable::NeedInterpolation() const
 {
     if(m_dataTable.size() <= 1) return false;

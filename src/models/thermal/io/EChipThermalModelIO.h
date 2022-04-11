@@ -1,7 +1,6 @@
 #ifndef ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP
 #define ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP
-#include "models/thermal/EChipThermalModel.h"
-#include "generic/tools/StringHelper.hpp"
+#include "models/thermal/io/EGridThermalModelIO.h"
 #include <set>
 
 namespace ecad {
@@ -28,10 +27,6 @@ ECAD_API bool WriteCTMv1HeaderFile(const std::string & filename, const ECTMv1Hea
 ECAD_API bool WriteCTMv1PowerFile(const std::string & filename, const EGridData & powers, std::string * err = nullptr);
 ECAD_API bool WriteCTMv1DensityFile(const std::string & filename, const size_t size, FCoord res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err = nullptr);
 ECAD_API bool GenerateCTMv1Package(const std::string & dirName, const std::string & packName, bool removeDir, std::string * err = nullptr);
-
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
-ECAD_API bool GenerateImageProfile(const std::string & filename, const EGridData & data);
-#endif//BOOST_GIL_IO_PNG_SUPPORT
 
 }//namespace detail
 }//namespace io

@@ -86,6 +86,9 @@ public:
     ///Metal Fraction Mapping
     bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings);
 
+    ///Layout to CTMv1
+    bool GenerateCTMv1File(const ELayout2CtmSettings & settings);
+
     ///Connectivity Extraction
     void ExtractConnectivity();
 

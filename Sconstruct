@@ -60,8 +60,8 @@ python_include_path = '/usr/include/python' + str(boost_python_version)
 cpp_path.append(python_include_path)
 
 if mfsolver_support :
-    cpp_path.append(mfsolver_path + "/mf2/include")
-    cpp_path.append(mfsolver_path + "/mf2/include/core")
+    cpp_path.append(mfsolver_path + "/include")
+    cpp_path.append(mfsolver_path + "/include/core")
 
 # Build dir
 build_path = os.path.abspath(cwd + '/build')

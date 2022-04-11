@@ -30,6 +30,8 @@ public:
 
     std::list<ESimVal> GetAllKeys() const;
     CPtr<EGridData> GetTable(ESimVal key) const;
+    std::pair<ESimVal, ESimVal> GetRange() const;
+
     bool NeedInterpolation() const;
 
 private:

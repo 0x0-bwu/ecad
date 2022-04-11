@@ -29,10 +29,11 @@ if boost_serialization_support :
     libs_name.append('boost_serialization')
 
 # mfsolver
+mfsolver_support = env['MFSOLVERSUPPORT']
 if mfsolver_support :
     mfsolver_path = env['MFSOLVERPATH']
-    libs_path.append(mfsolver_path + '/mf2/lib')
-    libs_path.append(mfsolver_path + '/mkl/lib')
+    mfsolver_lib_path = mfsolver_path + '/lib'
+    libs_path.append(mfsolver_lib_path)
 
     libs_name += [
         'mkl_intel_lp64',

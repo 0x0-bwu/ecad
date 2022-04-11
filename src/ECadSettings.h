@@ -53,5 +53,18 @@ struct EThermalNetworkSolveSettings
     EValue residual = 0.5;
 };
 
+struct ELayout2CtmSettings
+{
+    size_t threads = 8;
+    std::string dirName;
+    std::string filename;
+    EValue resolution = 10;//unit: um
+    EValue regionExtTop = 0;
+    EValue regionExtBot = 0;
+    EValue regionExtLeft = 0;
+    EValue regionExtRight = 0;
+    std::unordered_set<ENetId> selectNets;
+};
+
 }//namespace ecad
 #endif//ECAD_ECADSETTINGS_H

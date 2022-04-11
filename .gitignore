@@ -1,7 +1,7 @@
 #ignore files
 *.o
-*.os
 *.a
+*.os
 *.so
 *.mf
 *.tar
@@ -10,6 +10,7 @@
 *.txt
 *.xml
 *.ctm
+*.tar.gz
 build
 .VSCodeCounter
 .sconsign.dblite

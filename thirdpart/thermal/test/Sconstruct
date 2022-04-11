@@ -31,7 +31,7 @@ boost_include_path = '/usr/local/include'
 boost_library_path = '/usr/local/lib'
 
 ## mfsolver
-mfsolver_support = False
+mfsolver_support = True
 mfsolver_path = os.path.abspath(cwd + '/../../internal/mfsolver')
 
 ## thirdpart
@@ -53,8 +53,8 @@ cpp_path = [
 cpp_path.append(boost_include_path)
 
 if mfsolver_support :
-    cpp_path.append(mfsolver_path + "/mf2/include")
-    cpp_path.append(mfsolver_path + "/mf2/include/core")
+    cpp_path.append(mfsolver_path + "/include")
+    cpp_path.append(mfsolver_path + "/include/core")
 
 # Build dir
 build_path = os.path.abspath(cwd + '/build')
@@ -73,8 +73,8 @@ libs_path = [build_dir, boost_library_path, thirdpart_lib_path, linux_library_pa
 
 # mfsolver
 if mfsolver_support :
-    libs_path.append(mfsolver_path + '/mf2/lib')
-    libs_path.append(mfsolver_path + '/mkl/lib')
+    mfsolver_lib_path = mfsolver_path + '/lib'
+    libs_path.append(mfsolver_lib_path)
 
     libs_name += [
         'mkl_intel_lp64',

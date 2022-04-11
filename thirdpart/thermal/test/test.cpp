@@ -16,9 +16,11 @@ int main(int argc, char * argv[])
     network.SetT(2, 30);
     
     solver::ThermalNetworkSolver<float_t> solver(network, 4);
-    auto results = solver.Solve(20);
-    for(size_t i = 0; i < results.size(); ++i) {
-        std::cout << "node " << i + 1 <<": " << results[i] << std::endl;
+    solver.Solve(20);
+
+    const auto & nodes = network.GetNodes();
+    for(size_t i = 0; i < nodes.size(); ++i) {
+        std::cout << "node " << i + 1 <<": " << nodes[i].t << std::endl;
     }
 
     return 0;

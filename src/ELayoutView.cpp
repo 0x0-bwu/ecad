@@ -9,6 +9,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #include "utilities/EBoundaryCalculator.h"
 #include "utilities/ELayoutMergeUtility.h"
 #include "utilities/ELayoutConnectivity.h"
+#include "utilities/ELayout2CtmUtility.h"
 #include "Interface.h"
 #include "EShape.h"
 
@@ -247,6 +248,13 @@ ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionM
 {
     eutils::ELayoutMetalFractionMapper mapper(settings);
     return mapper.GenerateMetalFractionMapping(this);
+}
+
+ECAD_INLINE bool ELayoutView::GenerateCTMv1File(const ELayout2CtmSettings & settings)
+{
+    eutils::ELayout2CtmUtility utility(this);
+    utility.SetLayout2CtmSettings(settings);
+    return utility.GenerateCTMv1File();
 }
 
 ECAD_INLINE void ELayoutView::ExtractConnectivity()

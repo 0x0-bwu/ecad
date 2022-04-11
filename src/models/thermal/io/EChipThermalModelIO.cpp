@@ -2,8 +2,10 @@
 #include "models/thermal/io/EChipThermalModelIO.h"
 #endif
 
+#include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"
+
 namespace ecad {
 namespace emodel {
 namespace etherm {
@@ -95,12 +97,9 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
             if(err) *err = Format2String("Error: failed to get metal density data of layer: %1%!", layer.name);
             return false;
         }
-        density.push_back(iter.second);
-    }//wbtest, todo
-    if(density.size() != model.header.layers.size()) {
-        if(err) *err = "Error: metal density data mismatch with layer size!";
-        return false;
+        density.push_back(iter->second);
     }
+
     FPoint2D rf = model.header.size[0];
     size_t size = model.header.tiles.x * model.header.tiles.y;
     std::string densityFile = ctmDir + GENERIC_FOLDER_SEPS + "metal_density.ctm";
@@ -121,20 +120,21 @@ ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, c
 
     //power
     if(model.powers) {
+        auto range = model.powers->GetRange();
         size_t size = std::min(model.header.temperatures.size(), model.powers->GetSampleSize());
         for(size_t i = 0; i < size; ++i) {
             auto t = model.header.temperatures.at(i);
             auto table = model.powers->GetTable(t);
             if(nullptr == table) continue;
             std::string filename = dirName + GENERIC_FOLDER_SEPS + "power_" + std::to_string(t) + "c.png";
-            if(!GenerateImageProfile(filename, *table)) continue;
+            if(!GenerateImageProfile(filename, *table, range.first, range.second)) continue;
         }
     }
     //density
     for(const auto & density : model.densities) {
         if(nullptr == density.second) continue;
         std::string filename = dirName + GENERIC_FOLDER_SEPS + "layer_" + density.first + ".png";
-        if(!GenerateImageProfile(filename, *(density.second))) continue;
+        if(!GenerateImageProfile(filename, *(density.second), 0.0, 1.0)) continue;
     }
     return true;
 }
@@ -449,8 +449,8 @@ ECAD_INLINE bool WriteCTMv1HeaderFile(const std::string & filename, const ECTMv1
     for(const auto & vLayer : header.viaLayers) {
         out << sp << sp;
         out << std::setw(21) << vLayer.name;
-        out << std::setw(21) << vLayer.botLayer;
-        out << std::setw(21) << vLayer.topLayer;
+        out << std::setw(21) << vLayer.botLayer.empty() ? "None" : vLayer.botLayer;
+        out << std::setw(21) << vLayer.topLayer.empty() ? "None" : vLayer.topLayer;
         out << GENERIC_DEFAULT_EOL;
     }
     out << "}" << GENERIC_DEFAULT_EOL;
@@ -534,23 +534,6 @@ ECAD_INLINE bool GenerateCTMv1Package(const std::string & dirName, const std::st
     if(err) *err = Format2String("Error: failed to generate ctm package: %1%.", packName);
     return false;
 }
-
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
-ECAD_INLINE bool GenerateImageProfile(const std::string & filename, const EGridData & data)
-{
-    using NumType = typename EGridData::ResultType;
-    auto min = data.MaxOccupancy(std::less<NumType>());
-    auto max = data.MaxOccupancy(std::greater<NumType>());
-    auto range = max - min;
-    auto rgbaFunc = [&min, &range](NumType d) {
-        int r, g, b, a = 255;
-        generic::color::RGBFromScalar((d - min) / range, r, g, b);
-        return std::make_tuple(r, g, b, a);
-    };
-
-    return data.WriteImgProfile(filename, rgbaFunc);
-}
-#endif//BOOST_GIL_IO_PNG_SUPPORT
 
 }//namespace detail
 }//namespace io
