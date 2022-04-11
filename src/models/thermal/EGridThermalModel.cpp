@@ -131,7 +131,6 @@ ECAD_INLINE void EGridDataTable::ResetInterpolater()
 ECAD_INLINE EGridThermalLayer::EGridThermalLayer(std::string name, SPtr<ELayerMetalFraction> metalFraction)
  : m_name(std::move(name)), m_metalFraction(metalFraction)
 {
-    GENERIC_ASSERT(m_metalFraction != nullptr)
 }
 
 ECAD_INLINE EGridThermalLayer::~EGridThermalLayer()
@@ -216,9 +215,12 @@ ECAD_INLINE CPtr<EGridPowerModel> EGridThermalLayer::GetPowerModel() const
     return m_powerModel.get();
 }
 
-ECAD_INLINE ESimVal EGridThermalLayer::GetMetalFraction(size_t x, size_t y) const
+ECAD_INLINE bool EGridThermalLayer::SetMetalFraction(SPtr<ELayerMetalFraction> mf)
 {
-    return (*m_metalFraction)(x, y);
+    if(nullptr == mf) return false;
+    if(ESize2D(mf->Width(), mf->Height()) != GetSize()) return false;
+    m_metalFraction = mf;
+    return true;
 }
 
 ECAD_INLINE SPtr<ELayerMetalFraction> EGridThermalLayer::GetMetalFraction() const
@@ -226,11 +228,15 @@ ECAD_INLINE SPtr<ELayerMetalFraction> EGridThermalLayer::GetMetalFraction() cons
     return m_metalFraction;
 }
 
+ECAD_INLINE ESimVal EGridThermalLayer::GetMetalFraction(size_t x, size_t y) const
+{
+    return (*m_metalFraction)(x, y);
+}
+
 ECAD_INLINE ESize2D EGridThermalLayer::GetSize() const
 {
-    auto w = m_metalFraction->Width();
-    auto h = m_metalFraction->Height();
-    return ESize2D{w, h};
+    if(nullptr == m_metalFraction) return ESize2D{};
+    return ESize2D(m_metalFraction->Width(), m_metalFraction->Height());
 }
 
 ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPoint2D & ref, FCoord elevation)
@@ -249,6 +255,14 @@ ECAD_INLINE FCoord EGridThermalModel::TotalThickness() const
     for(const auto & layer : m_stackupLayers)
         thickness += layer.GetThickness();
     return thickness;
+}
+
+ECAD_INLINE FBox2D EGridThermalModel::GetRegion(bool scaled) const
+{
+    FPoint2D ur = m_ref;
+    for(size_t i = 0; i < 2; ++i)
+        ur[i] += scaled ? m_scaleH * m_resolution[i] * m_size[i] : m_resolution[i] * m_size[i];
+    return FBox2D(m_ref, ur);
 }
 
 ECAD_INLINE size_t EGridThermalModel::TotalLayers() const
@@ -290,15 +304,20 @@ ECAD_INLINE bool EGridThermalModel::SetResolution(FCoord x, FCoord y)
     return true;
 }
 
-ECAD_INLINE void EGridThermalModel::GetResolution(FCoord & x, FCoord & y) const
+ECAD_INLINE void EGridThermalModel::GetResolution(FCoord & x, FCoord & y, bool scaled) const
 {
-    x = m_resolution[0];
-    y = m_resolution[1];
+    x = scaled ? m_scaleH * m_resolution[0] : m_resolution[0];
+    y = scaled ? m_scaleH * m_resolution[1] : m_resolution[1];
 }
 
-ECAD_INLINE const std::array<FCoord, 2> & EGridThermalModel::GetResolution() const
+ECAD_INLINE std::array<FCoord, 2> EGridThermalModel::GetResolution(bool scaled) const
 {
-    return m_resolution;
+    auto res = m_resolution;
+    if(scaled) {
+        res[0] *= m_scaleH;
+        res[1] *= m_scaleH;
+    }
+    return res;
 }
 
 ECAD_INLINE bool EGridThermalModel::AppendLayer(EGridThermalLayer layer)
@@ -312,6 +331,11 @@ ECAD_INLINE bool EGridThermalModel::AppendLayer(EGridThermalLayer layer)
     }
     m_stackupLayers.emplace_back(std::move(layer));
     return true;
+}
+
+ECAD_INLINE std::vector<EGridThermalLayer> & EGridThermalModel::GetLayers()
+{
+    return m_stackupLayers;
 }
 
 ECAD_INLINE const std::vector<EGridThermalLayer> & EGridThermalModel::GetLayers() const

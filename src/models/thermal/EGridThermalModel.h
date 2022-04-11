@@ -53,7 +53,7 @@ class ECAD_API EGridThermalLayer
 {
     friend class utils::EGridThermalModelReduction;
 public:
-    explicit EGridThermalLayer(std::string name, SPtr<ELayerMetalFraction> metalFraction);
+    explicit EGridThermalLayer(std::string name, SPtr<ELayerMetalFraction> metalFraction = nullptr);
     virtual ~EGridThermalLayer();
 
     const std::string & GetName() const;
@@ -79,8 +79,9 @@ public:
     bool SetPowerModel(SPtr<EGridPowerModel> pwrModel);
     CPtr<EGridPowerModel> GetPowerModel() const;
 
-    ESimVal GetMetalFraction(size_t x, size_t y) const;
+    bool SetMetalFraction(SPtr<ELayerMetalFraction> mf);
     SPtr<ELayerMetalFraction> GetMetalFraction() const;
+    ESimVal GetMetalFraction(size_t x, size_t y) const;
 
     ESize2D GetSize() const;
 
@@ -105,6 +106,8 @@ public:
     virtual ~EGridThermalModel();
 
     FCoord TotalThickness() const;
+    FBox2D GetRegion(bool scaled = false) const;
+    
     size_t TotalLayers() const;
     size_t TotalGrids() const;
     ESize3D ModelSize() const;
@@ -114,10 +117,12 @@ public:
     FCoord GetScaleH() const;
 
     bool SetResolution(FCoord x, FCoord y);
-    void GetResolution(FCoord & x, FCoord & y) const;
-    const std::array<FCoord, 2> & GetResolution() const;
+    void GetResolution(FCoord & x, FCoord & y, bool scaled = false) const;
+    std::array<FCoord, 2> GetResolution(bool scaled = false) const;
 
     bool AppendLayer(EGridThermalLayer layer);
+
+    std::vector<EGridThermalLayer> & GetLayers();
     const std::vector<EGridThermalLayer> & GetLayers() const; 
 
     bool SetPowerModel(size_t layer, SPtr<EGridPowerModel> pwrModel);

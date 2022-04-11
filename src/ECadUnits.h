@@ -14,6 +14,18 @@ struct ESize2D
     ESize2D() = default;
     ESize2D(size_t x, size_t y) : x(x), y(y) {}
 
+    size_t & operator[] (size_t i)
+    {
+        if(0 == i) return x;
+        else return y; 
+    }
+
+    const size_t & operator[] (size_t i) const
+    {
+        if(0 == i) return x;
+        else return y; 
+    }
+
     bool operator== (const ESize2D & other) const
     {
         return x == other.x && y == other.y;
@@ -51,6 +63,20 @@ struct ESize3D
     ESize3D() = default;
     ESize3D(size_t x, size_t y, size_t z) : x(x), y(y), z(z) {}
     ESize3D(const ESize2D & size, size_t z) : x(size.x), y(size.y), z(z) {}
+
+    size_t & operator[] (size_t i)
+    {
+        if(0 == i) return x;
+        else if(1 == i) return y;
+        else return z;
+    }
+
+    const size_t & operator[] (size_t i) const
+    {
+        if(0 == i) return x;
+        else if(1 == i) return y;
+        else return z;
+    }
 
     bool operator== (const ESize3D & other) const
     {
