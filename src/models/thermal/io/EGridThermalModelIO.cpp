@@ -17,6 +17,13 @@ using namespace generic::filesystem;
 
 ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, const std::string & filename, std::string * err)
 {
+    auto dir = DirName(filename);
+    if(!PathExists(dir)) MakeDir(dir);
+    if(!PathExists(dir) || !isDirWritable(dir)) {
+        if(err) *err = Format2String("Error: unwritable folder: %1%.", dir);
+        return false;
+    }
+    
     std::ofstream out(filename);
     if(!out.is_open()) {
         if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
