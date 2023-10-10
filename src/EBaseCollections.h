@@ -318,7 +318,6 @@ public:
     {
         return UPtr<IIterator<Element> >(new EVectorCollectionIterator<T, Allocator>(*this));
     }
-
 private:
     Iterator m_curr;
     Iterator m_end;

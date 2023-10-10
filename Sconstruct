@@ -26,18 +26,11 @@ else :
 
 # Thirdpart
 ## boost
-boost_include_path = '/usr/local/include'
-boost_library_path = '/usr/local/lib'
-# boost_library_path = '/usr/lib/x86_64-linux-gnu'
+boost_include_path = os.environ['BOOST_PATH'] + '/include'
+boost_library_path = os.environ['BOOST_PATH'] + '/lib'
 boost_python_support = True
-# boost_python_version = 3.8
-boost_python_version = 3.6
-
+boost_python_version = 3.10
 boost_serialization_support = True
-
-## mfsolver
-mfsolver_support = False
-mfsolver_path = os.path.abspath(cwd + '/thirdpart/internal/mfsolver')
 
 ## thirdpart
 thirdpart_lib_path = cwd + '/thirdpart/libs'
@@ -59,10 +52,6 @@ cpp_path.append(boost_include_path)
 python_include_path = '/usr/include/python' + str(boost_python_version)
 cpp_path.append(python_include_path)
 
-if mfsolver_support :
-    cpp_path.append(mfsolver_path + "/include")
-    cpp_path.append(mfsolver_path + "/include/core")
-
 # Build dir
 build_path = os.path.abspath(cwd + '/build')
 
@@ -71,7 +60,6 @@ main_env = Environment()
 main_env.Append(CPPPATH=cpp_path)
 main_env.Append(CXXFLAGS=cxx_flags)
 main_env.Append(BUILDPATH=build_path)
-main_env.Append(MFSOLVERSUPPORT=mfsolver_support)
 main_env.Append(BOOSTINCLUDEPATH=boost_include_path)
 main_env.Append(BOOSTLIBRARYPATH=boost_library_path)
 main_env.Append(BOOSTPYTHONSUPPORT=boost_python_support)
@@ -80,9 +68,6 @@ main_env.Append(BOOSTSERIALIZATIONSUPPORT=boost_serialization_support)
 main_env.Append(THIRDPARTLIBPATH=thirdpart_lib_path)
 main_env.Append(LINUXLIBRARYPATH=linux_library_path)
 main_env.Append(COMPILEECADASLIB=compile_ecad_as_lib)
-
-if mfsolver_support :
-    main_env.Append(MFSOLVERPATH=mfsolver_path)
 
 # SCONS scripts to build
 build_scripts = []

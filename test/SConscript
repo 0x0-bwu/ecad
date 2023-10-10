@@ -5,7 +5,6 @@ Import('env')
 
 build_dir = env['BUILDPATH']
 program_name = build_dir + '/EcadTest.exe'
-mfsolver_support = env['MFSOLVERSUPPORT']
 boost_library_path = env['BOOSTLIBRARYPATH']
 thirdpart_lib_path = env['THIRDPARTLIBPATH']
 linux_library_path = env['LINUXLIBRARYPATH']
@@ -27,30 +26,6 @@ libs_path = [build_dir, boost_library_path, thirdpart_lib_path, linux_library_pa
 boost_serialization_support = env['BOOSTSERIALIZATIONSUPPORT']
 if boost_serialization_support :
     libs_name.append('boost_serialization')
-
-# mfsolver
-mfsolver_support = env['MFSOLVERSUPPORT']
-if mfsolver_support :
-    mfsolver_path = env['MFSOLVERPATH']
-    mfsolver_lib_path = mfsolver_path + '/lib'
-    libs_path.append(mfsolver_lib_path)
-
-    libs_name += [
-        'mkl_intel_lp64',
-        'mkl_sequential',
-        'mkl_core',
-        'ifcoremt',
-        'imf',
-        'iomp5',
-        'irc',
-        'intlc',
-        'svml',
-        'cublas',
-        'cublasLt',
-        'cudart',
-        'ansmf',
-        'ngcore'    
-    ]   
 
 if compile_ecad_as_lib :
     libs_name.append('Ecad')

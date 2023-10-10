@@ -5,12 +5,6 @@
 #include "generic/tools/Tools.hpp"
 #include <memory>
 
-//#define MFSOLVER_SUPPORT
-#ifdef MFSOLVER_SUPPORT
-#include "mfsolver64_lib.h"
-#include "mfsolver64def.h"
-#endif//MFSOLVER_SUPPORT
-
 #include "Eigen/IterativeLinearSolvers"
 #include "Eigen/SparseCholesky"
 #include "Eigen/SparseLU"
@@ -32,97 +26,8 @@ public:
 
     void Solve(num_type refT) const
     {
-#ifdef MFSOLVER_SUPPORT
-        SolveMF(refT);
-#else
         SolveEigen(refT);
-#endif//MFSOLVER_SUPPORT
     }
-
-#ifdef MFSOLVER_SUPPORT
-    void SolveMF(num_type refT) const
-    {
-    
-        ThermalNetworkMatrixBuilder<num_type> builder(m_network);
-        auto size = builder.GetMatrixSize();
-        const auto & mnMap = builder.GetMatrixNodeIndicesMap();
-        const auto & nmMap = builder.GetNodeMatrixIndicesMap();
-
-        mfs_options myOptions;
-        // myOptions.SetReduceMatrix(2);//specifyareductiontype2.
-        myOptions.SetFullPrecision(true);//Setfullprecision.
-        myOptions.SetMetisReordering(true);//RequestreorderingusingMETIS.
-        myOptions.SetMetis51(true);//UseMETIS5.1
-        myOptions.SetCheckSolution(false);//Donotchecksolution.
-        myOptions.SetMultithread(true);//Toenablemultithreading.
-        myOptions.SetNcpu(std::max<size_t>(1, m_threads));//Enable4threads.
-        myOptions.SetNcpuFbs(std::max<size_t>(1, m_threads));//Solverfor4RHS.
-        myOptions.SetCudaMode(MfCudaAuto);//MfCudaAuto(autoselectGPUmode).
-        myOptions.quiet = true;
-        mfsolver64lib :: MfsolverLib mf( solver_type :: REAL_SYM );
-        mf.SetOptions (&myOptions);
-
-        ANSLONG *IA;
-        int dimA = size, *JA , iarg , flag = 0, Nrhs=1 , error = 0;
-        double * AA = nullptr ;
-        IA = ( ANSLONG *) malloc ((dimA + 1) * sizeof ( ANSLONG ));
-        IA[0] = 0;
-        size_t count;
-        for(size_t i = 0; i < size; ++i){
-            count = 1;
-            const auto & ns = m_network.NS(mnMap.at(i));
-            for(const auto & n : ns){
-                if(nmMap.at(n) < i) count++;
-            }
-            IA[i + 1] = IA[i] + count;
-        }
-        size_t NzA = IA[dimA];
-        size_t aaIndex = 0;
-        size_t jaIndex = 0;
-        AA = ( double *) malloc (NzA * sizeof ( double ));
-        JA = (int *) malloc ( NzA * sizeof (int));
-        for(size_t i = 0; i < size; ++i){
-            JA[jaIndex++] = i;
-            AA[aaIndex++] = builder.GetDiagCoeff(i);
-            const auto & ns = m_network.NS(mnMap.at(i));
-            // std::sort(ns.begin(), ns.end(), std::less<size_t>());
-            for(const auto & n : ns){
-                auto j = nmMap.at(n);
-                if(j < i){
-                    JA[jaIndex++] = j;
-                    AA[aaIndex++] = builder.GetCoeff(j, i);
-                }
-            }
-        }
-
-        int* iperm = nullptr; //null signals that we want to invoke ordering first
-        //4.Performreorderingandsymbolicfactorization.
-        mf.FindReordering(dimA,NzA,(/*const*/ ANSLONG*)IA,(/*const*/ int*)JA, iperm);
-        //5.Performfactorization.
-        error=mf.FindFactorization(dimA,NzA,IA,JA,AA);
-        //6.Solve.
-        //6.1.ProvideRHS.
-        int dimb=dimA;
-        //int numRhs=1;
-        double*b=(double*)malloc(dimb * Nrhs * sizeof(double));
-        for(size_t i = 0; i < size; ++i){
-            b[i] = builder.GetRhs(i, refT);
-        }
-        //6.2.Initializeb-rhstodesiredvalue.
-        //6.3.Pre-initializeFBS.
-        mf.PostInitialize(dimA,IA,JA,AA,true,false);
-        //6.4.DoFBS.
-        //error=mf.FindSolutions(dimA,IA,JA,AA,Nrhs,(void**)&b);
-        error=mf.FindSolutions(dimA,nullptr,nullptr,nullptr,Nrhs,(void**)&b);
-        
-        auto & nodes = m_network.GetNodes();
-        for(size_t i = 0; i < dimb; ++i)
-            nodes[mnMap.at(i)].t = b[i];
-
-        //7.Free data
-        free(AA); free(IA); free(JA); free(b);
-    }
-#endif//MFSOLVER_SUPPORT
     void SolveEigen(num_type refT) const
     {
 
