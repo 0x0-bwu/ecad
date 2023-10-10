@@ -1,5 +1,4 @@
-#ifndef ECAD_ECONNOBJCOLLECTION_H
-#define ECAD_ECONNOBJCOLLECTION_H
+#pragma once
 #include "interfaces/IConnObjCollection.h"
 #include "interfaces/IIterator.h"
 #include "ECollectionCollection.h"
@@ -64,5 +63,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EConnObjCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "EConnObjCollection.cpp"
 #endif
-
-#endif//ECAD_ECONNOBJCOLLECTION_H

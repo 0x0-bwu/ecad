@@ -86,6 +86,7 @@ ECAD_INLINE EVia & EVia::operator= (const EVia & other)
     rotation = other.rotation;
     offset = other.offset;
     shape = CloneHelper(other.shape);
+    return *this;
 }
 
 ECAD_INLINE EPad::EPad(const EPad & other)
@@ -99,6 +100,7 @@ ECAD_INLINE EPad & EPad::operator= (const EPad & other)
     rotation = other.rotation;
     offset = other.offset;
     shape = CloneHelper(other.shape);
+    return *this;
 }
 
 ECAD_INLINE EPadstackDefData::EPadstackDefData(const EPadstackDefData & other)

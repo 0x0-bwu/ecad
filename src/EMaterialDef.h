@@ -1,5 +1,4 @@
-#ifndef ECAD_EMATERIALDEF_H
-#define ECAD_EMATERIALDEF_H
+#pragma once
 #include "interfaces/IMaterialProp.h"
 #include "interfaces/IMaterialDef.h"
 #include "EDefinition.h"
@@ -19,7 +18,7 @@ public:
 
     bool hasProperty(EMaterialPropId id) const;
     void SetProperty(EMaterialPropId id, UPtr<IMaterialProp> prop);
-    CPtr<IMaterialProp> GetPropperty(EMaterialPropId id) const;
+    CPtr<IMaterialProp> GetProperty(EMaterialPropId id) const;
 
     const std::string & GetName() const;
     const EUuid & Uuid() const;
@@ -48,5 +47,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialDef)
 #ifdef ECAD_HEADER_ONLY
 #include "EMaterialDef.cpp"
 #endif
-
-#endif//ECAD_EMATERIALDEF_H

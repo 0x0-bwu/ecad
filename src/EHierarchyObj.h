@@ -1,5 +1,4 @@
-#ifndef ECAD_EHIERARCHYOBJ_H
-#define ECAD_EHIERARCHYOBJ_H
+#pragma once
 #include "interfaces/IHierarchyObj.h"
 #include "ETransform.h"
 #include "EObject.h"
@@ -35,5 +34,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EHierarchyObj)
 #ifdef ECAD_HEADER_ONLY
 #include "EHierarchyObj.cpp"
 #endif
-
-#endif//ECAD_EHIERARCHYOBJ_H

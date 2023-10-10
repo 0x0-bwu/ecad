@@ -1,5 +1,4 @@
-#ifndef ECAD_EPADSTACKINST_H
-#define ECAD_EPADSTACKINST_H
+#pragma once
 #include "interfaces/IPadstackInst.h"
 #include "EConnObj.h"
 namespace ecad {
@@ -64,5 +63,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPadstackInst)
 #ifdef ECAD_HEADER_ONLY
 #include "EPadstackInst.cpp"
 #endif
-
-#endif//ECAD_EPADSTACKINST_H

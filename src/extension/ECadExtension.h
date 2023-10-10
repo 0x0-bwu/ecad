@@ -1,5 +1,4 @@
-#ifndef ECAD_ECADEXTENSION_H
-#define ECAD_ECADEXTENSION_H
+#pragma once
 #include "ECadCommon.h"
 namespace ecad {
 
@@ -16,5 +15,3 @@ ECAD_API SPtr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const s
 #ifdef ECAD_HEADER_ONLY
 #include "ECadExtension.cpp"
 #endif
-
-#endif//ECAD_ECADEXTENSION_H

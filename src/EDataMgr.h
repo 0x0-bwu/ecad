@@ -1,5 +1,4 @@
-#ifndef ECAD_EDATAMGR_H
-#define ECAD_EDATAMGR_H
+#pragma once
 #include "generic/geometry/Geometries.hpp"
 #include "ECadCommon.h"
 #include "ETransform.h"
@@ -124,5 +123,3 @@ private:
 #ifdef ECAD_HEADER_ONLY
 #include "EDataMgr.cpp"
 #endif
-
-#endif//ECAD_EDATAMGR_H

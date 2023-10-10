@@ -1,5 +1,4 @@
-#ifndef ECAD_EMODEL_ETHERM_ETHERMALMODEL_HPP
-#define ECAD_EMODEL_ETHERM_ETHERMALMODEL_HPP
+#pragma once
 #include "utilities/EMetalFractionMapping.h"
 #include "generic/math/Interpolation.hpp"
 #include "ECadCommon.h"
@@ -20,5 +19,3 @@ public:
 #ifdef ECAD_HEADER_ONLY
 #include "EThermalModel.cpp"
 #endif
-
-#endif//ECAD_EMODEL_ETHERM_ETHERMALMODEL_HPP

@@ -147,7 +147,7 @@ ECAD_INLINE UPtr<ILayerMap> ELayoutView::AddDefaultDielectricLayers() const
     auto lyrMap = GetLayerCollection()->AddDefaultDielectricLayers();
     GetPrimitiveCollection()->Map(lyrMap.get());
     GetPadstackInstCollection()->Map(lyrMap.get());
-    return std::move(lyrMap);
+    return lyrMap;
 }
 
 ECAD_INLINE Ptr<ILayer> ELayoutView::FindLayerByLayerId(ELayerId lyrId) const
@@ -303,8 +303,8 @@ ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)
 
 ECAD_INLINE void ELayoutView::SyncCloneReference(ECloneOption option)
 {
-    auto nc = GetNetCollection();
-    auto lc = GetLayerCollection();
+    [[maybe_unused]] auto nc = GetNetCollection();
+    [[maybe_unused]] auto lc = GetLayerCollection();
     //todo
 }
 

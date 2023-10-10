@@ -1,5 +1,4 @@
-#ifndef ECAD_EBASECOLLECTIONS_H
-#define ECAD_EBASECOLLECTIONS_H
+#pragma once
 #include "interfaces/IIterator.h"
 #include "ECollection.h"
 #include <unordered_map>
@@ -324,4 +323,3 @@ private:
 };
 
 }//namespace ecad
-#endif//ECAD_EBASECOLLECTIONS_H

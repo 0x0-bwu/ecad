@@ -67,6 +67,7 @@ ECAD_INLINE ECell & ECell::operator= (const ECell & other)
     m_flattenedLayoutView = CloneHelper(other.m_flattenedLayoutView);
     if(m_flattenedLayoutView)
         m_flattenedLayoutView->SetCell(this);
+    return *this;
 }
 
 ECAD_INLINE ECellType ECell::GetCellType() const

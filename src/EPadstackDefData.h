@@ -1,5 +1,4 @@
-#ifndef ECAD_EPADSTACKDEFDATA_H
-#define ECAD_EPADSTACKDEFDATA_H
+#pragma once
 #include "interfaces/IPadstackDefData.h"
 #include "ECadCommon.h"
 #include "ECadDef.h"
@@ -83,5 +82,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EVia)
 #ifdef ECAD_HEADER_ONLY
 #include "EPadstackDefData.cpp"
 #endif
-
-#endif//ECAD_EPADSTACKDEFDATA_H

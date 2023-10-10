@@ -1,5 +1,4 @@
-#ifndef ECAD_PROTOCOL_CLONABLE_H
-#define ECAD_PROTOCOL_CLONABLE_H
+#pragma once
 #include "ECadAlias.h"
 #include <vector>
 namespace ecad {
@@ -32,4 +31,3 @@ ECAD_ALWAYS_INLINE std::vector<UPtr<T, Deleter> > CloneHelper(const std::vector<
     return res;
 }
 }//namespace ecad
-#endif//ECAD_PROTOCOL_CLONABLE_H

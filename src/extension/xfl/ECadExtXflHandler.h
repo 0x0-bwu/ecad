@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_XFL_ECADEXTXFLHANDLER_H
-#define ECAD_EXT_XFL_ECADEXTXFLHANDLER_H
+#pragma once
 #include "extension/xfl/EXflObjects.h"
 #include "ECadCommon.h"
 #include "Interface.h"
@@ -62,5 +61,3 @@ ECAD_ALWAYS_INLINE EPoint2D ECadExtXflHandler::makeEPoint2D(const Point & p) con
 #ifdef ECAD_HEADER_ONLY
 #include "ECadExtXflHandler.cpp"
 #endif
-
-#endif//ECAD_EXT_XFL_ECADEXTXFLHANDLER_H

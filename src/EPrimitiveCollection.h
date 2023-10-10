@@ -1,5 +1,4 @@
-#ifndef ECAD_EPRIMITIVECOLLECTION_H
-#define ECAD_EPRIMITIVECOLLECTION_H
+#pragma once
 #include "interfaces/IPrimitiveCollection.h"
 #include "interfaces/IIterator.h"
 #include "EBaseCollections.h"
@@ -50,5 +49,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPrimitiveCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "EPrimitiveCollection.cpp"
 #endif
-
-#endif//ECAD_EPRIMITIVECOLLECTION_H

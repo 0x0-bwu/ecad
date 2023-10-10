@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_XFL_EXFLOBJECTS_H
-#define ECAD_EXT_XFL_EXFLOBJECTS_H
+#pragma once
 #include "generic/geometry/Utility.hpp"
 #include "ECadCommon.h"
 #include "EShape.h"
@@ -172,7 +171,7 @@ public:
         iter++;
         Point lastPt = *pt;
         for(; iter != composite.cend(); ++iter) {
-            if(pt = boost::get<Point>(&(*iter))) {
+            if(auto pt = boost::get<Point>(&(*iter)); pt) {
                 data << toEPoint2D(*pt);
                 lastPt = *pt;
             }
@@ -454,4 +453,3 @@ private:
 }//namespace xfl   
 }//namespace ext
 }//namespace ecad
-#endif//ECAD_EXT_XFL_EXFLOBJECTS_H

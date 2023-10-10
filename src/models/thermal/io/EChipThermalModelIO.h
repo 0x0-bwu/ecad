@@ -1,5 +1,4 @@
-#ifndef ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP
-#define ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP
+#pragma once
 #include "models/thermal/io/EGridThermalModelIO.h"
 #include <set>
 
@@ -37,5 +36,3 @@ ECAD_API bool GenerateCTMv1Package(const std::string & dirName, const std::strin
 #ifdef ECAD_HEADER_ONLY
 #include "EChipThermalModelIO.cpp"
 #endif
-
-#endif//ECAD_EMODEL_ETHERM_IO_ECHIPTHERMALMODELIO_HPP

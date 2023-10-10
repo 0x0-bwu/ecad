@@ -86,7 +86,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
 
 ECAD_INLINE void ECadExtGdsHandler::ImportOneCell(const EGdsCell & cell, Ptr<ICell> iCell)
 {
-    auto & eMgr = EDataMgr::Instance();
+    EDataMgr::Instance();
     auto iLayoutView = iCell->GetLayoutView();
 
     for(const auto & object : cell.objects){
@@ -158,14 +158,14 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOneText(CPtr<EGdsText> text, Ptr<ILayo
     auto transform = makeETransform2D(text->scale, text->rotation, text->position);
     
     for(auto eLyrId : eLyrIds) {
-        auto iText = eMgr.CreateText(iLayoutView, eLyrId, transform, text->text);
+        [[maybe_unused]] auto iText = eMgr.CreateText(iLayoutView, eLyrId, transform, text->text);
         //todo other paras
     }
 }
 
 ECAD_INLINE void ECadExtGdsHandler::ImportCellReferences(const EGdsCell & cell, Ptr<ICell> iCell)
 {
-    auto & eMgr = EDataMgr::Instance();
+    EDataMgr::Instance();
     auto iLayoutView = iCell->GetLayoutView();
 
     for(const auto & object : cell.objects){

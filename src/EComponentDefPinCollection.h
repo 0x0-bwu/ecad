@@ -1,5 +1,4 @@
-#ifndef ECAD_ECOMPONENTDEFPINCOLLECTION_H
-#define ECAD_ECOMPONENTDEFPINCOLLECTION_H
+#pragma once
 #include "interfaces/IComponentDefPinCollection.h"
 #include "interfaces/IIterator.h"
 #include "EBaseCollections.h"
@@ -39,5 +38,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EComponentDefPinCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "EComponentDefPinCollection.cpp"
 #endif
-
-#endif//ECAD_ECOMPONENTDEFPINCOLLECTION_H

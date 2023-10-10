@@ -1,5 +1,4 @@
-#ifndef ECAD_ICELL_H
-#define ECAD_ICELL_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "Protocol.h"
@@ -30,4 +29,3 @@ public:
 
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ICell)
-#endif//ECAD_IDATABASE_H

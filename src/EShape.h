@@ -1,5 +1,4 @@
-#ifndef ECAD_ESHAPE_H
-#define ECAD_ESHAPE_H
+#pragma once
 #include "generic/geometry/Geometries.hpp"
 #include "generic/geometry/GeometryIO.hpp"
 #include "ECadCommon.h"
@@ -176,5 +175,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPath)
 #ifdef ECAD_HEADER_ONLY
 #include "EShape.cpp"
 #endif
-
-#endif//ECAD_ESHAPE_H

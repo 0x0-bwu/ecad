@@ -1,5 +1,4 @@
-#ifndef ECAD_ECOMPONENTDEFPIN_HPP
-#define ECAD_ECOMPONENTDEFPIN_HPP
+#pragma once
 #include "interfaces/IComponentDefPin.h"
 #include "EObject.h"
 namespace ecad {
@@ -54,5 +53,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EComponentDefPin)
 #ifdef ECAD_HEADER_ONLY
 #include "EComponentDefPin.cpp"
 #endif
-
-#endif//ECAD_ECOMPONENTDEFPIN_HPP

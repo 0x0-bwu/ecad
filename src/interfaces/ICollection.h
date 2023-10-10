@@ -1,5 +1,4 @@
-#ifndef ECAD_ICOLLECTION_H
-#define ECAD_ICOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "Protocol.h"
 namespace ecad {
@@ -12,4 +11,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ICollection)
-#endif//ECAD_ICOLLECTION_H

@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_XFL_EXFLPARSER_H
-#define ECAD_EXT_XFL_EXFLPARSER_H
+#pragma once
 #include "EXflObjects.h"
 #include "ECadAlias.h"
 #include "generic/tools/StringHelper.hpp"
@@ -595,4 +594,3 @@ struct EXflReader
 }//namespace xfl   
 }//namespace ext
 }//namespace ecad
-#endif//ECAD_EXT_XFL_EXFLPARSER_H

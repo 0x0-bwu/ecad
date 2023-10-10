@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_GDS_EGDSFILEIO_H
-#define ECAD_EXT_GDS_EGDSFILEIO_H
+#pragma once
 #include "EGdsObjects.h"
 #include "EGdsRecords.h"
 namespace ecad {
@@ -59,5 +58,3 @@ protected:
 #ifdef ECAD_HEADER_ONLY
 #include "EGdsFileIO.cpp"
 #endif
-
-#endif//ECAD_EXT_GDS_EGDSFILEIO_H

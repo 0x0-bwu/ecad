@@ -1,5 +1,4 @@
-#ifndef ECAD_ENET_H
-#define ECAD_ENET_H
+#pragma once
 #include "interfaces/INet.h"
 #include "EObject.h"
 namespace ecad {
@@ -51,5 +50,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ENet)
 #ifdef ECAD_HEADER_ONLY
 #include "ENet.cpp"
 #endif
-
-#endif//ECAD_ENET_H

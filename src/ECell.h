@@ -1,5 +1,4 @@
-#ifndef ECAD_ECELL_H
-#define ECAD_ECELL_H
+#pragma once
 #include "interfaces/ICell.h"
 #include "EDefinition.h"
 #include "ECadDef.h"
@@ -86,5 +85,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECircuitCell)
 #ifdef ECAD_HEADER_ONLY
 #include "ECell.cpp"
 #endif
-
-#endif//ECAD_ECELL_H

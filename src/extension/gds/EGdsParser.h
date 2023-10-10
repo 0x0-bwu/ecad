@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_GDS_EGDSPARSER_H
-#define ECAD_EXT_GDS_EGDSPARSER_H
+#pragma once
 #include "EGdsObjects.h"
 #include "EGdsRecords.h"
 #include <istream>
@@ -39,5 +38,3 @@ protected:
 #ifdef ECAD_HEADER_ONLY
 #include "EGdsParser.cpp"
 #endif
-
-#endif//ECAD_EXT_GDS_EGDSPARSER_H

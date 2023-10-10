@@ -1,5 +1,4 @@
-#ifndef ECAD_EMODEL_ETHERM_ECHIPTHERMALMODEL_HPP
-#define ECAD_EMODEL_ETHERM_ECHIPTHERMALMODEL_HPP
+#pragma once
 #include "EGridThermalModel.h"
 #include <unordered_map>
 #include <unordered_set>
@@ -87,5 +86,3 @@ private:
 #ifdef ECAD_HEADER_ONLY
 #include "EChipThermalModel.cpp"
 #endif
-
-#endif//ECAD_EMODEL_ETHERM_ECHIPTHERMALMODEL_HPP

@@ -1,5 +1,4 @@
-#ifndef ECAD_ECELLCOLLECTION_H
-#define ECAD_ECELLCOLLECTION_H
+#pragma once
 #include "interfaces/IDefinitionCollection.h"
 #include "interfaces/ICellCollection.h"
 #include "interfaces/IIterator.h"
@@ -46,5 +45,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECellCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "ECellCollection.cpp"
 #endif
-
-#endif//ECAD_ECELLCOLLECTION_H

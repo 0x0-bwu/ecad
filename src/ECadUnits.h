@@ -1,6 +1,6 @@
-#ifndef ECAD_ECADUNITS_H
-#define ECAD_ECADUNITS_H
+#pragma once
 #include <boost/core/ignore_unused.hpp>
+#include <boost/serialization/split_member.hpp>
 #include "generic/tools/Units.hpp"
 #include "ECadSerialization.h"
 #include "ECadAlias.h"
@@ -202,4 +202,3 @@ public:
 };
 
 }//namespace ecad
-#endif//ECAD_ECADUNITS_H

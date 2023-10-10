@@ -1,5 +1,4 @@
-#ifndef ECAD_ETRANSFORM_H
-#define ECAD_ETRANSFORM_H
+#pragma once
 #include "generic/geometry/Transform.hpp"
 #include "generic/math/MathUtility.hpp"
 #include "ECadCommon.h"
@@ -136,5 +135,3 @@ ECAD_ALWAYS_INLINE ETransform2D makeETransform2D(EValue scale, EValue rotation, 
 }
 
 }//namespace ecad
-
-#endif//ECAD_ETRANSFORM_H

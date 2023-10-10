@@ -1,5 +1,4 @@
-#ifndef ECAD_EMODEL_ETHERM_EGRIDTHERMALMODEL_HPP
-#define ECAD_EMODEL_ETHERM_EGRIDTHERMALMODEL_HPP
+#pragma once
 #include "utilities/EMetalFractionMapping.h"
 #include "generic/math/Interpolation.hpp"
 #include "EThermalModel.h"
@@ -48,7 +47,8 @@ using EGridBCModel = EGridDataTable;
 using EGridPowerModel = EGridDataTable;
 
 namespace utils {
-class EGridThermalModelReduction; }//namespace utils;
+class EGridThermalModelReduction;
+}//namespace utils;
 class ECAD_API EGridThermalLayer
 {
     friend class utils::EGridThermalModelReduction;
@@ -185,5 +185,3 @@ ECAD_ALWAYS_INLINE bool EGridThermalModel::isValid(const ESize3D & index) const
 #ifdef ECAD_HEADER_ONLY
 #include "EGridThermalModel.cpp"
 #endif
-
-#endif//ECAD_EMODEL_ETHERM_EGRIDTHERMALMODEL_HPP

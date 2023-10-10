@@ -1,5 +1,4 @@
-#ifndef ECAD_PROTOCOL_TRANSFORMABLE_H
-#define ECAD_PROTOCOL_TRANSFORMABLE_H
+#pragma once
 #include "ETransform.h"
 namespace ecad {
 struct Transformable2D
@@ -26,4 +25,3 @@ protected:
 };
 
 }//namespace ecad
-#endif//ECAD_PROTOCOL_TRANSFORMABLE_H

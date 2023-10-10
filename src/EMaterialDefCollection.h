@@ -1,5 +1,4 @@
-#ifndef ECAD_EMATERIALDEFCOLLECTION_H
-#define ECAD_EMATERIALDEFCOLLECTION_H
+#pragma once
 #include "interfaces/IMaterialDefCollection.h"
 #include "interfaces/IDefinitionCollection.h"
 #include "interfaces/IIterator.h"
@@ -45,5 +44,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialDefCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "EMaterialDefCollection.cpp"
 #endif
-
-#endif//ECAD_EMATERIALDEFCOLLECTION_H

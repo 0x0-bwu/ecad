@@ -1,5 +1,4 @@
-#ifndef ECAD_ECOLLECTION_ECOLLECTION_H
-#define ECAD_ECOLLECTION_ECOLLECTION_H
+#pragma once
 #include "interfaces/ICollectionCollection.h"
 #include "EBaseCollections.h"
 #include <unordered_map>
@@ -64,5 +63,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECollectionCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "ECollectionCollection.cpp"
 #endif
-
-#endif//ECAD_ECOLLECTION_ECOLLECTION_H

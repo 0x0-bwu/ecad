@@ -1,5 +1,4 @@
-#ifndef ECAD_ELAYERCOLLECTION_H
-#define ECAD_ELAYERCOLLECTION_H
+#pragma once
 #include "interfaces/ILayerCollection.h"
 #include "interfaces/IIterator.h"
 #include "EBaseCollections.h"
@@ -48,5 +47,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayerCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "ELayerCollection.cpp"
 #endif
-
-#endif//ECAD_ELAYERCOLLECTION_H

@@ -1,5 +1,4 @@
-#ifndef ECAD_EHIERARCHYOBJCOLLECTION_H
-#define ECAD_EHIERARCHYOBJCOLLECTION_H
+#pragma once
 #include "interfaces/IHierarchyObjCollection.h"
 #include "interfaces/IIterator.h"
 #include "ECollectionCollection.h"
@@ -60,5 +59,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EHierarchyObjCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "EHierarchyObjCollection.cpp"
 #endif
-
-#endif//ECAD_EHIERARCHYOBJCOLLECTION_H

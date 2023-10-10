@@ -1,5 +1,4 @@
-#ifndef ECAD_EPADSTACKINSTCOLLECTION_H
-#define ECAD_EPADSTACKINSTCOLLECTION_H
+#pragma once
 #include "interfaces/IPadstackInstCollection.h"
 #include "interfaces/IIterator.h"
 #include "EBaseCollections.h"
@@ -45,5 +44,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPadstackInstCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "EPadstackInstCollection.cpp"
 #endif
-
-#endif//ECAD_EPADSTACKINSTCOLLECTION_H

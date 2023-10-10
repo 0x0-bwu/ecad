@@ -1,5 +1,4 @@
-#ifndef ECAD_ECOMPONENTDEF_HPP
-#define ECAD_ECOMPONENTDEF_HPP
+#pragma once
 #include "interfaces/IComponentDef.h"
 #include "ECollectionCollection.h"
 #include "EDefinition.h"
@@ -53,5 +52,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EComponentDef)
 #ifdef ECAD_HEADER_ONLY
 #include "EComponentDef.cpp"
 #endif
-
-#endif//ECAD_ECOMPONENTDEF_HPP

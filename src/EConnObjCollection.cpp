@@ -108,16 +108,15 @@ ECAD_INLINE EConnObjIterator & EConnObjIterator::operator= (EConnObjIterator && 
 
 ECAD_INLINE Ptr<IConnObj> EConnObjIterator::Next()
 {
-    Ptr<IConnObj> p = nullptr;
-    if(p = dynamic_cast<Ptr<IConnObj> >(m_primitiveIter->Next())) return p;
-    if(p = dynamic_cast<Ptr<IConnObj> >(m_padstackInstIter->Next())) return p;
-    return p;
+    if (auto p = dynamic_cast<Ptr<IConnObj> >(m_primitiveIter->Next()); p) return p;
+    if (auto p = dynamic_cast<Ptr<IConnObj> >(m_padstackInstIter->Next()); p) return p;
+    return nullptr;
 }
 
 ECAD_INLINE Ptr<IConnObj> EConnObjIterator::Current()
 {
-    if(m_primitiveIter->Current()) return dynamic_cast<Ptr<IConnObj> >(m_primitiveIter->Current());
-    if(m_padstackInstIter->Current()) return dynamic_cast<Ptr<IConnObj> >(m_padstackInstIter->Current());
+    if (m_primitiveIter->Current()) return dynamic_cast<Ptr<IConnObj> >(m_primitiveIter->Current());
+    if (m_padstackInstIter->Current()) return dynamic_cast<Ptr<IConnObj> >(m_padstackInstIter->Current());
     return nullptr;
 }
 

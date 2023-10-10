@@ -1,5 +1,4 @@
-#ifndef ECAD_ECADCOMMON_H
-#define ECAD_ECADCOMMON_H
+#pragma once
 #include "ECadConfig.h"
 #include "ECadVersion.h"
 #include "ECadUnits.h"
@@ -28,6 +27,4 @@
 
 namespace ecad {
 ECAD_ALWAYS_INLINE size_t DefaultThreads() { return 16; }
-}//namespace 
-
-#endif//ECAD_ECADCOMMON_H
+} //namespace ecad

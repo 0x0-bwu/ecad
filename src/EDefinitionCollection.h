@@ -1,5 +1,4 @@
-#ifndef ECAD_EDEFINITIONCOLLECTION_H
-#define ECAD_EDEFINITIONCOLLECTION_H
+#pragma once
 #include "interfaces/IDefinitionCollection.h"
 #include "ECollectionCollection.h"
 
@@ -35,5 +34,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EDefinitionCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "EDefinitionCollection.cpp"
 #endif
-
-#endif//ECAD_EDEFINITIONCOLLECTION_H

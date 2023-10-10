@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_GDS_EGDSLAYMAP_H
-#define ECAD_EXT_GDS_EGDSLAYMAP_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include <unordered_map>
@@ -56,5 +55,3 @@ protected:
 #ifdef ECAD_HEADER_ONLY
 #include "EGdsLayerMap.cpp"
 #endif
-
-#endif//ECAD_EXT_GDS_EGDSLAYMAP_H

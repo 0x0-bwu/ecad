@@ -1,5 +1,4 @@
-#ifndef ECAD_ECADSETTINGS_H
-#define ECAD_ECADSETTINGS_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include <unordered_set>
@@ -67,4 +66,3 @@ struct ELayout2CtmSettings
 };
 
 }//namespace ecad
-#endif//ECAD_ECADSETTINGS_H

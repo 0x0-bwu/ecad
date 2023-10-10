@@ -1,5 +1,4 @@
-#ifndef ECAD_ECADDEF_H
-#define ECAD_ECADDEF_H
+#pragma once
 #include "ECadConfig.h"
 #include <limits>
 #include <string>
@@ -149,4 +148,3 @@ ECAD_ALWAYS_INLINE std::string toString(EDefinitionType type)
 }
 
 }//namespace ecad
-#endif//ECAD_ECADDEF_H

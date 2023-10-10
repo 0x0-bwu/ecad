@@ -1,5 +1,4 @@
-#ifndef ECAD_EDATABASE_H
-#define ECAD_EDATABASE_H
+#pragma once
 #include "interfaces/IDatabase.h"
 #include "EDefinitionCollection.h"
 #include <string>
@@ -92,5 +91,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EDatabase)
 #ifdef ECAD_HEADER_ONLY
 #include "EDatabase.cpp"
 #endif
-
-#endif//ECAD_EDATABASE_H

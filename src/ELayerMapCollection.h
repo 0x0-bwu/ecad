@@ -1,5 +1,4 @@
-#ifndef ECAD_ELAYERMAPCOLLECTION_H
-#define ECAD_ELAYERMAPCOLLECTION_H
+#pragma once
 #include "interfaces/IDefinitionCollection.h"
 #include "interfaces/ILayerMapCollection.h"
 #include "interfaces/IIterator.h"
@@ -45,5 +44,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayerMapCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "ELayerMapCollection.cpp"
 #endif
-
-#endif//ECAD_ELAYERMAPCOLLECTION_H

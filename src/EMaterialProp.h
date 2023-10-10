@@ -1,5 +1,4 @@
-#ifndef ECAD_EMATERIALPROP_H
-#define ECAD_EMATERIALPROP_H
+#pragma once
 #include "interfaces/IMaterialProp.h"
 #include <vector>
 #include <map>
@@ -82,5 +81,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialPropTable)
 #ifdef ECAD_HEADER_ONLY
 #include "EMaterialProp.cpp"
 #endif
-
-#endif//ECAD_EMATERIALPROP_H

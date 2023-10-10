@@ -67,7 +67,7 @@ ECAD_INLINE void EMaterialDef::SetProperty(EMaterialPropId id, UPtr<IMaterialPro
     m_properties.insert(std::make_pair(id, std::move(prop)));
 }
 
-ECAD_INLINE CPtr<IMaterialProp> EMaterialDef::GetPropperty(EMaterialPropId id) const
+ECAD_INLINE CPtr<IMaterialProp> EMaterialDef::GetProperty(EMaterialPropId id) const
 {
     auto iter = m_properties.find(id);
     if(iter == m_properties.end()) return nullptr;

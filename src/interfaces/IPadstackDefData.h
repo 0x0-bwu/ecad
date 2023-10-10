@@ -1,5 +1,4 @@
-#ifndef ECAD_IPADSTACKDEFDATA_H
-#define ECAD_IPADSTACKDEFDATA_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "EShape.h"
@@ -26,4 +25,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPadstackDefData)
-#endif//ECAD_IPADSTACKDEFDATA_H

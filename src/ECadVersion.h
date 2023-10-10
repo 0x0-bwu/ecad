@@ -1,5 +1,4 @@
-#ifndef ECAD_ECADVERSION_H
-#define ECAD_ECADVERSION_H
+#pragma once
 #include "ECadConfig.h"
 #include <utility>
 #include <string>
@@ -41,4 +40,3 @@ ECAD_ALWAYS_INLINE bool VersionLessThan(const EVersion & ver1, const EVersion & 
 //  1.0 : First release version.
 
 }//namespace ecad
-#endif//ECAD_ECADVERSION_H

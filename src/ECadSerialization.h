@@ -1,9 +1,10 @@
-#ifndef ECAD_ECADSERIALIZATION_H
-#define ECAD_ECADSERIALIZATION_H
-
+#pragma once
+#include "ECadConfig.h"
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
-    #define BOOST_SERIALIZATION_SUPPORT
+    #ifndef BOOST_SERIALIZATION_SUPPORT
+        #define BOOST_SERIALIZATION_SUPPORT
+    #endif
     #include "generic/common/Archive.hpp"
     #include "generic/geometry/Serialization.hpp"
     
@@ -41,5 +42,3 @@
     #define ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     #define ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
-
-#endif//ECAD_ECADSERIALIZATION_H

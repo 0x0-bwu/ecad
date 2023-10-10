@@ -1,5 +1,4 @@
-#ifndef ECAD_ELAYOUTVIEW_H
-#define ECAD_ELAYOUTVIEW_H
+#pragma once
 #include "interfaces/ILayoutView.h"
 #include "interfaces/IIterator.h"
 #include "ECollectionCollection.h"
@@ -132,5 +131,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayoutView)
 #ifdef ECAD_HEADER_ONLY
 #include "ELayoutView.cpp"
 #endif
-
-#endif//ECAD_ELAYOUTVIEW_H

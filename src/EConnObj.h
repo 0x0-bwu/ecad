@@ -1,5 +1,4 @@
-#ifndef ECAD_ECONNOBJ_H
-#define ECAD_ECONNOBJ_H
+#pragma once
 #include "interfaces/IConnObj.h"
 #include "ECadDef.h"
 #include "EObject.h"
@@ -45,5 +44,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EConnObj)
 #ifdef ECAD_HEADER_ONLY
 #include "EConnObj.cpp"
 #endif
-
-#endif//ECAD_ECONNOBJ_H

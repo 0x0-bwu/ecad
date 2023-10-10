@@ -1,5 +1,4 @@
-#ifndef ECAD_INTERFACE_H
-#define ECAD_INTERFACE_H
+#pragma once
 
 #include "interfaces/ICell.h"
 #include "interfaces/ICellCollection.h"
@@ -31,5 +30,3 @@
 #include "interfaces/IPadstackInstCollection.h"
 #include "interfaces/IPrimitive.h"
 #include "interfaces/IPrimitiveCollection.h"
-
-#endif//ECAD_INTERFACE_H

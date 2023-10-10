@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_GDS_ECADEXTGDSHANDLER_H
-#define ECAD_EXT_GDS_ECADEXTGDSHANDLER_H
+#pragma once
 #define ECAD_EXT_GDS_DEBUG_MODE
 #include "extension/gds/EGdsObjects.h"
 #include "ECadCommon.h"
@@ -44,5 +43,3 @@ private:
 #ifdef ECAD_HEADER_ONLY
 #include "ECadExtGdsHandler.cpp"
 #endif
-
-#endif//ECAD_EXT_GDS_ECADEXTGDSHANDLER_H

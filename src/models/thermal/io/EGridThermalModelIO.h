@@ -1,11 +1,7 @@
-#ifndef ECAD_EMODEL_ETHERM_IO_EGRIDTHERMALMODELIO_HPP
-#define ECAD_EMODEL_ETHERM_IO_EGRIDTHERMALMODELIO_HPP
+#pragma once
 #include "models/thermal/EChipThermalModel.h"
 
-namespace ecad {
-namespace emodel {
-namespace etherm {
-namespace io {
+namespace ecad::emodel::etherm::io {
 
 ECAD_API bool GenerateTxtProfile(const EGridThermalModel & model, const std::string & filename, std::string * err = nullptr);
 
@@ -17,15 +13,9 @@ namespace detail {
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
 ECAD_API bool GenerateImageProfile(const std::string & filename, const EGridData & data, double min, double max);
 #endif//BOOST_GIL_IO_PNG_SUPPORT
-
-}//namespace detail
-}//namespace io
-}//namespace etherm
-}//namespace emodel
-}//namespace ecad
+}
+}//namespace ecad::emodel::etherm::io
 
 #ifdef ECAD_HEADER_ONLY
 #include "EGridThermalModelIO.cpp"
 #endif
-
-#endif//ECAD_EMODEL_ETHERM_IO_EGRIDTHERMALMODELIO_HPP

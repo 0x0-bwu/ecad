@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_GDS_EGDSOBJECTS_H
-#define ECAD_EXT_GDS_EGDSOBJECTS_H
+#pragma once
 #include "generic/geometry/Geometries.hpp"
 #include "extension/gds/EGdsRecords.h"
 #include "ECadCommon.h"
@@ -243,4 +242,3 @@ struct EGdsDB : public EGdsObject
 }//namespace gds   
 }//namespace ext
 }//namespace ecad
-#endif//ECAD_EXT_GDS_EGDSOBJECTS_H

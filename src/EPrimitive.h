@@ -1,5 +1,4 @@
-#ifndef ECAD_EPRIMITIVE_H
-#define ECAD_EPRIMITIVE_H
+#pragma once
 #include "interfaces/IPrimitive.h"
 #include "ETransform.h"
 #include "EConnObj.h"
@@ -99,5 +98,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EText)
 #ifdef ECAD_HEADER_ONLY
 #include "EPrimitive.cpp"
 #endif
-
-#endif//ECAD_EPRIMITIVE_H

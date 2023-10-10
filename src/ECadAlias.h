@@ -1,5 +1,4 @@
-#ifndef ECAD_ECADALIAS_H
-#define ECAD_ECADALIAS_H
+#pragma once
 #include "generic/geometry/Box.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <cstddef>
@@ -47,4 +46,3 @@ ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
 ECAD_ALWAYS_INLINE static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
 
 }//namespace ecad
-#endif//ECAD_ECADALIAS_H

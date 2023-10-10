@@ -1,5 +1,4 @@
-#ifndef ECAD_PROTOCOL_PRINTABLE_H
-#define ECAD_PROTOCOL_PRINTABLE_H
+#pragma once
 #include "ECadAlias.h"
 #include <iostream>
 namespace ecad {
@@ -23,5 +22,3 @@ ECAD_ALWAYS_INLINE std::ostream & operator<< (std::ostream & os, const ecad::Pri
 }
 
 }//namespace
-
-#endif//ECAD_PROTOCOL_PRINTABLE_H

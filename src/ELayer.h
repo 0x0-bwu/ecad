@@ -1,5 +1,4 @@
-#ifndef ECAD_ELAYER_H
-#define ECAD_ELAYER_H
+#pragma once
 #include "interfaces/ILayer.h"
 #include "EObject.h"
 #include "ECadDef.h"
@@ -99,5 +98,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EViaLayer)
 #ifdef ECAD_HEADER_ONLY
 #include "ELayer.cpp"
 #endif
-
-#endif//ECAD_ELAYER_H

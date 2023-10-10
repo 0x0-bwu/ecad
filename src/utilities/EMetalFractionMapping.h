@@ -1,5 +1,4 @@
-#ifndef ECAD_EUTILS_EMATELFRACTIONMAPPING_H
-#define ECAD_EUTILS_EMATELFRACTIONMAPPING_H
+#pragma once
 #include "generic/geometry/OccupancyGridMap.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "ECadSettings.h"
@@ -87,5 +86,3 @@ ECAD_API bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayout
 #ifdef ECAD_HEADER_ONLY
 #include "EMetalFractionMapping.cpp"
 #endif
-
-#endif//ECAD_EUTILS_EMATELFRACTIONMAPPING_H

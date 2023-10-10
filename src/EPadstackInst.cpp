@@ -149,7 +149,7 @@ ECAD_INLINE UPtr<EShape> EPadstackInst::GetLayerShape(ELayerId lyr) const
     transform.Append(makeETransform2D(1.0, rotation, offset));
     lyrShape->Transform(transform);
 
-    return std::move(lyrShape);    
+    return lyrShape;   
 }
 
 }//namespace ecad

@@ -1,5 +1,4 @@
-#ifndef ECAD_ECADEXTDMCDOMHANDLER_H
-#define ECAD_ECADEXTDMCDOMHANDLER_H
+#pragma once
 #include "generic/geometry/Box.hpp"
 #include "ECadCommon.h"
 #include "EShape.h"
@@ -48,5 +47,3 @@ private:
 #ifdef ECAD_HEADER_ONLY
 #include "ECadExtDmcDomHandler.cpp"
 #endif
-
-#endif//ECAD_ECADEXTDMCDOMHANDLER_H

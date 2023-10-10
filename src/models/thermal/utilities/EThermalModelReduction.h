@@ -1,5 +1,4 @@
-#ifndef ECAD_EMODEL_ETHERM_UTILS_ETHERMALMODELREDUCTION_HPP
-#define ECAD_EMODEL_ETHERM_UTILS_ETHERMALMODELREDUCTION_HPP
+#pragma once
 #include "models/thermal/EChipThermalModel.h"
 namespace ecad {
 namespace emodel {
@@ -57,5 +56,3 @@ ECAD_API UPtr<EGridDataTable> Reduce(SPtr<EGridDataTable> data, ReduceValueMetho
 #ifdef ECAD_HEADER_ONLY
 #include "EThermalModelReduction.cpp"
 #endif
-
-#endif//ECAD_EMODEL_ETHERM_UTILS_ETHERMALMODELREDUCTION_HPP

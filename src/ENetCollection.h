@@ -1,5 +1,4 @@
-#ifndef ECAD_ENETCOLLECTION_H
-#define ECAD_ENETCOLLECTION_H
+#pragma once
 #include "interfaces/INetCollection.h"
 #include "interfaces/IIterator.h"
 #include "EBaseCollections.h"
@@ -53,5 +52,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ENetCollection)
 #ifdef ECAD_HEADER_ONLY
 #include "ENetCollection.cpp"
 #endif
-
-#endif//ECAD_ENETCOLLECTION_H

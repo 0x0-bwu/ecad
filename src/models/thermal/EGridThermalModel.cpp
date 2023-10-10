@@ -3,9 +3,8 @@
 #endif
 
 #include "interfaces/IMaterialDef.h"
-namespace ecad {
-namespace emodel {
-namespace etherm {
+
+namespace ecad::emodel::etherm {
 
 using namespace eutils;
 
@@ -393,6 +392,4 @@ ECAD_INLINE bool EGridThermalModel::NeedIteration() const
     return false;
 }
 
-}//namespace etherm
-}//namespace emodel
-}//namespace ecad
+} //namespace ecad::emodel::etherm

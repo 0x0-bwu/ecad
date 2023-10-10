@@ -101,9 +101,8 @@ ECAD_INLINE EHierarchyObjIterator & EHierarchyObjIterator::operator= (EHierarchy
 
 ECAD_INLINE Ptr<IHierarchyObj> EHierarchyObjIterator::Next()
 {
-    Ptr<IHierarchyObj> p = nullptr;
-    if(p = dynamic_cast<Ptr<IHierarchyObj> >(m_cellInstIter->Next())) return p;
-    return p;
+    if(auto p = dynamic_cast<Ptr<IHierarchyObj> >(m_cellInstIter->Next()); p) return p;
+    return nullptr;
 }
 
 ECAD_INLINE Ptr<IHierarchyObj> EHierarchyObjIterator::Current()

@@ -41,18 +41,18 @@ ECAD_INLINE bool EGdsParser::operator() (std::istream & fp)
 	unsigned char * noByteArray;
 	int noRead;
 	int noBytes;
-	unsigned char * record;
+	unsigned char * record{nullptr};
     int indentAmount;
 	int recordType;
 	int dataType;
 	int expectedDataType;
     EGdsRecords::EnumType enumRecordType;
     EGdsData::EnumType enumDataType;
-    EGdsData::EnumType enumExpectedDataType;
+    [[maybe_unused]] EGdsData::EnumType enumExpectedDataType;
 	int intKtr;
 	int dataKtr;
 	int exponentKtr;
-	int corruptKtr;
+	[[maybe_unused]] int corruptKtr;
 	unsigned int displayInteger;
 #ifdef ECAD_EXT_GDS_DEBUG_MODE
 	unsigned int hexDisplayInteger;
@@ -69,7 +69,7 @@ ECAD_INLINE bool EGdsParser::operator() (std::istream & fp)
 	/* start out with no indent */
     indentAmount = 0;
 
-    while(1){
+    while (1){
         noByteArray = (unsigned char*)Parse(fp, noRead, 2);
         if(noRead != 2){
             //Error: reached the end of the file!

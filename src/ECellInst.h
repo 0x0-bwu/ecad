@@ -1,5 +1,4 @@
-#ifndef ECAD_ECELLINST_H
-#define ECAD_ECELLINST_H
+#pragma once
 #include "interfaces/ICellInst.h"
 #include "EHierarchyObj.h"
 namespace ecad {
@@ -44,5 +43,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECellInst)
 #ifdef ECAD_HEADER_ONLY
 #include "ECellInst.cpp"
 #endif
-
-#endif//ECAD_ECELLINST_H

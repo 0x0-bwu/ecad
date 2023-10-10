@@ -1,6 +1,4 @@
-#ifndef ECAD_EOBJECT_H
-#define ECAD_EOBJECT_H
-
+#pragma once
 #include "ECadCommon.h"
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/functional/hash.hpp>
@@ -77,5 +75,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EObject)
 #ifdef ECAD_HEADER_ONLY
 #include "EObject.cpp"
 #endif
-
-#endif//ECAD_EOBJECT_H

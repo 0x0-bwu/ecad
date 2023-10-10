@@ -1,5 +1,4 @@
-#ifndef ECAD_EXT_GDS_EGDSRECORDS_H
-#define ECAD_EXT_GDS_EGDSRECORDS_H
+#pragma once
 #include "ECadCommon.h"
 
 namespace ecad {
@@ -73,6 +72,7 @@ struct EGdsRecords
     };
 };
 
+[[maybe_unused]] 
 static const char * eGdsRecordsAscii[] = {
         "HEADER", 
         "BGNLIB", 
@@ -137,6 +137,7 @@ static const char * eGdsRecordsAscii[] = {
         "UNKNOWN"
 };
 
+[[maybe_unused]]
 static const char* eGdsRecordsDescription[] = {
     "Start of stream, contains version number of stream file", 
     "Beginning of library, plus mod and access dates", 
@@ -217,7 +218,7 @@ struct EGdsData
 };
 
 /// @brief array to map from enum of GDSII data type to ASCII 
-static const char* eGdsDataAscii[] = {
+[[maybe_unused]] static const char* eGdsDataAscii[] = {
     "NO_DATA", 
     "BIT_ARRAY", 
     "INTEGER_2", 
@@ -229,7 +230,7 @@ static const char* eGdsDataAscii[] = {
 };
 
 /// @brief array to map from enum of GDSII data type to descriptions 
-static const char* eGdsDataDescription[] = {
+[[maybe_unused]] static const char* eGdsDataDescription[] = {
     "No data present (nothing after the record header)",
     "Bit array (2 bytes)",
     "Two byte signed integer",
@@ -326,4 +327,3 @@ ECAD_ALWAYS_INLINE EGdsData::EnumType GdsDataType(int numeric)
 }//namespace gds
 }//namespace ext
 }//namespace ecad
-#endif//ECAD_EXT_GDS_EGDSRECORDS_H

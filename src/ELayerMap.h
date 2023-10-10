@@ -1,5 +1,4 @@
-#ifndef ECAD_ELAYERMAP_HPP
-#define ECAD_ELAYERMAP_HPP
+#pragma once
 #include "interfaces/ILayerMap.h"
 #include "EDefinition.h"
 #include <boost/bimap.hpp>
@@ -58,5 +57,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayerMap)
 #ifdef ECAD_HEADER_ONLY
 #include "ELayerMap.cpp"
 #endif
-
-#endif//ECAD_ELAYERMAP_HPP

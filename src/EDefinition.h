@@ -1,5 +1,4 @@
-#ifndef ECAD_EDEFINITION_HPP
-#define ECAD_EDEFINITION_HPP
+#pragma once
 #include "interfaces/IDefinition.h"
 #include "ECadCommon.h"
 #include "EObject.h"
@@ -56,5 +55,3 @@ ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EDefinition)
 #ifdef ECAD_HEADER_ONLY
 #include "EDefinition.cpp"
 #endif
-
-#endif//ECAD_EDEFINITION_HPP

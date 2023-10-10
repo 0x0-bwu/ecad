@@ -98,7 +98,7 @@ ECAD_INLINE UPtr<IPrimitive> EPrimitiveCollection::PopBack()
     if(0 == Size()) return nullptr;
     UPtr<IPrimitive> tail = std::move(m_collection.back());
     m_collection.pop_back();
-    return std::move(tail);
+    return tail;
 }
 
 ECAD_INLINE size_t EPrimitiveCollection::Size() const

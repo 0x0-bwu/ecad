@@ -1,5 +1,4 @@
-#ifndef ECAD_ICELLINST_H
-#define ECAD_ICELLINST_H
+#pragma once
 #include "ECadCommon.h"
 #include "ETransform.h"
 #include "Protocol.h"
@@ -20,4 +19,3 @@ public:
 
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ICellInst)
-#endif//ECAD_ICELLINST_H

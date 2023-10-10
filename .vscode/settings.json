@@ -99,6 +99,8 @@
         "coroutine": "cpp",
         "resumable": "cpp",
         "sparse": "cpp",
-        "sparselu": "cpp"
+        "sparselu": "cpp",
+        "semaphore": "cpp",
+        "cassert": "cpp"
     }
 }

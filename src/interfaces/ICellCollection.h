@@ -1,5 +1,4 @@
-#ifndef ECAD_ICELLCOLLECTION_H
-#define ECAD_ICELLCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "Protocol.h"
@@ -17,4 +16,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ICellCollection)
-#endif//ECAD_ICELLCOLLECTION_H
