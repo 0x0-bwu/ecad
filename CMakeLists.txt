@@ -20,6 +20,10 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message("-- Build Type: " ${CMAKE_BUILD_TYPE})
 
+# Compile options
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
 message(STATUS "CMAKE_HOST_SYSTEM: ${CMAKE_HOST_SYSTEM}")
 message(STATUS "CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
@@ -70,3 +74,4 @@ add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 
 add_subdirectory(src)
 add_subdirectory(test)
+add_subdirectory(py)

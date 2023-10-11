@@ -15,7 +15,7 @@ void t_thermal_network_extraction()
     using namespace generic::filesystem;
 
     std::string err;
-    std::string qcomXfl = ecad_test::GetTestDataPath() + "/extension/xfl/qcom.xfl";
+    std::string qcomXfl = ecad_test::GetTestDataPath() + "/xfl/qcom.xfl";
     auto qcom = ext::CreateDatabaseFromXfl("qcom", qcomXfl, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(qcom != nullptr);

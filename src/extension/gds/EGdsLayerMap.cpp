@@ -1,7 +1,6 @@
 #include "EGdsLayerMap.h"
 
 #include "generic/tools/StringHelper.hpp"
-#include "generic/tools/Parser.hpp"
 #include <fstream>
 namespace ecad {
 
@@ -71,7 +70,6 @@ ECAD_INLINE bool EGdsLayerMapParser::operator() (std::istream & fp)
 ECAD_INLINE bool EGdsLayerMapParser::ParseOneLine(const std::string & line, EGdsLayer & layer)
 {
     using namespace generic::str;
-    using namespace generic::parser;
 
     //name m/v layertype datatype thickness
     auto split = Split(line, std::string(1, char(32)));

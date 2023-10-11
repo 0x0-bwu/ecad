@@ -1,6 +1,3 @@
-#include "ECadCommon.h"
-#define ECAD_BOOST_PYTHON_SUPPORT
-#ifdef ECAD_BOOST_PYTHON_SUPPORT
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/stl_iterator.hpp>
 #include <boost/python.hpp>
@@ -1113,4 +1110,3 @@ namespace {
             ;
     }
 }
-#endif//ECAD_BOOST_PYTHON_SUPPORT

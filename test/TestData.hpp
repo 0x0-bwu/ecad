@@ -4,6 +4,6 @@
 namespace ecad_test{
 inline std::string GetTestDataPath()
 {
-    return generic::filesystem::CurrentPath() + "/test/data";
+    return generic::filesystem::CurrentPath() + "/../../test/data";
 }
 }//namespace ecad_test

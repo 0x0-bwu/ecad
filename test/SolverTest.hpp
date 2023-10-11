@@ -16,8 +16,8 @@ using namespace ecad::emodel::etherm;
 void t_grid_thermal_model_solver_test()
 {
     std::string err;
-    std::string ctm = ecad_test::GetTestDataPath() + "/extension/ctm/rhsc_ctm5.tar.gz";
-    std::string ctmFolder = ecad_test::GetTestDataPath() + "/extension/ctm/rhsc_ctm5";
+    std::string ctm = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5.tar.gz";
+    std::string ctmFolder = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5";
     auto model = io::makeGridThermalModelFromCTMv1File(ctm, 0, &err);
     BOOST_CHECK(generic::filesystem::PathExists(ctmFolder));
     generic::filesystem::RemoveDir(ctmFolder);

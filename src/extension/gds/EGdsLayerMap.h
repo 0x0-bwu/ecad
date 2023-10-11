@@ -35,7 +35,7 @@ private:
 class ECAD_API EGdsLayerMapParser
 {
 public:
-    EGdsLayerMapParser(EGdsLayerMap & layerMap);
+    explicit EGdsLayerMapParser(EGdsLayerMap & layerMap);
     virtual ~EGdsLayerMapParser();
 
     virtual bool operator() (const std::string & filename);

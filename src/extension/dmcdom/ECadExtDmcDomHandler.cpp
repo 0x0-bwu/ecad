@@ -1,8 +1,5 @@
 #include "ECadExtDmcDomHandler.h"
 
-#include <boost/spirit/include/qi.hpp>
-#include <boost/phoenix.hpp>
-
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"
@@ -18,17 +15,9 @@ using namespace generic;
 namespace fmt = generic::format;
 ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EValue scale)
 {
-    using namespace boost;
-    using namespace spirit;
     EPoint2D point;
-    auto begin = line.begin(), end = line.end();
-    bool ok = spirit::qi::phrase_parse(begin, end,
-                                (
-                                    qi::double_[phoenix::ref(point[0]) = qi::_1] >>
-                                    qi::double_[phoenix::ref(point[1]) = qi::_1]
-                                ),
-                                ascii::space);
-    if(!ok || begin != end) return false;
+    std::stringstream ss(line);
+    ss >> point[0] >> point[1];
     point *= scale;
     points.emplace_back(std::move(point));
     return true;

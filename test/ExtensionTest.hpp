@@ -11,8 +11,8 @@ using namespace ecad;
 void t_extension_dmcdom()
 {
     std::string err;
-    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
-    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
+    std::string dmc = ecad_test::GetTestDataPath() + "/dmcdom/import.dmc";
+    std::string dom = ecad_test::GetTestDataPath() + "/dmcdom/import.dom";
     auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -35,8 +35,8 @@ void t_extension_dmcdom()
 void t_extension_gds()
 {
     std::string err;
-    std::string ringoGds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
-    std::string layerMap = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.elm";
+    std::string ringoGds = ecad_test::GetTestDataPath() + "/gdsii/ringo.gds";
+    std::string layerMap = ecad_test::GetTestDataPath() + "/gdsii/ringo.elm";
     auto ringo = ext::CreateDatabaseFromGds("ringo", ringoGds, layerMap, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(ringo != nullptr);
@@ -47,7 +47,7 @@ void t_extension_gds()
 void t_extension_xfl()
 {
     std::string err;
-    std::string fccspXfl = ecad_test::GetTestDataPath() + "/extension/xfl/fccsp.xfl";
+    std::string fccspXfl = ecad_test::GetTestDataPath() + "/xfl/fccsp.xfl";
     auto fccsp = ext::CreateDatabaseFromXfl("test", fccspXfl, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(fccsp != nullptr);

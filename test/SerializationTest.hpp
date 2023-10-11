@@ -33,8 +33,8 @@ void t_boost_serialization()
     using namespace generic::filesystem;
 
     std::string err;
-    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
-    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
+    std::string dmc = ecad_test::GetTestDataPath() + "/dmcdom/import.dmc";
+    std::string dom = ecad_test::GetTestDataPath() + "/dmcdom/import.dom";
     auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);

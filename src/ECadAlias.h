@@ -1,4 +1,5 @@
 #pragma once
+#include "ECadConfig.h"
 #include "generic/geometry/Box.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <cstddef>

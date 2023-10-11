@@ -1,10 +1,9 @@
-from gc import collect
 import os
 import sys
 
 current_dir = os.path.dirname(__file__)
-ecad_lib_path = os.path.abspath(current_dir + "/../build/")
-sys.path.append(ecad_lib_path)
+ecad_lib = os.path.abspath(current_dir + "/../build/lib")
+sys.path.append(ecad_lib)
 
 import PyEcad as ecad
 from PyEcad import EPoint2D
@@ -974,12 +973,12 @@ def test_extension() :
     mgr = ecad.EDataMgr.instance()
 
     #gds
-    gds_file = current_dir + '/../test/data/extension/gdsii/4004.gds'
+    gds_file = current_dir + '/../test/data/gdsii/4004.gds'
     gds_database = mgr.create_database_from_gds('4004', gds_file)
     assert(gds_database)
 
     #xfl
-    xfl_file = current_dir + '/../test/data/extension/xfl/fccsp.xfl'
+    xfl_file = current_dir + '/../test/data/xfl/fccsp.xfl'
     xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
     assert(xfl_database)
 
@@ -992,7 +991,7 @@ def test_utilities() :
     mgr = ecad.EDataMgr.instance()
 
     #xfl
-    xfl_file = current_dir + '/../test/data/extension/xfl/pop.xfl'
+    xfl_file = current_dir + '/../test/data/xfl/pop.xfl'
     xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
     assert(xfl_database)
 
@@ -1008,8 +1007,8 @@ def test_utilities() :
     layout.merge_layer_polygons(settings)
     
     #gds
-    gds_file = current_dir + '/../test/data/extension/gdsii/4004.gds'
-    lyr_file = ''#current_dir + '/../test/data/extension/gdsii/ringo.elm'
+    gds_file = current_dir + '/../test/data/gdsii/4004.gds'
+    lyr_file = ''#current_dir + '/../test/data/gdsii/ringo.elm'
     gds_database = mgr.create_database_from_gds('ringo', gds_file, lyr_file)
     assert(gds_database)
 

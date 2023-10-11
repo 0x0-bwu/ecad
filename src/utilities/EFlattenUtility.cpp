@@ -20,15 +20,6 @@ ECAD_INLINE bool EFlattenUtility::Flatten(Ptr<IDatabase> database, Ptr<ICell> ce
     auto flattenFlow = UPtr<FlattenFlow>(new FlattenFlow);
     ScheduleFlattenTasks(flattenFlow.get(), nullptr, *(cellNodeMap->at(cell)));
 
-    // std::ofstream out;
-    // std::string dirPath = "/mnt/c/Users/bwu/iCloudDrive/Code/Garage/test/";
-    // std::string fileName = dirPath + "graph.dot";
-    // out.open(fileName);//wbtest
-    // if(out.is_open()){
-    //     flattenFlow->PrintTaskGraph(out);
-    //     out.close();
-    // }
-
     taskflow::Executor executor(threads);
     return executor.Run(*flattenFlow);
 }

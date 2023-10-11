@@ -13,7 +13,7 @@ void t_flatten_utility()
 {
     std::string err;
     std::string name = "ringo";
-    std::string gds = ecad_test::GetTestDataPath() + "/extension/gdsii/ringo.gds";
+    std::string gds = ecad_test::GetTestDataPath() + "/gdsii/ringo.gds";
     auto database = ext::CreateDatabaseFromGds(name, gds, std::string{}, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -36,8 +36,8 @@ void t_flatten_utility()
 void t_connectivity_extraction()
 {
     std::string err;
-    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
-    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
+    std::string dmc = ecad_test::GetTestDataPath() + "/dmcdom/import.dmc";
+    std::string dom = ecad_test::GetTestDataPath() + "/dmcdom/import.dom";
     auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -55,7 +55,7 @@ void t_connectivity_extraction()
 void t_layout_polygon_merge()
 {
     std::string err;
-    std::string qcomXfl = ecad_test::GetTestDataPath() + "/extension/xfl/pop.xfl";
+    std::string qcomXfl = ecad_test::GetTestDataPath() + "/xfl/pop.xfl";
     auto qcom = ext::CreateDatabaseFromXfl("qcom", qcomXfl, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(qcom != nullptr);
@@ -81,7 +81,7 @@ void t_metal_fraction_mapping()
 
     std::string err;
     std::string name = "4004";
-    std::string gds = ecad_test::GetTestDataPath() + "/extension/gdsii/" + name + ".gds";
+    std::string gds = ecad_test::GetTestDataPath() + "/gdsii/" + name + ".gds";
     auto database = ext::CreateDatabaseFromGds(name, gds, std::string{}, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -108,8 +108,8 @@ void t_metal_fraction_mapping_select_nets()
     using namespace generic::filesystem;
 
     std::string err;
-    std::string dmc = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dmc";
-    std::string dom = ecad_test::GetTestDataPath() + "/extension/dmcdom/import.dom";
+    std::string dmc = ecad_test::GetTestDataPath() + "/dmcdom/import.dmc";
+    std::string dom = ecad_test::GetTestDataPath() + "/dmcdom/import.dom";
     auto database = ext::CreateDatabaseFromDomDmc("test_dmcdom", dmc, dom);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(database != nullptr);
@@ -135,7 +135,7 @@ void t_metal_fraction_mapping_select_nets()
 void t_layout_to_ctm()
 {
     std::string err;
-    std::string popXfl = ecad_test::GetTestDataPath() + "/extension/xfl/pop.xfl";
+    std::string popXfl = ecad_test::GetTestDataPath() + "/xfl/pop.xfl";
     auto pop = ext::CreateDatabaseFromXfl("pop", popXfl, &err);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(pop != nullptr);
