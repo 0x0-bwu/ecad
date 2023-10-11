@@ -52,7 +52,3 @@ ECAD_API UPtr<EGridDataTable> Reduce(SPtr<EGridDataTable> data, ReduceValueMetho
 }//namespace etherm
 }//namesapce emodel
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EThermalModelReduction.cpp"
-#endif

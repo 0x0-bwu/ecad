@@ -1,5 +1,4 @@
-#ifndef ECAD_IDEFINITIONCOLLECTION_H
-#define ECAD_IDEFINITIONCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "Protocol.h"
@@ -20,4 +19,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IDefinitionCollection)
-#endif//ECAD_IDEFINITIONCOLLECTION_H

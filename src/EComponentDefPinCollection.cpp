@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EComponentDefPinCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentDefPinCollection)
-#endif
 
 #include "EComponentDefPin.h"
 namespace ecad {

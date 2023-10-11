@@ -3,9 +3,9 @@
 #include "ETransform.h"
 #include "IIterator.h"
 #include "Protocol.h"
+#include "ICellInst.h"
 namespace ecad {
 
-class ICellInst;
 class ILayoutView;
 class ECAD_API ICellInstCollection : public Clonable<ICellInstCollection>
 {

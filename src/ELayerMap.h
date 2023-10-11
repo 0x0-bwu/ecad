@@ -51,9 +51,4 @@ ECAD_ALWAYS_INLINE const std::string & ELayerMap::GetName() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayerMap)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ELayerMap.cpp"
-#endif

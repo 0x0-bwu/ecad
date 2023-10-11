@@ -1,5 +1,4 @@
-#ifndef ECAD_IHIERARCHYOBJ_H
-#define ECAD_IHIERARCHYOBJ_H
+#pragma once
 #include "ECadCommon.h"
 #include "Protocol.h"
 namespace ecad {
@@ -12,4 +11,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IHierarchyObj)
-#endif//ECAD_IHIERARCHYOBJ_H

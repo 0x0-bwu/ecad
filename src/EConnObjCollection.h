@@ -57,9 +57,4 @@ private:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EConnObjCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EConnObjCollection.cpp"
-#endif

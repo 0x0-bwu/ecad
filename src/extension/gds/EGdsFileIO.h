@@ -54,7 +54,3 @@ protected:
 }//namespace gds   
 }//namespace ext
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EGdsFileIO.cpp"
-#endif

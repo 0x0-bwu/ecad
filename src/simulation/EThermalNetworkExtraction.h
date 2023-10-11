@@ -1,5 +1,4 @@
-#ifndef ECAD_ESIM_ETHERMALNETWOKREXTRACTION_H
-#define ECAD_ESIM_ETHERMALNETWOKREXTRACTION_H
+#pragma once
 #include "ECadSettings.h"
 #include "ECadCommon.h"
 namespace ecad {
@@ -15,7 +14,8 @@ public:
 private:
     EThermalNetworkExtractionSettings m_settings;
 };
-
+}//namespace esim
+}//namespace ecad
 // class ECAD_API EThermalNetworkExtraction
 // {
 //     using float_t = double;
@@ -230,12 +230,3 @@ private:
 //     if(z == 0 || z == (m_modelSize.z - 1)) return true;
 //     return false;
 // }
-
-}//namespace esim
-}//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EThermalNetworkExtraction.cpp"
-#endif
-
-#endif//ECAD_ESIM_ETHERMALNETWOKREXTRACTION_H

@@ -1,6 +1,7 @@
 #pragma once
 #include "ECadCommon.h"
 #include "ETransform.h"
+#include "IIterator.h"
 #include "Protocol.h"
 namespace ecad {
 

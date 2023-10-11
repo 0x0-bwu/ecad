@@ -74,11 +74,6 @@ protected:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPadstackDefData)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPad)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EVia)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EPadstackDefData.cpp"
-#endif

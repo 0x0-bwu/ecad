@@ -46,9 +46,4 @@ protected:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ENetCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ENetCollection.cpp"
-#endif

@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "models/thermal/io/EGridThermalModelIO.h"
-#endif
 
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"

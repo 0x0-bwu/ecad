@@ -1,5 +1,4 @@
-#ifndef ECAD_IPRIMITIVECOLLECTION_H
-#define ECAD_IPRIMITIVECOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "ETransform.h"
 #include "ECadDef.h"
@@ -29,4 +28,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPrimitiveCollection)
-#endif//ECAD_IPRIMITIVECOLLECTION_H

@@ -32,7 +32,3 @@ ECAD_API bool GenerateCTMv1Package(const std::string & dirName, const std::strin
 }//namespace etherm
 }//namespace emodel
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EChipThermalModelIO.cpp"
-#endif

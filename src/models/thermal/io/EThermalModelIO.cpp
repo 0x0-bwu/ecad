@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "models/thermal/io/EThermalModelIO.h"
-#endif
 
 #include "models/thermal/utilities/EThermalModelReduction.h"
 #include "models/thermal/io/EChipThermalModelIO.h"

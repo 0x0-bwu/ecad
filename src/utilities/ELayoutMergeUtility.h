@@ -1,5 +1,4 @@
-#ifndef ECAD_EUTILS_ELAYOUTMERGEUTILITY_H
-#define ECAD_EUTILS_ELAYOUTMERGEUTILITY_H
+#pragma once
 #include "ECadCommon.h"
 namespace ecad {
 
@@ -14,9 +13,3 @@ public:
 
 }//namespace eutils
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "utilities/ELayoutMergeUtility.cpp"
-#endif
-
-#endif//ECAD_EUTILS_ELAYOUTMERGEUTILITY_H

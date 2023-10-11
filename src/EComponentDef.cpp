@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EComponentDef.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentDef)
-#endif
 
 #include "interfaces/IComponentDefPinCollection.h"
 

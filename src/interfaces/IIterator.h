@@ -1,6 +1,8 @@
-#ifndef ECAD_IITERATOR_H
-#define ECAD_IITERATOR_H
+#pragma once
 #include "ECadCommon.h"
+#include "ECadSerialization.h"
+
+
 namespace ecad {
 
 class INet;
@@ -41,4 +43,3 @@ using HierarchyObjIter = UPtr<IIterator<IHierarchyObj> >;
 using PadstackInstIter = UPtr<IIterator<IPadstackInst> >;
 using ComponentDefPinIter = UPtr<IIterator<IComponentDefPin> >;
 }//namespace ecad
-#endif//ECAD_IITERATOR_H

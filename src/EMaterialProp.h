@@ -73,11 +73,6 @@ private:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialProp)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialPropValue)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialPropTable)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EMaterialProp.cpp"
-#endif

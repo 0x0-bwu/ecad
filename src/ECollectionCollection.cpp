@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECollectionCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECollectionCollection)
-#endif
 
 #include "EComponentDefPinCollection.h"
 #include "EPadstackInstCollection.h"

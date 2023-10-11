@@ -14,6 +14,16 @@ models/thermal/utilities/EThermalModelReduction.cpp
 models/thermal/EChipThermalModel.cpp
 models/thermal/EGridThermalModel.cpp
 models/thermal/EThermalModel.cpp
+simulation/EThermalNetworkExtraction.cpp
+solvers/utilities/EThermalNetworkBuilder.cpp
+solvers/EThermalNetworkSolver.cpp
+utilities/EBoundaryCalculator.cpp
+utilities/EFlattenUtility.cpp
+utilities/ELayout2CtmUtility.cpp
+utilities/ELayoutConnectivity.cpp
+utilities/ELayoutMergeUtility.cpp
+utilities/ELayoutPolygonMerger.cpp
+utilities/EMetalFractionMapping.cpp
 ECell.cpp
 ECellCollection.cpp
 ECellInst.cpp
@@ -30,6 +40,7 @@ EDatabase.cpp
 EDataMgr.cpp
 EDefinition.cpp
 EDefinitionCollection.cpp
+EHierarchyObj.cpp
 EHierarchyObjCollection.cpp
 ELayer.cpp
 ELayerCollection.cpp
@@ -52,4 +63,4 @@ EPrimitiveCollection.cpp
 EShape.cpp
 )
 
-target_link_libraries(Ecad boost_serialization)
+target_link_libraries(Ecad ${PNG_LIBRARY} boost_serialization)

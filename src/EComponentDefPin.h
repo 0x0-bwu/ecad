@@ -47,9 +47,4 @@ ECAD_ALWAYS_INLINE const std::string & EComponentDefPin::GetName() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EComponentDefPin)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EComponentDefPin.cpp"
-#endif

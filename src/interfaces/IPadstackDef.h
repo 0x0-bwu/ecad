@@ -1,5 +1,4 @@
-#ifndef ECAD_IPADSTACKDEF_H
-#define ECAD_IPADSTACKDEF_H
+#pragma once
 #include "ECadCommon.h"
 #include "Protocol.h"
 #include <string>
@@ -18,4 +17,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPadstackDef)
-#endif//ECAD_IPADSTACKDEF_H

@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EGdsLayerMap.h"
-#endif
 
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/Parser.hpp"

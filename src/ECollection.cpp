@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECollection)
-#endif
 
 namespace ecad {
 

@@ -8,7 +8,3 @@ ECAD_API UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const EChipT
 ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelV1FromGridThermalModel(const EGridThermalModel & model, bool encrypted, size_t reduceOrder = 0, std::string * err = nullptr);
 
 }//namespace ecad::emodel::etherm::io
-
-#ifdef ECAD_HEADER_ONLY
-#include "EThermalModelIO.cpp"
-#endif

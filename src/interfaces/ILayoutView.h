@@ -1,5 +1,4 @@
-#ifndef ECAD_ILAYOUTVIEW_H
-#define ECAD_ILAYOUTVIEW_H
+#pragma once
 #include "ECadSettings.h"
 #include "IIterator.h"
 #include "Protocol.h"
@@ -111,4 +110,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ILayoutView)
-#endif//ECAD_ILAYOUTVIEW_H

@@ -1,10 +1,10 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EHierarchyObjCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EHierarchyObjCollection)
-#endif
 
-#include "ECollectionCollection.h"
-#include "Interface.h"
+#include "interfaces/ICellInstCollection.h"
+#include "interfaces/IHierarchyObj.h"
+#include "interfaces/ICellInst.h"
+
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

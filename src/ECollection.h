@@ -28,9 +28,4 @@ protected:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECollection.cpp"
-#endif

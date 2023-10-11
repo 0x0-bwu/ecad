@@ -41,9 +41,4 @@ protected:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayerCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ELayerCollection.cpp"
-#endif

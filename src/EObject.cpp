@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EObject.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EObject)
-#endif
 
 namespace ecad {
 

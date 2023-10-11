@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ELayoutView.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
-#endif
 
 #include "simulation/EThermalNetworkExtraction.h"
 #include "utilities/EMetalFractionMapping.h"
@@ -10,7 +8,18 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #include "utilities/ELayoutMergeUtility.h"
 #include "utilities/ELayoutConnectivity.h"
 #include "utilities/ELayout2CtmUtility.h"
-#include "Interface.h"
+
+#include "interfaces/IHierarchyObjCollection.h"
+#include "interfaces/IPadstackInstCollection.h"
+#include "interfaces/IPrimitiveCollection.h"
+#include "interfaces/ICellInstCollection.h"
+#include "interfaces/IConnObjCollection.h"
+#include "interfaces/ILayerCollection.h"
+#include "interfaces/INetCollection.h"
+#include "interfaces/ILayerMap.h"
+#include "interfaces/ILayer.h"
+#include "interfaces/ICell.h"
+
 #include "EShape.h"
 
 namespace ecad {

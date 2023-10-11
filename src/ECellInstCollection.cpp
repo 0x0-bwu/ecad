@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECellInstCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECellInstCollection)
-#endif
 
 #include "interfaces/ILayoutView.h"
 #include "ECellInst.h"

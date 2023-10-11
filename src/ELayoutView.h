@@ -125,9 +125,4 @@ ECAD_ALWAYS_INLINE std::string ELayoutView::sUuid() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayoutView)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ELayoutView.cpp"
-#endif

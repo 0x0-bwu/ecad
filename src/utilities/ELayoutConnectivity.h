@@ -1,6 +1,4 @@
-#ifndef ECAD_EUTILS_ELAYOUTCONNECTIVITY_H
-#define ECAD_EUTILS_ELAYOUTCONNECTIVITY_H
-
+#pragma once
 #include "ECadCommon.h"
 namespace ecad {
 
@@ -16,9 +14,3 @@ public:
 
 }//namespace eutils
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "utilities/ELayoutConnectivity.cpp"
-#endif
-
-#endif//ECAD_EUTILS_ELAYOUTCONNECTIVITY_H

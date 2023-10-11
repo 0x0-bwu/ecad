@@ -85,9 +85,4 @@ ECAD_ALWAYS_INLINE std::string EDatabase::sUuid() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EDatabase)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EDatabase.cpp"
-#endif

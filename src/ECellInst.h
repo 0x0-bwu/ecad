@@ -37,9 +37,4 @@ private:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECellInst)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECellInst.cpp"
-#endif

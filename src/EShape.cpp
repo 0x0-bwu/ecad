@@ -1,10 +1,8 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EShape.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPolygonWithHoles)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ERectangle)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPolygon)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPath)
-#endif
 
 #include "generic/geometry/Utility.hpp"
 #include "ETransform.h"

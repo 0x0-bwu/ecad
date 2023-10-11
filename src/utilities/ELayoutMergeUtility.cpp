@@ -1,8 +1,17 @@
-#ifndef ECAD_HEADER_ONLY
 #include "utilities/ELayoutMergeUtility.h"
-#endif
 
-#include "Interface.h"
+#include "interfaces/IPadstackInstCollection.h"
+#include "interfaces/IPrimitiveCollection.h"
+#include "interfaces/ICellInstCollection.h"
+#include "interfaces/ILayerCollection.h"
+#include "interfaces/INetCollection.h"
+#include "interfaces/IPadstackInst.h"
+#include "interfaces/ILayoutView.h"
+#include "interfaces/IPrimitive.h"
+#include "interfaces/ILayerMap.h"
+#include "interfaces/ICellInst.h"
+#include "interfaces/INet.h"
+#include "EShape.h"
 #include <unordered_map>
 namespace ecad {
 namespace eutils {

@@ -1,10 +1,11 @@
 #pragma once
 #include "extension/xfl/EXflObjects.h"
 #include "ECadCommon.h"
-#include "Interface.h"
 namespace ecad {
 
 class EDataMgr;
+class IDatabase;
+class ILayoutView;
 
 namespace ext {
 namespace xfl {
@@ -57,7 +58,3 @@ ECAD_ALWAYS_INLINE EPoint2D ECadExtXflHandler::makeEPoint2D(const Point & p) con
 }//namespace xfl
 }//namespace ext
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECadExtXflHandler.cpp"
-#endif

@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "solvers/EThermalNetworkSolver.h"
-#endif
 
 #include "models/thermal/utilities/EThermalModelReduction.h"
 #include "thermal/solver/ThermalNetworkSolver.hpp"

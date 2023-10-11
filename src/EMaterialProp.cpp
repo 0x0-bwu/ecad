@@ -1,9 +1,7 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EMaterialProp.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialProp)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialPropValue)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialPropTable)
-#endif
 
 namespace ecad {
 

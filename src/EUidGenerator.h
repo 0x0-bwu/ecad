@@ -1,5 +1,4 @@
-#ifndef ECAD_EUIDGENERATOR_H
-#define ECAD_EUIDGENERATOR_H
+#pragma once
 #include "ECadCommon.h"
 #include <atomic>
 namespace ecad {
@@ -37,4 +36,3 @@ private:
 };
 
 }//namespace ecad
-#endif//ECAD_EUIDGENERATOR_H

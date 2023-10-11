@@ -71,7 +71,3 @@ ECAD_ALWAYS_INLINE std::string EObject::sUuid() const
 }//namespace ecad
 
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EObject)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EObject.cpp"
-#endif

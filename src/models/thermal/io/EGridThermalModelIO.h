@@ -15,7 +15,3 @@ ECAD_API bool GenerateImageProfile(const std::string & filename, const EGridData
 #endif//BOOST_GIL_IO_PNG_SUPPORT
 }
 }//namespace ecad::emodel::etherm::io
-
-#ifdef ECAD_HEADER_ONLY
-#include "EGridThermalModelIO.cpp"
-#endif

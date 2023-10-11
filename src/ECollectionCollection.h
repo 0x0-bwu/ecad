@@ -57,9 +57,4 @@ ECAD_ALWAYS_INLINE std::string ECollectionCollection::sUuid() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECollectionCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECollectionCollection.cpp"
-#endif

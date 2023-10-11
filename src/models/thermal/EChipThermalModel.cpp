@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "models/thermal/EChipThermalModel.h"
-#endif
 
 #include "generic/tools/Format.hpp"
 

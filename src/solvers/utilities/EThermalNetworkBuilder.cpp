@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "solvers/utilities/EThermalNetworkBuilder.h"
-#endif
 
 namespace ecad {
 namespace esolver {
@@ -26,7 +24,6 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
     auto network = std::make_unique<ThermalNetwork<ESimVal> >(size);
 
     //power
-    bool success;
     const auto & layers = m_model.GetLayers();
     for(size_t z = 0; z < layers.size(); ++z) {
         const auto & layer = layers.at(z);

@@ -38,9 +38,4 @@ protected:
     virtual Ptr<EMaterialDefCollection> CloneImp() const override { return new EMaterialDefCollection(*this); }
 };
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialDefCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EMaterialDefCollection.cpp"
-#endif

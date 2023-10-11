@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "models/thermal/EThermalModel.h"
-#endif
 
 namespace ecad {
 namespace emodel {

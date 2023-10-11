@@ -15,7 +15,3 @@ public:
 }//namespace etherm
 }//namesapce emodel
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EThermalModel.cpp"
-#endif

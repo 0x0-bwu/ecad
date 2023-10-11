@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EMaterialDef.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialDef)
-#endif
 
 namespace ecad {
 

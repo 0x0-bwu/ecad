@@ -82,7 +82,3 @@ ECAD_API bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayout
 
 }//namespace eutils
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EMetalFractionMapping.cpp"
-#endif

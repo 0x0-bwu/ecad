@@ -1,11 +1,9 @@
-#ifndef ECAD_TEST_EXTENSIONTEST_HPP
-#define ECAD_TEST_EXTENSIONTEST_HPP
+#pragma once
 #define BOOST_TEST_INCLUDED
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
 #include "extension/ECadExtension.h"
 #include "TestData.hpp"
-#include "Interface.h"
 #include "EDataMgr.h"
 using namespace boost::unit_test;
 using namespace ecad;
@@ -71,4 +69,3 @@ test_suite * create_ecad_extension_test_suite()
     //
     return extension_suite;
 }
-#endif//ECAD_TEST_EXTENSIONTEST_HPP

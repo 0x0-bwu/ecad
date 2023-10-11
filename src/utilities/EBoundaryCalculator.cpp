@@ -1,9 +1,10 @@
-#ifndef ECAD_HEADER_ONLY
 #include "utilities/EBoundaryCalculator.h"
-#endif//ECAD_HEADER_ONLY
 
 #include "generic/geometry/Utility.hpp"
-#include "Interface.h"
+#include "interfaces/ILayoutView.h"
+#include "interfaces/IPrimitive.h"
+#include "interfaces/ICellInst.h"
+#include "interfaces/ILayer.h"
 #include <unordered_map>
 namespace ecad {
 namespace eutils {
@@ -48,7 +49,7 @@ ECAD_INLINE UPtr<EPolygon> CalculateBoundary(CPtr<ILayoutView> layout)
 
     auto boundary = UPtr<EPolygon>(new EPolygon);
     boundary->shape = generic::geometry::toPolygon(bbox);
-    return std::move(boundary);
+    return boundary;
 }
 
 }//namespace eutils

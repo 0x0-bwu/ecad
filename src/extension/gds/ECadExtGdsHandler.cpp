@@ -1,13 +1,10 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECadExtGdsHandler.h"
-#endif
 
 #include "extension/gds/EGdsLayerMap.h"
 #include "extension/gds/EGdsFileIO.h"
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/Format.hpp"
 #include "ETransform.h"
-#include "Interface.h"
 #include "ELayerMap.h"
 #include "EDataMgr.h"
 namespace ecad {

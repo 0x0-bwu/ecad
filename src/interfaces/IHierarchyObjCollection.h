@@ -1,5 +1,4 @@
-#ifndef ECAD_IHIERARCHYOBJCOLLECTION_H
-#define ECAD_IHIERARCHYOBJCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "Protocol.h"
@@ -18,4 +17,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IHierarchyObjCollection)
-#endif//ECAD_IHIERARCHYOBJCOLLECTION_H

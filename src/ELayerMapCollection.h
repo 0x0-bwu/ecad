@@ -38,9 +38,4 @@ protected:
     virtual Ptr<ELayerMapCollection> CloneImp() const override { return new ELayerMapCollection(*this); }
 };
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayerMapCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ELayerMapCollection.cpp"
-#endif

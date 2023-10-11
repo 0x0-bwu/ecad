@@ -1,14 +1,12 @@
-#ifndef ECAD_HEADER_ONLY
 #include "utilities/ELayout2CtmUtility.h"
-#endif
 
 #include "models/thermal/io/EChipThermalModelIO.h"
 #include "models/thermal/io/EThermalModelIO.h"
+#include "interfaces/ILayoutView.h"
+#include "interfaces/ILayer.h"
 #include "EMetalFractionMapping.h"
 #include "EShape.h"
 
-#include "interfaces/ILayoutView.h"
-#include "interfaces/ILayer.h"
 namespace ecad {
 namespace eutils {
     

@@ -44,9 +44,4 @@ ECAD_ALWAYS_INLINE const EUuid & ENet::Uuid() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ENet)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ENet.cpp"
-#endif

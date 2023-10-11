@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EGdsParser.h"
-#endif
 
 #include "extension/gds/EGdsFileIO.h"
 #include <fstream>

@@ -38,9 +38,4 @@ protected:
     virtual Ptr<EComponentDefCollection> CloneImp() const override { return new EComponentDefCollection(*this); }
 };
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EComponentDefCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EComponentDefCollection.cpp"
-#endif

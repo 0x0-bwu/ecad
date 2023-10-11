@@ -1,6 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECadExtension.h"
-#endif
+
 #include "extension/dmcdom/ECadExtDmcDomHandler.h"
 #include "extension/gds/ECadExtGdsHandler.h"
 #include "extension/xfl/ECadExtXflHandler.h"

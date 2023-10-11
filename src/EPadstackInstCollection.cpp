@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EPadstackInstCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPadstackInstCollection)
-#endif
 
 #include "interfaces/IDatabase.h"
 #include "interfaces/ILayerMap.h"

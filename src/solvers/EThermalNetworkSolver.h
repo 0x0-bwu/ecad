@@ -1,5 +1,4 @@
-#ifndef ECAD_ESOLVER_ETHERMALNETWORKSOLVER_HPP
-#define ECAD_ESOLVER_ETHERMALNETWORKSOLVER_HPP
+#pragma once
 #include "models/thermal/EGridThermalModel.h"
 #include "ECadSettings.h"
 #include "ECadCommon.h"
@@ -41,8 +40,8 @@ private:
     void SolveOneLayer(size_t z, ESimVal refT, std::vector<ESimVal> & results);
     
 private:
-    std::vector<ESimVal> m_iniT;
     const EGridThermalModel & m_model;
+    std::vector<ESimVal> m_iniT;
 };
 
 class ECAD_API EGridThermalNetworkReductionSolver : public EThermalNetworkSolver
@@ -67,9 +66,3 @@ private:
 
 }//namesapce esolver
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EThermalNetworkSolver.cpp"
-#endif
-
-#endif//ECAD_ESOLVER_ETHERMALNETWORKSOLVER_HPP

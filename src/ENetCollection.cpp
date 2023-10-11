@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ENetCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ENetCollection)
-#endif
 
 #include "ENet.h"
 namespace ecad {

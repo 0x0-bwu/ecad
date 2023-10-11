@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ELayerMap.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayerMap)
-#endif
 
 #include "interfaces/IDatabase.h"
 #include "ECadDef.h"

@@ -2,9 +2,13 @@
 #define ECAD_EXT_GDS_DEBUG_MODE
 #include "extension/gds/EGdsObjects.h"
 #include "ECadCommon.h"
-#include "Interface.h"
 #include <map>
 namespace ecad {
+
+class ICell;
+class IDatabase;
+class ILayoutView;
+
 namespace ext {
 namespace gds {
 
@@ -39,7 +43,3 @@ private:
 }//namespace gds
 }//namespace ext
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECadExtGdsHandler.cpp"
-#endif

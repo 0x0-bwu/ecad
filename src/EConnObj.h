@@ -38,9 +38,4 @@ ECAD_ALWAYS_INLINE ENetId EConnObj::GetNet() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EConnObj)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EConnObj.cpp"
-#endif

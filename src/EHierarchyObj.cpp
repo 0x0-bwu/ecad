@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EHierarchyObj.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EHierarchyObj)
-#endif
 
 #include "interfaces/ILayer.h"
 namespace ecad {

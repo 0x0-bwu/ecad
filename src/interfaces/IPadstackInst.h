@@ -1,5 +1,4 @@
-#ifndef ECAD_IPADSTACKINST_H
-#define ECAD_IPADSTACKINST_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "Protocol.h"
@@ -31,4 +30,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPadstackInst)
-#endif//ECAD_IPADSTACKINST_H

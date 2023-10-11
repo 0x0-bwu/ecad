@@ -1,5 +1,4 @@
-#ifndef ECAD_EUTLIS_ELAYOUTPOLYGONMERGER_H
-#define ECAD_EUTLIS_ELAYOUTPOLYGONMERGER_H
+#pragma once
 #include "ECadSettings.h"
 #include <unordered_map>
 #include <fstream>
@@ -50,9 +49,3 @@ private:
 
 }//namespace eutils
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "utilities/ELayoutPolygonMerger.cpp"
-#endif
-
-#endif//ECAD_EUTLIS_ELAYOUTPOLYGONMERGER_H

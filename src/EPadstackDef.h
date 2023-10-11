@@ -37,9 +37,4 @@ ECAD_ALWAYS_INLINE const std::string & EPadstackDef::GetName() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPadstackDef)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EPadstackDef.cpp"
-#endif

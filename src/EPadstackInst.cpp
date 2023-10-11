@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EPadstackInst.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPadstackInst)
-#endif
 
 #include "interfaces/IPadstackDefData.h"
 #include "interfaces/IPadstackDef.h"

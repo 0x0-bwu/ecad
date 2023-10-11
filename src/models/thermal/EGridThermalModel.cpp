@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "models/thermal/EGridThermalModel.h"
-#endif
 
 #include "interfaces/IMaterialDef.h"
 

@@ -1,5 +1,4 @@
-#ifndef ECAD_ICONNOBJCOLLECTION_H
-#define ECAD_ICONNOBJCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "Protocol.h"
@@ -20,4 +19,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IConnObjCollection)
-#endif//ECAD_ICONNOBJCOLLECTION_H

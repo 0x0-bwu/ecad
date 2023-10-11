@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EConnObj.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EConnObj)
-#endif
 
 #include "interfaces/INet.h"
 

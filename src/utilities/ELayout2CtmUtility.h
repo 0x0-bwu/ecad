@@ -1,5 +1,4 @@
-#ifndef ECAD_EUTILS_ELAYOUT2CTMUTILITY_H
-#define ECAD_EUTILS_ELAYOUT2CTMUTILITY_H
+#pragma once
 #include "ECadSettings.h"
 #include "ECadCommon.h"
 namespace ecad {
@@ -22,9 +21,3 @@ private:
 
 }//namespace eutils
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "utilities/ELayout2CtmUtility.cpp"
-#endif
-
-#endif//ECAD_EUTILS_ELAYOUT2CTMUTILITY_H

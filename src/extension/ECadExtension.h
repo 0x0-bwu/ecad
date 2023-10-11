@@ -11,7 +11,3 @@ ECAD_API SPtr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const s
 
 }//namespace ext
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECadExtension.cpp"
-#endif

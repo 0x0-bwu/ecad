@@ -28,9 +28,4 @@ private:
 };  
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EHierarchyObj)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EHierarchyObj.cpp"
-#endif

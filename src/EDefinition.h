@@ -49,9 +49,4 @@ ECAD_ALWAYS_INLINE std::string EDefinition::sUuid() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EDefinition)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EDefinition.cpp"
-#endif

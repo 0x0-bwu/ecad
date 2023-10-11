@@ -1,5 +1,4 @@
-#ifndef ECAD_ILAYERMAPCOLLECTION_H
-#define ECAD_ILAYERMAPCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "Protocol.h"
@@ -16,4 +15,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ILayerMapCollection)
-#endif//ECAD_ILAYERCOLLECTION_H

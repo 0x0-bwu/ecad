@@ -41,9 +41,4 @@ ECAD_ALWAYS_INLINE const EUuid & EMaterialDef::Uuid() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialDef)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EMaterialDef.cpp"
-#endif

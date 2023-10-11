@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EDatabase.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
-#endif
 
 #include "generic/tools/FileSystem.hpp"
 #include "utilities/EFlattenUtility.h"

@@ -1,5 +1,5 @@
 #include "ECadCommon.h"
-
+#define ECAD_BOOST_PYTHON_SUPPORT
 #ifdef ECAD_BOOST_PYTHON_SUPPORT
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/stl_iterator.hpp>
@@ -353,7 +353,7 @@ namespace {
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrShutDownWithAutoSave, EDataMgr::ShutDown, 0, 1)
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrCreateDatabaseFromGdsWithoutLayrMap, EDataMgr::CreateDatabaseFromGds, 2, 3)
 
-    BOOST_PYTHON_MODULE(ECAD_LIB_NAME)
+    BOOST_PYTHON_MODULE(PyEcad)
     {           
         //Enum
         enum_<EArchiveFormat>("EArchiveFormat")

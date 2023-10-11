@@ -43,7 +43,3 @@ private:
 }//namespace dmcdom
 }//namespace ext
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECadExtDmcDomHandler.cpp"
-#endif

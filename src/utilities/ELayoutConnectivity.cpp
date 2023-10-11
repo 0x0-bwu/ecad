@@ -1,9 +1,17 @@
-#ifndef ECAD_HEADER_ONLY
 #include "utilities/ELayoutConnectivity.h"
-#endif
 
 #include "generic/geometry/Connectivity.hpp"
-#include "Interface.h"
+#include "interfaces/IPadstackInstCollection.h"
+#include "interfaces/IPrimitiveCollection.h"
+#include "interfaces/IConnObjCollection.h"
+#include "interfaces/INetCollection.h"
+#include "interfaces/IPadstackInst.h"
+#include "interfaces/ILayoutView.h"
+#include "interfaces/IPrimitive.h"
+#include "interfaces/IConnObj.h"
+#include "interfaces/ILayer.h"
+#include "interfaces/INet.h"
+#include "EShape.h"
 namespace ecad {
 namespace eutils {
 

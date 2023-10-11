@@ -1,9 +1,9 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECellInst.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECellInst)
-#endif
 
-#include "Interface.h"
+#include "interfaces/ILayoutView.h"
+#include "interfaces/ICell.h"
+
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

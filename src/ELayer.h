@@ -90,11 +90,6 @@ protected:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayer)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EStackupLayer)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EViaLayer)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ELayer.cpp"
-#endif

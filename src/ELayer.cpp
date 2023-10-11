@@ -1,9 +1,7 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ELayer.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayer)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EStackupLayer)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EViaLayer)
-#endif
 
 namespace ecad {
 

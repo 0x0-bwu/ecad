@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ELayerMapCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayerMapCollection)
-#endif
 
 #include "interfaces/IDefinitionCollection.h"
 #include "interfaces/IDefinition.h"

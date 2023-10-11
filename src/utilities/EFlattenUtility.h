@@ -1,5 +1,4 @@
-#ifndef ECAD_EUTILS_EFLATTENUTILITY_H
-#define ECAD_EUTILS_EFLATTENUTILITY_H
+#pragma once
 #include "ECadCommon.h"
 #include <unordered_map>
 #include <mutex>
@@ -39,9 +38,3 @@ private:
 
 }//namespace utility
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "utilities/EFlattenUtility.cpp"
-#endif
-
-#endif//ECAD_EUTILS_EFLATTENUTILITY_H

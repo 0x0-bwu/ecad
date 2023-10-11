@@ -1,5 +1,4 @@
-#ifndef ECAD_TEST_SIMULATION_HPP
-#define ECAD_TEST_SIMULATION_HPP
+#pragma once
 #define BOOST_TEST_INCLUDED
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
@@ -7,7 +6,6 @@
 #include "simulation/EThermalNetworkExtraction.h"
 #include "extension/ECadExtension.h"
 #include "TestData.hpp"
-#include "Interface.h"
 #include "EDataMgr.h"
 using namespace boost::unit_test;
 using namespace ecad;
@@ -54,4 +52,3 @@ test_suite * create_ecad_simulation_test_suite()
     //
     return simulation_suite;
 }
-#endif//ECAD_TEST_SIMULATION_HPP

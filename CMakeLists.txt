@@ -10,6 +10,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O2")
@@ -29,20 +33,40 @@ message(STATUS "CMAKE_CXX_FLAGS_MINSIZEREL: ${CMAKE_CXX_FLAGS_MINSIZEREL}")
 message(STATUS "CMAKE_EXE_LINKER_FLAGS: " ${CMAKE_EXE_LINKER_FLAGS})
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
 # Find program
 find_program(PYTHON_EXECUTABLE python)
 message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 
+# Boost library
 set(BOOST_INCLUDE_PATH $ENV{BOOST_PATH}/include)
 set(BOOST_LIBRARY_PATH $ENV{BOOST_PATH}/lib)
 
+## Ignore BOOST deprecated headers
+add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS")
+add_definitions("-DBOOST_BIND_GLOBAL_PLACEHOLDERS")
+
+## Link boost_serialization static
+add_library(boost_serialization STATIC IMPORTED)
+if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_serialization.a)
+    set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION ${BOOST_LIBRARY_PATH}/libboost_serialization.a)
+else()
+    message(FATAL_ERROR "The IMPORTED_LOCATION of boost_serialization does not exist!")
+endif()
+
+set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
+
 # Find package
 find_package(PNG REQUIRED)
+find_package(Eigen3 REQUIRED)
 find_package(Threads REQUIRED)
 
-get_filename_component(GENERIC_LIBRARY_DIR ../ ABSOLUTE)
-include_directories(${GENERIC_LIBRARY_DIR} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
+include_directories(${THIRD_LIBRARY_PATH} ${EIGEN3_INCLUDE_DIR} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
+
+# Compile definition
+add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)
+add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 
 add_subdirectory(src)
-#add_subdirectory(test)
+add_subdirectory(test)

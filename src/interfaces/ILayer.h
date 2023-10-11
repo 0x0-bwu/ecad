@@ -1,5 +1,4 @@
-#ifndef ECAD_ILAYER_H
-#define ECAD_ILAYER_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "Protocol.h"
@@ -50,5 +49,3 @@ public:
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ILayer)
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IStackupLayer)
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IViaLayer)
-
-#endif//ECAD_ILAYER_H

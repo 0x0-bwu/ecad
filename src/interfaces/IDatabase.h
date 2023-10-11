@@ -1,5 +1,4 @@
-#ifndef ECAD_IDATABASE_H
-#define ECAD_IDATABASE_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "IIterator.h"
@@ -65,4 +64,3 @@ public:
 
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IDatabase)
-#endif//ECAD_IDATABASE_H

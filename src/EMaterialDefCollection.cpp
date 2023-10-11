@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EMaterialDefCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialDefCollection)
-#endif
 
 #include "interfaces/IDefinitionCollection.h"
 #include "interfaces/IMaterialDef.h"

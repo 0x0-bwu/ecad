@@ -1,7 +1,6 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EDefinition.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDefinition)
-#endif
+
 #include "ECadDef.h"
 namespace ecad {
 

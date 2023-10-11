@@ -1,8 +1,6 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECell.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECell)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECircuitCell)
-#endif
 
 #include "ELayoutView.h"
 #include "EDatabase.h"

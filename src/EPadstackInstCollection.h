@@ -38,9 +38,4 @@ protected:
 };
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPadstackInstCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EPadstackInstCollection.cpp"
-#endif

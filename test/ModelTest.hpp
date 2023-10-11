@@ -1,5 +1,4 @@
-#ifndef ECAD_TEST_MODEL_HPP
-#define ECAD_TEST_MODEL_HPP
+#pragma once
 #define BOOST_TEST_INCLUDED
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
@@ -33,4 +32,3 @@ test_suite * create_ecad_model_test_suite()
     //
     return model_suite;
 }
-#endif//ECAD_TEST_MODEL_HPP

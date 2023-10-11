@@ -1,5 +1,4 @@
-#ifndef ECAD_IPADSTACKINSTCOLLECTION_H
-#define ECAD_IPADSTACKINSTCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "ECadDef.h"
@@ -29,4 +28,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPadstackInstCollection)
-#endif//ECAD_IPADSTACKINSTCOLLECTION_H

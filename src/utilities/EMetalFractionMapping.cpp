@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EMetalFractionMapping.h"
-#endif
 
 #if defined(ECAD_DEBUG_MODE) && defined(BOOST_GIL_IO_PNG_SUPPORT)
 #include "generic/tools/Color.hpp"
@@ -10,7 +8,13 @@
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"
-#include "Interface.h"
+
+#include "interfaces/ILayoutView.h"
+#include "interfaces/IPrimitive.h"
+#include "interfaces/ILayer.h"
+
+#include "EShape.h"
+
 namespace ecad {
 namespace eutils {
 using namespace generic::geometry;
@@ -78,8 +82,8 @@ ECAD_INLINE void ELayerMetalFractionMapper::Mapping(const MapCtrl & ctrl)
 
     auto width = m_fraction.Width();
     auto height = m_fraction.Height();
-    for(auto i = 0; i < width; ++i){
-        for(auto j = 0; j < height; ++j){
+    for (size_t i = 0; i < width; ++i) {
+        for (size_t j = 0; j < height; ++j) {
             auto & res = m_fraction(i, j);
             if(res < 0.0f) res = 0.0f;
             if(res > 1.0f) res = 1.0f;
@@ -280,8 +284,8 @@ ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELay
     auto ref = bbox[0];
     auto width = info.grid[0];
     auto height = info.grid[1];
-    for(auto i = 0; i < width; ++i){
-        for(auto j = 0; j < height; ++j){
+    for (size_t i = 0; i < width; ++i) {
+        for (size_t j = 0; j < height; ++j) {
             auto ll = ref + EPoint2D(info.stride[0] * i, info.stride[1] * j);
             auto ur = ll + EPoint2D(info.stride[0], info.stride[1]);
             auto box = EBox2D(ll, ur);
@@ -292,7 +296,7 @@ ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELay
             out << sp << unit.toUnit(box[1][0], um);
             out << sp << unit.toUnit(box[1][1], um);
 
-            for(auto k = 0; k < layerSize; ++k){
+            for (size_t k = 0; k < layerSize; ++k) {
                 out << sp;
                 out << (*mf[k])(i, j);
             }

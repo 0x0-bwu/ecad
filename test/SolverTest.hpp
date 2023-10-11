@@ -1,5 +1,4 @@
-#ifndef ECAD_TEST_SOLVER_HPP
-#define ECAD_TEST_SOLVER_HPP
+#pragma once
 #define BOOST_TEST_INCLUDED
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
@@ -104,4 +103,3 @@ test_suite * create_ecad_solver_test_suite()
     //
     return solver_suite;
 }
-#endif//ECAD_TEST_SOLVER_HPP

@@ -1,12 +1,10 @@
-#ifndef ECAD_TEST_UTILITY_HPP
-#define ECAD_TEST_UTILITY_HPP
+#pragma once
 #define BOOST_TEST_INCLUDED
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
 #include "generic/geometry/Utility.hpp"
 #include "extension/ECadExtension.h"
 #include "TestData.hpp"
-#include "Interface.h"
 #include "EDataMgr.h"
 using namespace boost::unit_test;
 using namespace ecad;
@@ -170,4 +168,3 @@ test_suite * create_ecad_utility_test_suite()
     //
     return utility_suite;
 }
-#endif//ECAD_TEST_UTILITY_HPP

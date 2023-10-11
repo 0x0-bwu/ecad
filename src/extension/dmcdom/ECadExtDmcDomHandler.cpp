@@ -1,38 +1,31 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECadExtDmcDomHandler.h"
-#endif
+
+#include <boost/spirit/include/qi.hpp>
+#include <boost/phoenix.hpp>
 
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"
-#include "generic/tools/Parser.hpp"
 #include "generic/tools/Format.hpp"
 #include "generic/math/Numbers.hpp"
 #include "generic/tools/Tools.hpp"
 
-#include "Interface.h"
 #include "EDataMgr.h"
 #include <tuple>
-namespace ecad {
-
-namespace ext {
-
-namespace dmcdom {
+namespace ecad::ext::dmcdom {
 
 using namespace generic;
 namespace fmt = generic::format;
-namespace phx = boost::phoenix;
-namespace qi = boost::spirit::qi;
-namespace ascii = boost::spirit::ascii;
-
 ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EValue scale)
 {
+    using namespace boost;
+    using namespace spirit;
     EPoint2D point;
     auto begin = line.begin(), end = line.end();
-    bool ok = qi::phrase_parse(begin, end,
+    bool ok = spirit::qi::phrase_parse(begin, end,
                                 (
-                                    qi::double_[phx::ref(point[0]) = qi::_1] >>
-                                    qi::double_[phx::ref(point[1]) = qi::_1]
+                                    qi::double_[phoenix::ref(point[0]) = qi::_1] >>
+                                    qi::double_[phoenix::ref(point[1]) = qi::_1]
                                 ),
                                 ascii::space);
     if(!ok || begin != end) return false;
@@ -256,6 +249,4 @@ ECAD_INLINE bool ECadExtDmcDomHandler::ParseDmcFile(const std::string & filename
     return true;
 }
 
-}//namespace dmcdom
-}//namespace ext
-}//namespace ecad
+}//namespace ecad::ext::dmcdom

@@ -1,9 +1,7 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EPadstackDefData.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPadstackDefData)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPad)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EVia)
-#endif
 
 #include "EShape.h"
 

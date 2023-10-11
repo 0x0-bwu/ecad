@@ -1,11 +1,12 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EThermalNetworkExtraction.h"
-#endif
 
 #include "utilities/EMetalFractionMapping.h"
 #include "solvers/EThermalNetworkSolver.h"
 #include "generic/tools/FileSystem.hpp"
-#include "Interface.h"
+
+#include "interfaces/ILayoutView.h"
+#include "interfaces/ILayer.h"
+
 namespace ecad {
 namespace esim {
 
@@ -118,8 +119,8 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
 
     using ValueType = typename ELayerMetalFraction::ResultType;
-    if(!m_settings.outDir.empty() && m_settings.dumpHotmaps) {        
-        for(auto index = 0; index < mfInfo->layers.size(); ++index){
+    if (not m_settings.outDir.empty() && m_settings.dumpHotmaps) {        
+        for (size_t index = 0; index < mfInfo->layers.size(); ++index) {
             auto lyr = htMap->at(index);
             auto min = lyr->MaxOccupancy(std::less<ValueType>());
             auto max = lyr->MaxOccupancy(std::greater<ValueType>());

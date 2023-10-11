@@ -181,7 +181,3 @@ ECAD_ALWAYS_INLINE bool EGridThermalModel::isValid(const ESize3D & index) const
 }//namespace etherm
 }//namesapce emodel
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EGridThermalModel.cpp"
-#endif

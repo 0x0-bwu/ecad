@@ -2,11 +2,10 @@
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "Protocol.h"
+#include "IDatabase.h"
+#include "ILayoutView.h"
 #include <string>
 namespace ecad {
-
-class IDatabase;
-class ILayoutView;
 class ECAD_API ICell : public Clonable<ICell>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION

@@ -1,10 +1,13 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EConnObjCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EConnObjCollection)
-#endif
 
-#include "ECollectionCollection.h"
-#include "Interface.h"
+#include "interfaces/IPadstackInstCollection.h"
+#include "interfaces/IPrimitiveCollection.h"
+#include "interfaces/IPadstackInst.h"
+#include "interfaces/IDefinition.h"
+#include "interfaces/IPrimitive.h"
+#include "interfaces/IConnObj.h"
+
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

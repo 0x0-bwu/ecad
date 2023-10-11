@@ -1,9 +1,7 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EPrimitive.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPrimitive)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EGeometry2D)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EText)
-#endif
 
 #include "interfaces/ILayer.h"
 #include "interfaces/INet.h"

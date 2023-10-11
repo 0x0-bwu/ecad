@@ -94,7 +94,3 @@ protected:
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPrimitive)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EGeometry2D)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EText)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EPrimitive.cpp"
-#endif

@@ -1,9 +1,7 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EDefinitionCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDefinitionCollection)
-#endif
 
-#include "Interface.h"
+#include "interfaces/IDefinition.h"
 
 namespace ecad {
 

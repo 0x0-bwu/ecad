@@ -78,10 +78,5 @@ ECAD_ALWAYS_INLINE std::string ECell::sUuid() const
 }
 
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECell)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECircuitCell)
-
-#ifdef ECAD_HEADER_ONLY
-#include "ECell.cpp"
-#endif

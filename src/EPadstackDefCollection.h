@@ -38,9 +38,4 @@ protected:
     virtual Ptr<EPadstackDefCollection> CloneImp() const override { return new EPadstackDefCollection(*this); }
 };
 }//namespace ecad
-
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPadstackDefCollection)
-
-#ifdef ECAD_HEADER_ONLY
-#include "EPadstackDefCollection.cpp"
-#endif

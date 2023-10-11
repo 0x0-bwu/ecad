@@ -1,10 +1,10 @@
-#ifndef ECAD_IPADSTACKDEFCOLLECTION_H
-#define ECAD_IPADSTACKDEFCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "IIterator.h"
 #include "Protocol.h"
+#include "IPadstackDef.h"
 namespace ecad {
-class IPadstackDef;
+
 class ECAD_API IPadstackDefCollection : public Clonable<IPadstackDefCollection>
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
@@ -16,4 +16,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPadstackDefCollection)
-#endif//ECAD_IPADSTACKDEFCOLLECTION_H

@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "utilities/EFlattenUtility.h"
-#endif
 
 #include "generic/thread/TaskFlow.hpp"
 #include "interfaces/ILayoutView.h"
@@ -57,7 +55,7 @@ ECAD_INLINE UPtr<ECellNodeMap> EFlattenUtility::BuildCellNodeMap(Ptr<IDatabase> 
             dependent->successors.push_back(successor.get());
         }
     }
-    return std::move(cellNodeMap);
+    return cellNodeMap;
 }
 
 ECAD_INLINE bool EFlattenUtility::GetTopCells(Ptr<IDatabase> database, std::vector<Ptr<ICell> > & tops)

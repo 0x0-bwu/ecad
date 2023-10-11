@@ -1,5 +1,4 @@
-#ifndef ECAD_ICOMPONENTDEF_H
-#define ECAD_ICOMPONENTDEF_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "Protocol.h"
@@ -19,4 +18,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IComponentDef)
-#endif//ECAD_ICOMPONENTDEF_H

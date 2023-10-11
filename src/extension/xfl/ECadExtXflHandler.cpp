@@ -1,13 +1,10 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECadExtXflHandler.h"
-#endif
 
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/Format.hpp"
 #include "EMaterialProp.h"
 #include "EXflParser.h"
 #include "ETransform.h"
-#include "Interface.h"
 #include "EDataMgr.h"
 namespace ecad {
 namespace ext {

@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EComponentDefPin.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentDefPin)
-#endif
 
 #include "interfaces/IPadstackDef.h"
 namespace ecad {

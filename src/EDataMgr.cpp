@@ -1,6 +1,4 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EDataMgr.h"
-#endif
 
 #include "extension/ECadExtension.h"
 #include "EPadstackDefData.h"

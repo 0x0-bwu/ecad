@@ -1,11 +1,18 @@
-#ifndef ECAD_HEADER_ONLY
 #include "utilities/ELayoutPolygonMerger.h"
-#endif
 
 #include "generic/geometry/PolygonMerge.hpp"
 #include "generic/geometry/GeometryIO.hpp"
 #include "generic/tools/FileSystem.hpp"
-#include "Interface.h"
+
+#include "interfaces/IPrimitiveCollection.h"
+#include "interfaces/IPadstackInst.h"
+#include "interfaces/IPadstackDef.h"
+#include "interfaces/ILayoutView.h"
+#include "interfaces/IPrimitive.h"
+#include "interfaces/ILayer.h"
+#include "interfaces/INet.h"
+#include "EShape.h"
+
 namespace ecad {
 namespace eutils {
 
@@ -57,8 +64,6 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
 {
     m_netIdNameMap.clear();
     m_primTobeRemove.clear();
-
-    size_t i = 0;
     auto primitives = m_layout->GetPrimitiveCollection();
     for(size_t i = 0; i < primitives->Size(); ++i) {
         auto prim = primitives->GetPrimitive(i);
@@ -138,7 +143,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
                 shape->shape.holes = std::move(polygon->holes);
                 eShape = UPtr<EShape>(shape);
             }
-            auto prim = primitives->CreateGeometry2D(merger.first, polygon->property, std::move(eShape));
+            [[maybe_unused]] auto prim = primitives->CreateGeometry2D(merger.first, polygon->property, std::move(eShape));
             GENERIC_ASSERT(prim != nullptr)
         }
     }

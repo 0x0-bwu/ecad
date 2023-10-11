@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "EPrimitiveCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPrimitiveCollection)
-#endif
 
 #include "interfaces/ILayerMap.h"
 #include "interfaces/INet.h"

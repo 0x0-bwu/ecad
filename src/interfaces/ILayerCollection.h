@@ -1,5 +1,4 @@
-#ifndef ECAD_ILAYERCOLLECTION_H
-#define ECAD_ILAYERCOLLECTION_H
+#pragma once
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include "IIterator.h"
@@ -25,4 +24,3 @@ public:
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ILayerCollection)
-#endif//ECAD_ILAYERCOLLECTION_H

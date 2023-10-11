@@ -82,7 +82,3 @@ private:
 }//namespace etherm
 }//namespace emodel
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EChipThermalModel.cpp"
-#endif

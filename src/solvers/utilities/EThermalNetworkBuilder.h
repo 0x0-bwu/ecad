@@ -1,5 +1,4 @@
-#ifndef ECAD_ESOLVER_ETHERMALNETWORKBUILDER_HPP
-#define ECAD_ESOLVER_ETHERMALNETWORKBUILDER_HPP
+#pragma once
 #include "models/thermal/EGridThermalModel.h"
 #include "thermal/model/ThermalNetwork.hpp"
 namespace ecad {
@@ -119,9 +118,3 @@ ECAD_ALWAYS_INLINE bool EGridThermalNetworkBuilder::isValid(const ESize3D & inde
 // };
 }//namesapce esolver
 }//namespace ecad
-
-#ifdef ECAD_HEADER_ONLY
-#include "EThermalNetworkBuilder.cpp"
-#endif
-
-#endif//ECAD_ESOLVER_ETHERMALNETWORKBUILDER_HPP

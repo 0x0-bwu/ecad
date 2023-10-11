@@ -1,5 +1,4 @@
-#ifndef ECAD_IPRIMITIVE_H
-#define ECAD_IPRIMITIVE_H
+#pragma once
 #include "ECadCommon.h"
 #include "ETransform.h"
 #include "ECadDef.h"
@@ -50,4 +49,3 @@ public:
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPrimitive)
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IGeometry2D)
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IText)
-#endif//ECAD_IPRIMITIVE_H

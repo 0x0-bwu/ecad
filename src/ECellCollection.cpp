@@ -1,7 +1,5 @@
-#ifndef ECAD_HEADER_ONLY
 #include "ECellCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECellCollection)
-#endif
 
 #include "interfaces/IDefinition.h"
 #include "interfaces/ICell.h"

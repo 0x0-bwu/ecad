@@ -101,6 +101,7 @@
         "sparse": "cpp",
         "sparselu": "cpp",
         "semaphore": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "numbers": "cpp"
     }
 }
