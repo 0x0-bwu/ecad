@@ -1,5 +1,5 @@
 
-add_library(Ecad
+add_library(Ecad SHARED
 extension/dmcdom/ECadExtDmcDomHandler.cpp
 extension/gds/ECadExtGdsHandler.cpp
 extension/gds/EGdsFileIO.cpp

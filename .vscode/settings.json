@@ -102,6 +102,7 @@
         "sparselu": "cpp",
         "semaphore": "cpp",
         "cassert": "cpp",
-        "numbers": "cpp"
+        "numbers": "cpp",
+        "core": "cpp"
     }
 }

@@ -15,11 +15,9 @@ using namespace generic;
 namespace fmt = generic::format;
 ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EValue scale)
 {
-    EPoint2D point;
-    std::stringstream ss(line);
-    ss >> point[0] >> point[1];
-    point *= scale;
-    points.emplace_back(std::move(point));
+    double x{0}, y{0};
+    std::stringstream(line) >> x >> y;
+    points.emplace_back(x, y);
     return true;
 }
 

@@ -1,8 +1,8 @@
 
 ## Link boost_serialization static
-add_library(boost_python STATIC IMPORTED)
-if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_python310.a)
-    set_target_properties(boost_python PROPERTIES IMPORTED_LOCATION ${BOOST_LIBRARY_PATH}/libboost_python310.a)
+add_library(boost_python SHARED IMPORTED)
+if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_python310.so)
+    set_target_properties(boost_python PROPERTIES IMPORTED_LOCATION ${BOOST_LIBRARY_PATH}/libboost_python310.so)
 else()
     message(FATAL_ERROR "The IMPORTED_LOCATION of boost_python does not exist!")
 endif()

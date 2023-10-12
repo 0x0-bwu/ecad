@@ -62,18 +62,18 @@ public:
         
         Eigen::VectorXd x;
         //iterator
-        // Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> solver;
-        // solver.compute(spMat);
-        // x = solver.solve(b);
-        // std::cout << "#iterations:     " << solver.iterations() << std::endl;
-        // std::cout << "estimated error: " << solver.error()      << std::endl;
+        Eigen::ConjugateGradient<Eigen::SparseMatrix<double>, Eigen::Lower|Eigen::Upper> solver;
+        solver.compute(spMat);
+        x = solver.solve(b);
+        std::cout << "#iterations:     " << solver.iterations() << std::endl;
+        std::cout << "estimated error: " << solver.error()      << std::endl;
 
         //direct
-        Eigen::SparseLU<Eigen::SparseMatrix<double> > solver;
-        // Eigen::SimplicialCholesky<Eigen::SparseMatrix<double> > solver;
-        solver.analyzePattern(spMat);
-        solver.factorize(spMat);
-        x = solver.solve(b); 
+        // Eigen::SparseLU<Eigen::SparseMatrix<double> > solver;
+        // // Eigen::SimplicialCholesky<Eigen::SparseMatrix<double> > solver;
+        // solver.analyzePattern(spMat);
+        // solver.factorize(spMat);
+        // x = solver.solve(b); 
 
         auto & nodes = m_network.GetNodes();
         for(size_t i = 0; i < size; ++i)
