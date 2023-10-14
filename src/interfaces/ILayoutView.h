@@ -41,6 +41,7 @@ public:
     virtual ConnObjIter GetConnObjIter() const = 0;
     virtual CellInstIter GetCellInstIter() const = 0;
     virtual PrimitiveIter GetPrimitiveIter() const = 0;
+    virtual HierarchyObjIter GetHierarchyObjIter() const = 0;
     virtual PadstackInstIter GetPadstackInstIter() const = 0;
 
     ///Cell

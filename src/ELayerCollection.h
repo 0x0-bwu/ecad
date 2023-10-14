@@ -19,19 +19,19 @@ public:
     ELayerCollection(const ELayerCollection & other);
     ELayerCollection & operator= (const ELayerCollection & other);
 
-    ELayerId AppendLayer(UPtr<ILayer> layer);
-    std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers);
-    UPtr<ILayerMap> AddDefaultDielectricLayers();
-    UPtr<ILayerMap> GetDefaultLayerMap() const;
+    ELayerId AppendLayer(UPtr<ILayer> layer) override;
+    std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers) override;
+    UPtr<ILayerMap> AddDefaultDielectricLayers() override;
+    UPtr<ILayerMap> GetDefaultLayerMap() const override;
 
-    void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const;
-    void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const;
+    void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const override;
+    void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const override;
 
-    LayerIter GetLayerIter() const;
-    size_t Size() const;
+    LayerIter GetLayerIter() const override;
+    size_t Size() const override;
 
-    Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const;
-    Ptr<ILayer> FindLayerByName(const std::string & name) const;
+    Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const override;
+    Ptr<ILayer> FindLayerByName(const std::string & name) const override;
     std::string GetNextLayerName(const std::string & base) const;
 
 protected:

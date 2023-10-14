@@ -23,86 +23,86 @@ public:
     ELayoutView(const ELayoutView & other);
     ELayoutView & operator= (const ELayoutView & other);
 
-    const std::string & GetName() const;
-    std::string sUuid() const;
+    const std::string & GetName() const override;
+    std::string sUuid() const override;
 
     ///Units
-    const ECoordUnits & GetCoordUnits() const;
+    const ECoordUnits & GetCoordUnits() const override;
 
     ///Iterator objects
-    NetIter GetNetIter() const;
-    LayerIter GetLayerIter() const;
-    ConnObjIter GetConnObjIter() const;
-    CellInstIter GetCellInstIter() const;
-    PrimitiveIter GetPrimitiveIter() const;
-    HierarchyObjIter GetHierarchyObjIter() const;
-    PadstackInstIter GetPadstackInstIter() const;
+    NetIter GetNetIter() const override;
+    LayerIter GetLayerIter() const override;
+    ConnObjIter GetConnObjIter() const override;
+    CellInstIter GetCellInstIter() const override;
+    PrimitiveIter GetPrimitiveIter() const override;
+    HierarchyObjIter GetHierarchyObjIter() const override;
+    PadstackInstIter GetPadstackInstIter() const override;
 
     ///Cell
-    void SetCell(Ptr<ICell> cell);
-    Ptr<ICell> GetCell() const;
+    void SetCell(Ptr<ICell> cell) override;
+    Ptr<ICell> GetCell() const override;
 
     ///Layer
-    ELayerId AppendLayer(UPtr<ILayer> layer) const;
-    std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers) const;
-    void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const;
-    void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const;
-    UPtr<ILayerMap> AddDefaultDielectricLayers() const;
-    Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const;
-    Ptr<ILayer> FindLayerByName(const std::string & name) const;
+    ELayerId AppendLayer(UPtr<ILayer> layer) const override;
+    std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers) const override;
+    void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const override;
+    void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const override;
+    UPtr<ILayerMap> AddDefaultDielectricLayers() const override;
+    Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const override;
+    Ptr<ILayer> FindLayerByName(const std::string & name) const override;
 
     ///Net
-    Ptr<INet> CreateNet(const std::string & name);
-    Ptr<INet> FindNetByName(const std::string & name) const;
-    Ptr<INet> FindNetByNetId(ENetId netId) const;
+    Ptr<INet> CreateNet(const std::string & name) override;
+    Ptr<INet> FindNetByName(const std::string & name) const override;
+    Ptr<INet> FindNetByNetId(ENetId netId) const override;
 
     ///PadstackInst
     Ptr<IPadstackInst> CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,
                                           ELayerId topLyr, ELayerId botLyr, CPtr<ILayerMap> layerMap,
-                                          const ETransform2D & transform); 
+                                          const ETransform2D & transform) override; 
     ///CellInst
-    Ptr<ICellInst> CreateCellInst(const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform);
+    Ptr<ICellInst> CreateCellInst(const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform) override;
     
     ///Primitive
-    Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape);
+    Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) override;
 
     ///Text
-    Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text);
+    Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) override;
 
     ///ECollectionCollection
-    Ptr<INetCollection> GetNetCollection() const;
-    Ptr<ILayerCollection> GetLayerCollection() const;
-    Ptr<IConnObjCollection> GetConnObjCollection() const;
-    Ptr<ICellInstCollection> GetCellInstCollection() const;
-    Ptr<IPrimitiveCollection> GetPrimitiveCollection() const;
-    Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const;
-    Ptr<IPadstackInstCollection> GetPadstackInstCollection() const;
+    Ptr<INetCollection> GetNetCollection() const override;
+    Ptr<ILayerCollection> GetLayerCollection() const override;
+    Ptr<IConnObjCollection> GetConnObjCollection() const override;
+    Ptr<ICellInstCollection> GetCellInstCollection() const override;
+    Ptr<IPrimitiveCollection> GetPrimitiveCollection() const override;
+    Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const override;
+    Ptr<IPadstackInstCollection> GetPadstackInstCollection() const override;
 
     ///Boundary
-    void SetBoundary(UPtr<EPolygon> boundary);
-    CPtr<EPolygon> GetBoundary() const;
+    void SetBoundary(UPtr<EPolygon> boundary) override;
+    CPtr<EPolygon> GetBoundary() const override;
 
     ///Metal Fraction Mapping
-    bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings);
+    bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) override;
 
     ///Layout to CTMv1
-    bool GenerateCTMv1File(const ELayout2CtmSettings & settings);
+    bool GenerateCTMv1File(const ELayout2CtmSettings & settings) override;
 
     ///Connectivity Extraction
-    void ExtractConnectivity();
+    void ExtractConnectivity() override;
 
     ///Layout Polygon Merge
-    bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings);
+    bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) override;
 
     ///Thermal Network Extraction
-    bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings);
+    bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) override;
     
     ///Flatten
-    void Flatten(const EFlattenOption & option);
+    void Flatten(const EFlattenOption & option) override;
     void Merge(CPtr<ILayoutView> other, const ETransform2D & transform);
 
     ///Mapping
-    void Map(CPtr<ILayerMap> lyrMap);
+    void Map(CPtr<ILayerMap> lyrMap) override;
     
 protected:
     ///Copy

@@ -17,7 +17,7 @@ public:
     ECollection(const ECollection & other);
     ECollection & operator= (const ECollection & other);
 
-    virtual size_t Size() const;
+    virtual size_t Size() const override;
 
 protected:
     ///Copy

@@ -21,17 +21,17 @@ public:
     EPadstackInstCollection(const EPadstackInstCollection & other);
     EPadstackInstCollection & operator= (const EPadstackInstCollection & other);
 
-    Ptr<IPadstackInst> AddPadstackInst(UPtr<IPadstackInst> psInst);
+    Ptr<IPadstackInst> AddPadstackInst(UPtr<IPadstackInst> psInst) override;
     
     Ptr<IPadstackInst> CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,
                                           ELayerId topLyr, ELayerId botLyr, CPtr<ILayerMap> layerMap,
-                                          const ETransform2D & transform); 
+                                          const ETransform2D & transform) override; 
     
-    void Map(CPtr<ILayerMap> lyrMap);
+    void Map(CPtr<ILayerMap> lyrMap) override;
 
-    PadstackInstIter GetPadstackInstIter() const;
+    PadstackInstIter GetPadstackInstIter() const override;
 
-    size_t Size() const;
+    size_t Size() const override;
 protected:
     ///Copy
     virtual Ptr<EPadstackInstCollection> CloneImp() const override { return new EPadstackInstCollection(*this); }

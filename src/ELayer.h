@@ -48,17 +48,17 @@ public:
     EStackupLayer(const EStackupLayer & other);
     EStackupLayer & operator= (const EStackupLayer & other);
 
-    void SetElevation(FCoord elevation);
-    FCoord GetElevation() const;
+    void SetElevation(FCoord elevation) override;
+    FCoord GetElevation() const override;
 
-    void SetThickness(FCoord thickness);
-    FCoord GetThickness() const;
+    void SetThickness(FCoord thickness) override;
+    FCoord GetThickness() const override;
 
-    void SetConductingMaterial(const std::string & material);
-    const std::string & GetConductingMaterial() const;
+    void SetConductingMaterial(const std::string & material) override;
+    const std::string & GetConductingMaterial() const override;
 
-    void SetDielectricMaterial(const std::string & material);
-    const std::string & GetDielectricMaterial() const;
+    void SetDielectricMaterial(const std::string & material) override;
+    const std::string & GetDielectricMaterial() const override;
 
 protected:
     ///Copy

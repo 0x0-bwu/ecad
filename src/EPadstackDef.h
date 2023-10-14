@@ -17,11 +17,11 @@ public:
     EPadstackDef(const EPadstackDef & other);
     EPadstackDef & operator= (const EPadstackDef & other);
 
-    void SetPadstackDefData(UPtr<IPadstackDefData> data);
-    Ptr<IPadstackDefData> GetPadstackDefData() const;
+    void SetPadstackDefData(UPtr<IPadstackDefData> data) override;
+    Ptr<IPadstackDefData> GetPadstackDefData() const override;
 
-    EDefinitionType GetDefinitionType() const;
-    const std::string & GetName() const;
+    EDefinitionType GetDefinitionType() const override;
+    const std::string & GetName() const override;
 
 protected:
     ///Copy

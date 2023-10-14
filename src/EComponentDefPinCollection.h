@@ -19,12 +19,12 @@ public:
     EComponentDefPinCollection(const EComponentDefPinCollection & other);
     EComponentDefPinCollection & operator= (const EComponentDefPinCollection & other);
 
-    Ptr<IComponentDefPin> AddPin(UPtr<IComponentDefPin> pin);
-    Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
+    Ptr<IComponentDefPin> AddPin(UPtr<IComponentDefPin> pin) override;
+    Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) override;
 
-    ComponentDefPinIter GetComponentDefPinIter() const;
-    size_t Size() const;
-    void Clear();
+    ComponentDefPinIter GetComponentDefPinIter() const override;
+    size_t Size() const override;
+    void Clear() override;
 
 protected:
     ///Copy

@@ -18,29 +18,29 @@ public:
     EPadstackInst(const EPadstackInst & other);
     EPadstackInst & operator= (const EPadstackInst & other);
 
-    void SetNet(ENetId net);
-    ENetId GetNet() const;
+    void SetNet(ENetId net) override;
+    ENetId GetNet() const override;
 
-    void SetLayerRange(ELayerId top, ELayerId bot);
-    void GetLayerRange(ELayerId & top, ELayerId & bot) const;
+    void SetLayerRange(ELayerId top, ELayerId bot) override;
+    void GetLayerRange(ELayerId & top, ELayerId & bot) const override;
 
     /**
      * @brief layer id map b/w design stackup layers and padstackup layers
      * 
      * @param layerMap design layer id -> pad layer id
      */
-    void SetLayerMap(CPtr<ILayerMap> layerMap);
-    CPtr<ILayerMap> GetLayerMap() const;
+    void SetLayerMap(CPtr<ILayerMap> layerMap) override;
+    CPtr<ILayerMap> GetLayerMap() const override;
 
-    CPtr<IPadstackDef> GetPadstackDef() const;
+    CPtr<IPadstackDef> GetPadstackDef() const override;
 
-    bool isLayoutPin() const;
-    void SetIsLayoutPin(bool isPin);
+    bool isLayoutPin() const override;
+    void SetIsLayoutPin(bool isPin) override;
 
     /**
      * @brief get shape at stackup layer
      */
-    UPtr<EShape> GetLayerShape(ELayerId lyr) const;
+    UPtr<EShape> GetLayerShape(ELayerId lyr) const override;
 
 protected:
     ///Copy

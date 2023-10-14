@@ -22,19 +22,19 @@ public:
     EPrimitiveCollection(const EPrimitiveCollection & other);
     EPrimitiveCollection & operator= (const EPrimitiveCollection & other);
 
-    Ptr<IPrimitive> GetPrimitive(size_t index) const;
-    Ptr<IPrimitive> AddPrimitive(UPtr<IPrimitive> primitive);
-    bool SetPrimitive(UPtr<IPrimitive> primitive, size_t index);
+    Ptr<IPrimitive> GetPrimitive(size_t index) const override;
+    Ptr<IPrimitive> AddPrimitive(UPtr<IPrimitive> primitive) override;
+    bool SetPrimitive(UPtr<IPrimitive> primitive, size_t index) override;
 
-    Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape);
-    Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text);
+    Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) override;
+    Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) override;
 
-    void Map(CPtr<ILayerMap> lyrMap);
+    void Map(CPtr<ILayerMap> lyrMap) override;
 
-    PrimitiveIter GetPrimitiveIter() const;
-    UPtr<IPrimitive> PopBack();
+    PrimitiveIter GetPrimitiveIter() const override;
+    UPtr<IPrimitive> PopBack() override;
 
-    size_t Size() const;
+    size_t Size() const override;
     void Clear();
     
 protected:

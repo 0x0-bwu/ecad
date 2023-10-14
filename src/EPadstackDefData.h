@@ -49,16 +49,16 @@ public:
     EPadstackDefData(const EPadstackDefData & other);
     EPadstackDefData & operator= (const EPadstackDefData & other);
 
-    std::string GetMaterial() const;
-    void SetMaterial(const std::string & material);
+    std::string GetMaterial() const override;
+    void SetMaterial(const std::string & material) override;
 
-    void SetLayers(const std::vector<std::string> & layers);
-    bool SetPadParameters(ELayerId layerId, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation);
-    bool GetPadParameters(ELayerId layerId, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const;
-    bool SetPadParameters(const std::string & layer, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation);
-    bool GetPadParameters(const std::string & layer, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const;
-    void SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EValue rotation);
-    void GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const;
+    void SetLayers(const std::vector<std::string> & layers) override;
+    bool SetPadParameters(ELayerId layerId, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) override;
+    bool GetPadParameters(ELayerId layerId, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const override;
+    bool SetPadParameters(const std::string & layer, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) override;
+    bool GetPadParameters(const std::string & layer, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const override;
+    void SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) override;
+    void GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const override;
     
 protected:
     ELayerId GetPadLayerId(const std::string & layer) const;

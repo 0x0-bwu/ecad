@@ -150,7 +150,7 @@ ECAD_INLINE EPolygonData ERectangle::GetContour() const
 ECAD_INLINE EPolygonWithHolesData ERectangle::GetPolygonWithHoles() const
 {
     EPolygonWithHolesData pwh;
-    pwh.outline = std::move(GetContour());
+    pwh.outline = GetContour();
     return pwh;
 }
 
@@ -188,7 +188,7 @@ ECAD_INLINE EPolygonData EPath::GetContour() const
 ECAD_INLINE EPolygonWithHolesData EPath::GetPolygonWithHoles() const
 {
     EPolygonWithHolesData pwh;
-    pwh.outline = std::move(GetContour());
+    pwh.outline = GetContour();
     return pwh;
 }
 

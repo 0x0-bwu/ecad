@@ -20,14 +20,14 @@ public:
     EComponentDef(const EComponentDef & other);
     EComponentDef & operator= (const EComponentDef & other);
 
-    EDefinitionType GetDefinitionType() const;
+    EDefinitionType GetDefinitionType() const override;
 
-    const std::string & GetName() const;
+    const std::string & GetName() const override;
 
     void SetComponentType(EComponentType type);
     EComponentType GetComponentType() const;
 
-    Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
+    Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) override;
 
 protected:
     ///Copy

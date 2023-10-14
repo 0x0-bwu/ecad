@@ -35,13 +35,13 @@ public:
     ERectangle() = default;
     ~ERectangle() = default;
 
-    bool hasHole() const;
-    EBox2D GetBBox() const;
-    EPolygonData GetContour() const;
-    EPolygonWithHolesData GetPolygonWithHoles() const;
-    void Transform(const ETransform2D & trans);
-    EShapeType GetShapeType() const;
-    bool isValid() const;
+    bool hasHole() const override;
+    EBox2D GetBBox() const override;
+    EPolygonData GetContour() const override;
+    EPolygonWithHolesData GetPolygonWithHoles() const override;
+    void Transform(const ETransform2D & trans) override;
+    EShapeType GetShapeType() const override;
+    bool isValid() const override;
 
 protected:
     ///Copy
@@ -58,13 +58,13 @@ public:
     EPolylineData shape;
     EPath() = default;
     ~EPath() = default;
-    bool hasHole() const;
-    EBox2D GetBBox() const;
-    EPolygonData GetContour() const;
-    EPolygonWithHolesData GetPolygonWithHoles() const;
-    void Transform(const ETransform2D & trans);
-    EShapeType GetShapeType() const;
-    bool isValid() const;
+    bool hasHole() const override;
+    EBox2D GetBBox() const override;
+    EPolygonData GetContour() const override;
+    EPolygonWithHolesData GetPolygonWithHoles() const override;
+    void Transform(const ETransform2D & trans) override;
+    EShapeType GetShapeType() const override;
+    bool isValid() const override;
 
     void SetPoints(const std::vector<EPoint2D> & points);
     void SetType(int type);
@@ -85,13 +85,13 @@ public:
     ECircle(EPoint2D o, ECoord r, size_t div);
     ~ECircle() = default;
 
-    bool hasHole() const;
-    EBox2D GetBBox() const;
-    EPolygonData GetContour() const;
-    EPolygonWithHolesData GetPolygonWithHoles() const;
-    void Transform(const ETransform2D & trans);
-    EShapeType GetShapeType() const;
-    bool isValid() const;
+    bool hasHole() const override;
+    EBox2D GetBBox() const override;
+    EPolygonData GetContour() const override;
+    EPolygonWithHolesData GetPolygonWithHoles() const override;
+    void Transform(const ETransform2D & trans) override;
+    EShapeType GetShapeType() const override;
+    bool isValid() const override;
 
 protected:
     ///Copy
@@ -106,13 +106,13 @@ public:
     EPolygon() = default;
     ~EPolygon() = default;
 
-    bool hasHole() const;
-    EBox2D GetBBox() const;
-    EPolygonData GetContour() const;
-    EPolygonWithHolesData GetPolygonWithHoles() const;
-    void Transform(const ETransform2D & trans);
-    EShapeType GetShapeType() const;
-    bool isValid() const;
+    bool hasHole() const override;
+    EBox2D GetBBox() const override;
+    EPolygonData GetContour() const override;
+    EPolygonWithHolesData GetPolygonWithHoles() const override;
+    void Transform(const ETransform2D & trans) override;
+    EShapeType GetShapeType() const override;
+    bool isValid() const override;
 
     void SetPoints(const std::vector<EPoint2D> & points);
     EPolygon ConvexHull(const EPolygon & other);
@@ -128,13 +128,13 @@ public:
     EPolygonWithHolesData shape;
     EPolygonWithHoles() = default;
     ~EPolygonWithHoles() = default;
-    bool hasHole() const;
-    EBox2D GetBBox() const;
-    EPolygonData GetContour() const;
-    EPolygonWithHolesData GetPolygonWithHoles() const;
-    void Transform(const ETransform2D & trans);
-    EShapeType GetShapeType() const;
-    bool isValid() const;
+    bool hasHole() const override;
+    EBox2D GetBBox() const override;
+    EPolygonData GetContour() const override;
+    EPolygonWithHolesData GetPolygonWithHoles() const override;
+    void Transform(const ETransform2D & trans) override;
+    EShapeType GetShapeType() const override;
+    bool isValid() const override;
 
 protected:
     ///Copy
@@ -151,13 +151,13 @@ class ECAD_API EShapeFromTemplate : public EShape
 public:
     explicit EShapeFromTemplate(Template ts, ETransform2D trans = ETransform2D{});
     ~EShapeFromTemplate() = default;
-    bool hasHole() const;
-    EBox2D GetBBox() const;
-    EPolygonData GetContour() const;
-    EPolygonWithHolesData GetPolygonWithHoles() const;
-    void Transform(const ETransform2D & trans);
-    EShapeType GetShapeType() const;
-    bool isValid() const;
+    bool hasHole() const override;
+    EBox2D GetBBox() const override;
+    EPolygonData GetContour() const override;
+    EPolygonWithHolesData GetPolygonWithHoles() const override;
+    void Transform(const ETransform2D & trans) override;
+    EShapeType GetShapeType() const override;
+    bool isValid() const override;
 
 protected:
     ///Copy

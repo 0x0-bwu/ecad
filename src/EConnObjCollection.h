@@ -22,11 +22,11 @@ public:
     EConnObjCollection(const EConnObjCollection & other);
     EConnObjCollection & operator= (const EConnObjCollection & other);
 
-    Ptr<IPrimitiveCollection> GetPrimitiveCollection() const;
-    Ptr<IPadstackInstCollection> GetPadstackInstCollection() const;
+    Ptr<IPrimitiveCollection> GetPrimitiveCollection() const override;
+    Ptr<IPadstackInstCollection> GetPadstackInstCollection() const override;
 
-    ConnObjIter GetConnObjIter() const;
-    size_t Size() const;
+    ConnObjIter GetConnObjIter() const override;
+    size_t Size() const override;
     
 protected:
     ///Copy

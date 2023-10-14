@@ -24,20 +24,20 @@ public:
     explicit EMaterialPropValue(EValue value);
     ~EMaterialPropValue() = default;
 
-    bool isPropValue() const { return true;  } 
-    bool isPropTable() const { return false; }
-    Ptr<IMaterialPropValue> GetPropValue();
+    bool isPropValue() const override { return true;  } 
+    bool isPropTable() const override { return false; }
+    Ptr<IMaterialPropValue> GetPropValue() override;
 
-    void SetSimpleProperty(const EValue & value);
-    void SetAnsiotropicProerty(const std::array<EValue, 3> & values);
-    void SetTensorProperty(const std::array<EValue, 9> & values);
+    void SetSimpleProperty(const EValue & value) override;
+    void SetAnsiotropicProerty(const std::array<EValue, 3> & values) override;
+    void SetTensorProperty(const std::array<EValue, 9> & values) override;
 
-    bool GetSimpleProperty(EValue & value) const;
-    bool GetAnsiotropicProperty(size_t row, EValue & value) const;
-    bool GetTensorProperty(size_t row, size_t col, EValue & value) const;
+    bool GetSimpleProperty(EValue & value) const override;
+    bool GetAnsiotropicProperty(size_t row, EValue & value) const override;
+    bool GetTensorProperty(size_t row, size_t col, EValue & value) const override;
 
     //1x1-simple, 3x1-anisotropic, 3x3-tensor
-    void GetDimensions(size_t & row, size_t & col) const;;
+    void GetDimensions(size_t & row, size_t & col) const override;
 
 protected:
     ///Copy
@@ -59,8 +59,8 @@ public:
     EMaterialPropTable(const EMaterialPropTable & other);
     EMaterialPropTable & operator= (const EMaterialPropTable & other);
 
-    bool isPropValue() const { return false; } 
-    bool isPropTable() const { return true;  }
+    bool isPropValue() const override { return false; } 
+    bool isPropTable() const override { return true;  }
     Ptr<IMaterialPropTable> GetPropTable() override;
 
 protected:

@@ -21,16 +21,16 @@ public:
     ENetCollection(const ENetCollection & other);
     ENetCollection & operator= (const ENetCollection & other);
 
-    std::string NextNetName(const std::string & name) const;
+    std::string NextNetName(const std::string & name) const override;
     
-    Ptr<INet> FindNetByName(const std::string & name) const;
-    Ptr<INet> FindNetByNetId(ENetId netId) const;
-    Ptr<INet> CreateNet(const std::string & name);
-    Ptr<INet> AddNet(UPtr<INet> net);
+    Ptr<INet> FindNetByName(const std::string & name) const override;
+    Ptr<INet> FindNetByNetId(ENetId netId) const override;
+    Ptr<INet> CreateNet(const std::string & name) override;
+    Ptr<INet> AddNet(UPtr<INet> net) override;
 
-    NetIter GetNetIter() const;
-    size_t Size() const;
-    void Clear();
+    NetIter GetNetIter() const override;
+    size_t Size() const override;
+    void Clear() override;
 
 protected:
     ///Copy

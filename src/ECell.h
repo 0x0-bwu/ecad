@@ -52,14 +52,14 @@ public:
     ECircuitCell(const ECircuitCell & other);
     ECircuitCell & operator= (const ECircuitCell & other);
 
-    bool SetLayoutView(UPtr<ILayoutView> layout);
-    Ptr<ILayoutView> GetLayoutView() const;
-    Ptr<ILayoutView> GetFlattenedLayoutView();
+    bool SetLayoutView(UPtr<ILayoutView> layout) override;
+    Ptr<ILayoutView> GetLayoutView() const override;
+    Ptr<ILayoutView> GetFlattenedLayoutView() override;
 
 protected:
     ///Copy
     virtual Ptr<ECircuitCell> CloneImp() const override { return new ECircuitCell(*this); }
-    virtual void PrintImp(std::ostream & os) const { ECell::Print(os); }
+    virtual void PrintImp(std::ostream & os) const override { ECell::Print(os); }
 };
 
 ECAD_ALWAYS_INLINE void ECell::Print(std::ostream & os) const

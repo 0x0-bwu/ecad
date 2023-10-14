@@ -18,25 +18,25 @@ public:
     ECollectionCollection(const ECollectionCollection & other);
     ECollectionCollection & operator= (const ECollectionCollection & other);
 
-    virtual Ptr<ICollection> AddCollection(ECollectionType type);
-    virtual Ptr<ICollection> GetCollection(ECollectionType type) const;
+    virtual Ptr<ICollection> AddCollection(ECollectionType type) override;
+    virtual Ptr<ICollection> GetCollection(ECollectionType type) const override;
 
-    virtual Ptr<INetCollection> GetNetCollection() const;
-    virtual Ptr<ICellCollection> GetCellCollection() const;
-    virtual Ptr<ILayerCollection> GetLayerCollection() const;
-    virtual Ptr<IConnObjCollection> GetConnObjCollection() const;
-    virtual Ptr<ICellInstCollection> GetCellInstCollection() const;
-    virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const;
-    virtual Ptr<IPrimitiveCollection> GetPrimitiveCollection() const;
-    virtual Ptr<IDefinitionCollection> GetDefinitionCollection() const;
-    virtual Ptr<IMaterialDefCollection> GetMaterialDefCollection() const;
-    virtual Ptr<IPadstackDefCollection> GetPadstackDefCollection() const;
-    virtual Ptr<IComponentDefCollection> GetComponentDefCollection() const;
-    virtual Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const;
-    virtual Ptr<IPadstackInstCollection> GetPadstackInstCollection() const;
-    virtual Ptr<IComponentDefPinCollection> GetComponentDefPinCollection() const;
+    virtual Ptr<INetCollection> GetNetCollection() const override;
+    virtual Ptr<ICellCollection> GetCellCollection() const override;
+    virtual Ptr<ILayerCollection> GetLayerCollection() const override;
+    virtual Ptr<IConnObjCollection> GetConnObjCollection() const override;
+    virtual Ptr<ICellInstCollection> GetCellInstCollection() const override;
+    virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const override;
+    virtual Ptr<IPrimitiveCollection> GetPrimitiveCollection() const override;
+    virtual Ptr<IDefinitionCollection> GetDefinitionCollection() const override;
+    virtual Ptr<IMaterialDefCollection> GetMaterialDefCollection() const override;
+    virtual Ptr<IPadstackDefCollection> GetPadstackDefCollection() const override;
+    virtual Ptr<IComponentDefCollection> GetComponentDefCollection() const override;
+    virtual Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const override;
+    virtual Ptr<IPadstackInstCollection> GetPadstackInstCollection() const override;
+    virtual Ptr<IComponentDefPinCollection> GetComponentDefPinCollection() const override;
 
-    size_t Size() const;
+    size_t Size() const override;
 
     const std::string & GetName() const;
     std::string sUuid() const;

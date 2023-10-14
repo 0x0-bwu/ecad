@@ -16,12 +16,12 @@ public:
     EDefinitionCollection(const EDefinitionCollection & other);
     EDefinitionCollection & operator= (const EDefinitionCollection & other);
 
-    virtual Ptr<IDefinitionCollection> AddDefinitionCollection(EDefinitionType type);
-    virtual Ptr<IDefinitionCollection> GetDefinitionCollection(EDefinitionType type) const;
-    virtual Ptr<IDefinition> AddDefinition(const std::string & name, UPtr<IDefinition> definition);
-    virtual Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const;
-    virtual std::string GetNextDefName(const std::string & name, EDefinitionType type) const;
-    virtual size_t Size() const;
+    virtual Ptr<IDefinitionCollection> AddDefinitionCollection(EDefinitionType type) override;
+    virtual Ptr<IDefinitionCollection> GetDefinitionCollection(EDefinitionType type) const override;
+    virtual Ptr<IDefinition> AddDefinition(const std::string & name, UPtr<IDefinition> definition) override;
+    virtual Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const override;
+    virtual std::string GetNextDefName(const std::string & name, EDefinitionType type) const override;
+    virtual size_t Size() const override;
 protected:
     ///Copy
     virtual Ptr<EDefinitionCollection> CloneImp() const override { return new EDefinitionCollection(*this); }

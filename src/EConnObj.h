@@ -16,8 +16,8 @@ public:
     EConnObj(const EConnObj & other);
     EConnObj & operator= (const EConnObj & other);
 
-    void SetNet(ENetId net);
-    ENetId GetNet() const;
+    void SetNet(ENetId net) override;
+    ENetId GetNet() const override;
 
 protected:
     ///Copy

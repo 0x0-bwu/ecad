@@ -16,12 +16,12 @@ public:
     EMaterialDef(const EMaterialDef & other);
     EMaterialDef & operator= (const EMaterialDef & other);
 
-    bool hasProperty(EMaterialPropId id) const;
-    void SetProperty(EMaterialPropId id, UPtr<IMaterialProp> prop);
-    CPtr<IMaterialProp> GetProperty(EMaterialPropId id) const;
+    bool hasProperty(EMaterialPropId id) const override;
+    void SetProperty(EMaterialPropId id, UPtr<IMaterialProp> prop) override;
+    CPtr<IMaterialProp> GetProperty(EMaterialPropId id) const override;
 
-    const std::string & GetName() const;
-    const EUuid & Uuid() const;
+    const std::string & GetName() const override;
+    const EUuid & Uuid() const override;
 
 protected:
     ///Copy

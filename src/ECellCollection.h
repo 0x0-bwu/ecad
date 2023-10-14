@@ -23,15 +23,15 @@ public:
     ECellCollection(const ECellCollection & other);
     ECellCollection & operator= (const ECellCollection & other);
 
-    Ptr<IDefinitionCollection> AddDefinitionCollection(EDefinitionType type);
-    Ptr<IDefinitionCollection> GetDefinitionCollection(EDefinitionType type) const;
-    Ptr<IDefinition> AddDefinition(const std::string & name, UPtr<IDefinition> definition);
-    Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const;
-    std::string GetNextDefName(const std::string & base, EDefinitionType type) const;
+    Ptr<IDefinitionCollection> AddDefinitionCollection(EDefinitionType type) override;
+    Ptr<IDefinitionCollection> GetDefinitionCollection(EDefinitionType type) const override;
+    Ptr<IDefinition> AddDefinition(const std::string & name, UPtr<IDefinition> definition) override;
+    Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const override;
+    std::string GetNextDefName(const std::string & base, EDefinitionType type) const override;
 
-    CellIter GetCellIter() const;
-    size_t Size() const;
-    void Clear();
+    CellIter GetCellIter() const override;
+    size_t Size() const override;
+    void Clear() override;
 
 protected:
     ///Copy

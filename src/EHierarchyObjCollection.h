@@ -21,10 +21,10 @@ public:
     EHierarchyObjCollection(const EHierarchyObjCollection & other);
     EHierarchyObjCollection & operator= (const EHierarchyObjCollection & other);
 
-    Ptr<ICellInstCollection> GetCellInstCollection() const;
+    Ptr<ICellInstCollection> GetCellInstCollection() const override;
 
-    HierarchyObjIter GetHierarchyObjIter() const;
-    size_t Size() const;
+    HierarchyObjIter GetHierarchyObjIter() const override;
+    size_t Size() const override;
 protected:
     ///Copy
     virtual Ptr<EHierarchyObjCollection> CloneImp() const override { return new EHierarchyObjCollection(*this); }

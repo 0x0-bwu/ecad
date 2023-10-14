@@ -17,19 +17,19 @@ public:
     ELayerMap(const ELayerMap & other);
     ELayerMap & operator= (const ELayerMap & other);
 
-    Ptr<IDatabase> GetDatabase() const;
+    Ptr<IDatabase> GetDatabase() const override;
 
-    EDefinitionType GetDefinitionType() const;
+    EDefinitionType GetDefinitionType() const override;
 
-    void SetName(std::string name);
-    const std::string & GetName() const;
+    void SetName(std::string name) override;
+    const std::string & GetName() const override;
 
-    void SetMapping(ELayerId from, ELayerId to);
-    void MappingLeft(CPtr<ILayerMap> layerMap);
-    void MappingRight(CPtr<ILayerMap> layerMap);
+    void SetMapping(ELayerId from, ELayerId to) override;
+    void MappingLeft(CPtr<ILayerMap> layerMap) override;
+    void MappingRight(CPtr<ILayerMap> layerMap) override;
 
-    ELayerId GetMappingForward(ELayerId from) const;
-    ELayerId GetMappingBackward(ELayerId to) const;
+    ELayerId GetMappingForward(ELayerId from) const override;
+    ELayerId GetMappingBackward(ELayerId to) const override;
 
 protected:
     ///Copy

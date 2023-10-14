@@ -249,7 +249,7 @@ ECAD_INLINE void ELayoutView::SetBoundary(UPtr<EPolygon> boundary)
 ECAD_INLINE CPtr<EPolygon> ELayoutView::GetBoundary() const
 {
     if(nullptr == m_boundary) 
-        m_boundary = std::move(eutils::CalculateBoundary(const_cast<Ptr<ELayoutView> >(this)));
+        m_boundary = eutils::CalculateBoundary(const_cast<Ptr<ELayoutView> >(this));
     return m_boundary.get();
 }
 

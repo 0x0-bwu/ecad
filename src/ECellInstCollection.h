@@ -19,14 +19,14 @@ public:
     ECellInstCollection(const ECellInstCollection & other);
     ECellInstCollection & operator= (const ECellInstCollection & other);
 
-    Ptr<ICellInst> AddCellInst(UPtr<ICellInst> cellInst);
+    Ptr<ICellInst> AddCellInst(UPtr<ICellInst> cellInst) override;
 
     Ptr<ICellInst> CreateCellInst(Ptr<ILayoutView> reflayout, const std::string & name,
-                                  Ptr<ILayoutView> defLayout, const ETransform2D & transform);
+                                  Ptr<ILayoutView> defLayout, const ETransform2D & transform) override;
 
-    CellInstIter GetCellInstIter() const;
-    size_t Size() const;
-    void Clear();
+    CellInstIter GetCellInstIter() const override;
+    size_t Size() const override;
+    void Clear() override;
     
 protected:
     ///Copy

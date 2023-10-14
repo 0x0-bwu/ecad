@@ -50,9 +50,9 @@ public:
     EGeometry2D & operator= (const EGeometry2D & other);
 
     void SetShape(UPtr<EShape> shape);
-    Ptr<EShape> GetShape() const;
+    Ptr<EShape> GetShape() const override;
 
-    void Transform(const ETransform2D & transform);
+    void Transform(const ETransform2D & transform) override;
 
 protected:
     ///Copy
@@ -75,8 +75,8 @@ public:
     EText(const EText & other);
     EText & operator= (const EText & other);
 
-    const std::string & GetText() const;
-    EPoint2D GetPosition() const;
+    const std::string & GetText() const override;
+    EPoint2D GetPosition() const override;
 protected:
     ///Copy
     virtual Ptr<EText> CloneImp() const override { return new EText(*this); }
