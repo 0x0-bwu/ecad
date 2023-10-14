@@ -5,7 +5,6 @@ cmake_minimum_required(VERSION 3.18...3.20)
 project(Ecad)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -19,6 +18,34 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O2")
 endif()
 message("-- Build Type: " ${CMAKE_BUILD_TYPE})
+
+set(DYLIB_SUFFIX "so")
+set(PYVERSION "310")
+
+# MacOs
+# On macOS, add the Homebrew prefix (with appropriate suffixes) to the
+# respective HINTS directories (after any user-specified locations).  This
+# handles Homebrew installations into non-standard locations (not /usr/local).
+# We do not use CMAKE_PREFIX_PATH for this as given the search ordering of
+# find_xxx(), doing so would override any user-specified HINTS locations with
+# the Homebrew version if it exists.
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+  find_program(HOMEBREW_EXECUTABLE brew)
+  mark_as_advanced(FORCE HOMEBREW_EXECUTABLE)
+  if (HOMEBREW_EXECUTABLE)
+    # Detected a Homebrew install, query for its install prefix.
+    execute_process(COMMAND ${HOMEBREW_EXECUTABLE} --prefix
+      OUTPUT_VARIABLE HOMEBREW_INSTALL_PREFIX
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    message(STATUS "Detected Homebrew with install prefix: "
+      "${HOMEBREW_INSTALL_PREFIX}, adding to CMake search paths.")
+    list(APPEND CMAKE_PREFIX_PATH "${HOMEBREW_INSTALL_PREFIX}")
+    #set(CMAKE_C_COMPILER "${HOMEBREW_INSTALL_PREFIX}/Cellar/gcc/13.2.0/bin/gcc-13")
+    #set(CMAKE_CXX_COMPILER "${HOMEBREW_INSTALL_PREFIX}/Cellar/gcc/13.2.0/bin/g++-13")
+    set(DYLIB_SUFFIX "dylib")
+    set(PYVERSION "39")
+  endif()
+endif()
 
 # Compile options
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
@@ -53,8 +80,8 @@ add_definitions("-DBOOST_BIND_GLOBAL_PLACEHOLDERS")
 
 ## Link boost_serialization static
 add_library(boost_serialization SHARED IMPORTED)
-if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_serialization.so)
-    set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION ${BOOST_LIBRARY_PATH}/libboost_serialization.so)
+if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
+    set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
 else()
     message(FATAL_ERROR "The IMPORTED_LOCATION of boost_serialization does not exist!")
 endif()
