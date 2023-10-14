@@ -152,9 +152,24 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
     }
 
     bool res = true;
-    if(!m_settings.outFile.empty())    
+    if(!m_settings.outFile.empty()) {
         res = WriteResult2File(coordUnits.Scale2Unit());
+#if defined(BOOST_GIL_IO_PNG_SUPPORT)
+        auto rgbaFunc = [](float d) {
+            int r, g, b, a = 255;
+            d = std::max<float>(0, std::min<float>(1, d));
+            generic::color::RGBFromScalar(d, r, g, b);
+            return std::make_tuple(r, g, b, a);
+        };
 
+        std::string dirPath  = generic::filesystem::DirName(m_settings.outFile);
+        std::string fileName = generic::filesystem::FileName(m_settings.outFile);
+        for(size_t index = 0; index < m_result->size(); ++index){
+            std::string filepng = dirPath + GENERIC_FOLDER_SEPS + fileName + "_" + std::to_string(index) + ".png";
+            m_result->at(index)->WriteImgProfile(filepng, rgbaFunc);
+        }
+#endif
+    }
     return res;
 }
 

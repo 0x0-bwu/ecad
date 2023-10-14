@@ -26,7 +26,10 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     Reset();
 
     EXflReader reader(*m_xflDB);
-    if(!reader(m_xflFile)) return nullptr;
+    if (not reader(m_xflFile)) {
+        if (err) *err = fmt::Format2String("Error: failed to parse  %1%.", m_xflFile);
+        return nullptr;
+    }
 
     //reset temporary data
     m_database = mgr.CreateDatabase(name);
@@ -157,7 +160,8 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
             //todo, anti-pad
 
             //layer map
-            layerMap->SetMapping(static_cast<ELayerId>(i), m_metalLyrIdMap.at(xflPad.sigLyr));
+            if (auto iter = m_metalLyrIdMap.find(xflPad.sigLyr); iter != m_metalLyrIdMap.cend())
+                layerMap->SetMapping(static_cast<ELayerId>(i), iter->second);
         }
 
         auto psDef = mgr.CreatePadstackDef(m_database, xflVia.name);

@@ -11,21 +11,29 @@ int main(int argc, char * argv[])
     using namespace generic::filesystem;
 
     std::string err;
-    std::string fccspXfl = ecad_test::GetTestDataPath() + "/xfl/fccsp.xfl";
-    auto fccsp = ext::CreateDatabaseFromXfl("fccsp", fccspXfl, &err);
-    assert(err.empty());
-    assert(fccsp != nullptr);
+    std::string filename = ecad_test::GetTestDataPath() + "/gdsii/4004.gds";
+    std::string layermap = ecad_test::GetTestDataPath() + "/gdsii/4004.layermap";
+    auto database = ext::CreateDatabaseFromGds("4004", filename, layermap, &err);
+    // std::string filename = ecad_test::GetTestDataPath() + "/xfl/fccsp.xfl";
+    // auto database = ext::CreateDatabaseFromXfl("fccsp", filename, &err);
+    if (not err.empty()) std::cout << err << std::endl;
+    if (nullptr == database) return EXIT_FAILURE;
 
     std::vector<Ptr<ICell> > cells;
-    fccsp->GetCircuitCells(cells);
+    database->GetCircuitCells(cells);
     assert(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
+    std::cout << "nets:" << layout->GetNetCollection()->Size() << std::endl;//wbtest
+    std::cout << "boundary:" << layout->GetBoundary()->GetBBox() << std::endl;
+    auto iter = layout->GetLayerCollection()->GetLayerIter();
+    while (auto layer = iter->Next())
+        std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
 
-    ELayoutPolygonMergeSettings mergeSettings;
-    mergeSettings.threads = 1;
-    mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    layout->MergeLayerPolygons(mergeSettings);
+    // ELayoutPolygonMergeSettings mergeSettings;
+    // mergeSettings.threads = 1;
+    // mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    // layout->MergeLayerPolygons(mergeSettings);
 
     EThermalNetworkExtractionSettings extSettings;
     extSettings.threads = 4;
@@ -35,7 +43,7 @@ int main(int argc, char * argv[])
 #endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
-    extSettings.grid = {500, 500};
+    extSettings.grid = {200, 200};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
     esim::EThermalNetworkExtraction ne;

@@ -30,6 +30,8 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     settings.regionExtLeft  = m_settings.regionExtLeft;
     settings.regionExtRight = m_settings.regionExtRight;
     settings.mergeGeomBeforeMapping = m_settings.mergeGeomBeforeMetalMapping;
+    if(!m_settings.outDir.empty() && m_settings.dumpDensityFile)
+        settings.outFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mf.txt";
 
     ELayoutMetalFractionMapper mapper(settings);
     if(!mapper.GenerateMetalFractionMapping(layout)) return false;
