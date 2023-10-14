@@ -24,8 +24,8 @@ int main(int argc, char * argv[])
     assert(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
+    auto bbox = layout->GetBoundary()->GetBBox();
     std::cout << "nets:" << layout->GetNetCollection()->Size() << std::endl;//wbtest
-    std::cout << "boundary:" << layout->GetBoundary()->GetBBox() << std::endl;
     auto iter = layout->GetLayerCollection()->GetLayerIter();
     while (auto layer = iter->Next())
         std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
@@ -43,7 +43,9 @@ int main(int argc, char * argv[])
 #endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
-    extSettings.grid = {200, 200};
+
+    size_t xGrid = 2000;
+    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
     esim::EThermalNetworkExtraction ne;
