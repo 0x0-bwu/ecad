@@ -10,6 +10,8 @@
 *.xml
 *.ctm
 *.tar.gz
+*.DS_Store
 build
+settings.json
 .VSCodeCounter
 .sconsign.dblite

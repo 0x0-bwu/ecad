@@ -72,19 +72,20 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     //wbtest
     ESimVal iniT = 25;
     //power
-    ESimVal totalP = 0.1;//W
+    size_t pwrTiles = 0;
+    ESimVal totalP = 1;//W
     auto modelSize = model.ModelSize();
-    size_t sx = 0.3 * modelSize.x, ex = 0.7 * modelSize.x;
-    size_t sy = 0.3 * modelSize.y, ey = 0.7 * modelSize.y;
-    size_t total = (ex - sx + 1) * (ey - sy + 1);
-    ESimVal aveP = totalP / total;
+    const auto & topLayer = *(mf->front());
+    for (size_t x = 0; x < modelSize.x; ++x)
+        for (size_t y = 0; y < modelSize.y; ++y)
+            if (topLayer(x, y) > 0.5) pwrTiles +=1;
+    std::cout << "power tiles: " << EValue(pwrTiles) / modelSize.x / modelSize.x << std::endl;
+    ESimVal aveP = totalP / EValue(pwrTiles);
 
     auto gridPower = EGridData(nx, ny, 0);
-    for(size_t x = sx; x <= ex; ++x){
-        for(size_t y = sy; y <= ey; ++y){
-            gridPower(x, y) = aveP;
-        }
-    }
+    for (size_t x = 0; x < modelSize.x; ++x)
+        for (size_t y = 0; y < modelSize.y; ++y)
+            if (topLayer(x, y) > 0.5) gridPower(x, y) = aveP;
 
     auto powerModel = std::make_shared<EGridPowerModel>(ESize2D(nx, ny));
     powerModel->AddSample(iniT, std::move(gridPower));
