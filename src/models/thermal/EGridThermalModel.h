@@ -1,7 +1,10 @@
 #pragma once
 #include "utilities/EMetalFractionMapping.h"
-#include "generic/math/Interpolation.hpp"
 #include "EThermalModel.h"
+
+namespace boost::math::interpolators { 
+template <class RandomAccessContainer> class pchip;
+}
 namespace ecad {
 
 class IMaterialDef;
@@ -9,11 +12,11 @@ namespace emodel {
 namespace etherm {
 
 using namespace eutils;
-using namespace generic::math;
 using namespace generic::geometry;
 
 using EGridData = OccupancyGridMap<ESimVal>;
-using EGridInterpolator = OccupancyGridMap<Interpolation<ESimVal> >;
+using Interpolator = boost::math::interpolators::pchip<std::vector<ESimVal> >;
+using EGridInterpolator = OccupancyGridMap<SPtr<Interpolator> >;
 
 class ECAD_API EGridDataTable
 {

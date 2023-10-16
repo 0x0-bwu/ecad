@@ -35,7 +35,6 @@ public:
     virtual const ECoordUnits & GetCoordUnits() const = 0;
 
     virtual std::string GetNextDefName(const std::string & base, EDefinitionType type) const = 0;
-    virtual Ptr<IDefinitionCollection> GetDefinitionCollection() = 0;
 
     virtual Ptr<ICellCollection> GetCellCollection() const = 0;
     virtual Ptr<ICell> CreateCircuitCell(const std::string & name) = 0;

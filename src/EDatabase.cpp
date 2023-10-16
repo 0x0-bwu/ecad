@@ -153,11 +153,6 @@ ECAD_INLINE std::string EDatabase::GetNextDefName(const std::string & base, EDef
     return EDefinitionCollection::GetNextDefName(base, type);
 }
 
-ECAD_INLINE Ptr<IDefinitionCollection> EDatabase::GetDefinitionCollection()
-{
-    return dynamic_cast<Ptr<IDefinitionCollection> >(this);
-}
-
 ECAD_INLINE Ptr<ICellCollection> EDatabase::GetCellCollection() const
 {
     return dynamic_cast<Ptr<ICellCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::Cell));

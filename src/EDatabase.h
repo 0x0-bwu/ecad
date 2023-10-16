@@ -26,8 +26,6 @@ public:
 
     std::string GetNextDefName(const std::string & base, EDefinitionType type) const override;
     
-    Ptr<IDefinitionCollection> GetDefinitionCollection() override;
-
     ///Cell
     Ptr<ICellCollection> GetCellCollection() const override;
     Ptr<ICell> CreateCircuitCell(const std::string & name) override;

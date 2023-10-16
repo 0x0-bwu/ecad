@@ -83,7 +83,6 @@ ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::stri
 
     database->SetCoordUnits(m_units);
 
-    auto dc = database->GetDefinitionCollection();
     auto cell = mgr.CreateCircuitCell(database, name);
     auto layout = cell->GetLayoutView();
 
@@ -173,7 +172,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::stri
         auto psDefData = mgr.CreatePadstackDefData();
         psDefData->SetLayers(layerNames);
         psDefData->SetViaParameters(std::move(std::get<3>(via)), EPoint2D(0, 0), 0);
-        auto name = dc->GetNextDefName(sPadstack, EDefinitionType::PadstackDef);
+        auto name = database->GetNextDefName(sPadstack, EDefinitionType::PadstackDef);
         auto psDef = mgr.CreatePadstackDef(database, name);
         psDef->SetPadstackDefData(std::move(psDefData));
 
