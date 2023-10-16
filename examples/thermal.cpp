@@ -1,11 +1,25 @@
-// #include "generic/tools/FileSystem.hpp"
+#include <boost/stacktrace.hpp>
+#include <string_view>
+#include <filesystem>
+#include <cassert>
+#include <csignal>
+
 #include "../test/TestData.hpp"
 #include "simulation/EThermalNetworkExtraction.h"
 #include "EDataMgr.h"
-#include <cassert>
+
+void SignalHandler(int signum)
+{
+    ::signal(signum, SIG_DFL);
+    std::cout << boost::stacktrace::stacktrace();
+    ::raise(SIGABRT);
+}
+
 int main(int argc, char * argv[])
 {
-    std::cout << "hello world" << std::endl;
+    ::signal(SIGSEGV, &SignalHandler);
+    ::signal(SIGABRT, &SignalHandler);
+
     using namespace ecad;
     using namespace generic::filesystem;
 
