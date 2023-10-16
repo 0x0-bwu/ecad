@@ -15,12 +15,12 @@ public:
     ENet(const ENet & other);
     ENet & operator= (const ENet & other);
 
-    void SetNetId(ENetId id);
-    ENetId GetNetId() const;
+    void SetNetId(ENetId id) override;
+    ENetId GetNetId() const override;
 
-    void SetName(std::string name);
-    const std::string & GetName() const;
-    const EUuid & Uuid() const;
+    void SetName(std::string name) override;
+    const std::string & GetName() const override;
+    const EUuid & Uuid() const override;
 protected:
     ///Copy
     Ptr<ENet> CloneImp() const override;

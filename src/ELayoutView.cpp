@@ -208,17 +208,17 @@ ECAD_INLINE Ptr<IText> ELayoutView::CreateText(ELayerId layer, const ETransform2
 
 ECAD_INLINE Ptr<INetCollection> ELayoutView::GetNetCollection() const
 {
-    return ECollectionCollection::GetNetCollection();
+    return ECollectionCollection::NetCollection();
 }
 
 ECAD_INLINE Ptr<ILayerCollection> ELayoutView::GetLayerCollection() const
 {
-    return ECollectionCollection::GetLayerCollection();
+    return ECollectionCollection::LayerCollection();
 }
 
 ECAD_INLINE Ptr<IConnObjCollection> ELayoutView::GetConnObjCollection() const
 {
-    return ECollectionCollection::GetConnObjCollection();
+    return ECollectionCollection::ConnObjCollection();
 }
 
 ECAD_INLINE Ptr<ICellInstCollection> ELayoutView::GetCellInstCollection() const
@@ -233,7 +233,7 @@ ECAD_INLINE Ptr<IPrimitiveCollection> ELayoutView::GetPrimitiveCollection() cons
 
 ECAD_INLINE Ptr<IHierarchyObjCollection> ELayoutView::GetHierarchyObjCollection() const
 {
-    return ECollectionCollection::GetHierarchyObjCollection();
+    return ECollectionCollection::HierarchyObjCollection();
 }
 
 ECAD_INLINE Ptr<IPadstackInstCollection> ELayoutView::GetPadstackInstCollection() const

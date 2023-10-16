@@ -25,6 +25,7 @@ public:
     const ECoordUnits & GetCoordUnits() const override;
 
     std::string GetNextDefName(const std::string & base, EDefinitionType type) const override;
+    
     Ptr<IDefinitionCollection> GetDefinitionCollection() override;
 
     ///Cell
@@ -36,7 +37,7 @@ public:
     bool Flatten(Ptr<ICell> cell) const override;
     
     ///Material
-    Ptr<IMaterialDefCollection> GetMaterialCollection() const;
+    Ptr<IMaterialDefCollection> GetMaterialCollection() const override;
     Ptr<IMaterialDef> CreateMaterialDef(const std::string & name) override;
     Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const override;
 

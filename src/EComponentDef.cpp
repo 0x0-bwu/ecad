@@ -80,7 +80,7 @@ ECAD_INLINE EComponentType EComponentDef::GetComponentType() const
 
 ECAD_INLINE Ptr<IComponentDefPin> EComponentDef::CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
 {
-    return GetComponentDefPinCollection()->CreatePin(name, loc, type, psDef, lyr);
+    return ComponentDefPinCollection()->CreatePin(name, loc, type, psDef, lyr);
 }
 
 

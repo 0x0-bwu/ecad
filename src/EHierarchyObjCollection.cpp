@@ -51,7 +51,7 @@ ECAD_INLINE EHierarchyObjCollection & EHierarchyObjCollection::operator= (const 
 
 ECAD_INLINE Ptr<ICellInstCollection> EHierarchyObjCollection::GetCellInstCollection() const
 {
-    return ECollectionCollection::GetCellInstCollection();
+    return ECollectionCollection::CellInstCollection();
 }
 
 ECAD_INLINE HierarchyObjIter EHierarchyObjCollection::GetHierarchyObjIter() const
@@ -84,7 +84,7 @@ ECAD_INLINE EHierarchyObjIterator::EHierarchyObjIterator(const EHierarchyObjIter
 
 ECAD_INLINE EHierarchyObjIterator & EHierarchyObjIterator::operator= (const EHierarchyObjIterator & other)
 {
-    m_cellInstIter = std::move(other.m_cellInstIter->Clone());
+    m_cellInstIter = other.m_cellInstIter->Clone();
     return *this;
 }
 

@@ -7,7 +7,6 @@
 #include <array>
 namespace ecad {
 
-class ICollectionCollection;
 class ECAD_API EConnObjCollection : public ECollectionCollection, public IConnObjCollection
 {
     friend class EConnObjIterator;

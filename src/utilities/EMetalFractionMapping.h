@@ -22,7 +22,7 @@ public:
     using MapCtrl = ELayoutMetalFractionMapCtrl;
     using Product = typename Factory::Product<Property>;
     using Setting = EMetalFractionMappingSettings;
-    explicit ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId, bool isMetal);
+    explicit ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId);
     virtual ~ELayerMetalFractionMapper();
 
     void GenerateMetalFractionMapping(CPtr<ILayoutView> layout, const MapCtrl & ctrl);
@@ -31,7 +31,6 @@ private:
     void Mapping(const MapCtrl & ctrl);
 
 private:
-    bool m_bMetal;
     ELayerId m_layerId;
     const Setting & m_settings;
     ELayerMetalFraction & m_fraction;

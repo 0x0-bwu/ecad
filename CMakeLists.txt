@@ -30,6 +30,9 @@ set(PYVERSION "310")
 # find_xxx(), doing so would override any user-specified HINTS locations with
 # the Homebrew version if it exists.
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+
+  add_definitions(-DBOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED)
+
   find_program(HOMEBREW_EXECUTABLE brew)
   mark_as_advanced(FORCE HOMEBREW_EXECUTABLE)
   if (HOMEBREW_EXECUTABLE)
@@ -75,8 +78,8 @@ set(BOOST_INCLUDE_PATH $ENV{BOOST_PATH}/include)
 set(BOOST_LIBRARY_PATH $ENV{BOOST_PATH}/lib)
 
 ## Ignore BOOST deprecated headers
-add_definitions("-DBOOST_ALLOW_DEPRECATED_HEADERS")
-add_definitions("-DBOOST_BIND_GLOBAL_PLACEHOLDERS")
+add_definitions(-DBOOST_ALLOW_DEPRECATED_HEADERS)
+add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 ## Link boost_serialization static
 add_library(boost_serialization SHARED IMPORTED)

@@ -9,7 +9,6 @@
 #include "interfaces/ICellInst.h"
 #include "interfaces/ICellInstCollection.h"
 #include "interfaces/ICollection.h"
-#include "interfaces/ICollectionCollection.h"
 #include "interfaces/IConnObj.h"
 #include "interfaces/IConnObjCollection.h"
 #include "interfaces/IDatabase.h"

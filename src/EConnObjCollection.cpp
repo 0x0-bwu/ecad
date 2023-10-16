@@ -54,12 +54,12 @@ ECAD_INLINE EConnObjCollection & EConnObjCollection::operator= (const EConnObjCo
 
 ECAD_INLINE Ptr<IPrimitiveCollection> EConnObjCollection::GetPrimitiveCollection() const
 {
-    return ECollectionCollection::GetPrimitiveCollection();
+    return ECollectionCollection::PrimitiveCollection();
 }
 
 ECAD_INLINE Ptr<IPadstackInstCollection> EConnObjCollection::GetPadstackInstCollection() const
 {
-    return ECollectionCollection::GetPadstackInstCollection();
+    return ECollectionCollection::PadstackInstCollection();
 }
 
 ECAD_INLINE ConnObjIter EConnObjCollection::GetConnObjIter() const
@@ -93,8 +93,8 @@ ECAD_INLINE EConnObjIterator::EConnObjIterator(const EConnObjIterator & other)
 
 ECAD_INLINE EConnObjIterator & EConnObjIterator::operator= (const EConnObjIterator & other)
 {
-    m_primitiveIter = std::move(other.m_primitiveIter->Clone());
-    m_padstackInstIter = std::move(other.m_padstackInstIter->Clone());
+    m_primitiveIter = other.m_primitiveIter->Clone();
+    m_padstackInstIter = other.m_padstackInstIter->Clone();
     return *this;
 }
 

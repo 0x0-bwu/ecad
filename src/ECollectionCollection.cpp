@@ -25,7 +25,6 @@ template <typename Archive>
 ECAD_INLINE void ECollectionCollection::save(Archive & ar, const unsigned int version) const
 {
     ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ECollectionCollection, ICollectionCollection>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BaseCollection);
 }
 
@@ -33,7 +32,6 @@ template <typename Archive>
 ECAD_INLINE void ECollectionCollection::load(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ECollectionCollection, ICollectionCollection>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BaseCollection);
 }
 
@@ -140,85 +138,85 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::GetCollection(ECollectionTyp
     return At(type).get();
 }
 
-ECAD_INLINE Ptr<INetCollection> ECollectionCollection::GetNetCollection() const
+ECAD_INLINE Ptr<INetCollection> ECollectionCollection::NetCollection() const
 {
     auto res = GetCollection(ECollectionType::Net);
     return dynamic_cast<Ptr<INetCollection> >(res);
 }
 
-ECAD_INLINE Ptr<ICellCollection> ECollectionCollection::GetCellCollection() const
+ECAD_INLINE Ptr<ICellCollection> ECollectionCollection::CellCollection() const
 {
     auto res = GetCollection(ECollectionType::Cell);
     return dynamic_cast<Ptr<ICellCollection> >(res);
 }
 
-ECAD_INLINE Ptr<ILayerCollection> ECollectionCollection::GetLayerCollection() const
+ECAD_INLINE Ptr<ILayerCollection> ECollectionCollection::LayerCollection() const
 {
     auto res = GetCollection(ECollectionType::Layer);
     return dynamic_cast<Ptr<ILayerCollection> >(res);
 }
 
-ECAD_INLINE Ptr<IConnObjCollection> ECollectionCollection::GetConnObjCollection() const
+ECAD_INLINE Ptr<IConnObjCollection> ECollectionCollection::ConnObjCollection() const
 {
     auto res = GetCollection(ECollectionType::ConnObj);
     return dynamic_cast<Ptr<IConnObjCollection> >(res);
 }
 
-ECAD_INLINE Ptr<ICellInstCollection> ECollectionCollection::GetCellInstCollection() const
+ECAD_INLINE Ptr<ICellInstCollection> ECollectionCollection::CellInstCollection() const
 {
     auto res = GetCollection(ECollectionType::CellInst);
     return dynamic_cast<Ptr<ICellInstCollection> >(res);   
 }
 
-ECAD_INLINE Ptr<ILayerMapCollection> ECollectionCollection::GetLayerMapCollection() const
+ECAD_INLINE Ptr<ILayerMapCollection> ECollectionCollection::LayerMapCollection() const
 {
     auto res = GetCollection(ECollectionType::LayerMap);
     return dynamic_cast<Ptr<ILayerMapCollection> >(res);   
 }
 
-ECAD_INLINE Ptr<IPrimitiveCollection> ECollectionCollection::GetPrimitiveCollection() const
+ECAD_INLINE Ptr<IPrimitiveCollection> ECollectionCollection::PrimitiveCollection() const
 {
     auto res = GetCollection(ECollectionType::Primitive);
     return dynamic_cast<Ptr<IPrimitiveCollection> >(res);    
 }
 
-ECAD_INLINE Ptr<IDefinitionCollection> ECollectionCollection::GetDefinitionCollection() const
+ECAD_INLINE Ptr<IDefinitionCollection> ECollectionCollection::DefinitionCollection() const
 {
     auto res = GetCollection(ECollectionType::Definition);
     return dynamic_cast<Ptr<IDefinitionCollection> >(res);
 }
 
-ECAD_INLINE Ptr<IMaterialDefCollection> ECollectionCollection::GetMaterialDefCollection() const
+ECAD_INLINE Ptr<IMaterialDefCollection> ECollectionCollection::MaterialDefCollection() const
 {
     auto res = GetCollection(ECollectionType::MaterialDef);
     return dynamic_cast<Ptr<IMaterialDefCollection> >(res);
 }
 
-ECAD_INLINE Ptr<IPadstackDefCollection> ECollectionCollection::GetPadstackDefCollection() const
+ECAD_INLINE Ptr<IPadstackDefCollection> ECollectionCollection::PadstackDefCollection() const
 {
     auto res = GetCollection(ECollectionType::PadstackDef);
     return dynamic_cast<Ptr<IPadstackDefCollection> >(res);
 }
 
-ECAD_INLINE Ptr<IComponentDefCollection> ECollectionCollection::GetComponentDefCollection() const
+ECAD_INLINE Ptr<IComponentDefCollection> ECollectionCollection::ComponentDefCollection() const
 {
     auto res = GetCollection(ECollectionType::ComponentDef);
     return dynamic_cast<Ptr<IComponentDefCollection> >(res);
 }
 
-ECAD_INLINE Ptr<IHierarchyObjCollection> ECollectionCollection::GetHierarchyObjCollection() const
+ECAD_INLINE Ptr<IHierarchyObjCollection> ECollectionCollection::HierarchyObjCollection() const
 {
     auto res = GetCollection(ECollectionType::HierarchyObj);
     return dynamic_cast<Ptr<IHierarchyObjCollection> >(res);   
 }
 
-ECAD_INLINE Ptr<IPadstackInstCollection> ECollectionCollection::GetPadstackInstCollection() const
+ECAD_INLINE Ptr<IPadstackInstCollection> ECollectionCollection::PadstackInstCollection() const
 {
     auto res = GetCollection(ECollectionType::PadstackInst);
     return dynamic_cast<Ptr<IPadstackInstCollection> >(res);
 }
 
-ECAD_INLINE Ptr<IComponentDefPinCollection> ECollectionCollection::GetComponentDefPinCollection() const
+ECAD_INLINE Ptr<IComponentDefPinCollection> ECollectionCollection::ComponentDefPinCollection() const
 {
     auto res = GetCollection(ECollectionType::ComponentDefPin);
     return dynamic_cast<Ptr<IComponentDefPinCollection> >(res);

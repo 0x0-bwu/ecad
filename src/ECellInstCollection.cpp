@@ -57,7 +57,7 @@ ECAD_INLINE Ptr<ICellInst> ECellInstCollection::CreateCellInst(Ptr<ILayoutView> 
 {
     auto cellInst = new ECellInst(name, reflayout, defLayout);
     cellInst->EHierarchyObj::SetTransform(transform);
-    Append(std::move(UPtr<ICellInst>(cellInst)));
+    Append(UPtr<ICellInst>(cellInst));
     return Back().get();
 }
 

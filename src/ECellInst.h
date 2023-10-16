@@ -17,13 +17,13 @@ public:
     ECellInst(const ECellInst & other);
     ECellInst & operator= (const ECellInst & other);
 
-    void SetRefLayoutView(CPtr<ILayoutView> refLayout);
-    CPtr<ILayoutView> GetRefLayoutView() const;
+    void SetRefLayoutView(CPtr<ILayoutView> refLayout) override;
+    CPtr<ILayoutView> GetRefLayoutView() const override;
 
-    void SetDefLayoutView(CPtr<ILayoutView> defLayout);
-    CPtr<ILayoutView> GetDefLayoutView() const;
+    void SetDefLayoutView(CPtr<ILayoutView> defLayout) override;
+    CPtr<ILayoutView> GetDefLayoutView() const override;
 
-    CPtr<ILayoutView> GetFlattenedLayoutView() const;
+    CPtr<ILayoutView> GetFlattenedLayoutView() const override;
 
 protected:
     ///Copy

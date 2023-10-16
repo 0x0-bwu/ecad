@@ -16,19 +16,19 @@ public:
     EComponentDefPin(const EComponentDefPin & other);
     EComponentDefPin & operator= (const EComponentDefPin & other);
 
-    const std::string & GetName() const;
+    const std::string & GetName() const override;
 
-    void SetIOType(EPinIOType type);
-    EPinIOType GetIOType() const;
+    void SetIOType(EPinIOType type) override;
+    EPinIOType GetIOType() const override;
 
-    void SetLocation(EPoint2D location);
-    const EPoint2D & GetLocation() const;
+    void SetLocation(EPoint2D location) override;
+    const EPoint2D & GetLocation() const override;
 
-    void SetPadstackDef(CPtr<IPadstackDef> def);
-    CPtr<IPadstackDef> GetPadstackDef() const;
+    void SetPadstackDef(CPtr<IPadstackDef> def) override;
+    CPtr<IPadstackDef> GetPadstackDef() const override;
 
-    void SetLayerId(ELayerId lyrId);
-    ELayerId GetLayerId() const;
+    void SetLayerId(ELayerId lyrId) override;
+    ELayerId GetLayerId() const override;
 
 protected:
     ///Copy

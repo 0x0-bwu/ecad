@@ -447,8 +447,8 @@ ECAD_INLINE bool WriteCTMv1HeaderFile(const std::string & filename, const ECTMv1
     for(const auto & vLayer : header.viaLayers) {
         out << sp << sp;
         out << std::setw(21) << vLayer.name;
-        out << std::setw(21) << vLayer.botLayer.empty() ? "None" : vLayer.botLayer;
-        out << std::setw(21) << vLayer.topLayer.empty() ? "None" : vLayer.topLayer;
+        out << std::setw(21) << (vLayer.botLayer.empty() ? "None" : vLayer.botLayer);
+        out << std::setw(21) << (vLayer.topLayer.empty() ? "None" : vLayer.topLayer);
         out << GENERIC_DEFAULT_EOL;
     }
     out << "}" << GENERIC_DEFAULT_EOL;

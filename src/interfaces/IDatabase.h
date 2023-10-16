@@ -12,6 +12,7 @@ class IDefinition;
 class IMaterialDef;
 class IPadstackDef;
 class IComponentDef;
+class ICellCollection;
 class ILayerMapCollection;
 class IDefinitionCollection;
 class IMaterialDefCollection;
@@ -36,15 +37,18 @@ public:
     virtual std::string GetNextDefName(const std::string & base, EDefinitionType type) const = 0;
     virtual Ptr<IDefinitionCollection> GetDefinitionCollection() = 0;
 
+    virtual Ptr<ICellCollection> GetCellCollection() const = 0;
     virtual Ptr<ICell> CreateCircuitCell(const std::string & name) = 0;
     virtual Ptr<ICell> FindCellByName(const std::string & name) = 0;
     virtual bool GetCircuitCells(std::vector<Ptr<ICell> > & cells) const = 0;
     virtual bool GetTopCells(std::vector<Ptr<ICell> > & cells) const = 0;
     virtual bool Flatten(Ptr<ICell> cell) const = 0;
 
+    virtual Ptr<IMaterialDefCollection> GetMaterialCollection() const = 0;
     virtual Ptr<IMaterialDef> CreateMaterialDef(const std::string & name) = 0;
     virtual Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const = 0;
 
+    virtual Ptr<IComponentDefCollection> GetComponentDefCollection() const = 0;
     virtual Ptr<IComponentDef> CreateComponentDef(const std::string & name) = 0;
     virtual Ptr<IComponentDef> FindComponentDefByName(const std::string & name) = 0;
 
@@ -53,6 +57,7 @@ public:
     virtual Ptr<ILayerMap> FindLayerMapByName(const std::string & name) const = 0;
     virtual bool AddLayerMap(UPtr<ILayerMap> layerMap) = 0;
     
+    virtual Ptr<IPadstackDefCollection> GetPadstackDefCollection() const = 0;
     virtual Ptr<IPadstackDef> CreatePadstackDef(const std::string & name) = 0;
     virtual Ptr<IPadstackDef> FindPadstackDefByName(const std::string & name) const = 0;
 

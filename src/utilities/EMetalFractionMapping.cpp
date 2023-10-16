@@ -19,9 +19,8 @@ namespace ecad {
 namespace eutils {
 using namespace generic::geometry;
 
-ECAD_INLINE ELayerMetalFractionMapper::ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId, bool isMetal)
- : m_bMetal(isMetal)
- , m_layerId(layerId)
+ECAD_INLINE ELayerMetalFractionMapper::ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId)
+ : m_layerId(layerId)
  , m_settings(settings)
  , m_fraction(fraction)
 {
@@ -143,7 +142,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
         if(nullptr == stackupLayer) continue;
         bool isMetal = layer->GetLayerType() == ELayerType::ConductingLayer;
         auto layerFraction = std::make_shared<ELayerMetalFraction>(m_mfInfo->grid[0], m_mfInfo->grid[1], 0.0);
-        ELayerMetalFractionMapper mapper(m_settings, *layerFraction, layer->GetLayerId(), isMetal);
+        ELayerMetalFractionMapper mapper(m_settings, *layerFraction, layer->GetLayerId());
         mapper.GenerateMetalFractionMapping(layout, ctrl);
         m_result->push_back(layerFraction);
 

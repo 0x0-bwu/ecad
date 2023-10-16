@@ -1,11 +1,25 @@
 #pragma once
-#include "interfaces/ICollectionCollection.h"
 #include "EBaseCollections.h"
 #include <unordered_map>
 #include <string>
 namespace ecad {
 
-class ECAD_API ECollectionCollection : public EUnorderedMapCollection<ECollectionType, UPtr<ICollection> >, public ICollectionCollection
+class INetCollection;
+class ICellCollection;
+class ILayerCollection;
+class IConnObjCollection;
+class ICellInstCollection;
+class ILayerMapCollection;
+class IPrimitiveCollection;
+class IDefinitionCollection;
+class IMaterialDefCollection;
+class IPadstackDefCollection;
+class IComponentDefCollection;
+class IHierarchyObjCollection;
+class IPadstackInstCollection;
+class IPadstackInstCollection;
+class IComponentDefPinCollection;
+class ECAD_API ECollectionCollection : public EUnorderedMapCollection<ECollectionType, UPtr<ICollection> >
 {
     using BaseCollection = EUnorderedMapCollection<ECollectionType, UPtr<ICollection> >;
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
@@ -18,23 +32,23 @@ public:
     ECollectionCollection(const ECollectionCollection & other);
     ECollectionCollection & operator= (const ECollectionCollection & other);
 
-    virtual Ptr<ICollection> AddCollection(ECollectionType type) override;
-    virtual Ptr<ICollection> GetCollection(ECollectionType type) const override;
+    Ptr<ICollection> AddCollection(ECollectionType type);
+    Ptr<ICollection> GetCollection(ECollectionType type) const;
 
-    virtual Ptr<INetCollection> GetNetCollection() const override;
-    virtual Ptr<ICellCollection> GetCellCollection() const override;
-    virtual Ptr<ILayerCollection> GetLayerCollection() const override;
-    virtual Ptr<IConnObjCollection> GetConnObjCollection() const override;
-    virtual Ptr<ICellInstCollection> GetCellInstCollection() const override;
-    virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const override;
-    virtual Ptr<IPrimitiveCollection> GetPrimitiveCollection() const override;
-    virtual Ptr<IDefinitionCollection> GetDefinitionCollection() const override;
-    virtual Ptr<IMaterialDefCollection> GetMaterialDefCollection() const override;
-    virtual Ptr<IPadstackDefCollection> GetPadstackDefCollection() const override;
-    virtual Ptr<IComponentDefCollection> GetComponentDefCollection() const override;
-    virtual Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const override;
-    virtual Ptr<IPadstackInstCollection> GetPadstackInstCollection() const override;
-    virtual Ptr<IComponentDefPinCollection> GetComponentDefPinCollection() const override;
+    Ptr<INetCollection> NetCollection() const;
+    Ptr<ICellCollection> CellCollection() const;
+    Ptr<ILayerCollection> LayerCollection() const;
+    Ptr<IConnObjCollection> ConnObjCollection() const;
+    Ptr<ICellInstCollection> CellInstCollection() const;
+    Ptr<ILayerMapCollection> LayerMapCollection() const;
+    Ptr<IPrimitiveCollection> PrimitiveCollection() const;
+    Ptr<IDefinitionCollection> DefinitionCollection() const;
+    Ptr<IMaterialDefCollection> MaterialDefCollection() const;
+    Ptr<IPadstackDefCollection> PadstackDefCollection() const;
+    Ptr<IComponentDefCollection> ComponentDefCollection() const;
+    Ptr<IHierarchyObjCollection> HierarchyObjCollection() const;
+    Ptr<IPadstackInstCollection> PadstackInstCollection() const;
+    Ptr<IComponentDefPinCollection> ComponentDefPinCollection() const;
 
     size_t Size() const override;
 

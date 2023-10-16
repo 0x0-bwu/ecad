@@ -141,7 +141,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
     using namespace thermal::solver;
     using Orient = typename EGridThermalNetworkBuilder::Orientation;
 
-    auto getT = [this, &results](const ESize3D & grid) {
+    auto getT = [this](const ESize3D & grid) {
         size_t i = m_model.GetFlattenIndex(grid);
         return m_iniT[i];
     };

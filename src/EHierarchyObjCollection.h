@@ -7,7 +7,6 @@
 #include <array>
 namespace ecad {
 
-class ICollectionCollection;
 class ECAD_API EHierarchyObjCollection : public ECollectionCollection, public IHierarchyObjCollection
 {
     friend class EHierarchyObjIterator;

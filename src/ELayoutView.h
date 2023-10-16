@@ -6,7 +6,6 @@
 namespace ecad {
 
 class ICell;
-class ICollectionCollection;
 class ECAD_API ELayoutView : public ECollectionCollection, public ILayoutView
 {
     ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 4> m_collectionTypes = { ECollectionType::HierarchyObj,

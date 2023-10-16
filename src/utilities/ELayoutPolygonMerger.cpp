@@ -150,7 +150,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
 
     auto iter = m_primTobeRemove.begin();
     for(; iter != m_primTobeRemove.end(); ++iter) {
-        primitives->SetPrimitive(std::move(primitives->PopBack()), *iter);
+        primitives->SetPrimitive(primitives->PopBack(), *iter);
     }
 }
 
@@ -294,7 +294,7 @@ ECAD_INLINE void ELayoutPolygonMerger::WriteDomDmcForOneLayer(std::fstream & dom
     using PolygonData = typename LayerMerger::PolygonData;
     int lyrId = static_cast<int>(layerId);
     EValue scale = m_layout->GetCoordUnits().Scale2Unit();
-    auto writeOnePolygon = [this, &dom, &dmc, &scale, &lyrId](const std::string & lyrName, int netId, const std::string & netName, const Polygon2D<ECoord> & p, bool isHole)
+    auto writeOnePolygon = [&dom, &dmc, &scale, &lyrId](const std::string & lyrName, int netId, const std::string & netName, const Polygon2D<ECoord> & p, bool isHole)
     {
         char s(32);
         auto box = geometry::Extent(p);
