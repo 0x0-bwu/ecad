@@ -1,7 +1,6 @@
-#include "generic/tools/FileSystem.hpp"
-#include "simulation/EThermalNetworkExtraction.h"
-#include "extension/ECadExtension.h"
+// #include "generic/tools/FileSystem.hpp"
 #include "../test/TestData.hpp"
+#include "simulation/EThermalNetworkExtraction.h"
 #include "EDataMgr.h"
 #include <cassert>
 int main(int argc, char * argv[])
@@ -10,13 +9,12 @@ int main(int argc, char * argv[])
     using namespace ecad;
     using namespace generic::filesystem;
 
-    std::string err;
+    auto & eDataMgr = EDataMgr::Instance();
     std::string filename = ecad_test::GetTestDataPath() + "/gdsii/4004.gds";
     std::string layermap = ecad_test::GetTestDataPath() + "/gdsii/4004.layermap";
-    auto database = ext::CreateDatabaseFromGds("4004", filename, layermap, &err);
+    auto database = eDataMgr.CreateDatabaseFromGds("4004", filename, layermap);
     // std::string filename = ecad_test::GetTestDataPath() + "/xfl/fccsp.xfl";
-    // auto database = ext::CreateDatabaseFromXfl("fccsp", filename, &err);
-    if (not err.empty()) std::cout << err << std::endl;
+    // auto database = eDataMgr.CreateDatabaseFromXfl("fccsp", filename);
     if (nullptr == database) return EXIT_FAILURE;
 
     std::vector<Ptr<ICell> > cells;
