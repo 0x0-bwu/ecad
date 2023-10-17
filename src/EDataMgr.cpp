@@ -275,4 +275,14 @@ ECAD_INLINE EDataMgr & EDataMgr::Instance()
     return mgr;
 }
 
+size_t EDataMgr::DefaultThreads() const
+{
+    return m_settings.threads;
+}
+
+void EDataMgr::SetDefaultThreads(size_t threads)
+{
+    m_settings.threads = threads;
+}
+
 }//namespace ecad

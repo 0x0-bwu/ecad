@@ -12,6 +12,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 #include "EMaterialDef.h"
 #include "EPadstackDef.h"
 #include "ELayerMap.h"
+#include "EDataMgr.h"
 #include "ECell.h"
 
 namespace ecad {
@@ -190,7 +191,7 @@ ECAD_INLINE bool EDatabase::GetTopCells(std::vector<Ptr<ICell> > & cells) const
 ECAD_INLINE bool EDatabase::Flatten(Ptr<ICell> cell) const
 {
     eutils::EFlattenUtility utility;
-    return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, DefaultThreads());
+    return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, EDataMgr::Instance().DefaultThreads());
 }
 
 ECAD_INLINE Ptr<IMaterialDefCollection> EDatabase::GetMaterialCollection() const

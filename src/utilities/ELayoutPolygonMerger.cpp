@@ -11,6 +11,7 @@
 #include "interfaces/IPrimitive.h"
 #include "interfaces/ILayer.h"
 #include "interfaces/INet.h"
+#include "EDataMgr.h"
 #include "EShape.h"
 
 namespace ecad {
@@ -101,7 +102,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
 
 ECAD_INLINE void ELayoutPolygonMerger::MergeLayers()
 {
-    auto threads = m_settings.threads;
+    auto threads = EDataMgr::Instance().DefaultThreads();
     if(threads > 1) {
         thread::ThreadPool pool(threads);
         for(auto & merger : m_mergers)
@@ -119,7 +120,8 @@ ECAD_INLINE void ELayoutPolygonMerger::MergeOneLayer(Ptr<LayerMerger> merger)
     //todo, add settings
     merger->SetMergeSettings(settings);
 
-    PolygonMergeRunner runner(*merger, m_settings.threads);
+    size_t threads = EDataMgr::Instance().DefaultThreads();
+    PolygonMergeRunner runner(*merger, threads);
     runner.Run();
 }
 

@@ -11,6 +11,7 @@
 #include "interfaces/IConnObj.h"
 #include "interfaces/ILayer.h"
 #include "interfaces/INet.h"
+#include "EDataMgr.h"
 #include "EShape.h"
 namespace ecad {
 namespace eutils {
@@ -92,7 +93,7 @@ ECAD_INLINE void ELayoutConnectivity::ConnectivityExtraction(Ptr<ILayoutView> la
     }
 
     //extract
-    auto graph = extractor.Extract(DefaultThreads());
+    auto graph = extractor.Extract(EDataMgr::Instance().DefaultThreads());
     std::vector<std::list<size_t> > cc;
     generic::topology::ConnectedComponents(*graph, cc);
     

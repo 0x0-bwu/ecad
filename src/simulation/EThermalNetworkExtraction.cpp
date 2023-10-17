@@ -23,7 +23,6 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     ECAD_EFFICIENCY_TRACK("generate thermal network")
 
     EMetalFractionMappingSettings settings;
-    settings.threads = m_settings.threads;
     settings.grid = m_settings.grid;
     settings.regionExtTop = m_settings.regionExtTop;
     settings.regionExtBot = m_settings.regionExtBot;

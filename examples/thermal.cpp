@@ -24,6 +24,7 @@ int main(int argc, char * argv[])
     using namespace generic::filesystem;
 
     auto & eDataMgr = EDataMgr::Instance();
+    eDataMgr.SetDefaultThreads(1);
     std::string filename = ecad_test::GetTestDataPath() + "/gdsii/4004.gds";
     std::string layermap = ecad_test::GetTestDataPath() + "/gdsii/4004.layermap";
     auto database = eDataMgr.CreateDatabaseFromGds("4004", filename, layermap);
@@ -42,13 +43,11 @@ int main(int argc, char * argv[])
     while (auto layer = iter->Next())
         std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
 
-    // ELayoutPolygonMergeSettings mergeSettings;
-    // mergeSettings.threads = 1;
-    // mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    // layout->MergeLayerPolygons(mergeSettings);
+    ELayoutPolygonMergeSettings mergeSettings;
+    mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    layout->MergeLayerPolygons(mergeSettings);
 
     EThermalNetworkExtractionSettings extSettings;
-    extSettings.threads = 4;
     extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpHotmaps = true;

@@ -25,7 +25,3 @@
 #else
     #define ECAD_EFFICIENCY_TRACK(task)
 #endif//ECAD_EFFICIENCY_TRACK
-
-namespace ecad {
-ECAD_ALWAYS_INLINE size_t DefaultThreads() { return 16; }
-} //namespace ecad

@@ -119,6 +119,10 @@ public:
 
     ///ComponentDefPin
     Ptr<IComponentDefPin> CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
+    
+    ///Settings
+    size_t DefaultThreads() const;
+    void SetDefaultThreads(size_t threads);
 
     static EDataMgr & Instance();
 
@@ -128,6 +132,7 @@ private:
 
     // mutable std::mutex m_databaseMutex;
     // mutable std::mutex m_dataObjsMutex;//unused currently
+    EDataMgrSettings m_settings;
     std::unordered_map<std::string, SPtr<IDatabase> > m_databases;
 };
 

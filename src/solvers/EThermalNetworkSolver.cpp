@@ -4,7 +4,7 @@
 #include "thermal/solver/ThermalNetworkSolver.hpp"
 #include "utilities/EThermalNetworkBuilder.h"
 #include "generic/thread/ThreadPool.hpp"
-
+#include "EDataMgr.h"
 namespace ecad {
 namespace esolver {
 
@@ -59,7 +59,7 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
             std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
             
-            ThermalNetworkSolver<ESimVal> solver(*network, m_settings.threads);
+            ThermalNetworkSolver<ESimVal> solver(*network, EDataMgr::Instance().DefaultThreads());
             solver.Solve(refT);
 
             const auto & nodes = network->GetNodes();
@@ -114,7 +114,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneIteration(ESimVal r
     bool multiThreads = true;
     results.resize(m_iniT.size());
     auto lyrs = m_model.TotalLayers();
-    size_t threads = std::max<size_t>(1, m_settings.threads);
+    size_t threads = EDataMgr::Instance().DefaultThreads();
     if(!multiThreads || threads == 1) {
         for(size_t z = 0; z < lyrs; ++z)
             SolveOneLayer(z, refT, results);

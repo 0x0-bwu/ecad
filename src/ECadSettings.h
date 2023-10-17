@@ -5,9 +5,12 @@
 #include <array>
 namespace ecad {
 
+struct EDataMgrSettings {
+    size_t threads = 8;
+};
+
 struct ELayoutPolygonMergeSettings
 {
-    size_t threads = 1;
     std::string outFile;
     bool includePadstackInst = true;
     bool includeDielectricLayer = true;
@@ -17,7 +20,6 @@ struct ELayoutPolygonMergeSettings
 
 struct EMetalFractionMappingSettings
 {
-    size_t threads = 1;
     std::string outFile;
     EValue regionExtTop = 0;
     EValue regionExtBot = 0;
@@ -30,7 +32,6 @@ struct EMetalFractionMappingSettings
 
 struct EThermalNetworkExtractionSettings
 {
-    size_t threads = 1;
     std::string outDir;
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
     bool dumpHotmaps = false;
@@ -47,14 +48,12 @@ struct EThermalNetworkExtractionSettings
 
 struct EThermalNetworkSolveSettings
 {
-    size_t threads = 8;
     size_t iteration = 10;
     EValue residual = 0.5;
 };
 
 struct ELayout2CtmSettings
 {
-    size_t threads = 8;
     std::string dirName;
     std::string filename;
     EValue resolution = 10;//unit: um

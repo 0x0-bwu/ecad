@@ -31,7 +31,6 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
 
     EMetalFractionMappingSettings mfSettings;
     mfSettings.outFile = std::string{};
-    mfSettings.threads = m_settings.threads;
     mfSettings.regionExtTop = m_settings.regionExtTop;
     mfSettings.regionExtBot = m_settings.regionExtBot;
     mfSettings.regionExtLeft = m_settings.regionExtLeft;
