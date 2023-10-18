@@ -1,5 +1,5 @@
 # CMake setup
-cmake_minimum_required(VERSION 3.18...3.20)
+cmake_minimum_required(VERSION 3.14)
 
 # Project name
 project(Ecad)
@@ -85,7 +85,15 @@ set(BOOST_LIBRARY_PATH $ENV{BOOST_PATH}/lib)
 add_definitions(-DBOOST_ALLOW_DEPRECATED_HEADERS)
 add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
-## Link boost_serialization static
+## Link Eigen
+if(DEFINED ENV{EIGEN_PATH})
+	include_directories($ENV{EIGEN_PATH})
+else()
+	find_package(Eigen3 REQUIRED)
+	include_directories(${EIGEN3_INCLUDE_DIR})
+endif()
+
+## Link boost_serialization
 add_library(boost_serialization SHARED IMPORTED)
 if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
     set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
@@ -97,10 +105,9 @@ set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
 
 # Find package
 find_package(PNG REQUIRED)
-find_package(Eigen3 REQUIRED)
 find_package(Threads REQUIRED)
 
-include_directories(${THIRD_LIBRARY_PATH} ${EIGEN3_INCLUDE_DIR} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
+include_directories(${THIRD_LIBRARY_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
 
 # Compile definition
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)

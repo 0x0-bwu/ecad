@@ -14,3 +14,6 @@
 # define ECAD_INLINE
 #define ECAD_EOL GENERIC_DEFAULT_EOL
 #define ECAD_ALWAYS_INLINE inline
+
+//thirdparty
+#define BOOST_GIL_IO_PNG_SUPPORT 1
