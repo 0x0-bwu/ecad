@@ -3,6 +3,7 @@
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"
+#include "generic/tools/Color.hpp"
 
 namespace ecad {
 namespace emodel {

@@ -1,6 +1,7 @@
 #pragma once
-#include "EXflObjects.h"
 #include "ECadAlias.h"
+#include "EXflObjects.h"
+
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/Parser.hpp"
 #include <boost/fusion/include/adapt_struct.hpp>

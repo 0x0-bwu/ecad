@@ -1,6 +1,6 @@
 #pragma once
-#include "utilities/EMetalFractionMapping.h"
 #include "EThermalModel.h"
+#include "utilities/EMetalFractionMapping.h"
 
 namespace boost::math::interpolators { 
 template <class RandomAccessContainer> class pchip;

@@ -1,7 +1,7 @@
 #pragma once
+#include "ECadSettings.h"
 #include "generic/geometry/OccupancyGridMap.hpp"
 #include "generic/tools/FileSystem.hpp"
-#include "ECadSettings.h"
 #include <vector>
 namespace ecad {
 
