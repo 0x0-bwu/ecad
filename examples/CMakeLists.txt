@@ -1,5 +1,10 @@
 
-set(BINARY_NAME thermal.exe)
-add_executable(${BINARY_NAME} thermal.cpp)
-target_include_directories(${BINARY_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/src)
-target_link_libraries(${BINARY_NAME} PRIVATE Ecad dl)
+set(thermal.exe)
+add_executable(thermal.exe thermal.cpp)
+target_include_directories(thermal.exe PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(thermal.exe PRIVATE Ecad dl)
+
+set(setup_design.exe)
+add_executable(setup_design.exe setup_design.cpp)
+target_include_directories(setup_design.exe PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(setup_design.exe PRIVATE Ecad dl)
