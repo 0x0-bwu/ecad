@@ -65,7 +65,7 @@ int main(int argc, char * argv[])
 
     //wire
     //todo, bondwire (3, 2.5) (3, 7.5)
-    std::vector<EPoint2D> ps1 {{0, 0}, {14200000, 0}, {14200000, 3500000}, {15750000, 3500000}, {15750000, 9150000}, {0, 9150000}};
+    std::vector<EPoint2D> ps1 {{0, 0}, {14200000, 0}, {14200000, 3500000}, {5750000, 3500000}, {5750000, 9150000}, {0, 9150000}};
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps1)));
 
     //todo, bondwire (10.8, 7.5) (10.8, 12.2), die (1.45, 13) (5.45, 17)
@@ -115,17 +115,18 @@ int main(int argc, char * argv[])
 
     //flatten
     database->Flatten(topCell);
+    auto layout = topCell->GetFlattenedLayoutView();
 
-    auto bbox = topLayout->GetBoundary()->GetBBox();
-    std::cout << "nets:" << topLayout->GetNetCollection()->Size() << std::endl;//wbtest
+    auto bbox = layout->GetBoundary()->GetBBox();
+    std::cout << "nets:" << layout->GetNetCollection()->Size() << std::endl;
     std::cout << "primitives:" << topCell->GetLayoutView()->GetPrimitiveCollection()->Size() << std::endl;
-    auto iter = topLayout->GetLayerCollection()->GetLayerIter();
+    auto iter = layout->GetLayerCollection()->GetLayerIter();
     while (auto layer = iter->Next())
         std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
 
     ELayoutPolygonMergeSettings mergeSettings;
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    topLayout->MergeLayerPolygons(mergeSettings);
+    layout->MergeLayerPolygons(mergeSettings);
 
     EThermalNetworkExtractionSettings extSettings;
     extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";

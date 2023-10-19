@@ -6,10 +6,29 @@
     "configurations": [
 
         {
-            "name": "(gdb) ECadTest",
+            "name": "(gdb) thermal",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/thermal.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "(gdb) setup design",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/setup_design.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
