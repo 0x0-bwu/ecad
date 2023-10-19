@@ -154,6 +154,11 @@ ECAD_INLINE EPolygonWithHolesData ERectangle::GetPolygonWithHoles() const
     return pwh;
 }
 
+ECAD_INLINE ERectangle::ERectangle(EPoint2D ll, EPoint2D ur)
+{
+    shape = EBox2D(std::move(ll), std::move(ur));
+}
+
 ECAD_INLINE void ERectangle::Transform(const ETransform2D & trans)
 {
     shape = Extent(trans.GetTransform() * shape);
@@ -266,6 +271,11 @@ ECAD_INLINE bool ECircle::isValid() const
 }
 
 ///EPolygon
+ECAD_INLINE EPolygon::EPolygon(std::vector<EPoint2D> points)
+{
+    shape.Set(std::move(points));
+}
+
 ECAD_INLINE bool EPolygon::hasHole() const
 {
     return false;

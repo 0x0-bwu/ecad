@@ -30,6 +30,11 @@ using FPoint2D = generic::geometry::Point2D<FCoord>;
 using EPoint3D = generic::geometry::Point3D<ECoord>;
 using FPoint3D = generic::geometry::Point3D<FCoord>;
 
+using EVector2D = EPoint2D;
+using FVector2D = FPoint2D;
+using EVector3D = EPoint3D;
+using FVector3D = FPoint3D;
+
 using EBox2D = generic::geometry::Box2D<ECoord>;
 using FBox2D = generic::geometry::Box2D<FCoord>;
 using EBox3D = generic::geometry::Box3D<ECoord>;

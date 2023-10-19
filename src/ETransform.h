@@ -124,7 +124,7 @@ private:
     std::list<ETransformData2D> m_sequence;//FIFO
 };
 
-ECAD_ALWAYS_INLINE ETransform2D makeETransform2D(EValue scale, EValue rotation, const EPoint2D & offset, EMirror2D mirror = EMirror2D::No)
+ECAD_ALWAYS_INLINE ETransform2D makeETransform2D(EValue scale, EValue rotation, const EVector2D & offset, EMirror2D mirror = EMirror2D::No)
 {
     ETransform2D transform;
     transform.Scale() = scale;

@@ -2,8 +2,8 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECellInst)
 
 #include "interfaces/ILayoutView.h"
+#include "interfaces/ILayerMap.h"
 #include "interfaces/ICell.h"
-
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -16,6 +16,7 @@ ECAD_INLINE void ECellInst::save(Archive & ar, const unsigned int version) const
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EHierarchyObj);
     ar & boost::serialization::make_nvp("ref_layout", m_refLayout);
     ar & boost::serialization::make_nvp("def_layout", m_defLayout);
+    ar & boost::serialization::make_nvp("layer_map", m_layerMap);
 }
 
 template <typename Archive>
@@ -26,6 +27,7 @@ ECAD_INLINE void ECellInst::load(Archive & ar, const unsigned int version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EHierarchyObj);
     ar & boost::serialization::make_nvp("ref_layout", m_refLayout);
     ar & boost::serialization::make_nvp("def_layout", m_defLayout);
+    ar & boost::serialization::make_nvp("layer_map", m_layerMap);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ECellInst)
@@ -84,6 +86,16 @@ ECAD_INLINE CPtr<ILayoutView> ECellInst::GetDefLayoutView() const
 ECAD_INLINE CPtr<ILayoutView> ECellInst::GetFlattenedLayoutView() const
 {
     return GetDefLayoutView()->GetCell()->GetFlattenedLayoutView();
+}
+
+ECAD_INLINE void ECellInst::SetLayerMap(CPtr<ILayerMap> layerMap)
+{
+    m_layerMap = layerMap;
+}
+
+ECAD_INLINE CPtr<ILayerMap> ECellInst::GetLayerMap() const
+{
+    return m_layerMap;
 }
 
 

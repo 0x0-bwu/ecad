@@ -6,6 +6,7 @@
 namespace ecad {
 
 class ILayoutView;
+class ILayerMap;
 class ECAD_API ICellInst : public Clonable<ICellInst>, public Transformable2D
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
@@ -16,6 +17,8 @@ public:
     virtual void SetDefLayoutView(CPtr<ILayoutView> defLayout) = 0;
     virtual CPtr<ILayoutView> GetDefLayoutView() const = 0;
     virtual CPtr<ILayoutView> GetFlattenedLayoutView() const = 0;
+    virtual void SetLayerMap(CPtr<ILayerMap> layerMap) = 0;
+    virtual CPtr<ILayerMap> GetLayerMap() const = 0;
 };
 
 }//namespace ecad

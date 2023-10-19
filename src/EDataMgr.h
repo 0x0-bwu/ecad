@@ -108,6 +108,7 @@ public:
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
 
     ///Shape
+    UPtr<EShape> CreateShapeRectangle(EPoint2D ll, EPoint2D ur);
     UPtr<EShape> CreateShapePath(std::vector<EPoint2D> points, ECoord width);
     UPtr<EShape> CreateShapePolygon(std::vector<EPoint2D> points);
     UPtr<EShape> CreateShapePolygon(Polygon2D<ECoord> polygon);

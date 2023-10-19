@@ -32,6 +32,7 @@ class ECAD_API ERectangle : public EShape
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     EBox2D shape;
+    ERectangle(EPoint2D ll, EPoint2D ur);
     ERectangle() = default;
     ~ERectangle() = default;
 
@@ -103,6 +104,7 @@ class ECAD_API EPolygon : public EShape
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     EPolygonData shape;
+    explicit EPolygon(std::vector<EPoint2D> points);
     EPolygon() = default;
     ~EPolygon() = default;
 

@@ -220,6 +220,12 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur)
+{
+    auto shape = new ERectangle(std::move(ll), std::move(ur));
+    return UPtr<EShape>(shape);
+}
+
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(std::vector<EPoint2D> points, ECoord width)
 {
     auto shape = new EPath;
@@ -229,7 +235,7 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(std::vector<EPoint2D> points,
 }
 
 
-ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(std::vector<Point2D<ECoord> > points)
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(std::vector<EPoint2D> points)
 {
     EPolygonData polygon;
     polygon.Set(std::move(points));

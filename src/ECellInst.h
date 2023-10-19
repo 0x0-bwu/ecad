@@ -4,6 +4,7 @@
 namespace ecad {
 
 class ICell;
+class ILayerMap;
 class ILayoutView;
 class ECAD_API ECellInst : public EHierarchyObj, public ICellInst
 {
@@ -25,6 +26,9 @@ public:
 
     CPtr<ILayoutView> GetFlattenedLayoutView() const override;
 
+    void SetLayerMap(CPtr<ILayerMap> layerMap) override;
+    CPtr<ILayerMap> GetLayerMap() const override;
+
 protected:
     ///Copy
     virtual Ptr<ECellInst> CloneImp() const override { return new ECellInst(*this); }
@@ -32,8 +36,9 @@ protected:
     virtual ETransform2D & GetTransformImp() override { return EHierarchyObj::GetTransformImp(); }
     virtual const ETransform2D & GetTransformImp() const override { return EHierarchyObj::GetTransformImp(); }
 private:
-    CPtr<ILayoutView> m_refLayout;
-    CPtr<ILayoutView> m_defLayout;
+    CPtr<ILayoutView> m_refLayout{nullptr};
+    CPtr<ILayoutView> m_defLayout{nullptr};
+    CPtr<ILayerMap> m_layerMap{nullptr};
 };
 
 }//namespace ecad
