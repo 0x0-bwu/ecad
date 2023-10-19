@@ -7,6 +7,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #include "utilities/EBoundaryCalculator.h"
 #include "utilities/ELayoutMergeUtility.h"
 #include "utilities/ELayoutConnectivity.h"
+#include "utilities/ELayoutViewRenderer.h"
 #include "utilities/ELayout2CtmUtility.h"
 
 #include "interfaces/IHierarchyObjCollection.h"
@@ -308,6 +309,11 @@ ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)
 {
     GetPrimitiveCollection()->Map(lyrMap);
     GetPadstackInstCollection()->Map(lyrMap);
+}
+
+ECAD_INLINE bool ELayoutView::Renderer(const ELayoutViewRendererSettings & settings) const
+{
+    return eutils::ELayoutViewRenderer(settings).Renderer(this);
 }
 
 ECAD_INLINE void ELayoutView::SyncCloneReference(ECloneOption option)

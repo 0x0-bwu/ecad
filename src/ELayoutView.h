@@ -95,14 +95,17 @@ public:
 
     ///Thermal Network Extraction
     bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) override;
-    
+
     ///Flatten
     void Flatten(const EFlattenOption & option) override;
     void Merge(CPtr<ILayoutView> other, const ETransform2D & transform);
 
     ///Mapping
     void Map(CPtr<ILayerMap> lyrMap) override;
-    
+
+    ///Render
+    bool Renderer(const ELayoutViewRendererSettings & settings) const override;
+
 protected:
     ///Copy
     virtual Ptr<ELayoutView> CloneImp() const override { return new ELayoutView(*this); }

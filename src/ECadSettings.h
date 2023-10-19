@@ -64,4 +64,14 @@ struct ELayout2CtmSettings
     std::unordered_set<ENetId> selectNets;
 };
 
+struct ELayoutViewRendererSettings
+{
+    enum class Format {
+        PNG = 0,
+        VTK = 1//todo
+    };
+    Format format;
+    std::string dirName;
+};
+
 }//namespace ecad

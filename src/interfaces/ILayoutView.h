@@ -108,6 +108,9 @@ public:
 
     ///Mapping
     virtual void Map(CPtr<ILayerMap> lyrMap) = 0;
+
+    ///Renderer
+    virtual bool Renderer(const ELayoutViewRendererSettings & settings) const = 0;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ILayoutView)
