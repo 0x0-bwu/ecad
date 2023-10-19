@@ -66,33 +66,33 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
     m_netIdNameMap.clear();
     m_primTobeRemove.clear();
     auto primitives = m_layout->GetPrimitiveCollection();
-    for(size_t i = 0; i < primitives->Size(); ++i) {
+    for (size_t i = 0; i < primitives->Size(); ++i) {
         auto prim = primitives->GetPrimitive(i);
         auto geom = prim->GetGeometry2DFromPrimitive();
-        if(nullptr == geom) continue;
+        if (nullptr == geom) continue;
 
         auto shape = geom->GetShape();
         auto netId = prim->GetNet();
         auto lyrId = prim->GetLayer();
-        if(FillOneShape(netId, lyrId, shape))
+        if (FillOneShape(netId, lyrId, shape))
             m_primTobeRemove.insert(i);
     }
 
     bool bSelNet = m_settings.selectNets.size() > 0;
     const auto & selNets = m_settings.selectNets;
-    if(m_settings.includePadstackInst) {
+    if (m_settings.includePadstackInst) {
         auto psInstIter = m_layout->GetPadstackInstIter();
-        while(auto psInst = psInstIter->Next()){
+        while (auto psInst = psInstIter->Next()){
 
             auto netId = psInst->GetNet();
-            if(bSelNet && !selNets.count(netId)) continue;
+            if (bSelNet && !selNets.count(netId)) continue;
 
             auto defData = psInst->GetPadstackDef()->GetPadstackDefData();
-            if(nullptr == defData) continue;
+            if (nullptr == defData) continue;
 
             ELayerId top, bot;
             psInst->GetLayerRange(top, bot);
-            for(int lyrId = std::min(top, bot); lyrId <= std::max(top, bot); lyrId++) {
+            for (int lyrId = std::min(top, bot); lyrId <= std::max(top, bot); lyrId++) {
                 auto shape = psInst->GetLayerShape(static_cast<ELayerId>(lyrId));
                 FillOneShape(netId, static_cast<ELayerId>(lyrId), shape.get());
             }
@@ -134,7 +134,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
         merger.second->GetAllPolygons(polygons);
         for(const auto * polygon : polygons) {
             UPtr<EShape> eShape = nullptr;
-            if(!polygon->hasHole()) {
+            if (not polygon->hasHole()) {
                 auto shape = new EPolygon;
                 shape->shape = std::move(polygon->solid);
                 eShape = UPtr<EShape>(shape);
@@ -158,11 +158,11 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
 
 ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layerId, Ptr<EShape> shape)
 {
-    if(nullptr == shape) return false;
-    if(!shape->isValid()) return false;
+    if (nullptr == shape) return false;
+    if (not shape->isValid()) return false;
     auto merger = m_mergers.find(layerId);
-    if(merger == m_mergers.end()) return false;
-    if(m_settings.selectNets.size() && !m_settings.selectNets.count(netId)) return false;
+    if (merger == m_mergers.cend()) return false;
+    if (m_settings.selectNets.size() && not m_settings.selectNets.count(netId)) return false;
 
     switch (shape->GetShapeType()) {
         case EShapeType::Rectangle : {
