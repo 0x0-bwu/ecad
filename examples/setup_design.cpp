@@ -34,13 +34,12 @@ int main(int argc, char * argv[])
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
     auto topLayout = topCell->GetLayoutView();
-    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{0, 0}, {71000000, 0}, {71000000, 26000000}, {0, 26000000}});
+    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {76000000, -5000000}, {76000000, 26500000}, {0, 26500000}});
     topLayout->SetBoundary(std::move(topBouds));
-    
+
     eDataMgr.CreateNet(topLayout, "Gate");
     eDataMgr.CreateNet(topLayout, "Drain");
     eDataMgr.CreateNet(topLayout, "Source");
-    eDataMgr.CreateNet(topLayout, "Floating");
 
     //substrate
     auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 0.4, "Cu", "Air"));
@@ -61,7 +60,6 @@ int main(int argc, char * argv[])
     auto gateNet = eDataMgr.CreateNet(sicLayout, "Gate");
     auto drainNet = eDataMgr.CreateNet(sicLayout, "Drain");
     auto sourceNet = eDataMgr.CreateNet(sicLayout, "Source");
-    auto floatingNet = eDataMgr.CreateNet(sicLayout, "Floating");
 
     //wire
     //todo, bondwire (3, 2.5) (3, 7.5)
@@ -83,43 +81,48 @@ int main(int argc, char * argv[])
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec2));
 
     auto rec3 = eDataMgr.CreateShapeRectangle(EPoint2D(7500000, 20500000), EPoint2D(13500000, 23000000));
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, floatingNet->GetNetId(), std::move(rec3));
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec3));
 
     auto rec4 = eDataMgr.CreateShapeRectangle(EPoint2D(7500000, 24000000), EPoint2D(10000000, 26000000));
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, floatingNet->GetNetId(), std::move(rec4));
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec4));
 
     auto rec5 = eDataMgr.CreateShapeRectangle(EPoint2D(11000000, 24000000), EPoint2D(13500000, 26000000));
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, floatingNet->GetNetId(), std::move(rec5));
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec5));
 
     //todo, bondwire (19.75, 24)
     auto rec6 = eDataMgr.CreateShapeRectangle(EPoint2D(19000000, 20500000), EPoint2D(20500000, 26000000));
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, floatingNet->GetNetId(), std::move(rec6));
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec6));
 
     //todo, bondwire (22.25, 24)
     auto rec7 = eDataMgr.CreateShapeRectangle(EPoint2D(21500000, 20500000), EPoint2D(23000000, 26000000));
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, floatingNet->GetNetId(), std::move(rec7));
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec7));
 
     //layer map
     auto layerMap = eDataMgr.CreateLayerMap(database, "Layermap");
     layerMap->SetMapping(iLyrWire, iLyrTopCu);
 
     //instance
-    auto inst1 = eDataMgr.CreateCellInst(topLayout, "Inst1", sicLayout, makeETransform2D(1, 0, EVector2D(0, 0)));
+    auto inst1 = eDataMgr.CreateCellInst(topLayout, "Inst1", sicLayout, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , 0)));
     inst1->SetLayerMap(layerMap);
 
-    auto inst2 = eDataMgr.CreateCellInst(topLayout, "Inst2", sicLayout, makeETransform2D(1, 0, EVector2D(29, 0)));
+    auto inst2 = eDataMgr.CreateCellInst(topLayout, "Inst2", sicLayout, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(29, ECoordUnits::Unit::Millimeter), 0)));
     inst2->SetLayerMap(layerMap);
 
-    auto inst3 = eDataMgr.CreateCellInst(topLayout, "Inst3", sicLayout, makeETransform2D(1, 0, EVector2D(58, 0)));
+    auto inst3 = eDataMgr.CreateCellInst(topLayout, "Inst3", sicLayout, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(58, ECoordUnits::Unit::Millimeter), 0)));
     inst3->SetLayerMap(layerMap);
 
     //flatten
     database->Flatten(topCell);
     auto layout = topCell->GetFlattenedLayoutView();
-
-    auto bbox = layout->GetBoundary()->GetBBox();
-    std::cout << "nets:" << layout->GetNetCollection()->Size() << std::endl;
-    std::cout << "primitives:" << topCell->GetLayoutView()->GetPrimitiveCollection()->Size() << std::endl;
+    
+    auto netIter = layout->GetNetIter();
+    while (auto net = netIter->Next()) {
+        std::cout << "net: " << net->GetName() << std::endl;
+    }
+    auto primIter = layout->GetPrimitiveIter();
+    while (auto prim = primIter->Next()) {
+        std::cout << *prim << std::endl;
+    }
     auto iter = layout->GetLayerCollection()->GetLayerIter();
     while (auto layer = iter->Next())
         std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
@@ -137,6 +140,7 @@ int main(int argc, char * argv[])
     extSettings.dumpTemperatureFile = true;
 
     size_t xGrid = 200;
+    auto bbox = layout->GetBoundary()->GetBBox();
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
