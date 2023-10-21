@@ -270,6 +270,11 @@ ECAD_INLINE bool ECircle::isValid() const
     return math::GT<ECoord>(r, 0) && div >= 3;
 }
 
+ECAD_INLINE void ECircle::PrintImp(std::ostream & os) const
+{
+    os << "CIRCLE(O:" << o[0] << ' ' << o[1] << ", R:" << r << ", DIV:" << div;
+}
+
 ///EPolygon
 ECAD_INLINE EPolygon::EPolygon(std::vector<EPoint2D> points)
 {

@@ -32,6 +32,9 @@ public:
     EPrimitiveType GetPrimitiveType() const;
 
 protected:
+    virtual void PrintImp(std::ostream & os) const override;
+    
+protected:
     ELayerId m_layer;
     EPrimitiveType m_type;
 };
@@ -55,8 +58,8 @@ public:
     void Transform(const ETransform2D & transform) override;
 
 protected:
-    ///Copy
     virtual Ptr<EGeometry2D> CloneImp() const override { return new EGeometry2D(*this); }
+    virtual void PrintImp(std::ostream & os) const override;
 
 protected:
     UPtr<EShape> m_shape;

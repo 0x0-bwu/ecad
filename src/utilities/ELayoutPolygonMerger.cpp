@@ -54,7 +54,7 @@ ECAD_INLINE void ELayoutPolygonMerger::Merge()
     MergeLayers();
 
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
-    if(!m_settings.outFile.empty())
+    if (not m_settings.outFile.empty())
         WritePngFiles(m_settings.outFile);
 #endif//BOOST_GIL_IO_PNG_SUPPORT
 
@@ -105,11 +105,11 @@ ECAD_INLINE void ELayoutPolygonMerger::MergeLayers()
     auto threads = EDataMgr::Instance().DefaultThreads();
     if(threads > 1) {
         thread::ThreadPool pool(threads);
-        for(auto & merger : m_mergers)
+        for(const auto & merger : m_mergers)
             pool.Submit(std::bind(&ELayoutPolygonMerger::MergeOneLayer, this, merger.second.get()));
     }
     else {
-        for(auto & merger : m_mergers)
+        for(const auto & merger : m_mergers)
             MergeOneLayer(merger.second.get());
     }
 }
@@ -129,7 +129,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
 {
     using PolygonData = typename LayerMerger::PolygonData;
     auto primitives = m_layout->GetPrimitiveCollection();
-    for(auto & merger : m_mergers) {
+    for(const auto & merger : m_mergers) {
         std::list<CPtr<PolygonData> > polygons;
         merger.second->GetAllPolygons(polygons);
         for(const auto * polygon : polygons) {
@@ -189,7 +189,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
             break;
         }
         case EShapeType::FromTemplate : {
-            if(shape->hasHole())
+            if (shape->hasHole())
                 merger->second->AddObject(netId, shape->GetPolygonWithHoles());
             else merger->second->AddObject(netId, shape->GetContour());
             break;
@@ -205,11 +205,11 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
 ECAD_INLINE bool ELayoutPolygonMerger::WritePngFiles(const std::string & filename, size_t width)
 {
     auto dir = filesystem::DirName(filename);
-    if(!filesystem::PathExists(dir))
+    if (not filesystem::PathExists(dir))
         filesystem::CreateDir(dir);
     
     bool res = true;
-    for(const auto & merger : m_mergers) {
+    for (const auto & merger : m_mergers) {
         std::string filePath = filename + '_' + std::to_string(static_cast<int>(merger.first)) + ".png";
         /*res = res && */WritePngFileForOneLayer(filePath, merger.second.get(), width);
     }
@@ -225,7 +225,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(const std::string
 
     std::vector<Polygon2D<ECoord> > outs;
     outs.reserve(polygons.size());
-    for(auto polygon : polygons) {
+    for (auto polygon : polygons) {
         outs.push_back(polygon->solid);
         for(const auto & hole : polygon->holes) {
             outs.push_back(hole);
@@ -238,7 +238,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(const std::string
 ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(const std::string & filename)
 {
     auto dir = filesystem::DirName(filename);
-    if(!filesystem::PathExists(dir))
+    if (not filesystem::PathExists(dir))
         filesystem::CreateDir(dir);
     
     bool res = true;
@@ -270,7 +270,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(const std::string
 ECAD_INLINE bool ELayoutPolygonMerger::WriteDomDmcFiles(const std::string & filename)
 {
     auto dir = filesystem::DirName(filename);
-    if(!filesystem::PathExists(dir))
+    if ( not filesystem::PathExists(dir))
         filesystem::CreateDir(dir);
 
     std::string dom = filename + ".dom";

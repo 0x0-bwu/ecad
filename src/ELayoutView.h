@@ -98,7 +98,7 @@ public:
 
     ///Flatten
     void Flatten(const EFlattenOption & option) override;
-    void Merge(CPtr<ILayoutView> other, const ETransform2D & transform);
+    void Merge(CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform);
 
     ///Mapping
     void Map(CPtr<ILayerMap> lyrMap) override;

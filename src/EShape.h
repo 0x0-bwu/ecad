@@ -13,7 +13,7 @@ using EPolygonWithHolesData = PolygonWithHoles2D<ECoord>;
 using EPolygonHolesData = typename EPolygonWithHolesData::hole_container;
 
 class ETransform;
-class ECAD_API EShape : public Clonable<EShape>
+class ECAD_API EShape : public Clonable<EShape>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:
@@ -47,6 +47,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<ERectangle> CloneImp() const override { return new ERectangle(*this); }
+    virtual void PrintImp(std::ostream & os) const override { os << shape; }
 };
 
 class ECAD_API EPath : public EShape
@@ -73,6 +74,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<EPath> CloneImp() const override { return new EPath(*this); }
+    virtual void PrintImp(std::ostream & os) const override { os << shape; }
 };
 
 class ECAD_API ECircle : public EShape
@@ -97,6 +99,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<ECircle> CloneImp() const override { return new ECircle(*this); }
+    virtual void PrintImp(std::ostream & os) const override;
 };
 
 class ECAD_API EPolygon : public EShape
@@ -121,6 +124,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<EPolygon> CloneImp() const override { return new EPolygon(*this); }
+    virtual void PrintImp(std::ostream & os) const override { os << shape; }
 };
 
 class ECAD_API EPolygonWithHoles : public EShape
@@ -141,6 +145,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<EPolygonWithHoles> CloneImp() const override { return new EPolygonWithHoles(*this); }
+    virtual void PrintImp(std::ostream & os) const override { os << shape; }
 };
 
 class ECAD_API EShapeFromTemplate : public EShape
@@ -164,6 +169,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<EShapeFromTemplate> CloneImp() const override { return new EShapeFromTemplate(*this); }
+    virtual void PrintImp(std::ostream & os) const override { os << "TEMPLATE SHAPE"; }
 };
 
 }//namespace ecad

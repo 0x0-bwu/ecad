@@ -9,7 +9,7 @@ class IText;
 class EShape;
 class IConnObj;
 class IGeometry2D;
-class ECAD_API IPrimitive : public Clonable<IPrimitive>
+class ECAD_API IPrimitive : public Clonable<IPrimitive>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:

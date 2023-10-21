@@ -109,6 +109,11 @@ ECAD_INLINE EPrimitiveType EPrimitive::GetPrimitiveType() const
     return m_type;
 }
 
+ECAD_INLINE void EPrimitive::PrintImp(std::ostream & os) const
+{
+    os << "LAYER: " << m_layer << ECAD_EOL;
+}
+
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
@@ -178,6 +183,13 @@ ECAD_INLINE Ptr<EShape> EGeometry2D::GetShape() const
 ECAD_INLINE void EGeometry2D::Transform(const ETransform2D & transform)
 {
     if(m_shape) m_shape->Transform(transform);
+}
+
+ECAD_INLINE void EGeometry2D::PrintImp(std::ostream & os) const
+{
+    os << "TYPE: " << "GEOMETRY2D" << ECAD_EOL;
+    os << *m_shape << ECAD_EOL;
+    EPrimitive::PrintImp(os);
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

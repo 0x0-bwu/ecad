@@ -16,31 +16,38 @@
 namespace ecad {
 namespace eutils {
 
-ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayoutView> other, const ETransform2D & transform)
+ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform)
 {
     // ECAD_EFFICIENCY_TRACK("layout merge")
     if(layout == other) return;
 
     //Boundary
-    auto boundary = *(layout->GetBoundary());
-    auto otherBdy = *(other->GetBoundary());
-    otherBdy.Transform(transform);
-    boundary.ConvexHull(otherBdy);
-    layout->SetBoundary(UPtr<EPolygon>(new EPolygon(std::move(boundary))));
+    // auto boundary = *(layout->GetBoundary());
+    // auto otherBdy = *(other->GetBoundary());
+    // otherBdy.Transform(transform);
+    // boundary.ConvexHull(otherBdy);
+    // layout->SetBoundary(UPtr<EPolygon>(new EPolygon(std::move(boundary))));
 
     //Net
     std::unordered_map<ENetId, ENetId> netIdMap;//<other, this>
-    netIdMap.insert(std::make_pair(ENetId::noNet, ENetId::noNet));
+    netIdMap.emplace(ENetId::noNet, ENetId::noNet);
     auto netIter = other->GetNetIter();
     while(auto * net = netIter->Next()){
-        auto clone = net->Clone();
-        auto added = layout->GetNetCollection()->AddNet(std::move(clone));
-        netIdMap.insert(std::make_pair(net->GetNetId(), added->GetNetId()));
+        if (auto thisNet = layout->FindNetByName(net->GetName()); thisNet)
+            netIdMap.emplace(net->GetNetId(), thisNet->GetNetId());
+        else {
+            auto clone = net->Clone();
+            auto added = layout->GetNetCollection()->AddNet(std::move(clone));
+            netIdMap.emplace(net->GetNetId(), added->GetNetId());
+        }
     }
 
-    //Layer, todo, Layermap check
-    auto lyrMap = layout->GetLayerCollection()->GetDefaultLayerMap();
-
+    UPtr<ILayerMap> defaultLyrMap;
+    if (nullptr == layermap) {
+        defaultLyrMap = std::move(layout->GetLayerCollection()->GetDefaultLayerMap());
+        layermap = defaultLyrMap.get();
+    }
+    
     //HierarchyObj/Cellinst
     auto cellInstIter = other->GetCellInstIter();
     while(auto * cellInst = cellInstIter->Next()){
@@ -60,11 +67,11 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
         else clone->SetNet(ENetId::noNet);
 
         //Layer
-        clone->SetLayer(lyrMap->GetMappingForward(clone->GetLayer()));
+        clone->SetLayer(layermap->GetMappingForward(clone->GetLayer()));
 
         //Transform
         auto primType = clone->GetPrimitiveType();
-        switch(primType){
+        switch(primType) {
             case EPrimitiveType::Geometry2D : {
                 clone->GetGeometry2DFromPrimitive()->Transform(transform);
                 break;
