@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
     auto topLayout = topCell->GetLayoutView();
-    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {76000000, -5000000}, {76000000, 26500000}, {0, 26500000}});
+    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {86000000, -5000000}, {86000000, 31000000}, {0, 31000000}});
     topLayout->SetBoundary(std::move(topBouds));
 
     eDataMgr.CreateNet(topLayout, "Gate");
@@ -139,14 +139,14 @@ int main(int argc, char * argv[])
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
 
-    size_t xGrid = 200;
+    size_t xGrid = 1000;
     auto bbox = layout->GetBoundary()->GetBBox();
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
-    ne.GenerateThermalNetwork(topLayout);
+    ne.GenerateThermalNetwork(layout);
 
 
     EDataMgr::Instance().ShutDown();

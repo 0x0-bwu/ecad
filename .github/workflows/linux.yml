@@ -1,0 +1,20 @@
+name: linux
+run-name: ecad test
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      
+      - name: update
+        run: sudo apt-get update
+      - name: install dependency
+        run: sudo apt-get install build-essential cmake ninja-build libboost-all-dev libeigen3-dev libpng-dev
+
+      - name: build ecad
+        run: cmake -B/build -G Ninja && cmake --build test/build
+
+      - name: run test
+        run: build/bin/setup_design.exe

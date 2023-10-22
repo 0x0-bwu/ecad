@@ -78,6 +78,7 @@ ECAD_INLINE void EGdsReader::ReadInteger4(const EGdsRecords::EnumType & recordTy
 
 ECAD_INLINE void EGdsReader::ReadInteger(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
 {
+    ECAD_UNUSED(dataType)
     switch (recordType)
     {
 		case EGdsRecords::HEADER : 
@@ -151,6 +152,7 @@ ECAD_INLINE void EGdsReader::ReadReal8(const EGdsRecords::EnumType & recordType,
 
 ECAD_INLINE void EGdsReader::ReadFloat(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<double> & data)
 {
+    ECAD_UNUSED(dataType)
     switch (recordType)
     {
         case EGdsRecords::UNITS:

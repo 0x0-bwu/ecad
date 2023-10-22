@@ -65,6 +65,14 @@ protected:
     UPtr<EShape> m_shape;
 };
 
+// class ECAD_API EBondwire : public EPrimitive, public IBondwire
+// {
+//     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+//     EBondwire;
+// public:
+//     EBondwire 
+// };
+
 class ECAD_API EText : public EPrimitive, public IText
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION

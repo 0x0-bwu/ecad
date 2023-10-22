@@ -17,7 +17,7 @@ ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> &
 {
     double x{0}, y{0};
     std::stringstream(line) >> x >> y;
-    points.emplace_back(x, y);
+    points.emplace_back(x * scale, y * scale);
     return true;
 }
 
