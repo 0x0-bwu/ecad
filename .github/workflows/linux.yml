@@ -14,7 +14,7 @@ jobs:
         run: sudo apt-get install build-essential cmake ninja-build libboost-all-dev libeigen3-dev libpng-dev
 
       - name: build ecad
-        run: cmake -B/build -G Ninja && cmake --build test/build
+        run: cmake -Bbuild -G Ninja && cmake --build test/build
 
       - name: run test
         run: build/bin/setup_design.exe
