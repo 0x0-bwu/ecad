@@ -18,12 +18,9 @@ jobs:
             boost_version: 1.83.0
             platform_version: 22.04
             boost_install_dir: /home/runner/boost_1_83_0
-  
-      - name: setup env
-        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && ls -all $BOOST_PATH/lib
-        
+            
       - name: build ecad
-        run: cmake -Bbuild -G Ninja && cmake --build test/build
+        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && cmake -Bbuild -G Ninja && cmake --build test/build
 
       - name: run test
         run: build/bin/setup_design.exe
