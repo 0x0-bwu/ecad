@@ -11,8 +11,17 @@ jobs:
       - name: update
         run: sudo apt-get update
       - name: install dependency
-        run: sudo apt-get install build-essential cmake ninja-build libboost-all-dev libeigen3-dev libpng-dev
+        run: sudo apt-get install build-essential cmake ninja-build libeigen3-dev libpng-dev
 
+      - name: install boost
+        uses: MarkusJx/install-boost@v2.4.4
+        id: install-boost
+        with:
+            boost_version: 1.83.0
+            boost_install_dir: /home/runner/boost_1_83_0      
+
+      - name: setup env
+        run: export BOOST_PATH=/home/runner/boost_1_83_0
       - name: build ecad
         run: cmake -Bbuild -G Ninja && cmake --build test/build
 
