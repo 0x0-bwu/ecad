@@ -47,6 +47,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     const auto & coordUnits = layout->GetCoordUnits();
 
     auto [nx, ny] = mfInfo->grid;
+    std::cout << "nx: " << nx << ", ny: " << ny << std::endl;
     EGridThermalModel model(ESize2D(nx, ny));
 
     auto rx = coordUnits.toUnit(mfInfo->stride[0], ECoordUnits::Unit::Meter);
@@ -64,8 +65,8 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         auto layerMetalFraction = mf->at(i);
         EGridThermalLayer layer(name, layerMetalFraction);
         layer.SetThickness(thickness);
-
-        GENERIC_ASSERT(model.AppendLayer(std::move(layer)));
+        [[maybe_unused]] auto res = model.AppendLayer(std::move(layer));
+        GENERIC_ASSERT(res)
     }
 
     //wbtest
@@ -78,7 +79,6 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     for (size_t x = 0; x < modelSize.x; ++x)
         for (size_t y = 0; y < modelSize.y; ++y)
             if (topLayer(x, y) > 0.5) pwrTiles +=1;
-    std::cout << "power tiles: " << EValue(pwrTiles) / modelSize.x / modelSize.x << std::endl;
     ESimVal aveP = totalP / EValue(pwrTiles);
 
     auto gridPower = EGridData(nx, ny, 0);

@@ -38,7 +38,6 @@ int main(int argc, char * argv[])
     
     auto layout = cells.front()->GetLayoutView();
     auto bbox = layout->GetBoundary()->GetBBox();
-    std::cout << "nets:" << layout->GetNetCollection()->Size() << std::endl;//wbtest
     auto iter = layout->GetLayerCollection()->GetLayerIter();
     while (auto layer = iter->Next())
         std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
@@ -55,7 +54,7 @@ int main(int argc, char * argv[])
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
 
-    size_t xGrid = 2000;
+    size_t xGrid = 200;
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
