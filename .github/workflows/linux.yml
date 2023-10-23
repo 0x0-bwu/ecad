@@ -7,9 +7,9 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-
+    
       - name: install dependency
-        run: sudo apt-get install build-essential cmake ninja-build libeigen3-dev libpng-dev
+        run: sudo apt-get update && apt-get install build-essential cmake ninja-build libeigen3-dev libpng-dev
 
       - name: install boost library
         uses: MarkusJx/install-boost@v2.4.4
@@ -19,6 +19,7 @@ jobs:
             platform_version: ubuntu-22.04
             boost_install_dir: /home/runner/boost_1_83_0
             link: shared
+  
       - name: setup env
         run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost
         
