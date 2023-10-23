@@ -96,10 +96,11 @@ endif()
 
 ## Link boost_serialization
 add_library(boost_serialization SHARED IMPORTED)
-if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
-    set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
+FILE(GLOB BOOST_SERIALIZATION_LIB ${BOOST_LIBRARY_PATH}/libboost_serialization*.${DYLIB_SUFFIX})
+if(EXISTS ${BOOST_SERIALIZATION_LIB})
+    set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION  ${BOOST_SERIALIZATION_LIB})
 else()
-    message(FATAL_ERROR "The IMPORTED_LOCATION of boost_serialization does not exist!")
+    message(FATAL_ERROR "The IMPORTED_LOCATION of boost_serialization ${BOOST_SERIALIZATION_LIB} does not exist!")
 endif()
 
 set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
