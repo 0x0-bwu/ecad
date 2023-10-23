@@ -3,7 +3,7 @@ run-name: ecad test
 on: [push]
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout
         uses: actions/checkout@v4
@@ -16,9 +16,8 @@ jobs:
         id: install-boost
         with:
             boost_version: 1.83.0
-            platform_version: ubuntu-20.04
+            platform_version: 22.04
             boost_install_dir: /home/runner/boost_1_83_0
-            link: shared
   
       - name: setup env
         run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost
