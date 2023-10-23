@@ -64,4 +64,6 @@ int main(int argc, char * argv[])
     ne.GenerateThermalNetwork(layout);
 
     EDataMgr::Instance().ShutDown();
+
+    return EXIT_SUCCESS;
 }
