@@ -21,7 +21,7 @@ jobs:
             boost_install_dir: /home/runner/boost_1_83_0      
 
       - name: setup env
-        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost && echo $BOOST_PATH && ll $BOOST_PATH
+        run: export BOOST_PATH=$BOOST_ROOT && ll $BOOST_PATH
       - name: build ecad
         run: cmake -Bbuild -G Ninja && cmake --build test/build
 
