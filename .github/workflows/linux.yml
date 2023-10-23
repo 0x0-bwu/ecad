@@ -7,6 +7,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+            submodules: 'recursive'
     
       - name: install dependency
         run: sudo apt-get update && sudo apt-get install build-essential cmake ninja-build libeigen3-dev libpng-dev
