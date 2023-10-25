@@ -119,6 +119,6 @@ add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 
 add_subdirectory(src)
+add_subdirectory(test)
 add_subdirectory(examples)
-#add_subdirectory(test)
 #add_subdirectory(py)

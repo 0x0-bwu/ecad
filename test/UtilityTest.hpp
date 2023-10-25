@@ -67,7 +67,6 @@ void t_layout_polygon_merge()
     auto layout = cells.front()->GetLayoutView();
 
     ELayoutPolygonMergeSettings settings;
-    settings.threads = 1;
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/qcom";
     // settings.selectNets = { ENetId(74) };
     BOOST_CHECK(layout->MergeLayerPolygons(settings));
@@ -94,7 +93,6 @@ void t_metal_fraction_mapping()
     auto flattened = topCell->GetFlattenedLayoutView();
 
     EMetalFractionMappingSettings settings;
-    settings.threads = 16;
     settings.grid = {50, 50};
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
 
@@ -122,7 +120,6 @@ void t_metal_fraction_mapping_select_nets()
     layout->ExtractConnectivity();
 
     EMetalFractionMappingSettings settings;
-    settings.threads = 16;
     settings.grid = {50, 50};
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
     settings.selectNets.insert(static_cast<ENetId>(1));
@@ -147,7 +144,6 @@ void t_layout_to_ctm()
     auto layout = cells.front()->GetLayoutView();
 
     ELayout2CtmSettings settings;
-    settings.threads = 8;
     settings.dirName = ecad_test::GetTestDataPath() + "/simulation/ctm";
     settings.filename = "pop";
     BOOST_CHECK(layout->GenerateCTMv1File(settings));

@@ -1,5 +1,7 @@
 #define ECAD_UNIT_TEST
 #include <boost/test/included/unit_test.hpp>
+#include <boost/stacktrace.hpp>
+
 #include "SerializationTest.hpp"
 #include "SimulationTest.hpp"
 #include "ExtensionTest.hpp"
@@ -23,9 +25,19 @@ void t_additional()
     BOOST_CHECK(true);
 }
 
+void SignalHandler(int signum)
+{
+    ::signal(signum, SIG_DFL);
+    std::cout << boost::stacktrace::stacktrace();
+    ::raise(SIGABRT);
+}
+
 test_suite *
 init_unit_test_suite( int argc, char* argv[] )
 {
+    ::signal(SIGSEGV, &SignalHandler);
+    ::signal(SIGABRT, &SignalHandler);
+
     framework::master_test_suite().add(create_ecad_serialization_test_suite());
     framework::master_test_suite().add(create_ecad_simulation_test_suite());
     framework::master_test_suite().add(create_ecad_extension_test_suite());

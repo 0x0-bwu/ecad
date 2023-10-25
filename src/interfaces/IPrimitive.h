@@ -36,6 +36,16 @@ public:
     virtual void Transform(const ETransform2D & transform) = 0;
 };
 
+class IBondwire
+{
+    ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
+public:
+    virtual ~IBondwire() = default;
+    virtual void SetRadius(FCoord r) = 0;
+    virtual FCoord GetRadius() const = 0;
+    virtual void Transform(const ETransform2D & transform) = 0;
+};
+
 class IText : public Transformable2D
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
@@ -48,4 +58,5 @@ public:
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPrimitive)
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IGeometry2D)
+ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IBondwrie)
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IText)

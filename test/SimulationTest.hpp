@@ -27,7 +27,6 @@ void t_thermal_network_extraction()
     auto layout = cells.front()->GetLayoutView();
 
     EThermalNetworkExtractionSettings settings;
-    settings.threads = 4;
     settings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
     settings.dumpHotmaps = true;

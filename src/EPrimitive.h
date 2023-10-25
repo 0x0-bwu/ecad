@@ -65,13 +65,33 @@ protected:
     UPtr<EShape> m_shape;
 };
 
-// class ECAD_API EBondwire : public EPrimitive, public IBondwire
-// {
-//     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-//     EBondwire;
-// public:
-//     EBondwire 
-// };
+class ECAD_API EBondwire : public EPrimitive, public IBondwire
+{
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+    EBondwire();
+public:
+    EBondwire(std::string name, ENetId net, ELayerId startLyr, ELayerId endLyr, EPoint2D startLoc, EPoint2D endLoc);
+    virtual ~EBondwire() = default;
+
+    ///Copy
+    EBondwire(const EBondwire & other);
+    EBondwire & operator= (const EBondwire & other);
+
+    void SetRadius(FCoord r);
+    FCoord GetRadius() const;
+
+    void Transform(const ETransform2D & transform) override;
+
+protected:
+    virtual Ptr<EBondwire> CloneImp() const override { return new EBondwire(*this); }
+    virtual void PrintImp(std::ostream & os) const override;
+
+protected:
+    ELayerId m_endLayer;
+    EPoint2D m_startLoc;
+    EPoint2D m_endLoc;
+    FCoord m_radius{0};
+};
 
 class ECAD_API EText : public EPrimitive, public IText
 {
