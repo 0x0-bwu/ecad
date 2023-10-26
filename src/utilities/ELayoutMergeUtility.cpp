@@ -44,7 +44,7 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
 
     UPtr<ILayerMap> defaultLyrMap;
     if (nullptr == layermap) {
-        defaultLyrMap = std::move(layout->GetLayerCollection()->GetDefaultLayerMap());
+        defaultLyrMap = layout->GetLayerCollection()->GetDefaultLayerMap();
         layermap = defaultLyrMap.get();
     }
     

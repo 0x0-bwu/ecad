@@ -19,18 +19,18 @@ public:
     EPrimitive(const EPrimitive & other);
     EPrimitive & operator= (const EPrimitive & other);
 
-    virtual Ptr<IText> GetTextFromPrimitive();
-    virtual Ptr<IConnObj> GetConnObjFromPrimitive();
-    virtual Ptr<IBondwire> GetBondwireFromPrimitive();
-    virtual Ptr<IGeometry2D> GetGeometry2DFromPrimitive();
+    virtual Ptr<IText> GetTextFromPrimitive() override;
+    virtual Ptr<IConnObj> GetConnObjFromPrimitive() override;
+    virtual Ptr<IBondwire> GetBondwireFromPrimitive() override;
+    virtual Ptr<IGeometry2D> GetGeometry2DFromPrimitive() override;
 
-    virtual void SetNet(ENetId net);
-    virtual ENetId GetNet() const;
+    virtual void SetNet(ENetId net) override;
+    virtual ENetId GetNet() const override;
 
-    void SetLayer(ELayerId layer);
-    ELayerId GetLayer() const;
+    void SetLayer(ELayerId layer) override;
+    ELayerId GetLayer() const override;
 
-    EPrimitiveType GetPrimitiveType() const;
+    EPrimitiveType GetPrimitiveType() const override;
 
 protected:
     virtual void PrintImp(std::ostream & os) const override;
@@ -78,8 +78,8 @@ public:
     EBondwire(const EBondwire & other);
     EBondwire & operator= (const EBondwire & other);
 
-    void SetRadius(FCoord r);
-    FCoord GetRadius() const;
+    void SetRadius(FCoord r) override;
+    FCoord GetRadius() const override;
 
     void Transform(const ETransform2D & transform) override;
 
