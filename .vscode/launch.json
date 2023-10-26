@@ -6,7 +6,7 @@
     "configurations": [
 
         {
-            "name": "(gdb) EcadTest",
+            "name": "EcadTest",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/EcadTest.exe",
@@ -15,7 +15,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
+            "linux": { "MIMode": "gdb"},
+            "osx": { "MIMode": "lldb" },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -25,7 +26,7 @@
             ]
         },
         {
-            "name": "(gdb) thermal",
+            "name": "thermal",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/thermal.exe",
@@ -34,7 +35,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
+            "linux": { "MIMode": "gdb"},
+            "osx": { "MIMode": "lldb" },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -44,7 +46,7 @@
             ]
         },
         {
-            "name": "(gdb) setup design",
+            "name": "setup design",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/bin/setup_design.exe",
@@ -53,7 +55,8 @@
             "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
+            "linux": { "MIMode": "gdb"},
+            "osx": { "MIMode": "lldb" },
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
