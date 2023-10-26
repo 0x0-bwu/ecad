@@ -2,7 +2,6 @@
 #include "ECadCommon.h"
 #include "ECadSerialization.h"
 
-
 namespace ecad {
 
 class INet;
@@ -11,6 +10,7 @@ class ILayer;
 class IConnObj;
 class ICellInst;
 class ILayerMap;
+class IComponent;
 class IPrimitive;
 class IMaterialDef;
 class IPadstackDef;
@@ -35,6 +35,7 @@ using LayerIter = UPtr<IIterator<ILayer> >;
 using ConnObjIter = UPtr<IIterator<IConnObj> >;
 using CellInstIter = UPtr<IIterator<ICellInst> >;
 using LayerMapIter = UPtr<IIterator<ILayerMap> >;
+using ComponentIter = UPtr<IIterator<IComponent> >;
 using PrimitiveIter = UPtr<IIterator<IPrimitive> >;
 using MaterialDefIter = UPtr<IIterator<IMaterialDef> >;
 using PadstackDefIter = UPtr<IIterator<IPadstackDef> >;

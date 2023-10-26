@@ -10,6 +10,7 @@ class ILayerCollection;
 class IConnObjCollection;
 class ICellInstCollection;
 class ILayerMapCollection;
+class IComponentCollection;
 class IPrimitiveCollection;
 class IDefinitionCollection;
 class IMaterialDefCollection;
@@ -41,6 +42,7 @@ public:
     Ptr<IConnObjCollection> ConnObjCollection() const;
     Ptr<ICellInstCollection> CellInstCollection() const;
     Ptr<ILayerMapCollection> LayerMapCollection() const;
+    Ptr<IComponentCollection> ComponentCollection() const;
     Ptr<IPrimitiveCollection> PrimitiveCollection() const;
     Ptr<IDefinitionCollection> DefinitionCollection() const;
     Ptr<IMaterialDefCollection> MaterialDefCollection() const;

@@ -4,7 +4,7 @@
 #include "Protocol.h"
 namespace ecad {
 class IMaterialDef;
-class ECAD_API IMaterialDefCollection : public Clonable<IMaterialDefCollection>
+class ECAD_API IMaterialDefCollection : public Clonable<IMaterialDefCollection>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:

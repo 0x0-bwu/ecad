@@ -57,4 +57,10 @@ ECAD_INLINE size_t ECollection::Size() const
 {
     return 0;
 }
+
+ECAD_INLINE void ECollection::PrintImp(std::ostream & os) const
+{
+    os << "COLLECTION: " << toString(m_type) << ECAD_EOL;
+}
+
 }//namespace ecad

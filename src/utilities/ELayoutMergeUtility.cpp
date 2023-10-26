@@ -76,11 +76,18 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
                 clone->GetGeometry2DFromPrimitive()->Transform(transform);
                 break;
             }
+            case EPrimitiveType::Bondwire : {
+                clone->GetBondwireFromPrimitive()->Transform(transform);
+                break;
+            }
             case EPrimitiveType::Text : {
                 clone->GetTextFromPrimitive()->AddTransform(transform);
                 break;
             }
-            default : break;
+            default : {
+                GENERIC_ASSERT(false)
+                break;
+            }
         }
 
         layout->GetPrimitiveCollection()->AddPrimitive(std::move(clone));

@@ -98,4 +98,14 @@ ECAD_INLINE void EComponentDefCollection::Clear()
     BaseCollection::Clear();
 }
 
+ECAD_INLINE void EComponentDefCollection::PrintImp(std::ostream & os) const
+{
+    BaseCollection::PrintImp(os);
+    for (const auto & [name, def] : m_collection) {
+        ECAD_UNUSED(def)
+        os << "NAME: " << name << ECAD_EOL;
+    }
+}
+
+
 }//namesapce ecad

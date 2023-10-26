@@ -36,6 +36,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<EComponentDefCollection> CloneImp() const override { return new EComponentDefCollection(*this); }
+    virtual void PrintImp(std::ostream & os) const override;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EComponentDefCollection)

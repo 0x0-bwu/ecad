@@ -42,9 +42,9 @@ int main(int argc, char * argv[])
     eDataMgr.CreateNet(topLayout, "Source");
 
     //substrate
-    auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 0.4, "Cu", "Air"));
-    auto iLyrSubstrate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("Substrate", ELayerType::DielectricLayer, -0.4, 0.635, "", "Si3N4"));
-    auto iLyrCuPlate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("CuPlate", ELayerType::ConductingLayer, -1.035, 0.3, "Cu", ""));
+    [[maybe_unused]] auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 0.4, "Cu", "Air"));
+    [[maybe_unused]] auto iLyrSubstrate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("Substrate", ELayerType::DielectricLayer, -0.4, 0.635, "", "Si3N4"));
+    [[maybe_unused]] auto iLyrCuPlate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("CuPlate", ELayerType::ConductingLayer, -1.035, 0.3, "Cu", ""));
 
     //sic die
     auto sicCell = eDataMgr.CreateCircuitCell(database, "SicDie");

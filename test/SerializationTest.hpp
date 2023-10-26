@@ -46,9 +46,9 @@ void t_boost_serialization()
     std::string archive_xml = ecad_test::GetTestDataPath() + "/serialization/archive.xml";
     std::string archive_bin = ecad_test::GetTestDataPath() + "/serialization/archive.bin";
 
-    if(FileExists(archive_txt)) RemoveFile(archive_txt);
-    if(FileExists(archive_xml)) RemoveFile(archive_xml);
-    if(FileExists(archive_bin)) RemoveFile(archive_bin);
+    if (FileExists(archive_txt)) RemoveFile(archive_txt);
+    if (FileExists(archive_xml)) RemoveFile(archive_xml);
+    if (FileExists(archive_bin)) RemoveFile(archive_bin);
 
     BOOST_CHECK(database->Save(archive_txt, EArchiveFormat::TXT));
     BOOST_CHECK(database->Save(archive_xml, EArchiveFormat::XML));

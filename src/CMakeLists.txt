@@ -31,6 +31,8 @@ ECellInst.cpp
 ECellInstCollection.cpp
 ECollection.cpp
 ECollectionCollection.cpp
+EComponent.cpp
+EComponentCollection.cpp
 EComponentDef.cpp
 EComponentDefCollection.cpp
 EComponentDefPin.cpp

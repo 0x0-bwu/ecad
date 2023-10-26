@@ -22,7 +22,8 @@ public:
 protected:
     ///Copy
     virtual Ptr<ECollection> CloneImp() const override { return new ECollection(*this); }
-    
+    virtual void PrintImp(std::ostream & os) const override;
+
 protected:
     ECollectionType m_type;
 };

@@ -5,7 +5,7 @@
 namespace ecad {
 
 using EVersion = std::pair<unsigned int, unsigned int>;//[Major(01), Minor(00)]
-ECAD_ALWAYS_INLINE static constexpr EVersion currentVer = EVersion{0, 0};
+ECAD_ALWAYS_INLINE static constexpr EVersion CURRENT_VERSION = EVersion{0, 0};
 
 ECAD_ALWAYS_INLINE unsigned int toInt(const EVersion & ver)
 {

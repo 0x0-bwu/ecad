@@ -131,9 +131,9 @@ private:
     EDataMgr();
     ~EDataMgr();
 
-    // mutable std::mutex m_databaseMutex;
     // mutable std::mutex m_dataObjsMutex;//unused currently
     EDataMgrSettings m_settings;
+    mutable std::mutex m_databaseMutex;
     std::unordered_map<std::string, SPtr<IDatabase> > m_databases;
 };
 

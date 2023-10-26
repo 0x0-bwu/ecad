@@ -82,8 +82,14 @@ ECAD_INLINE Ptr<IConnObj> EPrimitive::GetConnObjFromPrimitive()
 
 ECAD_INLINE Ptr<IGeometry2D> EPrimitive::GetGeometry2DFromPrimitive()
 {
-    if(m_type != EPrimitiveType::Geometry2D) return nullptr;
+    if (m_type != EPrimitiveType::Geometry2D) return nullptr;
     return dynamic_cast<Ptr<IGeometry2D> >(this);
+}
+
+ECAD_INLINE Ptr<IBondwire> EPrimitve::GetBondwireFromPrimitive()
+{
+    if (m_type != EPrimitiveType::Bondwire) return nullptr;
+    return dynamic_cast<Ptr<IBondwire> >(this);
 }
 
 ECAD_INLINE void EPrimitive::SetNet(ENetId net)
@@ -231,6 +237,7 @@ ECAD_INLINE EBondwire::EBondwire()
 ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, ELayerId startLyr, ELayerId endLyr, EPoint2D startLoc, EPoint2D endLoc)
  : EPrimitive(std::move(name), startLyr, net), m_endLayer(endLyr), m_startLoc(std::move(startLoc)), m_endLoc(std::move(endLoc))
 {
+    m_type = EPrimitiveType::Bondwire;
 }
 
 ECAD_INLINE EBondwire::EBondwire(const EBondwire & other)

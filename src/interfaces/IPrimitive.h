@@ -8,6 +8,7 @@ namespace ecad {
 class IText;
 class EShape;
 class IConnObj;
+class IBondwire;
 class IGeometry2D;
 class ECAD_API IPrimitive : public Clonable<IPrimitive>, public Printable
 {
@@ -16,6 +17,7 @@ public:
     virtual ~IPrimitive() = default;
     virtual Ptr<IText> GetTextFromPrimitive() = 0;
     virtual Ptr<IConnObj> GetConnObjFromPrimitive() = 0;
+    virtual Ptr<IBondwire> GetBondwireFromPrimitive() = 0;
     virtual Ptr<IGeometry2D> GetGeometry2DFromPrimitive() = 0;
 
     virtual void SetNet(ENetId net) = 0;

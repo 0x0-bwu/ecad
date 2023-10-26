@@ -4,7 +4,7 @@
 #include "Protocol.h"
 namespace ecad {
 class ILayerMap;
-class ECAD_API ILayerMapCollection : public Clonable<ILayerMapCollection>
+class ECAD_API ILayerMapCollection : public Clonable<ILayerMapCollection>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:

@@ -21,6 +21,7 @@ class INetCollection;
 class ILayerCollection;
 class IConnObjCollection;
 class ICellInstCollection;
+class IComponentCollection;
 class IPrimitiveCollection;
 class IHierarchyObjCollection;
 class IPadstackInstCollection;
@@ -40,6 +41,7 @@ public:
     virtual LayerIter GetLayerIter() const = 0;
     virtual ConnObjIter GetConnObjIter() const = 0;
     virtual CellInstIter GetCellInstIter() const = 0;
+    virtual ComponentIter GetComponentIter() const = 0;
     virtual PrimitiveIter GetPrimitiveIter() const = 0;
     virtual HierarchyObjIter GetHierarchyObjIter() const = 0;
     virtual PadstackInstIter GetPadstackInstIter() const = 0;
@@ -80,6 +82,7 @@ public:
     virtual Ptr<ILayerCollection> GetLayerCollection() const = 0;
     virtual Ptr<IConnObjCollection> GetConnObjCollection() const = 0;
     virtual Ptr<ICellInstCollection> GetCellInstCollection() const = 0;
+    virtual Ptr<IComponentCollection> GetComponentCollection() const = 0;
     virtual Ptr<IPrimitiveCollection> GetPrimitiveCollection() const = 0;
     virtual Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const = 0;
     virtual Ptr<IPadstackInstCollection> GetPadstackInstCollection() const = 0;

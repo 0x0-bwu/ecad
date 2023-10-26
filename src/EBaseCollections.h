@@ -1,6 +1,7 @@
 #pragma once
 #include "interfaces/IIterator.h"
 #include "ECollection.h"
+#include "Protocol.h"
 #include <unordered_map>
 #include <type_traits>
 #include <string>

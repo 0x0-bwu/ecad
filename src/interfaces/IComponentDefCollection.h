@@ -4,7 +4,7 @@
 #include "Protocol.h"
 namespace ecad {
 class IComponentDef;
-class ECAD_API IComponentDefCollection : public Clonable<IComponentDefCollection>
+class ECAD_API IComponentDefCollection : public Clonable<IComponentDefCollection>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:

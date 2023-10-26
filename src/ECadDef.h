@@ -20,6 +20,7 @@ enum class ECollectionType
     ConnObj,
     CellInst,
     LayerMap,
+    Component,
     Primitive,
     Definition,
     MaterialDef,
@@ -30,6 +31,31 @@ enum class ECollectionType
     ComponentDefPin,
     Collection
 };
+
+ECAD_ALWAYS_INLINE std::string toString(ECollectionType type)
+{
+    switch(type)
+    {
+        case ECollectionType::Invalid : return "Invalid";
+        case ECollectionType::Net : return "Net";
+        case ECollectionType::Cell : return "Cell";
+        case ECollectionType::Layer : return "Layer";
+        case ECollectionType::ConnObj : return "Connect Object";
+        case ECollectionType::CellInst : return "Cell Instance";
+        case ECollectionType::LayerMap : return "LayerMap";
+        case ECollectionType::Component : return "Component";
+        case ECollectionType::Primitive : return "Primitive";
+        case ECollectionType::Definition : return "Definition";
+        case ECollectionType::MaterialDef : return "Material Definition";
+        case ECollectionType::PadstackDef : return "Padstack Definition";
+        case ECollectionType::ComponentDef : return "Component Definition";
+        case ECollectionType::HierarchyObj : return "Hierarchy Object";
+        case ECollectionType::PadstackInst : return "Padstack Instance";
+        case ECollectionType::ComponentDefPin : return "Component Definition Pin";
+        case ECollectionType::Collection : return "Collection";
+        default : { GENERIC_ASSERT(false) return std::string{}; }
+    }
+}
 
 enum class ECellType
 {
@@ -90,8 +116,21 @@ enum class EPrimitiveType
 {
     Invalid = -1,
     Geometry2D,
+    Bondwire,
     Text
 };
+
+ECAD_ALWAYS_INLINE std::string toString(EPrimitiveType type)
+{
+    switch(type)
+    {
+        case EPrimitiveType::Invalid : return "Invalid";
+        case EPrimitiveType::Geometry2D : return "Geometry2D";
+        case EPrimitiveType::Bondwire : return "Bondwire";
+        case EPrimitiveType::Text : return "Text";
+        default : { GENERIC_ASSERT(false) return std::string{}; }
+    }
+}
 
 enum class EShapeType
 {
@@ -121,6 +160,20 @@ enum class EDefinitionType
     Cell
 };
 
+ECAD_ALWAYS_INLINE std::string toString(EDefinitionType type)
+{
+    switch(type)
+    {
+        case EDefinitionType::Invalid : return "Invalid";
+        case EDefinitionType::ComponentDef : return "Component Def";
+        case EDefinitionType::PadstackDef : return "Padstack Def";
+        case EDefinitionType::MaterialDef : return "Material Def";
+        case EDefinitionType::LayerMap : return "Layer Map";
+        case EDefinitionType::Cell : return "Cell";
+        default : { GENERIC_ASSERT(false) return std::string{}; }
+    }
+}
+
 enum class EFlattenOption
 {
 
@@ -132,19 +185,5 @@ enum class ECloneOption
     Cell = 1,
     LayoutView = 2
 };
-
-ECAD_ALWAYS_INLINE std::string toString(EDefinitionType type)
-{
-    switch(type)
-    {
-        case EDefinitionType::Invalid : return "Invalid";
-        case EDefinitionType::ComponentDef : return "Component Def";
-        case EDefinitionType::PadstackDef : return "Padstack Def";
-        case EDefinitionType::MaterialDef : return "Material Def";
-        case EDefinitionType::LayerMap : return "Layer Map";
-        case EDefinitionType::Cell : return "Cell";
-        default : return std::string{};
-    }
-}
 
 }//namespace ecad

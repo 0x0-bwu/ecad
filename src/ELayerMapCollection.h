@@ -36,6 +36,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<ELayerMapCollection> CloneImp() const override { return new ELayerMapCollection(*this); }
+    virtual void PrintImp(std::ostream & os) const override;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ELayerMapCollection)

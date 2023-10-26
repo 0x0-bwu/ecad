@@ -8,7 +8,8 @@ namespace ecad {
 class ICell;
 class ECAD_API ELayoutView : public ECollectionCollection, public ILayoutView
 {
-    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 4> m_collectionTypes = { ECollectionType::HierarchyObj,
+    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 5> m_collectionTypes = { ECollectionType::HierarchyObj,
+                                                                                             ECollectionType::Component,
                                                                                              ECollectionType::ConnObj,
                                                                                              ECollectionType::Layer,
                                                                                              ECollectionType::Net };
@@ -33,6 +34,7 @@ public:
     LayerIter GetLayerIter() const override;
     ConnObjIter GetConnObjIter() const override;
     CellInstIter GetCellInstIter() const override;
+    ComponentIter GetComponentIter() const override;
     PrimitiveIter GetPrimitiveIter() const override;
     HierarchyObjIter GetHierarchyObjIter() const override;
     PadstackInstIter GetPadstackInstIter() const override;
@@ -73,6 +75,7 @@ public:
     Ptr<ILayerCollection> GetLayerCollection() const override;
     Ptr<IConnObjCollection> GetConnObjCollection() const override;
     Ptr<ICellInstCollection> GetCellInstCollection() const override;
+    Ptr<IComponentCollection> GetComponentCollection() const override;
     Ptr<IPrimitiveCollection> GetPrimitiveCollection() const override;
     Ptr<IHierarchyObjCollection> GetHierarchyObjCollection() const override;
     Ptr<IPadstackInstCollection> GetPadstackInstCollection() const override;

@@ -87,24 +87,25 @@ ECAD_INLINE EDatabase & EDatabase::operator= (const EDatabase & other)
 ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt) const
 {
     auto dir = generic::filesystem::DirName(archive);
-    if(!generic::filesystem::PathExists(dir))
+    if (not generic::filesystem::PathExists(dir))
         generic::filesystem::CreateDir(dir);
 
     std::ofstream ofs(archive);
-    if(!ofs.is_open()) return false;
+    if (not ofs.is_open()) return false;
+
     
-    unsigned int version = toInt(currentVer);
-    if(fmt == EArchiveFormat::TXT){
+    unsigned int version = toInt(CURRENT_VERSION);
+    if (fmt == EArchiveFormat::TXT) {
         boost::archive::text_oarchive oa(ofs);
         oa & boost::serialization::make_nvp("version", version);
         save(oa, version);
     }
-    else if(fmt == EArchiveFormat::XML){
+    else if (fmt == EArchiveFormat::XML) {
         boost::archive::xml_oarchive oa(ofs);
         oa & boost::serialization::make_nvp("version", version);
         save(oa, version);
     }
-    else if(fmt == EArchiveFormat::BIN){
+    else if (fmt == EArchiveFormat::BIN) {
         boost::archive::binary_oarchive oa(ofs);
         oa & boost::serialization::make_nvp("version", version);
         save(oa, version);

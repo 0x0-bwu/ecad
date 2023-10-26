@@ -12,6 +12,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 
 #include "interfaces/IHierarchyObjCollection.h"
 #include "interfaces/IPadstackInstCollection.h"
+#include "interfaces/IComponentCollection.h"
 #include "interfaces/IPrimitiveCollection.h"
 #include "interfaces/ICellInstCollection.h"
 #include "interfaces/IConnObjCollection.h"
@@ -105,6 +106,11 @@ ECAD_INLINE ConnObjIter ELayoutView::GetConnObjIter() const
 ECAD_INLINE CellInstIter ELayoutView::GetCellInstIter() const
 {
     return GetCellInstCollection()->GetCellInstIter();
+}
+
+ECAD_INLINE ComponentIter ELayoutView::GetComponentIter() const
+{
+    return GetComponentCollection()->GetComponentIter();
 }
 
 ECAD_INLINE PrimitiveIter ELayoutView::GetPrimitiveIter() const
@@ -225,6 +231,11 @@ ECAD_INLINE Ptr<IConnObjCollection> ELayoutView::GetConnObjCollection() const
 ECAD_INLINE Ptr<ICellInstCollection> ELayoutView::GetCellInstCollection() const
 {
     return GetHierarchyObjCollection()->GetCellInstCollection();
+}
+
+ECAD_INLINE Ptr<IComponentCollection> ELayoutView::GetComponentCollection() const
+{
+    return ECollectionCollection::ComponentCollection();
 }
 
 ECAD_INLINE Ptr<IPrimitiveCollection> ELayoutView::GetPrimitiveCollection() const

@@ -21,6 +21,7 @@ public:
 
     virtual Ptr<IText> GetTextFromPrimitive();
     virtual Ptr<IConnObj> GetConnObjFromPrimitive();
+    virtual Ptr<IBondwire> GetBondwireFromPrimitive();
     virtual Ptr<IGeometry2D> GetGeometry2DFromPrimitive();
 
     virtual void SetNet(ENetId net);

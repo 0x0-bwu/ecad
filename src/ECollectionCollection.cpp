@@ -8,6 +8,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECollectionCollection)
 #include "EPadstackDefCollection.h"
 #include "EMaterialDefCollection.h"
 #include "EDefinitionCollection.h"
+#include "EComponentCollection.h"
 #include "EPrimitiveCollection.h"
 #include "ELayerMapCollection.h"
 #include "ECellInstCollection.h"
@@ -98,6 +99,10 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::AddCollection(ECollectionTyp
             collection = new EDefinitionCollection;
             break;
         }
+        case ECollectionType::Component : {
+            collection = new EComponentCollection;
+            break;
+        }
         case ECollectionType::Primitive : {
             collection = new EPrimitiveCollection;
             break;
@@ -126,7 +131,10 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::AddCollection(ECollectionTyp
             collection = new ENetCollection;
             break;
         }
-        default : break;
+        default : {
+            GENERIC_ASSERT(false)
+            break;
+        }
     }
     Insert(type, UPtr<ICollection>(collection));
     return m_collection[type].get();
@@ -172,6 +180,12 @@ ECAD_INLINE Ptr<ILayerMapCollection> ECollectionCollection::LayerMapCollection()
 {
     auto res = GetCollection(ECollectionType::LayerMap);
     return dynamic_cast<Ptr<ILayerMapCollection> >(res);   
+}
+
+ECAD_INLINE Ptr<IComponentCollection> ECollectionCollection::ComponentCollection() const
+{
+    auto res = GetCollection(ECollectionType::Component);
+    return dynamic_cast<Ptr<IComponentCollection> >(res);
 }
 
 ECAD_INLINE Ptr<IPrimitiveCollection> ECollectionCollection::PrimitiveCollection() const
