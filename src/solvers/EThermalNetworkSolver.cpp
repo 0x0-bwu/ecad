@@ -12,7 +12,7 @@ using namespace emodel;
 
 ECAD_INLINE ESimVal CalculateResidual(const std::vector<ESimVal> & v1, const std::vector<ESimVal> & v2)
 {
-    GENERIC_ASSERT(v1.size() == v2.size());
+    ECAD_ASSERT(v1.size() == v2.size());
     ESimVal residual = 0;
     size_t size = v1.size();
     for(size_t i = 0; i < size; ++i) {

@@ -11,7 +11,7 @@ namespace etherm {
 namespace io {
 
 using namespace generic::str;
-using namespace generic::format;
+using namespace generic::fmt;
 using namespace generic::filesystem;
 
 ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, const std::string & filename, std::string * err)
@@ -19,13 +19,13 @@ ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, const std::
     auto dir = DirName(filename);
     if(!PathExists(dir)) MakeDir(dir);
     if(!PathExists(dir) || !isDirWritable(dir)) {
-        if(err) *err = Format2String("Error: unwritable folder: %1%.", dir);
+        if(err) *err = Fmt2Str("Error: unwritable folder: %1%.", dir);
         return false;
     }
     
     std::ofstream out(filename);
     if(!out.is_open()) {
-        if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
+        if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
     }
     ECoordUnits coordUnits(ECoordUnits::Unit::Meter);
@@ -44,7 +44,7 @@ ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, const std::
     for(const auto & layer : model.GetLayers()) {
         auto mf = layer.GetMetalFraction();
         if(nullptr == mf) {
-            if(err) *err = Format2String("Error: missing data in layer: %1%", layer.GetName());
+            if(err) *err = Fmt2Str("Error: missing data in layer: %1%", layer.GetName());
             return false;
         }
         mfs.push_back(mf);

@@ -86,7 +86,8 @@ ECAD_INLINE void EPadstackInstCollection::Map(CPtr<ILayerMap> lyrMap)
             newMap->SetName(newName);
             newMap->MappingLeft(lyrMap);
             lyrMaps.insert(std::make_pair(origin, newMap.get()));
-            ECAD_ASSERT(database->AddLayerMap(std::move(newMap)))
+            [[maybe_unused]] auto res = database->AddLayerMap(std::move(newMap));
+            ECAD_ASSERT(res)
         }
         psInst->SetLayerMap(lyrMaps.at(origin));
     }

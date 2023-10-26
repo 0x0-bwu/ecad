@@ -12,7 +12,7 @@
 namespace ecad::ext::dmcdom {
 
 using namespace generic;
-namespace fmt = generic::format;
+namespace fmt = generic::fmt;
 ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EValue scale)
 {
     double x{0}, y{0};
@@ -68,7 +68,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::stri
 {
     auto & mgr = EDataMgr::Instance();
     if(mgr.OpenDatabase(name)){
-        if(err) *err = fmt::Format2String("Error: database %1% is already exist.", name);
+        if(err) *err = fmt::Fmt2Str("Error: database %1% is already exist.", name);
         return nullptr;
     }
     
@@ -203,7 +203,7 @@ ECAD_INLINE bool ECadExtDmcDomHandler::ParseDomFile(const std::string & filename
         if(line.empty()) continue;
 
         if(!ParseDomLine(line, points, scale)){
-            if(err) *err = generic::format::Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+            if(err) *err = generic::fmt::Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
             return false;
         }
     }
@@ -227,7 +227,7 @@ ECAD_INLINE bool ECadExtDmcDomHandler::ParseDmcFile(const std::string & filename
         if(line.empty()) continue;
 
         if(!ParseDmcLine(line, record, scale)){
-            if(err) *err = fmt::Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+            if(err) *err = fmt::Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
             return false;
         }
     }

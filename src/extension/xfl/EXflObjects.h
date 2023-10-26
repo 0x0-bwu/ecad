@@ -165,7 +165,7 @@ public:
 
         auto iter = composite.cbegin();
         auto * pt = boost::get<Point>(&(*iter));
-        GENERIC_ASSERT(pt != nullptr);
+        ECAD_ASSERT(pt != nullptr);
         data << toEPoint2D(*pt);
 
         iter++;
@@ -183,7 +183,7 @@ public:
                 lastPt = arc->end;
             }
             else {
-                GENERIC_ASSERT(false)
+                ECAD_ASSERT(false)
             }
         }
         return UPtr<EShape>(shape);        

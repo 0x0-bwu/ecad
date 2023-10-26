@@ -103,19 +103,18 @@ ECAD_INLINE void EGridDataTable::BuildInterpolater() const
     if(m_interpolator) return;
     m_interpolator.reset(new EGridInterpolator(m_size.x, m_size.y, nullptr));
 
-    std::vector<ESimVal> x, y;
+    std::vector<ESimVal> x, y(GetSampleSize());
     x.reserve(GetSampleSize());
     for (const auto & data : m_dataTable)
         x.push_back(data.first);
     
-    y.resize(GetSampleSize());
     for (size_t i = 0; i < m_size.x; ++i) {
         for (size_t j = 0; j < m_size.y; ++j) {
             size_t k = 0;
             for (const auto & data : m_dataTable){
                 y[k++] = (data.second)(i, j);
             }
-            (*m_interpolator)(i, j) = std::make_shared<Interpolator>(std::move(x), std::move(y));
+            (*m_interpolator)(i, j) = std::make_shared<Interpolator>(std::vector<ESimVal>(x), std::vector<ESimVal>(y));
         }
     }
 }

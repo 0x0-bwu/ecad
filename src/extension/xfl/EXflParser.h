@@ -562,7 +562,7 @@ struct EXflReader
 
 		void PartHandle(Part part)
 		{
-			std::cout << "Part Name: " << part.name << ", Pins: " << part.pins.size() << std::endl;
+			// std::cout << "Part Name: " << part.name << ", Pins: " << part.pins.size() << std::endl;
 			db.parts.emplace_back(std::move(part));
 		}
 

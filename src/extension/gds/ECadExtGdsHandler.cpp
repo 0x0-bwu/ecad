@@ -11,7 +11,7 @@ namespace ecad {
 namespace ext {
 namespace gds {
 
-namespace fmt = generic::format;
+namespace fmt = generic::fmt;
 
 ECAD_INLINE ECadExtGdsHandler::ECadExtGdsHandler(const std::string & gdsFile, const std::string & lyrMapFile)
  : m_gdsFile(gdsFile), m_lyrMapFile(lyrMapFile){}
@@ -24,7 +24,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
 
     auto & eMgr = EDataMgr::Instance();
     if(eMgr.OpenDatabase(name)){
-        if(err) *err = fmt::Format2String("Error: database %1% is already exist.", name);
+        if(err) *err = fmt::Fmt2Str("Error: database %1% is already exist.", name);
         return nullptr;
     }
 
@@ -43,7 +43,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
         EGdsLayerMap layerMap;
         bool res = EGdsLayerMapParser(layerMap)(m_lyrMapFile);
         if(!res){
-            if(err) *err = fmt::Format2String("Error: failed to parse layer map file %1%.", m_lyrMapFile);
+            if(err) *err = fmt::Fmt2Str("Error: failed to parse layer map file %1%.", m_lyrMapFile);
             return nullptr;
         }
         FCoord elevation = 0.0;

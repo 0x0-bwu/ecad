@@ -10,7 +10,7 @@ namespace etherm {
 namespace io {
 
 using namespace generic::str;
-using namespace generic::format;
+using namespace generic::fmt;
 using namespace generic::filesystem;
 
 ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::string & filename, std::string * err)
@@ -18,7 +18,7 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
     using namespace detail;
     auto dir = UntarCTMv1File(filename, err);
     if(dir.empty()) {
-        if(err) *err = Format2String("Error: failed to unarchive the file %1%", filename);
+        if(err) *err = Fmt2Str("Error: failed to unarchive the file %1%", filename);
         return nullptr;
     }
 
@@ -33,7 +33,7 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
     model->powers = std::make_shared<EGridPowerModel>(tiles);
     for(size_t i = 0; i < model->header.temperatures.size(); ++i) {
         auto temperature = model->header.temperatures.at(i);
-        auto powerFile = dir + GENERIC_FOLDER_SEPS + Format2String("power_T[%1%].ctm", i + 1);
+        auto powerFile = dir + GENERIC_FOLDER_SEPS + Fmt2Str("power_T[%1%].ctm", i + 1);
         EGridData powers(tiles.x, tiles.y);
         if(!ParseCTMv1PowerFile(powerFile, powers, err)) return nullptr;
         model->powers->AddSample(temperature, std::move(powers));
@@ -56,7 +56,7 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
     auto ctmDir = dirName + GENERIC_FOLDER_SEPS + filename;
     if(!PathExists(ctmDir)) MakeDir(ctmDir);
     if(!PathExists(ctmDir) || !isDirWritable(ctmDir)) {
-        if(err) *err = Format2String("Error: unwritable folder: %1%.", ctmDir);
+        if(err) *err = Fmt2Str("Error: unwritable folder: %1%.", ctmDir);
         return false;
     }
     
@@ -80,10 +80,10 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
         auto temperature = model.header.temperatures.at(i);
         auto table = powers.GetTable(temperature);
         if(nullptr == table) {
-            if(err) *err = Format2String("Error: failed to get power table at temperature: %1%", temperature);
+            if(err) *err = Fmt2Str("Error: failed to get power table at temperature: %1%", temperature);
             return false;
         }
-        std::string powerFile = ctmDir + GENERIC_FOLDER_SEPS + Format2String("power_T[%1%].ctm", i + 1);
+        std::string powerFile = ctmDir + GENERIC_FOLDER_SEPS + Fmt2Str("power_T[%1%].ctm", i + 1);
         if(!WriteCTMv1PowerFile(powerFile, *table, err)) return false;
     }
 
@@ -92,7 +92,7 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
     for(const auto & layer : model.header.layers) {
         auto iter = model.densities.find(layer.name);
         if(iter == model.densities.end() || nullptr == iter->second) {
-            if(err) *err = Format2String("Error: failed to get metal density data of layer: %1%!", layer.name);
+            if(err) *err = Fmt2Str("Error: failed to get metal density data of layer: %1%!", layer.name);
             return false;
         }
         density.push_back(iter->second);
@@ -141,22 +141,22 @@ ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, c
 namespace detail {
 ECAD_INLINE std::string UntarCTMv1File(const std::string & filename, std::string * err)
 {
-    if(!FileExists(filename)) {
-        if(err) *err = Format2String("Error: file %1% not exists!", filename);
+    if (not FileExists(filename)) {
+        if(err) *err = Fmt2Str("Error: file %1% not exists!", filename);
         return std::string{};
     }
 
     auto dir = DirName(filename);
-    if(!isDirWritable(dir)) dir = "/tmp";
+    if (not isDirWritable(dir)) dir = "/tmp";
     auto baseName = BaseName(filename);
     
     //unzip ctm file
     auto untarDir = dir + GENERIC_FOLDER_SEPS + baseName;
-    if(PathExists(untarDir))
+    if (PathExists(untarDir))
         RemoveDir(untarDir);
     MakeDir(untarDir);
 
-    std::string cmd = "tar --overwrite -zxf" + filename + " -C " + untarDir;
+    std::string cmd = "tar -zxf" + filename + " -C " + untarDir;
     int res = std::system(cmd.c_str());
     return res == 0 ? untarDir : std::string{};
 }
@@ -165,7 +165,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
 {
     std::ifstream fp(filename.c_str(), std::ios::in);
     if(!fp.good()) {
-        if(err) *err = Format2String("Error: failed to open file %1%!", filename);
+        if(err) *err = Fmt2Str("Error: failed to open file %1%!", filename);
         return false;
     }
 
@@ -174,7 +174,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
         std::for_each(tmp.begin(), tmp.end(), [&](char & c){ c -= 3 * len + 22; });
         double value = std::stod(tmp);
         bool ok = math::GE(value, 0.0);
-        if(!ok && err) *err += Format2String("\nWarning: decrypting for %1% failed, 0.0 will be used instead.", s);
+        if(!ok && err) *err += Fmt2Str("\nWarning: decrypting for %1% failed, 0.0 will be used instead.", s);
         return ok ? value : 0.0;
     };
 
@@ -198,12 +198,12 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
         else if(StartsWith(line, "LAYER")) {
             Split(line, items);
             if(items.size() < 2) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             size_t lyrNum = std::stol(items[1]);
             if(items.size() != (lyrNum * 2 + 2)) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             for(size_t i = 0; i < lyrNum; ++i) {
@@ -217,7 +217,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
         else if(StartsWith(line, "DIE")) {
             Split(line, items);
             if(items.size() != 5) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             FBox2D box;
@@ -234,7 +234,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
             for(size_t i = 1; i < items.size(); ++i)
                 header.temperatures.push_back(std::stod(items[i]));
             if(header.temperatures.size() < 5) {
-                if(err) *err = Format2String("Error: at least 5 temperature points in line %1%!", count);
+                if(err) *err = Fmt2Str("Error: at least 5 temperature points in line %1%!", count);
                 return false;
             }
         }
@@ -242,13 +242,13 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
         else if(StartsWith(line, "TILE")) {
             Split(line, items);
             if(items.size() != 3) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             header.tiles.x = std::stol(items[1]);
             header.tiles.y = std::stol(items[2]);
             if(header.tiles.x > maxTileNum || header.tiles.y > maxTileNum) {
-                if(err) *err = Format2String("Error: exceeded maxinum number of tiles: %1%.", maxTileNum);
+                if(err) *err = Fmt2Str("Error: exceeded maxinum number of tiles: %1%.", maxTileNum);
                 return false;
             }
         }
@@ -256,7 +256,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
         else if(StartsWith(line, "RESOLUTION")) {
             Split(line, items);
             if(items.size() != 2) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             header.resolution = std::stod(items[1]);
@@ -265,7 +265,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
         else if(StartsWith(line, "SCALE_FACTOR")) {
             Split(line, items);
             if(items.size() != 2) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             header.scale = std::stod(items[1]);
@@ -274,12 +274,12 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
         else if(StartsWith(line, "ALL_LAYERS")) {
             Split(line, items);
             if(items.size() < 2) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             size_t lyrNum = std::stol(items[1]);
             if(items.size() != (lyrNum + 2)) {
-                if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                 return false;
             }
             for(size_t i = 0; i < lyrNum; ++i)
@@ -297,7 +297,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
 
                 Split(line, items);
                 if(items.size() != 3) {
-                    if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                    if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                     return false;
                 }
 
@@ -320,7 +320,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
 
                 Split(line, items);
                 if(items.size() != 3) {
-                    if(err) *err = Format2String("Error: fail to parse file %1% at line %2%.", filename, count);
+                    if(err) *err = Fmt2Str("Error: fail to parse file %1% at line %2%.", filename, count);
                     return false;
                 }
 
@@ -341,7 +341,7 @@ ECAD_INLINE bool ParseCTMv1PowerFile(const std::string & filename, EGridData & p
 {
     std::ifstream fp(filename.c_str(), std::ios::in | std::ios::binary);
     if(!fp.good()) {
-        if(err) *err = Format2String("Error: failed to open file %1%!", filename);
+        if(err) *err = Fmt2Str("Error: failed to open file %1%!", filename);
         return false;
     }
 
@@ -357,7 +357,7 @@ ECAD_API bool ParseCTMv1DensityFile(const std::string & filename, const size_t s
 {
     std::ifstream fp(filename.c_str(), std::ios::in | std::ios::binary);
     if(!fp.good()) {
-        if(err) *err = Format2String("Error: failed to open file %1%!", filename);
+        if(err) *err = Fmt2Str("Error: failed to open file %1%!", filename);
         return false;
     }
 
@@ -389,7 +389,7 @@ ECAD_INLINE bool WriteCTMv1HeaderFile(const std::string & filename, const ECTMv1
 {
     std::ofstream out(filename);
     if(!out.is_open()) {
-        if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
+        if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
     }
 
@@ -461,7 +461,7 @@ ECAD_INLINE bool WriteCTMv1PowerFile(const std::string & filename, const EGridDa
 {
     std::ofstream out(filename, std::ios::out |std::ios::binary);
     if(!out.is_open()) {
-        if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
+        if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
     }
 
@@ -490,7 +490,7 @@ ECAD_INLINE bool WriteCTMv1DensityFile(const std::string & filename, const size_
 
     std::ofstream out(filename, std::ios::out |std::ios::binary);
     if(!out.is_open()) {
-        if(err) *err = Format2String("Error: failed to open file: %1%.", filename);
+        if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
     }
 
@@ -522,14 +522,14 @@ ECAD_INLINE bool WriteCTMv1DensityFile(const std::string & filename, const size_
 
 ECAD_INLINE bool GenerateCTMv1Package(const std::string & dirName, const std::string & packName, bool removeDir, std::string * err)
 {
-    std::string cmd = Format2String("tar zcf %1% -C %2% .", packName, dirName);
+    std::string cmd = Fmt2Str("tar zcf %1% -C %2% .", packName, dirName);
     int res = std::system(cmd.c_str());
     if(res == 0 && FileExists(packName)) {
         if(removeDir) RemoveDir(dirName);
         return true;
     }
 
-    if(err) *err = Format2String("Error: failed to generate ctm package: %1%.", packName);
+    if(err) *err = Fmt2Str("Error: failed to generate ctm package: %1%.", packName);
     return false;
 }
 

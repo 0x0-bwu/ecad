@@ -88,7 +88,7 @@ void t_grid_thermal_model_solver_test()
             generic::color::RGBFromScalar((d - min) / range, r, g, b);
             return std::make_tuple(r, g, b, a);
         };
-        std::cout << generic::format::Format2String("%1%: [%2%, %3%]", layer.GetName(), min, max) << std::endl;   
+        std::cout << generic::fmt::Fmt2Str("%1%: [%2%, %3%]", layer.GetName(), min, max) << std::endl;   
         std::string filepng = outDir + GENERIC_FOLDER_SEPS + "layer_" + std::to_string(++i) + ".png";
         htMap->WriteImgProfile(filepng, rgbaFunc);
     }

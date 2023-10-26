@@ -132,7 +132,7 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::AddCollection(ECollectionTyp
             break;
         }
         default : {
-            GENERIC_ASSERT(false)
+            ECAD_ASSERT(false)
             break;
         }
     }

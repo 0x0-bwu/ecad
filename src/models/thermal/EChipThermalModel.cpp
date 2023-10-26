@@ -6,7 +6,7 @@ namespace ecad {
 namespace emodel {
 namespace etherm {
 
-using namespace generic::format;
+using namespace generic::fmt;
 
 ECAD_INLINE EChipThermalModelV1::~EChipThermalModelV1()
 {
@@ -115,7 +115,7 @@ ECAD_INLINE void EChipThermalModelV1::BuildLayerStackup(std::string * info) cons
     for(const auto & name : header.techLayers) {
         EValue height, thickness;
         if(!GetLayerHeightThickness(name, height, thickness)) {
-            if(info) *info += Format2String("Warning: failed to get height and thickness of layer: %1%, ignored!\n", name);
+            if(info) *info += Fmt2Str("Warning: failed to get height and thickness of layer: %1%, ignored!\n", name);
         }
         else {
             ECTMv1Layer layer;
@@ -139,7 +139,7 @@ ECAD_INLINE void EChipThermalModelV1::BuildLayerStackup(std::string * info) cons
         auto stackup = std::make_pair(currLayer.elevation, std::list<EValue>());
         stackup.second.push_back(currLayer.thickness);
         while(!allLayers.empty() && math::EQ<EValue>(currLayer.elevation, allLayers.front().elevation, tolerance)) {
-            if(info) *info += Format2String("Warning: find layers in same height: %1% and %2%, merged!\n", currLayer.name, allLayers.front().name);
+            if(info) *info += Fmt2Str("Warning: find layers in same height: %1% and %2%, merged!\n", currLayer.name, allLayers.front().name);
             currLayer = allLayers.front();
             allLayers.pop_front();
             layers.insert(currLayer.name);

@@ -194,7 +194,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
     //RESOLUTION X(m)    Y(m)
     //X Y VALUE1 VALUE2  ...
 
-    using namespace generic::format;
+    using namespace generic::fmt;
     if(nullptr == m_mfInfo) return false;
     if(!m_fileHelper.Open(m_settings.outFile)) return false;
 
@@ -207,19 +207,19 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
     ss << std::endl;
     for(const auto & layer : info.layers){
         ss << "LAYER" << sp << layer.name << sp << (layer.isMetal ? 1 : 0) << sp;
-        ss << Format2String("%1$12.9f %2$12.9f", layer.elevation * scale, layer.thickness * scale) << std::endl;
+        ss << Fmt2Str("%1$12.9f %2$12.9f", layer.elevation * scale, layer.thickness * scale) << std::endl;
     }
     ss << std::endl;
     ss << "ORIGIN" << sp;
-    ss << Format2String("%1$12.9f %2$12.9f %3$12.9f %4$12.9f", info.origin[0][0] * scale, info.origin[0][1] * scale,
+    ss << Fmt2Str("%1$12.9f %2$12.9f %3$12.9f %4$12.9f", info.origin[0][0] * scale, info.origin[0][1] * scale,
                                                                info.origin[1][0] * scale, info.origin[1][1] * scale);
     ss << std::endl;
     ss << "EXTENSION" << sp;
-    ss << Format2String("%1$12.9f %2$12.9f %3$12.9f %4$12.9f", info.extension[0][0] * scale, info.extension[0][1] * scale,
+    ss << Fmt2Str("%1$12.9f %2$12.9f %3$12.9f %4$12.9f", info.extension[0][0] * scale, info.extension[0][1] * scale,
                                                                info.extension[1][0] * scale, info.extension[1][1] * scale);
     ss << std::endl;
     ss << "TILE" << sp <<  info.grid[0] << sp << info.grid[1] << std::endl;
-    ss << "RESOLUTION" <<  Format2String("%1$12.9f %2$12.9f", info.stride[0] * scale, info.stride[1] * scale) << std::endl;
+    ss << "RESOLUTION" <<  Fmt2Str("%1$12.9f %2$12.9f", info.stride[0] * scale, info.stride[1] * scale) << std::endl;
 
     ss << std::endl;
     ss << std::setiosflags(std::ios::fixed) << std::setprecision(6);

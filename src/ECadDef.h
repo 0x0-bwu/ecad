@@ -53,7 +53,7 @@ ECAD_ALWAYS_INLINE std::string toString(ECollectionType type)
         case ECollectionType::PadstackInst : return "Padstack Instance";
         case ECollectionType::ComponentDefPin : return "Component Definition Pin";
         case ECollectionType::Collection : return "Collection";
-        default : { GENERIC_ASSERT(false) return std::string{}; }
+        default : { ECAD_ASSERT(false) return std::string{}; }
     }
 }
 
@@ -128,7 +128,7 @@ ECAD_ALWAYS_INLINE std::string toString(EPrimitiveType type)
         case EPrimitiveType::Geometry2D : return "Geometry2D";
         case EPrimitiveType::Bondwire : return "Bondwire";
         case EPrimitiveType::Text : return "Text";
-        default : { GENERIC_ASSERT(false) return std::string{}; }
+        default : { ECAD_ASSERT(false) return std::string{}; }
     }
 }
 
@@ -170,7 +170,7 @@ ECAD_ALWAYS_INLINE std::string toString(EDefinitionType type)
         case EDefinitionType::MaterialDef : return "Material Def";
         case EDefinitionType::LayerMap : return "Layer Map";
         case EDefinitionType::Cell : return "Cell";
-        default : { GENERIC_ASSERT(false) return std::string{}; }
+        default : { ECAD_ASSERT(false) return std::string{}; }
     }
 }
 

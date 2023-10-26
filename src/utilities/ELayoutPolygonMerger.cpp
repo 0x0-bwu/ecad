@@ -146,7 +146,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
                 eShape = UPtr<EShape>(shape);
             }
             [[maybe_unused]] auto prim = primitives->CreateGeometry2D(merger.first, polygon->property, std::move(eShape));
-            GENERIC_ASSERT(prim != nullptr)
+            ECAD_ASSERT(prim != nullptr)
         }
     }
 
@@ -195,7 +195,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
             break;
         }
         default : {
-            GENERIC_ASSERT(false)
+            ECAD_ASSERT(false)
         }
     }
     return true;

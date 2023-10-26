@@ -10,7 +10,7 @@ namespace ecad {
 namespace ext {
 namespace xfl {
 
-namespace fmt = generic::format;
+namespace fmt = generic::fmt;
 
 ECAD_INLINE ECadExtXflHandler::ECadExtXflHandler(const std::string & xflFile, size_t circleDiv)
  : m_xflFile(xflFile), m_circleDiv(circleDiv) {}
@@ -19,7 +19,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
 {
     auto & mgr = EDataMgr::Instance();
     if(mgr.OpenDatabase(name)){
-        if(err) *err = fmt::Format2String("Error: database %1% is already exist.", name);
+        if(err) *err = fmt::Fmt2Str("Error: database %1% is already exist.", name);
         return nullptr;
     }
 
@@ -27,7 +27,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
 
     EXflReader reader(*m_xflDB);
     if (not reader(m_xflFile)) {
-        if (err) *err = fmt::Format2String("Error: failed to parse  %1%.", m_xflFile);
+        if (err) *err = fmt::Fmt2Str("Error: failed to parse  %1%.", m_xflFile);
         return nullptr;
     }
 
@@ -135,7 +135,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
         }
 
         auto shape = mgr.CreateShapeFromTemplate(ts);
-        GENERIC_ASSERT(shape != nullptr)
+        ECAD_ASSERT(shape != nullptr)
 
         psDefData->SetViaParameters(std::move(shape), EPoint2D(0, 0), math::Rad(xflVia.shapeRot));
 
@@ -153,7 +153,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
                 continue;
             }
             auto shape = mgr.CreateShapeFromTemplate(ts);
-            GENERIC_ASSERT(shape != nullptr)
+            ECAD_ASSERT(shape != nullptr)
 
             psDefData->SetPadParameters(static_cast<ELayerId>(i), std::move(shape), EPoint2D(0, 0), math::Rad(xflPad.shapeRot));
         
@@ -165,7 +165,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
         }
 
         auto psDef = mgr.CreatePadstackDef(m_database, xflVia.name);
-        GENERIC_ASSERT(psDef != nullptr)
+        ECAD_ASSERT(psDef != nullptr)
         psDef->SetPadstackDefData(std::move(psDefData));
     }
 
@@ -247,7 +247,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 }
                 auto ePath = mgr.CreateShapePath(polygon->shape.GetPoints(), instPath->width * m_scale);
                 [[maybe_unused]] auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(ePath));
-                GENERIC_ASSERT(ePrim != nullptr)
+                ECAD_ASSERT(ePrim != nullptr)
             }
             //inst padstack
             else if(auto * instVia = boost::get<InstVia>(&instObj)) {
@@ -277,7 +277,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 
                 auto name = GetNextPadstackInstName(instVia->name);
                 [[maybe_unused]] auto psInst = mgr.CreatePadstackInst(layout, name, psDef, netId, sLayer->second, eLayer->second, layerMap, trans);
-                GENERIC_ASSERT(psInst != nullptr)
+                ECAD_ASSERT(psInst != nullptr)
             }
             //inst bondwire
             else if (auto * instBw = boost::get<InstBondwire>(&instObj); instBw) {
@@ -298,7 +298,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                 }
                 shape->Transform(makeETransform2D(1.0, 0.0, makeEPoint2D(instAnnular->loc)));
                 [[maybe_unused]] auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(shape));
-                GENERIC_ASSERT(ePrim != nullptr)
+                ECAD_ASSERT(ePrim != nullptr)
             }
             //others
             else {
@@ -325,7 +325,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                         continue;
                     }
                     [[maybe_unused]] auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(shape));
-                    GENERIC_ASSERT(ePrim != nullptr)
+                    ECAD_ASSERT(ePrim != nullptr)
                 }
                 else {
                     auto pwh = std::make_unique<EPolygonWithHoles>();
@@ -339,7 +339,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
                         continue;
                     }
                     [[maybe_unused]] auto ePrim = mgr.CreateGeometry2D(layout, layer->second, netId, std::move(pwh));
-                    GENERIC_ASSERT(ePrim != nullptr)
+                    ECAD_ASSERT(ePrim != nullptr)
                 }
             }
         }
@@ -479,7 +479,7 @@ ECAD_INLINE std::pair<int, UPtr<EShape> > ECadExtXflHandler::makeEShapeFromInstO
         return std::make_pair(instShape->layer, std::move(shape));
     }
     else {
-        GENERIC_ASSERT(false)
+        ECAD_ASSERT(false)
         return std::make_pair(-1, nullptr);
     }
 }

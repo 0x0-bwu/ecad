@@ -85,7 +85,7 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
                 break;
             }
             default : {
-                GENERIC_ASSERT(false)
+                ECAD_ASSERT(false)
                 break;
             }
         }

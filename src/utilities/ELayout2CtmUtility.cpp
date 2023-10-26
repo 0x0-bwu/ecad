@@ -68,7 +68,7 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
 
     std::vector<Ptr<ILayer> > layers;
     m_layout->GetStackupLayers(layers);
-    GENERIC_ASSERT(layers.size() == mf->size());
+    ECAD_ASSERT(layers.size() == mf->size());
 
     for(size_t i = 0; i < layers.size(); ++i) {
         auto name = layers.at(i)->GetName();
@@ -79,7 +79,7 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
         layer.SetIsMetal(layers.at(i)->GetLayerType() == ELayerType::ConductingLayer);
         layer.SetThickness(thickness);
         [[maybe_unused]] auto res = gridModel->AppendLayer(std::move(layer));
-        GENERIC_ASSERT(res)
+        ECAD_ASSERT(res)
     }
 
     auto ctm = io::makeChipThermalModelV1FromGridThermalModel(*gridModel, false, 0, err);

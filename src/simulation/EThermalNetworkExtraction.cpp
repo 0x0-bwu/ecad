@@ -47,7 +47,6 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     const auto & coordUnits = layout->GetCoordUnits();
 
     auto [nx, ny] = mfInfo->grid;
-    std::cout << "nx: " << nx << ", ny: " << ny << std::endl;
     EGridThermalModel model(ESize2D(nx, ny));
 
     auto rx = coordUnits.toUnit(mfInfo->stride[0], ECoordUnits::Unit::Meter);
@@ -56,7 +55,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
 
     std::vector<Ptr<ILayer> > layers;
     layout->GetStackupLayers(layers);
-    GENERIC_ASSERT(layers.size() == mf->size());
+    ECAD_ASSERT(layers.size() == mf->size());
 
     for(size_t i = 0; i < layers.size(); ++i) {
         auto name = layers.at(i)->GetName();
@@ -66,7 +65,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         EGridThermalLayer layer(name, layerMetalFraction);
         layer.SetThickness(thickness);
         [[maybe_unused]] auto res = model.AppendLayer(std::move(layer));
-        GENERIC_ASSERT(res)
+        ECAD_ASSERT(res)
     }
 
     //wbtest
