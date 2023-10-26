@@ -5,15 +5,15 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v4
         with:
             submodules: 'recursive'
     
-      - name: install dependency
+      - name: Install dependency
         run: sudo apt-get update && sudo apt-get install build-essential cmake ninja-build libeigen3-dev libpng-dev
 
-      - name: install boost library
+      - name: Install boost library
         uses: MarkusJx/install-boost@v2.4.4
         id: install-boost
         with:
@@ -21,8 +21,11 @@ jobs:
             platform_version: 22.04
             boost_install_dir: /home/runner/boost_1_83_0
             
-      - name: build ecad
+      - name: Build ecad
         run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && cmake -Bbuild -G Ninja && cmake --build build
 
-      - name: run test
+      - name: Run unit test
+        run: build/bin/EcadTest.exe
+        
+      - name: Run examples
         run: build/bin/setup_design.exe
