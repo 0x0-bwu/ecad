@@ -20,7 +20,12 @@ else()
   set(CMAKE_BUILD_TYPE Debug)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
+
 add_compile_options(-Wall)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-fcompare-debug-second) #hide note message
+endif()
+
 message("-- Build Type: " ${CMAKE_BUILD_TYPE})
 message("-- CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
