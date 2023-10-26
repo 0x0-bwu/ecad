@@ -86,7 +86,7 @@ ECAD_INLINE Ptr<IGeometry2D> EPrimitive::GetGeometry2DFromPrimitive()
     return dynamic_cast<Ptr<IGeometry2D> >(this);
 }
 
-ECAD_INLINE Ptr<IBondwire> EPrimitve::GetBondwireFromPrimitive()
+ECAD_INLINE Ptr<IBondwire> EPrimitive::GetBondwireFromPrimitive()
 {
     if (m_type != EPrimitiveType::Bondwire) return nullptr;
     return dynamic_cast<Ptr<IBondwire> >(this);
