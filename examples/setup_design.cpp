@@ -45,16 +45,33 @@ int main(int argc, char * argv[])
     [[maybe_unused]] auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 0.4, "Cu", "Air"));
     [[maybe_unused]] auto iLyrSubstrate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("Substrate", ELayerType::DielectricLayer, -0.4, 0.635, "", "Si3N4"));
     [[maybe_unused]] auto iLyrCuPlate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("CuPlate", ELayerType::ConductingLayer, -1.035, 0.3, "Cu", ""));
+    assert(iLyrTopCu != ELayerId::noLayer);
+    assert(iLyrSubstrate != ELayerId::noLayer);
+    assert(iLyrCuPlate != ELayerId::noLayer);
 
     //sic die
     auto sicCell = eDataMgr.CreateCircuitCell(database, "SicDie");
+    assert(sicCell);
     auto sicLayout = sicCell->GetLayoutView();
+    assert(sicLayout);
 
     //boundary
     auto sicBonds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{0, 0}, {23000000, 0}, {23000000, 26000000}, {0, 26000000}});
     sicLayout->SetBoundary(std::move(sicBonds));
 
     auto iLyrWire = sicLayout->AppendLayer(eDataMgr.CreateStackupLayer("Wire", ELayerType::ConductingLayer, 0, 0.4, "Cu", ""));
+    assert(iLyrWire != ELayerId::noLayer);
+
+    //component
+    auto compDef = eDataMgr.CreateComponentDef(database, "CPMF-1200-S080B Z-FET");
+    assert(compDef);
+    compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
+    compDef->SetHeight(0.365);
+
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3.45) , coordUnits.toCoord(10))));
+    [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(19) , coordUnits.toCoord(15))));
+    assert(comp1);
+    assert(comp2);
 
     //net
     auto gateNet = eDataMgr.CreateNet(sicLayout, "Gate");

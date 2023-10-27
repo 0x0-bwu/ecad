@@ -24,8 +24,14 @@ public:
 
     const std::string & GetName() const override;
 
-    void SetComponentType(EComponentType type);
-    EComponentType GetComponentType() const;
+    void SetComponentType(EComponentType type) override;
+    EComponentType GetComponentType() const override;
+
+    void SetBondingBox(const EBox2D & bbox) override;
+    const EBox2D & GetBondingBox() const override;
+
+    void SetHeight(FCoord height) override;
+    FCoord GetHeight() const override;
 
     Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) override;
 

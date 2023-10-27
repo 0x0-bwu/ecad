@@ -21,6 +21,8 @@ public:
     EComponentCollection(const EComponentCollection & other);
     EComponentCollection & operator= (const EComponentCollection & other);
 
+    Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform) override;
+
     ComponentIter GetComponentIter() const override;
 
     size_t Size() const override;

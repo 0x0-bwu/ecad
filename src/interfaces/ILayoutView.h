@@ -77,6 +77,9 @@ public:
     ///CellInstance
     virtual Ptr<ICellInst> CreateCellInst(const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform) = 0;
 
+    ///Component
+    virtual Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform) = 0;
+
     ///Collection
     virtual Ptr<INetCollection> GetNetCollection() const = 0;
     virtual Ptr<ILayerCollection> GetLayerCollection() const = 0;

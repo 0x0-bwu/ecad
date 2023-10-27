@@ -1,8 +1,10 @@
 #include "EHierarchyObjCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EHierarchyObjCollection)
 
+#include "interfaces/IComponentCollection.h"
 #include "interfaces/ICellInstCollection.h"
 #include "interfaces/IHierarchyObj.h"
+#include "interfaces/IComponent.h"
 #include "interfaces/ICellInst.h"
 
 namespace ecad {
@@ -54,6 +56,11 @@ ECAD_INLINE Ptr<ICellInstCollection> EHierarchyObjCollection::GetCellInstCollect
     return ECollectionCollection::CellInstCollection();
 }
 
+ECAD_INLINE Ptr<IComponentCollection> EHierarchyObjCollection::GetComponentCollection() const
+{
+    return ECollectionCollection::ComponentCollection();
+}
+
 ECAD_INLINE HierarchyObjIter EHierarchyObjCollection::GetHierarchyObjIter() const
 {
     return HierarchyObjIter(new EHierarchyObjIterator(*this));
@@ -71,6 +78,7 @@ ECAD_INLINE size_t EHierarchyObjCollection::Size() const
 ECAD_INLINE EHierarchyObjIterator::EHierarchyObjIterator(const EHierarchyObjCollection & collection)
 {
     m_cellInstIter = collection.GetCellInstCollection()->GetCellInstIter();
+    m_componentIter = collection.GetComponentCollection()->GetComponentIter();
 }
 
 ECAD_INLINE EHierarchyObjIterator::~EHierarchyObjIterator()
@@ -85,6 +93,7 @@ ECAD_INLINE EHierarchyObjIterator::EHierarchyObjIterator(const EHierarchyObjIter
 ECAD_INLINE EHierarchyObjIterator & EHierarchyObjIterator::operator= (const EHierarchyObjIterator & other)
 {
     m_cellInstIter = other.m_cellInstIter->Clone();
+    m_componentIter = other.m_componentIter->Clone();
     return *this;
 }
 
@@ -102,12 +111,14 @@ ECAD_INLINE EHierarchyObjIterator & EHierarchyObjIterator::operator= (EHierarchy
 ECAD_INLINE Ptr<IHierarchyObj> EHierarchyObjIterator::Next()
 {
     if(auto p = dynamic_cast<Ptr<IHierarchyObj> >(m_cellInstIter->Next()); p) return p;
+    if(auto p = dynamic_cast<Ptr<IHierarchyObj> >(m_componentIter->Next()); p) return p;
     return nullptr;
 }
 
 ECAD_INLINE Ptr<IHierarchyObj> EHierarchyObjIterator::Current()
 {
     if(m_cellInstIter->Current()) return dynamic_cast<Ptr<IHierarchyObj> >(m_cellInstIter->Current());
+    
     return nullptr;
 }
 
@@ -119,8 +130,10 @@ ECAD_INLINE HierarchyObjIter EHierarchyObjIterator::Clone() const
 ECAD_INLINE void EHierarchyObjIterator::Move(EHierarchyObjIterator && other)
 {
     m_cellInstIter = std::move(other.m_cellInstIter);
+    m_componentIter = std::move(other.m_componentIter);
 
     other.m_cellInstIter = nullptr;
+    other.m_componentIter = nullptr;
 }
 
 }//namesapce ecad

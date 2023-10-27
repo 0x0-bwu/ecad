@@ -8,8 +8,7 @@ namespace ecad {
 class ICell;
 class ECAD_API ELayoutView : public ECollectionCollection, public ILayoutView
 {
-    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 5> m_collectionTypes = { ECollectionType::HierarchyObj,
-                                                                                             ECollectionType::Component,
+    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 4> m_collectionTypes = { ECollectionType::HierarchyObj,
                                                                                              ECollectionType::ConnObj,
                                                                                              ECollectionType::Layer,
                                                                                              ECollectionType::Net };
@@ -64,6 +63,9 @@ public:
     ///CellInst
     Ptr<ICellInst> CreateCellInst(const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform) override;
     
+    ///Component
+    Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform) override;
+
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) override;
 

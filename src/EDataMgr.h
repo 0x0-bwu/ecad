@@ -1,38 +1,6 @@
 #pragma once
 #include "generic/geometry/Geometries.hpp"
-#include "ECadCommon.h"
-#include "ETransform.h"
-#include "ECadDef.h"
-
-#include "interfaces/ICell.h"
-#include "interfaces/ICellCollection.h"
-#include "interfaces/ICellInst.h"
-#include "interfaces/ICellInstCollection.h"
-#include "interfaces/ICollection.h"
-#include "interfaces/IConnObj.h"
-#include "interfaces/IConnObjCollection.h"
-#include "interfaces/IDatabase.h"
-#include "interfaces/IDefinition.h"
-#include "interfaces/IDefinitionCollection.h"
-#include "interfaces/IHierarchyObj.h"
-#include "interfaces/IHierarchyObjCollection.h"
-#include "interfaces/IIterator.h"
-#include "interfaces/ILayer.h"
-#include "interfaces/ILayerCollection.h"
-#include "interfaces/ILayerMap.h"
-#include "interfaces/ILayerMapCollection.h"
-#include "interfaces/ILayoutView.h"
-#include "interfaces/IMaterialDef.h"
-#include "interfaces/IMaterialDefCollection.h"
-#include "interfaces/INet.h"
-#include "interfaces/INetCollection.h"
-#include "interfaces/IPadstackDef.h"
-#include "interfaces/IPadstackDefCollection.h"
-#include "interfaces/IPadstackDefData.h"
-#include "interfaces/IPadstackInst.h"
-#include "interfaces/IPadstackInstCollection.h"
-#include "interfaces/IPrimitive.h"
-#include "interfaces/IPrimitiveCollection.h"
+#include "Interface.h"
 
 #include <unordered_map>
 #include <memory>
@@ -102,8 +70,12 @@ public:
 
     ///CellInstance
     Ptr<ICellInst> CreateCellInst(Ptr<ILayoutView> layout, const std::string & name,
-                                          Ptr<ILayoutView> defLayout, const ETransform2D & transform);
+                                  Ptr<ILayoutView> defLayout, const ETransform2D & transform);
 
+    ///Component
+    Ptr<IComponent> CreateComponent(Ptr<ILayoutView> layout, const std::string & name, CPtr<IComponentDef> compDef,
+                                    ELayerId layer, const ETransform2D & transform);
+                                    
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
 

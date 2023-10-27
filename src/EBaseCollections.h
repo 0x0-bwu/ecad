@@ -64,9 +64,7 @@ public:
     template <typename key_t, typename value_t>
     bool Insert(key_t && key, value_t && value)
     { 
-        return m_collection.insert(
-            std::make_pair(std::forward<key_t>(key), std::forward<value_t>(value))
-            ).second;
+        return m_collection.emplace(std::forward<key_t>(key), std::forward<value_t>(value)).second;
     }
 
     template <typename key_t>

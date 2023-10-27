@@ -12,7 +12,6 @@ ECAD_INLINE void EHierarchyObj::save(Archive & ar, const unsigned int version) c
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EHierarchyObj, IHierarchyObj>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
-    ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("transform", m_transform);
 }
 
@@ -22,7 +21,6 @@ ECAD_INLINE void EHierarchyObj::load(Archive & ar, const unsigned int version)
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EHierarchyObj, IHierarchyObj>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
-    ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("transform", m_transform);
 }
 
@@ -51,7 +49,6 @@ ECAD_INLINE EHierarchyObj::EHierarchyObj(const EHierarchyObj & other)
 ECAD_INLINE EHierarchyObj & EHierarchyObj::operator= (const EHierarchyObj & other)
 {
     EObject::operator=(other);
-    m_placement = other.m_placement;
     m_transform = other.m_transform;
     return *this;
 }

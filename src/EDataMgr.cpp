@@ -203,20 +203,27 @@ ECAD_INLINE Ptr<IPadstackInst> EDataMgr::CreatePadstackInst(Ptr<ILayoutView> lay
                                                             ELayerId topLyr, ELayerId botLyr, CPtr<ILayerMap> layerMap,
                                                             const ETransform2D & transform)
 {
-    if(nullptr == layout) return nullptr;
+    if (nullptr == layout) return nullptr;
     return layout->CreatePadstackInst(name, def, net, topLyr, botLyr, layerMap, transform);
 }
 
 ECAD_INLINE Ptr<ICellInst> EDataMgr::CreateCellInst(Ptr<ILayoutView> layout, const std::string & name,
                                                     Ptr<ILayoutView> defLayout, const ETransform2D & transform)
 {
-    if(nullptr == layout) return nullptr;
+    if (nullptr == layout) return nullptr;
     return layout->CreateCellInst(name, defLayout, transform);
+}
+
+ECAD_INLINE Ptr<IComponent> EDataMgr::CreateComponent(Ptr<ILayoutView> layout, const std::string & name,
+                                                        CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform)
+{
+    if (nullptr == layout) return nullptr;
+    return layout->CreateComponent(name, compDef, layer, transform);
 }
 
 ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape)
 {
-    if(nullptr == layout) return nullptr;
+    if (nullptr == layout) return nullptr;
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 

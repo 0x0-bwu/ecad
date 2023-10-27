@@ -78,6 +78,26 @@ ECAD_INLINE EComponentType EComponentDef::GetComponentType() const
     return m_type;
 }
 
+ECAD_INLINE void EComponentDef::SetBondingBox(const EBox2D & bbox)
+{
+    m_bondingBox = bbox;
+}
+
+ECAD_INLINE const EBox2D & EComponentDef::GetBondingBox() const
+{
+    return m_bondingBox;
+}
+
+ECAD_INLINE void EComponentDef::SetHeight(FCoord height)
+{
+    m_height = height;
+}
+
+ECAD_INLINE FCoord EComponentDef::GetHeight() const
+{
+    return m_height;
+}
+
 ECAD_INLINE Ptr<IComponentDefPin> EComponentDef::CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
 {
     return ComponentDefPinCollection()->CreatePin(name, loc, type, psDef, lyr);
