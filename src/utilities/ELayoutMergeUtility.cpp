@@ -1,18 +1,8 @@
 #include "utilities/ELayoutMergeUtility.h"
 
-#include "interfaces/IPadstackInstCollection.h"
-#include "interfaces/IPrimitiveCollection.h"
-#include "interfaces/ICellInstCollection.h"
-#include "interfaces/ILayerCollection.h"
-#include "interfaces/INetCollection.h"
-#include "interfaces/IPadstackInst.h"
-#include "interfaces/ILayoutView.h"
-#include "interfaces/IPrimitive.h"
-#include "interfaces/ILayerMap.h"
-#include "interfaces/ICellInst.h"
-#include "interfaces/INet.h"
-#include "EShape.h"
 #include <unordered_map>
+#include "Interface.h"
+#include "EShape.h"
 namespace ecad {
 namespace eutils {
 
@@ -32,7 +22,7 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     std::unordered_map<ENetId, ENetId> netIdMap;//<other, this>
     netIdMap.emplace(ENetId::noNet, ENetId::noNet);
     auto netIter = other->GetNetIter();
-    while(auto * net = netIter->Next()){
+    while (auto * net = netIter->Next()){
         if (auto thisNet = layout->FindNetByName(net->GetName()); thisNet)
             netIdMap.emplace(net->GetNetId(), thisNet->GetNetId());
         else {
@@ -50,11 +40,20 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     
     //HierarchyObj/Cellinst
     auto cellInstIter = other->GetCellInstIter();
-    while(auto * cellInst = cellInstIter->Next()){
+    while (auto * cellInst = cellInstIter->Next()){
         auto clone = cellInst->Clone();
         clone->SetRefLayoutView(layout);
         clone->AddTransform(transform);
         layout->GetCellInstCollection()->AddCellInst(std::move(clone));
+    }
+    
+    //HierarchyObj/Component
+    auto compIter = other->GetComponentIter();
+    while (auto * comp = compIter->Next()) {
+        auto clone = comp->Clone();
+        clone->SetPlacementLayer(layermap->GetMappingForward(clone->GetPlacementLayer()));
+        clone->AddTransform(transform);
+        layout->GetComponentCollection()->AddComponent(std::move(clone));
     }
 
     //Connobj/Primitive

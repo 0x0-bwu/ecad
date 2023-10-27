@@ -19,8 +19,12 @@ public:
     void SetPlacementLayer(ELayerId layer) override;
     ELayerId GetPlacementLayer() const override;
 
+    void AddTransform(const ETransform2D & trans) override;
     void SetTransform(const ETransform2D & trans) override;
     const ETransform2D & GetTransform() const override;
+
+    void SetLossPower(ESimVal power) override;
+    ESimVal GetLossPower() const override;
 
     const std::string & GetName() const override;
 protected:
@@ -29,27 +33,8 @@ protected:
 protected:
     CPtr<IComponentDef> m_compDef;
     ELayerId m_placement{ELayerId::noLayer};
+    ESimVal m_lossPower{0};
 };
-
-ECAD_ALWAYS_INLINE void EComponent::SetPlacementLayer(ELayerId layer)
-{
-    m_placement = layer;
-}
-
-ECAD_ALWAYS_INLINE ELayerId EComponent::GetPlacementLayer() const
-{
-    return m_placement;
-}
-
-ECAD_ALWAYS_INLINE void EComponent::SetTransform(const ETransform2D & trans)
-{
-    EHierarchyObj::SetTransform(trans);
-}
-
-ECAD_ALWAYS_INLINE const ETransform2D & EComponent::GetTransform() const
-{
-    return EHierarchyObj::GetTransform();
-}
 
 ECAD_ALWAYS_INLINE const std::string & EComponent::GetName() const
 {

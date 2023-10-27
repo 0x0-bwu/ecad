@@ -45,6 +45,19 @@ ECAD_INLINE EComponentCollection & EComponentCollection::operator= (const ECompo
     return *this;
 }
 
+ECAD_INLINE Ptr<IComponent> EComponentCollection::AddComponent(UPtr<IComponent> component)
+{
+    auto name = component->GetName();
+    if (Count(name)) {
+        name = NextKey(*this, name);
+        dynamic_cast<Ptr<EObject>>(component.get())->SetName(name);
+    }
+    if (Insert(name, std::move(component)))
+        return At(name).get();
+    return nullptr;
+}
+
+
 ECAD_INLINE Ptr<IComponent> EComponentCollection::CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform)
 {
     auto component = new EComponent(name, compDef);
