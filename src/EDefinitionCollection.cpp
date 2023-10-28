@@ -29,11 +29,6 @@ ECAD_INLINE EDefinitionCollection::EDefinitionCollection()
 {
 }
 
-ECAD_INLINE EDefinitionCollection::EDefinitionCollection(std::string name)
- : ECollectionCollection(std::move(name))
-{
-}
-
 ECAD_INLINE EDefinitionCollection::~EDefinitionCollection()
 {
 }

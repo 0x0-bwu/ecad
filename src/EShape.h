@@ -33,6 +33,7 @@ class ECAD_API ERectangle : public EShape
 public:
     EBox2D shape;
     ERectangle(EPoint2D ll, EPoint2D ur);
+    ERectangle(EBox2D box);
     ERectangle() = default;
     ~ERectangle() = default;
 

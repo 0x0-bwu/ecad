@@ -2,6 +2,7 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentDef)
 
 #include "interfaces/IComponentDefPinCollection.h"
+#include "generic/geometry/GeometryIO.hpp"
 
 namespace ecad {
 
@@ -102,6 +103,16 @@ ECAD_INLINE Ptr<IComponentDefPin> EComponentDef::CreatePin(const std::string & n
 {
     return ComponentDefPinCollection()->CreatePin(name, loc, type, psDef, lyr);
 }
+
+ECAD_INLINE void EComponentDef::PrintImp(std::ostream & os) const
+{
+    os << "COMPONENT DEFINE: " << m_name << ECAD_EOL;
+    os << "TYPE: " << toString(m_type) << ECAD_EOL;
+    os << "BBOX: " << m_bondingBox << ECAD_EOL;
+    os << "HEIGHT: " << m_height << ECAD_EOL;
+    os << "MATERIAL: " << m_material << ECAD_EOL; 
+}
+
 
 
 }//namespace ecad

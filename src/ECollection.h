@@ -1,16 +1,14 @@
 #pragma once
 #include "interfaces/ICollection.h"
-#include "EObject.h"
 #include "ECadDef.h"
 #include <string>
 namespace ecad {
 
-class ECAD_API ECollection : public EObject, public ICollection
+class ECAD_API ECollection : public ICollection
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ECollection();
-    explicit ECollection(std::string name);
     virtual ~ECollection();
 
     ///Copy

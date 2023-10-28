@@ -2,6 +2,7 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponent)
 
 #include "interfaces/IComponentDef.h"
+#include "EShape.h"
 
 namespace ecad {
 
@@ -53,7 +54,7 @@ ECAD_INLINE EComponent::EComponent(const EComponent & other)
 
 ECAD_INLINE EComponent & EComponent::operator= (const EComponent & other)
 {
-    EHierarchyObj::operator==(other);
+    EHierarchyObj::operator=(other);
     m_compDef = other.m_compDef;
     m_placement = other.m_placement;
     m_lossPower = other.m_lossPower;
@@ -93,6 +94,21 @@ ECAD_INLINE void EComponent::SetLossPower(ESimVal power)
 ECAD_INLINE ESimVal EComponent::GetLossPower() const
 {
     return m_lossPower;
+}
+
+ECAD_INLINE EBox2D EComponent::GetBoundingBox() const
+{
+    ERectangle bbox(m_compDef->GetBondingBox());
+    bbox.Transform(m_transform);
+    return bbox.shape;
+}
+
+ECAD_INLINE void EComponent::PrintImp(std::ostream & os) const
+{
+    os << "COMPONENT DEFINE: " << m_compDef->GetName() << ECAD_EOL;
+    os << "PLACEMENT: " << m_placement << ECAD_EOL;
+    os << "LOSS POWER: " << m_lossPower << 'W' << ECAD_EOL;
+    EHierarchyObj::PrintImp(os);
 }
 
 }//namespace ecad

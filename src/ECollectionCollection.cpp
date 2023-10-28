@@ -40,12 +40,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(ECollectionCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE ECollectionCollection::ECollectionCollection()
- : ECollectionCollection(std::string{})
-{
-}
-
-ECAD_INLINE ECollectionCollection::ECollectionCollection(std::string name)
- : BaseCollection(std::move(name))
 {
     m_type = ECollectionType::Collection;
 }

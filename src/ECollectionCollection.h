@@ -26,7 +26,6 @@ class ECAD_API ECollectionCollection : public EUnorderedMapCollection<ECollectio
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ECollectionCollection();
-    explicit ECollectionCollection(std::string name);
     virtual ~ECollectionCollection();
     
     ///Copy
@@ -53,24 +52,10 @@ public:
     Ptr<IComponentDefPinCollection> ComponentDefPinCollection() const;
 
     size_t Size() const override;
-
-    const std::string & GetName() const;
-    std::string sUuid() const;
-
 protected:
     ///Copy
     virtual Ptr<ECollectionCollection> CloneImp() const override { return new ECollectionCollection(*this); }
 };
-
-ECAD_ALWAYS_INLINE const std::string & ECollectionCollection::GetName() const
-{
-    return ECollection::GetName();
-}
-
-ECAD_ALWAYS_INLINE std::string ECollectionCollection::sUuid() const
-{
-    return ECollection::sUuid();
-}
 
 }//namespace ecad
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::ECollectionCollection)

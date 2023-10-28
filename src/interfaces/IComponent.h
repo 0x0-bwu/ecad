@@ -5,7 +5,7 @@
 #include <string>
 namespace ecad {
 class IComponentDef;
-class ECAD_API IComponent : public Clonable<IComponent>
+class ECAD_API IComponent : public Clonable<IComponent>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:
@@ -21,6 +21,9 @@ public:
 
     virtual void SetLossPower(ESimVal power) = 0;
     virtual ESimVal GetLossPower() const = 0;
+
+    virtual EBox2D GetBoundingBox() const = 0;
+
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IComponent)

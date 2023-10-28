@@ -53,7 +53,7 @@ ECAD_INLINE EDatabase::EDatabase()
 }
 
 ECAD_INLINE EDatabase::EDatabase(std::string name)
- : EDefinitionCollection(std::move(name))
+ : EObject(std::move(name))
 {
     EDefinitionCollection::AddDefinitionCollection(EDefinitionType::ComponentDef);
     EDefinitionCollection::AddDefinitionCollection(EDefinitionType::PadstackDef);

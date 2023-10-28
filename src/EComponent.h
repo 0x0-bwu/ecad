@@ -26,10 +26,13 @@ public:
     void SetLossPower(ESimVal power) override;
     ESimVal GetLossPower() const override;
 
+    EBox2D GetBoundingBox() const;
+
     const std::string & GetName() const override;
 protected:
     ///Copy
     virtual Ptr<EComponent> CloneImp() const override { return new EComponent(*this); }
+    virtual void PrintImp(std::ostream & os) const override;
 protected:
     CPtr<IComponentDef> m_compDef;
     ELayerId m_placement{ELayerId::noLayer};

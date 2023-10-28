@@ -2,11 +2,12 @@
 #include "interfaces/ILayoutView.h"
 #include "interfaces/IIterator.h"
 #include "ECollectionCollection.h"
+#include "EObject.h"
 #include <array>
 namespace ecad {
 
 class ICell;
-class ECAD_API ELayoutView : public ECollectionCollection, public ILayoutView
+class ECAD_API ELayoutView : public ECollectionCollection, public EObject, public ILayoutView
 {
     ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 4> m_collectionTypes = { ECollectionType::HierarchyObj,
                                                                                              ECollectionType::ConnObj,
@@ -123,12 +124,12 @@ protected:
 
 ECAD_ALWAYS_INLINE const std::string & ELayoutView::GetName() const
 {
-    return ECollectionCollection::GetName();
+    return EObject::GetName();
 }
 
 ECAD_ALWAYS_INLINE std::string ELayoutView::sUuid() const
 {
-    return ECollectionCollection::sUuid();
+    return EObject::sUuid();
 }
 
 }//namespace ecad

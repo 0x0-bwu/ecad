@@ -38,6 +38,7 @@ public:
 protected:
     ///Copy
     virtual Ptr<EComponentDef> CloneImp() const override { return new EComponentDef(*this); }
+    virtual void PrintImp(std::ostream & os) const override;
 
 protected:
     EComponentType m_type = EComponentType::Invalid;

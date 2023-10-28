@@ -94,6 +94,22 @@ enum class EComponentType
     Molding
 };
 
+ECAD_ALWAYS_INLINE std::string toString(EComponentType type)
+{
+    switch(type)
+    {
+        case EComponentType::Invalid : return "Invalid";
+        case EComponentType::Other : return "Other";
+        case EComponentType::Resistor : return "Resistor";
+        case EComponentType::Inductor : return "Inductor";
+        case EComponentType::Capacitor : return "Capacitor";
+        case EComponentType::IC : return "IC";
+        case EComponentType::IO : return "IO";
+        case EComponentType::Molding : return "Molding";
+        default : { ECAD_ASSERT(false) return std::string{}; }
+    }
+}
+
 enum class EPinIOType
 {
     Invalid = -1,

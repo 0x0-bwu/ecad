@@ -37,8 +37,7 @@ class ECAD_API EUnorderedMapCollection : public ECollection
 public:
     using CollectionObject = T;
     using CollectionContainer = std::unordered_map<Key, T, Hash, KeyEqual, Allocator>;
-    EUnorderedMapCollection() : EUnorderedMapCollection(std::string{}) {}
-    explicit EUnorderedMapCollection(std::string name) : ECollection(std::move(name)) {}
+    EUnorderedMapCollection() = default;
     virtual ~EUnorderedMapCollection() = default;
 
     ///Copy
@@ -242,8 +241,7 @@ class ECAD_API EVectorCollection : public ECollection
 public:
     using CollectionObject = T;
     using CollectionContainer = std::vector<T, Allocator>;
-    EVectorCollection() : EVectorCollection(std::string{}) {}
-    explicit EVectorCollection(std::string name) : ECollection(std::move(name)) {}
+    EVectorCollection() = default;
     virtual ~EVectorCollection() = default;
 
     ///Copy

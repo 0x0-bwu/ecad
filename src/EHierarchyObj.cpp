@@ -1,7 +1,9 @@
 #include "EHierarchyObj.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EHierarchyObj)
 
+#include "generic/math/MathIO.hpp"
 #include "interfaces/ILayer.h"
+
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -52,4 +54,10 @@ ECAD_INLINE EHierarchyObj & EHierarchyObj::operator= (const EHierarchyObj & othe
     m_transform = other.m_transform;
     return *this;
 }
+
+ECAD_INLINE void EHierarchyObj::PrintImp(std::ostream & os) const
+{
+    os << "TRANSFORM: " << m_transform.GetTransform() << ECAD_EOL;
+}
+
 }//namespace ecad

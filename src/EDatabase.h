@@ -1,10 +1,11 @@
 #pragma once
 #include "interfaces/IDatabase.h"
 #include "EDefinitionCollection.h"
+#include "EObject.h"
 #include <string>
 namespace ecad {
 
-class ECAD_API EDatabase : public EDefinitionCollection, public IDatabase
+class ECAD_API EDatabase : public EDefinitionCollection, public EObject, public IDatabase
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EDatabase();

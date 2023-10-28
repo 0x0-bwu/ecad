@@ -154,6 +154,11 @@ ECAD_INLINE EPolygonWithHolesData ERectangle::GetPolygonWithHoles() const
     return pwh;
 }
 
+ECAD_INLINE ERectangle::ERectangle(EBox2D box)
+{
+    std::swap(shape, box);
+}
+
 ECAD_INLINE ERectangle::ERectangle(EPoint2D ll, EPoint2D ur)
 {
     shape = EBox2D(std::move(ll), std::move(ur));

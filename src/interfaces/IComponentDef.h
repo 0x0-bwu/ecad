@@ -7,7 +7,7 @@ namespace ecad {
 class ICell;
 class IPadstackDef;
 class IComponentDefPin;
-class ECAD_API IComponentDef : public Clonable<IComponentDef>
+class ECAD_API IComponentDef : public Clonable<IComponentDef>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:

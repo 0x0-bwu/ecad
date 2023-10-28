@@ -21,6 +21,7 @@ protected:
     ///Transform
     virtual ETransform2D & GetTransformImp() override { return m_transform; }
     virtual const ETransform2D & GetTransformImp() const override { return m_transform; }
+    virtual void PrintImp(std::ostream & os) const override;
 
 protected:
     ETransform2D m_transform;

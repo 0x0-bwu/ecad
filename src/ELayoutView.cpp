@@ -57,7 +57,7 @@ ECAD_INLINE ELayoutView::ELayoutView()
 }
 
 ECAD_INLINE ELayoutView::ELayoutView(std::string name, Ptr<ICell> cell)
- : ECollectionCollection(std::move(name))
+ : EObject(std::move(name))
  , m_cell(cell)
 {
     for(auto type : m_collectionTypes) 

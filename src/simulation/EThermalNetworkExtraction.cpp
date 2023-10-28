@@ -5,6 +5,7 @@
 #include "generic/tools/FileSystem.hpp"
 
 #include "interfaces/ILayoutView.h"
+#include "interfaces/IComponent.h"
 #include "interfaces/ILayer.h"
 
 namespace ecad {
@@ -60,7 +61,8 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     for(size_t i = 0; i < layers.size(); ++i) {
         auto name = layers.at(i)->GetName();
         auto stackupLayer = layers.at(i)->GetStackupLayerFromLayer();
-        auto thickness = coordUnits.toUnit(stackupLayer->GetThickness(), ECoordUnits::Unit::Meter);
+        auto thickness = coordUnits.toCoordF(stackupLayer->GetThickness());
+        thickness = coordUnits.toUnit(thickness, ECoordUnits::Unit::Meter);
         auto layerMetalFraction = mf->at(i);
         EGridThermalLayer layer(name, layerMetalFraction);
         layer.SetThickness(thickness);
@@ -68,44 +70,44 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         ECAD_ASSERT(res)
     }
 
-    //wbtest
     ESimVal iniT = 25;
-    //power
-    size_t pwrTiles = 0;
-    ESimVal totalP = 1;//W
-    auto modelSize = model.ModelSize();
-    const auto & topLayer = *(mf->front());
-    for (size_t x = 0; x < modelSize.x; ++x)
-        for (size_t y = 0; y < modelSize.y; ++y)
-            if (topLayer(x, y) > 0.5) pwrTiles +=1;
-    ESimVal aveP = totalP / EValue(pwrTiles);
-
     auto gridPower = EGridData(nx, ny, 0);
-    for (size_t x = 0; x < modelSize.x; ++x)
-        for (size_t y = 0; y < modelSize.y; ++y)
-            if (topLayer(x, y) > 0.5) gridPower(x, y) = aveP;
-
+    auto compIter = layout->GetComponentIter();
+    while (auto * component = compIter->Next()) {
+        if (auto power = component->GetLossPower(); power > 0) {
+            auto bbox = component->GetBoundingBox();
+            auto ll = mfInfo->GetIndex(bbox[0]);
+            auto ur = mfInfo->GetIndex(bbox[1]);
+            if (isValid(ll) && isValid(ur)) {
+                auto totalTiles = (ur[1] - ll[1] + 1) * (ur[0] - ll[0] + 1);
+                power /= totalTiles;
+                for (size_t i = ll[0]; i <= ur[0]; ++i)
+                    for (size_t j = ll[1]; j <= ur[1]; ++j)
+                        gridPower(i, j) = power;
+            }
+        }
+    }
     auto powerModel = std::make_shared<EGridPowerModel>(ESize2D(nx, ny));
     powerModel->AddSample(iniT, std::move(gridPower));
-
     model.SetPowerModel(0, powerModel);
 
     //htc
     auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
-    bcModel->AddSample(iniT, EGridData(nx, ny, 1000));
+    bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
 
     model.SetTopBotBCModel(bcModel, bcModel);
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<ESimVal> results;
     EGridThermalNetworkDirectSolver solver(model);
-    if(!solver.Solve(iniT, results)) return false;
-    
+    if (not solver.Solve(iniT, results)) return false;
+
+    auto modelSize = model.ModelSize();
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
-    for(size_t z = 0; z < modelSize.z; ++z)
+    for (size_t z = 0; z < modelSize.z; ++z)
         htMap->push_back(std::make_shared<ELayerMetalFraction>(modelSize.x, modelSize.y));
 
-    for(size_t i = 0; i < results.size(); ++i){
+    for (size_t i = 0; i < results.size(); ++i){
         auto gridIndex = model.GetGridIndex(i);
         auto lyrHtMap = htMap->at(gridIndex.z);
         (*lyrHtMap)(gridIndex.x, gridIndex.y) = results[i];
