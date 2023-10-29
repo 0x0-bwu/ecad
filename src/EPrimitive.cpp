@@ -208,9 +208,9 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EBondwire, IBondwire>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrimitive);
-    ar & boost::serialization::make_nvp("end_layer", m_endLayer);
-    ar & boost::serialization::make_nvp("start_loc", m_startLoc);
-    ar & boost::serialization::make_nvp("end_loc", m_endLoc);
+    ar & boost::serialization::make_nvp("material", m_material);
+    ar & boost::serialization::make_nvp("start", m_start);
+    ar & boost::serialization::make_nvp("end", m_end);
     ar & boost::serialization::make_nvp("radius", m_radius);
 }
 
@@ -220,9 +220,9 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EBondwire, IBondwire>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrimitive);
-    ar & boost::serialization::make_nvp("end_layer", m_endLayer);
-    ar & boost::serialization::make_nvp("start_loc", m_startLoc);
-    ar & boost::serialization::make_nvp("end_loc", m_endLoc);
+    ar & boost::serialization::make_nvp("material", m_material);
+    ar & boost::serialization::make_nvp("start", m_start);
+    ar & boost::serialization::make_nvp("end", m_end);
     ar & boost::serialization::make_nvp("radius", m_radius);
 }
 
@@ -230,12 +230,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EBondwire)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EBondwire::EBondwire()
- : EBondwire(std::string{}, noNet, noLayer, noLayer, EPoint2D{0, 0}, EPoint2D{0, 0})
+ : EBondwire(std::string{}, noLayer, noNet, EPoint2D{0, 0}, EPoint2D{0, 0}, 0)
 {
 }
 
-ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, ELayerId startLyr, ELayerId endLyr, EPoint2D startLoc, EPoint2D endLoc)
- : EPrimitive(std::move(name), startLyr, net), m_endLayer(endLyr), m_startLoc(std::move(startLoc)), m_endLoc(std::move(endLoc))
+ECAD_INLINE EBondwire::EBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ : EPrimitive(std::move(name), layer, net), m_start(std::move(start)), m_end(std::move(end)), m_radius(radius)
 {
     m_type = EPrimitiveType::Bondwire;
 }
@@ -248,9 +248,9 @@ ECAD_INLINE EBondwire::EBondwire(const EBondwire & other)
 ECAD_INLINE EBondwire & EBondwire::operator= (const EBondwire & other)
 {
     EPrimitive::operator=(other);
-    m_endLayer = other.m_endLayer;
-    m_startLoc = other.m_startLoc;
-    m_endLoc = other.m_endLoc;
+    m_material = other.m_material;
+    m_start = other.m_start;
+    m_end = other.m_end;
     m_radius = other.m_radius;
     return *this;
 }
@@ -265,19 +265,39 @@ ECAD_INLINE FCoord EBondwire::GetRadius() const
     return m_radius;
 }
 
+ECAD_INLINE const EPoint2D & EBondwire::GetStartPt() const
+{
+    return m_start;
+}
+
+ECAD_INLINE const EPoint2D & EBondwire::GetEndPt() const
+{
+    return m_end;
+}
+
+ECAD_INLINE void EBondwire::SetMaterial(const std::string & material)
+{
+    m_material = material;
+}
+
+ECAD_INLINE const std::string & EBondwire::GetMaterial() const
+{
+    return m_material;
+}
+
 ECAD_INLINE void EBondwire::Transform(const ETransform2D & transform)
 {
     auto trans = transform.GetTransform();
-    generic::geometry::Transform(m_startLoc, trans);
-    generic::geometry::Transform(m_endLoc, trans);
+    generic::geometry::Transform(m_start, trans);
+    generic::geometry::Transform(m_end, trans);
 }
 
 ECAD_INLINE void EBondwire::PrintImp(std::ostream & os) const
 {
     os << "TYPE: " << "BONDWIRE" << ECAD_EOL;
-    os << "START LAYER: " << m_layer << ", END LAYER: " << m_endLayer << ECAD_EOL;
-    os << "START LOCATION: " << m_startLoc << ", END LOCATION: " << m_endLoc << ECAD_EOL;
+    os << "START: " << m_start << ", END: " << m_end << ECAD_EOL;
     os << "RADIUS: " << m_radius << ECAD_EOL;
+    os << "MATERIAL: " << m_material << ECAD_EOL;
     EPrimitive::PrintImp(os);
 }
 

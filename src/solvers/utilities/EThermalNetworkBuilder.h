@@ -39,6 +39,7 @@ public:
     std::array<ESimVal, 3> GetDielectricMatK(const ESize3D & index, ESimVal refT) const;
     std::array<ESimVal, 3> GetConductingMatK(size_t layer, ESimVal refT) const;
     std::array<ESimVal, 3> GetDielectircMatK(size_t layer, ESimVal refT) const;
+    std::array<ESimVal, 3> GetDefaultAirK() const;
 public:
     FCoord GetXGridLength() const;
     FCoord GetYGridLength() const;

@@ -78,6 +78,7 @@ public:
                                     
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
+    Ptr<IPrimitive> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
 
     ///Shape
     UPtr<EShape> CreateShapeRectangle(EPoint2D ll, EPoint2D ur);

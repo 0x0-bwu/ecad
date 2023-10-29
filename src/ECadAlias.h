@@ -41,7 +41,6 @@ using EBox3D = generic::geometry::Box3D<ECoord>;
 using FBox3D = generic::geometry::Box3D<FCoord>;
 
 using EUuid = boost::uuids::uuid;
-using EIndex2D = std::array<size_t, 2>;
 
 class EShape;
 using ETemplateShape = SPtr<const EShape>;
@@ -51,10 +50,4 @@ ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
 
 ECAD_ALWAYS_INLINE static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
-
-ECAD_ALWAYS_INLINE bool isValid(const EIndex2D & index)
-{
-    return index[0] != invalidIndex && index[1] != invalidIndex;
-}
-
 }//namespace ecad

@@ -6,6 +6,7 @@
 
 #include "interfaces/ILayoutView.h"
 #include "interfaces/IComponent.h"
+#include "interfaces/IPrimitive.h"
 #include "interfaces/ILayer.h"
 
 namespace ecad {
@@ -78,7 +79,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
             auto bbox = component->GetBoundingBox();
             auto ll = mfInfo->GetIndex(bbox[0]);
             auto ur = mfInfo->GetIndex(bbox[1]);
-            if (isValid(ll) && isValid(ur)) {
+            if (ll.isValid() && ur.isValid()) {
                 auto totalTiles = (ur[1] - ll[1] + 1) * (ur[0] - ll[0] + 1);
                 power /= totalTiles;
                 for (size_t i = ll[0]; i <= ur[0]; ++i)
@@ -90,6 +91,25 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     auto powerModel = std::make_shared<EGridPowerModel>(ESize2D(nx, ny));
     powerModel->AddSample(iniT, std::move(gridPower));
     model.SetPowerModel(0, powerModel);
+
+    //bondwire
+    auto primIter = layout->GetPrimitiveIter();
+    while (auto * prim = primIter->Next()) {
+        if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
+
+            const auto & start = bw->GetStartPt();
+            const auto & end  = bw->GetEndPt();
+            auto l = coordUnits.toUnit(generic::geometry::Distance(start, end), ECoordUnits::Unit::Meter);
+            auto r = coordUnits.toCoordF(bw->GetRadius());
+            r = coordUnits.toUnit(r, ECoordUnits::Unit::Meter);
+            std::cout << "r: " << r << ", l: " << l << std::endl;//wbtest
+            auto alpha = generic::math::pi * r * r / l;
+            auto index1 = mfInfo->GetIndex(start);
+            auto index2 = mfInfo->GetIndex(end);
+            std::cout << "id1: " << index1.x << ',' << index1.y << ", id2: " << index2.x << ',' << index2.y << std::endl;//wbtest
+            model.AppendJumpConnection(ESize3D(index1, 0), ESize3D(index2, 0), alpha);
+        }
+    }
 
     //htc
     auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));

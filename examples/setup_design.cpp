@@ -68,7 +68,7 @@ int main(int argc, char * argv[])
     compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
     compDef->SetHeight(365);
 
-    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(10000))));
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(15000))));
     [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(19000) , coordUnits.toCoord(15000))));
     assert(comp1);
     assert(comp2);
@@ -81,15 +81,13 @@ int main(int argc, char * argv[])
     auto sourceNet = eDataMgr.CreateNet(sicLayout, "Source");
 
     //wire
-    //todo, bondwire (3, 2.5) (3, 7.5)
+    FCoord bwRadius = 125;//um
     std::vector<EPoint2D> ps1 {{0, 0}, {14200000, 0}, {14200000, 3500000}, {5750000, 3500000}, {5750000, 9150000}, {0, 9150000}};
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps1)));
 
-    //todo, bondwire (10.8, 7.5) (10.8, 12.2), die (1.45, 13) (5.45, 17)
     std::vector<EPoint2D> ps2 {{0, 10650000}, {7300000, 10650000}, {7300000, 5000000}, {14300000, 5000000}, {14300000, 19000000}, {1450000, 19000000}, {1450000, 26000000}, {0, 26000000}};
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, drainNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps2)));
 
-    //todo, bondwire (19.35, 2.5) (19.35, 7.5), die (17, 13) (21, 17)
     std::vector<EPoint2D> ps3 {{15750000, 0}, {23000000, 0}, {23000000, 18850000}, {18000000, 18850000}, {18000000, 26000000}, {14500000, 26000000}, {14500000, 20500000}, {15750000, 20500000}};
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, drainNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps3)));
 
@@ -108,13 +106,28 @@ int main(int argc, char * argv[])
     auto rec5 = eDataMgr.CreateShapeRectangle(EPoint2D(11000000, 24000000), EPoint2D(13500000, 26000000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec5));
 
-    //todo, bondwire (19.75, 24)
     auto rec6 = eDataMgr.CreateShapeRectangle(EPoint2D(19000000, 20500000), EPoint2D(20500000, 26000000));
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec6));
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec6));
 
-    //todo, bondwire (22.25, 24)
     auto rec7 = eDataMgr.CreateShapeRectangle(EPoint2D(21500000, 20500000), EPoint2D(23000000, 26000000));
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec7));
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec7));
+
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW1", iLyrWire, sourceNet->GetNetId(), {3000000, 7500000}, {4450000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW2", iLyrWire, sourceNet->GetNetId(), {3000000, 2500000}, {4450000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW3", iLyrWire, sourceNet->GetNetId(), {4450000, 1600000}, {1800000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW4", iLyrWire, sourceNet->GetNetId(), {4450000, 1400000}, {1800000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "DrainBW1", iLyrWire, drainNet->GetNetId(), {10800000, 12200000}, {19350000, 7500000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "DrainBW2", iLyrWire, drainNet->GetNetId(), {10800000, 7500000}, {19350000, 2500000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "GateBW1", iLyrWire, gateNet->GetNetId(), {3250000, 24000000}, {2450000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "GateBW2", iLyrWire, gateNet->GetNetId(), {5750000, 24000000}, {2450000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "GateBW3", iLyrWire, gateNet->GetNetId(), {19750000, 24000000}, {20000000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "GateBW4", iLyrWire, gateNet->GetNetId(), {22250000, 24000000}, {20000000, 14000000}, bwRadius);
+    
+    auto primIter = sicLayout->GetPrimitiveIter();
+    while (auto * prim = primIter->Next()) {
+        if (auto * bw = prim->GetBondwireFromPrimitive(); bw)
+            bw->SetMaterial("Al");
+    }
 
     //layer map
     auto layerMap = eDataMgr.CreateLayerMap(database, "Layermap");
@@ -134,23 +147,6 @@ int main(int argc, char * argv[])
     database->Flatten(topCell);
     auto layout = topCell->GetFlattenedLayoutView();
     
-    auto netIter = layout->GetNetIter();
-    while (auto net = netIter->Next()) {
-        std::cout << "net: " << net->GetName() << std::endl;
-    }
-    auto primIter = layout->GetPrimitiveIter();
-    while (auto prim = primIter->Next()) {
-        std::cout << *prim << std::endl;
-    }
-
-    auto lyrIter = layout->GetLayerCollection()->GetLayerIter();
-    while (auto layer = lyrIter->Next())
-        std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
-
-    auto compIter = layout->GetComponentCollection()->GetComponentIter();
-    while (auto comp = compIter->Next())
-        std::cout << *comp << std::endl;
-
     ELayoutPolygonMergeSettings mergeSettings;
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     layout->MergeLayerPolygons(mergeSettings);

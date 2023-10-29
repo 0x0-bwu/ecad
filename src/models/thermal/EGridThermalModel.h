@@ -125,6 +125,9 @@ public:
 
     bool AppendLayer(EGridThermalLayer layer);
 
+    void AppendJumpConnection(ESize3D start, ESize3D end, FCoord alpha); //alpha = pi * r * r / L
+    const std::vector<std::tuple<ESize3D, ESize3D, FCoord> > & GetJumpConnections() const;
+
     std::vector<EGridThermalLayer> & GetLayers();
     const std::vector<EGridThermalLayer> & GetLayers() const; 
 
@@ -153,6 +156,7 @@ private:
     std::vector<EGridThermalLayer> m_stackupLayers;
     std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
     std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
+    std::vector<std::tuple<ESize3D, ESize3D, FCoord> > m_jumpConnects;
 };
 
 ECAD_ALWAYS_INLINE size_t EGridThermalModel::GetFlattenIndex(const ESize3D & index) const

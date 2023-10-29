@@ -329,6 +329,16 @@ ECAD_INLINE bool EGridThermalModel::AppendLayer(EGridThermalLayer layer)
     return true;
 }
 
+ECAD_INLINE void EGridThermalModel::AppendJumpConnection(ESize3D start, ESize3D end, FCoord alpha)
+{
+    m_jumpConnects.emplace_back(std::move(start), std::move(end), alpha);
+}
+
+ECAD_INLINE const std::vector<std::tuple<ESize3D, ESize3D, FCoord> > & EGridThermalModel::GetJumpConnections() const
+{
+    return m_jumpConnects;
+}
+
 ECAD_INLINE std::vector<EGridThermalLayer> & EGridThermalModel::GetLayers()
 {
     return m_stackupLayers;

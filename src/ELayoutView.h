@@ -69,6 +69,7 @@ public:
 
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) override;
+    Ptr<IPrimitive> CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius) override;
 
     ///Text
     Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) override;

@@ -20,6 +20,7 @@ public:
     virtual bool SetPrimitive(UPtr<IPrimitive> primitive, size_t index) = 0;
 
     virtual Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) = 0;
+    virtual Ptr<IPrimitive> CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius) = 0;
     virtual Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) = 0;
     virtual void Map(CPtr<ILayerMap> lyrMap) = 0;
     virtual PrimitiveIter GetPrimitiveIter() const = 0;

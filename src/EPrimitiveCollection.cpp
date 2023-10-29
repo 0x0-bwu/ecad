@@ -72,6 +72,12 @@ ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::CreateGeometry2D(ELayerId laye
     return AddPrimitive(UPtr<IPrimitive>(primitive));
 }
 
+ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+{
+    auto primitve = new EBondwire(std::move(name), layer, net, std::move(start), std::move(end), radius);
+    return AddPrimitive(UPtr<IPrimitive>(primitve));
+}
+
 ECAD_INLINE Ptr<IText> EPrimitiveCollection::CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text)
 {
     auto primitive = new EText(text, layer);

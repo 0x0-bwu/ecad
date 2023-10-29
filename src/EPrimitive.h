@@ -71,7 +71,7 @@ class ECAD_API EBondwire : public EPrimitive, public IBondwire
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EBondwire();
 public:
-    EBondwire(std::string name, ENetId net, ELayerId startLyr, ELayerId endLyr, EPoint2D startLoc, EPoint2D endLoc);
+    EBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
     virtual ~EBondwire() = default;
 
     ///Copy
@@ -81,6 +81,12 @@ public:
     void SetRadius(FCoord r) override;
     FCoord GetRadius() const override;
 
+    const EPoint2D & GetStartPt() const override;
+    const EPoint2D & GetEndPt() const override;
+
+    void SetMaterial(const std::string & material) override;
+    const std::string & GetMaterial() const override;
+
     void Transform(const ETransform2D & transform) override;
 
 protected:
@@ -88,9 +94,10 @@ protected:
     virtual void PrintImp(std::ostream & os) const override;
 
 protected:
+    std::string m_material;
     ELayerId m_endLayer;
-    EPoint2D m_startLoc;
-    EPoint2D m_endLoc;
+    EPoint2D m_start;
+    EPoint2D m_end;
     FCoord m_radius{0};
 };
 

@@ -72,6 +72,15 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
             network->SetR(index1, index2, r);
         }
     }
+    
+    //bw
+    for (const auto & jc : m_model.GetJumpConnections()) {
+        auto index1 = GetFlattenIndex(std::get<0>(jc));
+        auto index2 = GetFlattenIndex(std::get<1>(jc));
+        auto k = GetConductingMatK(std::get<0>(jc), iniT.at(index1))[0];
+        network->SetR(index1, index2, k * std::get<2>(jc));
+    }
+    
 
     //bc
     SPtr<EGridBCModel> topBC = nullptr, botBC = nullptr;
@@ -164,9 +173,15 @@ ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetConductingMatK
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDielectircMatK(size_t layer, ESimVal refT) const
 {
     //todo
+    if (0 == layer) return GetDefaultAirK();//wbtest
     return std::array<ESimVal, 3>{148, 148, 148};
 }
 
+ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDefaultAirK() const
+{
+    //todo
+    return std::array<ESimVal, 3>{0.026, 0.026, 0.026};
+}
 ECAD_INLINE ESize3D EGridThermalNetworkBuilder::GetNeighbor(size_t index, Orientation o) const
 {
     return GetNeighbor(GetGridIndex(index), o);

@@ -55,9 +55,9 @@ struct EMetalFractionInfo
     std::array<ECoord, 2> stride;
     std::vector<EStackupLayerInfo> layers;
 
-    EIndex2D GetIndex(const EPoint2D & p) const
+    ESize2D GetIndex(const EPoint2D & p) const
     {
-        EIndex2D index{invalidIndex, invalidIndex};
+        ESize2D index{invalidIndex, invalidIndex};
         for (size_t i = 0; i < 2; ++i)
             if (extension[0][i] <= p[i] && p[i] <= extension[1][i])
                 index[i] = (p[i] - extension[0][i]) / stride[i];
