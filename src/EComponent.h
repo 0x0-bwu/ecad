@@ -26,7 +26,7 @@ public:
     void SetLossPower(ESimVal power) override;
     ESimVal GetLossPower() const override;
 
-    EBox2D GetBoundingBox() const;
+    EBox2D GetBoundingBox() const override;
 
     const std::string & GetName() const override;
 protected:
