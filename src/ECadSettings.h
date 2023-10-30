@@ -71,7 +71,10 @@ struct ELayoutViewRendererSettings
         VTK = 1//todo
     };
     Format format;
+    size_t width = 1024;
     std::string dirName;
+    std::unordered_set<ENetId> selectNets;
+    std::unordered_set<ELayerId> selectLayers;
 };
 
 }//namespace ecad

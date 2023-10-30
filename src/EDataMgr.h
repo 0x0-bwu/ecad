@@ -1,6 +1,6 @@
 #pragma once
-#include "generic/geometry/Geometries.hpp"
 #include "Interface.h"
+#include "EShape.h"
 
 #include <unordered_map>
 #include <memory>

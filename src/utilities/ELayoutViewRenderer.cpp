@@ -25,8 +25,44 @@ ECAD_INLINE bool ELayoutViewRenderer::Renderer(CPtr<ILayoutView> layout)
 
 ECAD_INLINE bool ELayoutViewRenderer::RendererPNG(CPtr<ILayoutView> layout)
 {   
-    //todo
-    return false;
+    using namespace generic::geometry;
+    
+    std::vector<EPolygonData> outs;
+
+    //boundary
+    auto boundary = layout->GetBoundary()->GetContour();
+    outs.emplace_back(std::move(boundary));
+    
+    //components
+    auto compIter = layout->GetComponentIter();
+    while (auto * comp = compIter->Next()) {
+        auto bbox = comp->GetBoundingBox();
+        if (not m_settings.selectLayers.empty()) {
+            auto layer = comp->GetPlacementLayer();
+            if (m_settings.selectLayers.count(layer))
+                continue;
+        }
+        outs.emplace_back(toPolygon(bbox));
+    }
+
+    //primitives
+    auto primIter = layout->GetPrimitiveIter();
+    while (auto * prim = primIter->Next()) {
+        if (not m_settings.selectNets.empty()) {
+            auto net = prim->GetNet();
+            if (m_settings.selectNets.count(net))
+                continue;
+        }
+        if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
+            // EPolygonData pd;
+        }
+    }
+    
+
+
+    auto cellName = layout->GetCell()->GetName();
+    auto filename = m_settings.dirName  + ECAD_SEPS + cellName + ".png";
+    return GeometryIO::WritePNG<Polygon2D<ECoord> >(filename, outs.begin(), outs.end(), m_settings.width);
 }
 
 }//namespace eutils
