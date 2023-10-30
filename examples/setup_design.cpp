@@ -34,7 +34,7 @@ int main(int argc, char * argv[])
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
     auto topLayout = topCell->GetLayoutView();
-    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {86000000, -5000000}, {86000000, 31000000}, {0, 31000000}});
+    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {86000000, -5000000}, {86000000, 31000000}, {-5000000, 31000000}});
     topLayout->SetBoundary(std::move(topBouds));
 
     eDataMgr.CreateNet(topLayout, "Gate");
@@ -114,8 +114,8 @@ int main(int argc, char * argv[])
 
     eDataMgr.CreateBondwire(sicLayout, "SourceBW1", iLyrWire, sourceNet->GetNetId(), {3000000, 7500000}, {4450000, 16000000}, bwRadius);
     eDataMgr.CreateBondwire(sicLayout, "SourceBW2", iLyrWire, sourceNet->GetNetId(), {3000000, 2500000}, {4450000, 14000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "SourceBW3", iLyrWire, sourceNet->GetNetId(), {4450000, 1600000}, {1800000, 16000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "SourceBW4", iLyrWire, sourceNet->GetNetId(), {4450000, 1400000}, {1800000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW3", iLyrWire, sourceNet->GetNetId(), {4450000, 16000000}, {18000000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW4", iLyrWire, sourceNet->GetNetId(), {4450000, 14000000}, {18000000, 14000000}, bwRadius);
     eDataMgr.CreateBondwire(sicLayout, "DrainBW1", iLyrWire, drainNet->GetNetId(), {10800000, 12200000}, {19350000, 7500000}, bwRadius);
     eDataMgr.CreateBondwire(sicLayout, "DrainBW2", iLyrWire, drainNet->GetNetId(), {10800000, 7500000}, {19350000, 2500000}, bwRadius);
     eDataMgr.CreateBondwire(sicLayout, "GateBW1", iLyrWire, gateNet->GetNetId(), {3250000, 24000000}, {2450000, 14000000}, bwRadius);
@@ -146,6 +146,11 @@ int main(int argc, char * argv[])
     //flatten
     database->Flatten(topCell);
     auto layout = topCell->GetFlattenedLayoutView();
+
+    ELayoutViewRendererSettings rendererSettings;
+    rendererSettings.format = ELayoutViewRendererSettings::Format::PNG;
+    rendererSettings.dirName = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    layout->Renderer(rendererSettings);
     
     ELayoutPolygonMergeSettings mergeSettings;
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";

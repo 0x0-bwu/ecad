@@ -53,12 +53,25 @@ ECAD_INLINE bool ELayoutViewRenderer::RendererPNG(CPtr<ILayoutView> layout)
             if (m_settings.selectNets.count(net))
                 continue;
         }
+        if (not m_settings.selectLayers.empty()) {
+            auto layer = prim->GetLayer();
+            if (m_settings.selectLayers.count(layer))
+                continue;
+        }
         if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
-            // EPolygonData pd;
+            EPolygonData pd;
+            pd << bw->GetStartPt() << bw->GetEndPt();
+            outs.emplace_back(std::move(pd));
+        }
+        else if (auto * geom = prim->GetGeometry2DFromPrimitive(); geom) {
+            auto pwh = geom->GetShape()->GetPolygonWithHoles();
+            outs.emplace_back(std::move(pwh.outline));
+            for (auto hole : pwh.holes)
+                outs.emplace_back(std::move(hole));
         }
     }
-    
 
+    //todo flatten cell inst
 
     auto cellName = layout->GetCell()->GetName();
     auto filename = m_settings.dirName  + ECAD_SEPS + cellName + ".png";

@@ -1,4 +1,5 @@
 #pragma once
+#include "ECadSettings.h"
 #include "Interface.h"
 #include "EShape.h"
 
