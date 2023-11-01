@@ -31,3 +31,6 @@ jobs:
         
       - name: Run examples
         run: build/bin/setup_design.exe
+
+      - name: Run PyEcad Test
+        run: python py/PyEcadTest.py
