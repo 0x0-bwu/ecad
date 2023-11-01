@@ -29,10 +29,6 @@ public:
         num_type htc = 0;
         std::vector<size_t> ns;
         std::vector<num_type> rs;
-        size_t Freedom() const
-        {
-            return 6 - ns.size();
-        }
     };
 
     struct Edge
@@ -64,11 +60,6 @@ public:
     const std::vector<size_t> & NS(size_t node) const
     {
         return m_nodes[node].ns;
-    }
-
-    size_t NodeFreedom(size_t node) const
-    {
-        return m_nodes[node].Freedom();
     }
 
     void SetT(size_t node, num_type t)

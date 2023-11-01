@@ -76,7 +76,8 @@ ECAD_INLINE ELayoutView::ELayoutView(const ELayoutView & other)
 ECAD_INLINE ELayoutView & ELayoutView::operator= (const ELayoutView & other)
 {
     ECollectionCollection::operator=(other);
-    if(other.m_boundary)
+    EObject::operator=(other);
+    if (other.m_boundary)
         m_boundary.reset(new EPolygon(*other.m_boundary));
     m_cell = other.m_cell;
     //sync, todo

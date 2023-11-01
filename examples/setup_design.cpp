@@ -81,7 +81,7 @@ int main(int argc, char * argv[])
     auto sourceNet = eDataMgr.CreateNet(sicLayout, "Source");
 
     //wire
-    FCoord bwRadius = 125;//um
+    FCoord bwRadius = 2000;//um
     std::vector<EPoint2D> ps1 {{0, 0}, {14200000, 0}, {14200000, 3500000}, {5750000, 3500000}, {5750000, 9150000}, {0, 9150000}};
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps1)));
 
@@ -164,7 +164,7 @@ int main(int argc, char * argv[])
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
 
-    size_t xGrid = 500;
+    size_t xGrid = 600;
     auto bbox = layout->GetBoundary()->GetBBox();
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;

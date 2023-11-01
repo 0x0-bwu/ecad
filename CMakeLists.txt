@@ -14,25 +14,26 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
+  	set(CMAKE_BUILD_TYPE Release)
+  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
 else()
-  set(CMAKE_BUILD_TYPE Debug)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
+  	set(CMAKE_BUILD_TYPE Debug)
+  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 
+# Compile options
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wno-deprecated-declarations")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcompare-debug-second -Wall") #hide note message
+  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcompare-debug-second -Wall") #hide note message
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-return-std-move -Wno-deprecated-declarations")
+  	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-return-std-move")
 endif()
 
 message("-- Build Type: " ${CMAKE_BUILD_TYPE})
 message("-- CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
 set(DYLIB_SUFFIX "so")
-set(PYVERSION "310")
-
 # MacOs
 # On macOS, add the Homebrew prefix (with appropriate suffixes) to the
 # respective HINTS directories (after any user-specified locations).  This
@@ -42,28 +43,23 @@ set(PYVERSION "310")
 # the Homebrew version if it exists.
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
-  add_definitions(-DBOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED)
+  	add_definitions(-DBOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED)
 
-  find_program(HOMEBREW_EXECUTABLE brew)
-  mark_as_advanced(FORCE HOMEBREW_EXECUTABLE)
-  if (HOMEBREW_EXECUTABLE)
-    # Detected a Homebrew install, query for its install prefix.
-    execute_process(COMMAND ${HOMEBREW_EXECUTABLE} --prefix
-      OUTPUT_VARIABLE HOMEBREW_INSTALL_PREFIX
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Detected Homebrew with install prefix: "
-      "${HOMEBREW_INSTALL_PREFIX}, adding to CMake search paths.")
-    list(APPEND CMAKE_PREFIX_PATH "${HOMEBREW_INSTALL_PREFIX}")
-    #set(CMAKE_C_COMPILER "${HOMEBREW_INSTALL_PREFIX}/Cellar/gcc/13.2.0/bin/gcc-13")
-    #set(CMAKE_CXX_COMPILER "${HOMEBREW_INSTALL_PREFIX}/Cellar/gcc/13.2.0/bin/g++-13")
-    set(DYLIB_SUFFIX "dylib")
-    set(PYVERSION "39")
-  endif()
+  	find_program(HOMEBREW_EXECUTABLE brew)
+  	mark_as_advanced(FORCE HOMEBREW_EXECUTABLE)
+  	if (HOMEBREW_EXECUTABLE)
+    	# Detected a Homebrew install, query for its install prefix.
+    	execute_process(COMMAND ${HOMEBREW_EXECUTABLE} --prefix
+      	OUTPUT_VARIABLE HOMEBREW_INSTALL_PREFIX
+      	OUTPUT_STRIP_TRAILING_WHITESPACE)
+    	message(STATUS "Detected Homebrew with install prefix: "
+      		"${HOMEBREW_INSTALL_PREFIX}, adding to CMake search paths.")
+    	list(APPEND CMAKE_PREFIX_PATH "${HOMEBREW_INSTALL_PREFIX}")
+    	#set(CMAKE_C_COMPILER "${HOMEBREW_INSTALL_PREFIX}/Cellar/gcc/13.2.0/bin/gcc-13")
+    	#set(CMAKE_CXX_COMPILER "${HOMEBREW_INSTALL_PREFIX}/Cellar/gcc/13.2.0/bin/g++-13")
+    	set(DYLIB_SUFFIX "dylib")
+  	endif()
 endif()
-
-# Compile options
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 message(STATUS "CMAKE_HOST_SYSTEM: ${CMAKE_HOST_SYSTEM}")
 message(STATUS "CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
@@ -79,10 +75,6 @@ message(STATUS "CMAKE_EXE_LINKER_FLAGS: " ${CMAKE_EXE_LINKER_FLAGS})
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
-
-# Find program
-find_program(PYTHON_EXECUTABLE python)
-message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 
 # Boost library
 set(BOOST_INCLUDE_PATH $ENV{BOOST_PATH}/include)
@@ -104,20 +96,20 @@ endif()
 
 ## Link boost_serialization
 add_library(boost_serialization SHARED IMPORTED)
-if(EXISTS ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
-    set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION  ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
-elseif(EXISTS ${BOOST_LIBRARY_PATH}/libboost_serialization-mt-x64.${DYLIB_SUFFIX})
-    set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION  ${BOOST_LIBRARY_PATH}/libboost_serialization-mt-x64.${DYLIB_SUFFIX})
-else()
-    message(FATAL_ERROR "The IMPORTED_LOCATION of boost_serialization ${BOOST_SERIALIZATION_LIB} does not exist!")
+set(BOOST_SERIALIZATION_LIB_PATH ${BOOST_LIBRARY_PATH}/libboost_serialization.${DYLIB_SUFFIX})
+if(NOT EXISTS ${BOOST_SERIALIZATION_LIB_PATH})
+	set(BOOST_SERIALIZATION_LIB_PATH ${BOOST_LIBRARY_PATH}/libboost_serialization-mt-x64.${DYLIB_SUFFIX})
+	if(NOT EXISTS ${BOOST_SERIALIZATION_LIB_PATH})
+		message(FATAL_ERROR "Can not find boost serialization library at ${BOOST_LIBRARY_PATH}!")
+	endif()
 endif()
-
-set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
+set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION ${BOOST_SERIALIZATION_LIB_PATH})
 
 # Find package
 find_package(PNG REQUIRED)
 find_package(Threads REQUIRED)
 
+set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
 include_directories(${THIRD_LIBRARY_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
 
 # Compile definition
@@ -127,4 +119,8 @@ add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(examples)
-#add_subdirectory(py)
+
+set(COMPILE_PYECAD true)
+if (${COMPILE_PYECAD})
+	add_subdirectory(py)
+endif()

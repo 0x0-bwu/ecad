@@ -1,10 +1,9 @@
 import os
 import sys
 
-current_dir = os.path.dirname(__file__)
-ecad_lib = os.path.abspath(current_dir + "/../build/lib")
+cwd = os.path.dirname(__file__)
+ecad_lib = os.path.abspath(cwd + "/../build/lib")
 sys.path.append(ecad_lib)
-
 import PyEcad as ecad
 from PyEcad import EPoint2D
 
@@ -36,12 +35,12 @@ def test_data_mgr() :
 
     #save database
     database = mgr.create_database(db_name)
-    bin_file = current_dir + '/' + db_name + '.bin'
+    bin_file = cwd + '/' + db_name + '.bin'
     if os.path.isfile(bin_file) :
         os.remove(bin_file)
     assert(mgr.save_database(database, bin_file))
     assert(os.path.isfile(bin_file) == True)
-    xml_file = current_dir + '/' + db_name + '.xml'
+    xml_file = cwd + '/' + db_name + '.xml'
     if os.path.isfile(xml_file) :
         os.remove(xml_file)
     assert(mgr.save_database(database, xml_file, ecad.EArchiveFormat.XML))
@@ -147,8 +146,8 @@ def test_database() :
     assert(database_copy.name == database.name)
 
     #save
-    bin_file = current_dir + '/' + db_name + '.bin'
-    xml_file = current_dir + '/' + db_name + '.xml'
+    bin_file = cwd + '/' + db_name + '.bin'
+    xml_file = cwd + '/' + db_name + '.xml'
     if os.path.isfile(bin_file) :
         os.remove(bin_file)
     assert(database.save(bin_file))
@@ -465,7 +464,7 @@ def test_layout_view() :
     layout.flatten(ecad.EFlattenOption())
 
     #merge
-    layout.merge(layout, ecad.ETransform2D())
+    layout.merge(layout, layer_map, ecad.ETransform2D())
 
     #map
     layout.map(layer_map)
@@ -973,12 +972,12 @@ def test_extension() :
     mgr = ecad.EDataMgr.instance()
 
     #gds
-    gds_file = current_dir + '/../test/data/gdsii/4004.gds'
+    gds_file = cwd + '/../test/data/gdsii/4004.gds'
     gds_database = mgr.create_database_from_gds('4004', gds_file)
     assert(gds_database)
 
-    #xfl
-    xfl_file = current_dir + '/../test/data/xfl/fccsp.xfl'
+    # xfl
+    xfl_file = cwd + '/../test/data/xfl/fccsp.xfl'
     xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
     assert(xfl_database)
 
@@ -991,7 +990,7 @@ def test_utilities() :
     mgr = ecad.EDataMgr.instance()
 
     #xfl
-    xfl_file = current_dir + '/../test/data/xfl/pop.xfl'
+    xfl_file = cwd + '/../test/data/xfl/pop.xfl'
     xfl_database = mgr.create_database_from_xfl('fccsp', xfl_file)
     assert(xfl_database)
 
@@ -1003,12 +1002,12 @@ def test_utilities() :
 
     settings = ecad.ELayoutPolygonMergeSettings()
     settings.threads = 4
-    settings.out_file = current_dir + '/../test/data/simulation/xfl'
+    settings.out_file = cwd + '/../test/data/simulation/xfl'
     layout.merge_layer_polygons(settings)
     
     #gds
-    gds_file = current_dir + '/../test/data/gdsii/4004.gds'
-    lyr_file = ''#current_dir + '/../test/data/gdsii/ringo.elm'
+    gds_file = cwd + '/../test/data/gdsii/4004.gds'
+    lyr_file = ''#cwd + '/../test/data/gdsii/ringo.elm'
     gds_database = mgr.create_database_from_gds('ringo', gds_file, lyr_file)
     assert(gds_database)
 
@@ -1020,7 +1019,7 @@ def test_utilities() :
 
     settings = ecad.ELayoutPolygonMergeSettings()
     settings.threads = 4
-    settings.out_file = current_dir + '/../test/data/simulation/gds'
+    settings.out_file = cwd + '/../test/data/simulation/gds'
     flattened_layout.merge_layer_polygons(settings)
 
     mgr.shutdown()

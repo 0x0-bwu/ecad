@@ -173,8 +173,7 @@ ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetConductingMatK
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDielectircMatK(size_t layer, ESimVal refT) const
 {
     //todo
-    if (0 == layer) return GetDefaultAirK();//wbtest
-    return std::array<ESimVal, 3>{148, 148, 148};
+    return std::array<ESimVal, 3>{70, 70, 70};
 }
 
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDefaultAirK() const

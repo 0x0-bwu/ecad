@@ -74,6 +74,8 @@ ECAD_INLINE EDatabase::EDatabase(const EDatabase & other)
 ECAD_INLINE EDatabase & EDatabase::operator= (const EDatabase & other)
 {
     EDefinitionCollection::operator=(other);
+    EObject::operator=(other);
+    
     m_coordUnits = other.m_coordUnits;
 
     auto cellIter = GetCellIter();
