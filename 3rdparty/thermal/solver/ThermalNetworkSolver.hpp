@@ -24,6 +24,8 @@ public:
 
     virtual ~ThermalNetworkSolver() = default;
 
+    void SetVerbose(int verbose) { m_verbose = verbose; }
+
     void Solve(num_type refT) const
     {
         SolveEigen(refT);
@@ -57,6 +59,11 @@ public:
         Eigen::VectorXd b(size);
         for(size_t i = 0; i < size; ++i)
             b[i] = builder.GetRhs(i, refT);
+        
+        if (m_verbose) {
+            std::cout << "G:\n" << spMat << std::endl;
+            std::cout << "u:\n" << b << std::endl;
+        }
 
         Eigen::setNbThreads(std::max<size_t>(1, m_threads));
         
@@ -80,6 +87,7 @@ public:
             nodes[mnMap.at(i)].t = x[i];
     }
 private:
+    int m_verbose = 0;
     size_t m_threads = 1;
     ThermalNetwork<num_type> & m_network;
 };

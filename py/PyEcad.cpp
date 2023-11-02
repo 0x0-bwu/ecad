@@ -126,7 +126,7 @@ namespace ecad {
         auto vec = py_list_to_std_container<std::vector<Ptr<ILayer> > >(layers);
         std::vector<UPtr<ILayer> > input;
         for(auto layer : vec)
-            input.emplace_back(std::move(layer->Clone()));
+            input.emplace_back(layer->Clone());
         auto res = collection.AppendLayers(std::move(input));
         return std_container_to_py_list(res);
     }
@@ -153,7 +153,7 @@ namespace ecad {
     void EPadSetPadShapeWrap(EPad & pad, Ptr<EShape> shape)
     {
         //todo, enhance, copy issue here
-        pad.shape = std::move(shape->Clone());
+        pad.shape = shape->Clone();
     }
 
     bool EPadstackDefDataSetPadParametersWrapWithLayerId(EPadstackDefData & data, ELayerId layer, Ptr<EShape> shape, const EPoint2D & offset, EValue rotation)
@@ -270,7 +270,7 @@ namespace ecad {
         auto vec = py_list_to_std_container<std::vector<Ptr<ILayer> > >(layers);
         std::vector<UPtr<ILayer> > input;
         for(auto layer : vec)
-            input.emplace_back(std::move(layer->Clone()));
+            input.emplace_back(layer->Clone());
         auto res = layout.AppendLayers(std::move(input));
         return std_container_to_py_list(res);
     }

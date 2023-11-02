@@ -119,6 +119,7 @@ add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(examples)
+add_subdirectory(3rdparty/thermal/test)
 
 set(COMPILE_PYECAD true)
 if (${COMPILE_PYECAD})
