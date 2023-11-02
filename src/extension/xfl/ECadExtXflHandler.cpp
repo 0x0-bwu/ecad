@@ -44,7 +44,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
     m_xflDB->BuildLUTs(eShapeGetter);
 
-    //import compdef
+    //import components
     ImportComponentDefs();
 
     //import material
@@ -74,18 +74,23 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
 
 ECAD_INLINE void ECadExtXflHandler::ImportComponentDefs()
 {
-    EDataMgr::Instance();
-    //todo
+    auto & mgr = EDataMgr::Instance();
+    
+    for (const auto & xflPart : m_xflDB->parts) {
+        auto name = m_database->GetNextDefName(xflPart.name, EDefinitionType::ComponentDef);
+        m_partNameMap.emplace(xflPart.name, name);
+        
+    }
 }
 
 ECAD_INLINE void ECadExtXflHandler::ImportMaterialDefs()
 {
     auto & mgr = EDataMgr::Instance();
 
-    for(const auto & xflMat : m_xflDB->materials) {
+    for (const auto & xflMat : m_xflDB->materials) {
         auto name = m_database->GetNextDefName(xflMat.name, EDefinitionType::MaterialDef);
         auto material = mgr.CreateMaterialDef(m_database, name);
-        if(nullptr == material) {
+        if (nullptr == material) {
             //todo, error handle
             continue;
         }

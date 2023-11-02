@@ -47,6 +47,7 @@ private:
     std::map<int, ELayerId> m_metalLyrIdMap;//xfl metal Id to ecad
     std::unordered_map<std::string, ENetId> m_netIdMap;
     std::unordered_map<std::string, std::string> m_matNameMap;
+    std::unordered_map<std::string, std::string> m_partNameMap;
     std::unordered_set<std::string> m_padstackInstNames;
 };
 
