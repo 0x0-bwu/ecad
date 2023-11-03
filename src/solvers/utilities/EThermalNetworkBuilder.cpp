@@ -32,9 +32,11 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
         ApplyBoundaryConditionForLayer(iniT, *pwrModel, EGridThermalModel::BCType::HeatFlow, z, *network);
     }
 
-    //r
+    //r, c
     for(size_t index1 = 0; index1 < size; ++index1) {
         auto grid1 = GetGridIndex(index1);
+
+        auto c1 = GetCompositeMatC(grid1, GetZGridLength(grid1.z), GetZGridArea(), iniT.at(index1));
         auto k1 = GetCompositeMatK(grid1, iniT.at(index1));
         
         ESize3D grid2;
@@ -45,7 +47,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
             auto k2 = GetCompositeMatK(grid2, iniT.at(index2));
             // auto kx = 0.5 * k1[0] + 0.5 * k2[0];
             // auto r = kx * GetXGridArea(grid1.z) / GetXGridLength();
-            auto r = GetR(k1[0], 0.5 * GetXGridLength(), k2[0], GetXGridLength(), GetXGridArea(grid1.z));
+            auto r = GetRes(k1[0], 0.5 * GetXGridLength(), k2[0], GetXGridLength(), GetXGridArea(grid1.z));
             network->SetR(index1, index2, r);
         }
         //back
@@ -55,7 +57,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
             auto k2 = GetCompositeMatK(grid2, iniT.at(index2));
             // auto ky = 0.5 * k1[1] + 0.5 * k2[1];
             // auto r = ky * GetYGridArea(grid1.z) / GetYGridLength();
-            auto r = GetR(k1[1], 0.5 * GetYGridLength(), k2[1], 0.5 * GetYGridLength(), GetYGridArea(grid1.z));
+            auto r = GetRes(k1[1], 0.5 * GetYGridLength(), k2[1], 0.5 * GetYGridLength(), GetYGridArea(grid1.z));
             network->SetR(index1, index2, r);
         }
         //bot
@@ -68,7 +70,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
             // auto a1 = 1.0 / z1, a2 = 1.0 / z2;
             // auto kz = (a1 * k1[2] + a2 * k2[2]) / (a1 + a2);
             // auto r = kz * GetZGridArea() / (0.5 * z1 + 0.5 * z2);
-            auto r = GetR(k1[2], 0.5 * GetZGridLength(grid1.z), k2[2], 0.5 * GetZGridLength(grid2.z), GetZGridArea());
+            auto r = GetRes(k1[2], 0.5 * GetZGridLength(grid1.z), k2[2], 0.5 * GetZGridLength(grid2.z), GetZGridArea());
             network->SetR(index1, index2, r);
         }
     }
@@ -131,15 +133,14 @@ ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetMetalComposite(const ESize3D 
     return m_model.GetLayers().at(index.z).GetMetalFraction(index.x, index.y);
 }
 
-ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetR(ESimVal k1, FCoord z1, ESimVal k2, FCoord z2, FCoord area, RMethod m) const
+ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetCap(ESimVal c, ESimVal rho, FCoord z, FCoord area) const
 {
-    if(m == RMethod::Harmonic) {
-        return area / (z1 / k1 + z2 / k2);
-    }
-    else {
-        auto z = z1 + z2;
-        return area * (k1 * z1 / z + k2 * z2 / z) / z;
-    }
+    return c * rho * z * area;
+}
+
+ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetRes(ESimVal k1, FCoord z1, ESimVal k2, FCoord z2, FCoord area) const
+{
+    return (z1 / k1 + z2 / k2) / area;
 }
 
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetCompositeMatK(const ESize3D & index, ESimVal refT) const
@@ -156,23 +157,27 @@ ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetCompositeMatK(
 
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetConductingMatK(const ESize3D & index, ESimVal refT) const
 {
+    ECAD_UNUSED(refT)
     return GetConductingMatK(index.z, refT);
 }
 
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDielectricMatK(const ESize3D & index, ESimVal refT) const
 {
+    ECAD_UNUSED(refT)
     return GetDielectircMatK(index.z, refT);
 }
 
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetConductingMatK(size_t layer, ESimVal refT) const
 {
     //todo
+    ECAD_UNUSED(refT)
     return std::array<ESimVal, 3>{400, 400, 400};
 }
 
 ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDielectircMatK(size_t layer, ESimVal refT) const
 {
     //todo
+    ECAD_UNUSED(refT)
     return std::array<ESimVal, 3>{70, 70, 70};
 }
 
@@ -181,6 +186,38 @@ ECAD_INLINE std::array<ESimVal, 3> EGridThermalNetworkBuilder::GetDefaultAirK() 
     //todo
     return std::array<ESimVal, 3>{0.026, 0.026, 0.026};
 }
+
+ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetCompositeMatC(const ESize3D & index, FCoord z, FCoord area, ESimVal refT) const
+{
+    auto mCap = GetCap(GetConductingMatC(index, refT), GetConductingMatRho(index, refT), z, area);
+    auto dCap = GetCap(GetDielectricMatC(index, refT), GetConductingMatRho(index, refT), z, area);
+    auto cp = GetMetalComposite(index);
+    return cp * mCap + (1 - cp) * dCap;
+}
+
+ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetConductingMatC(const ESize3D & index, ESimVal refT) const
+{
+    //todo
+    return 380;//J/(KG.K)
+}
+
+ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetDielectricMatC(const ESize3D & index, ESimVal refT) const
+{
+    //todo
+    return 691;//J(KG.K)
+}
+
+ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetConductingMatRho(const ESize3D & index, ESimVal refT) const
+{
+    //todo
+    return 8850;//Kg/m^3
+}
+ECAD_INLINE ESimVal EGridThermalNetworkBuilder::GetDielectricMatRho(const ESize3D & index, ESimVal refT) const
+{
+    //todo
+    return 2400;//Kg/m^3
+}
+
 ECAD_INLINE ESize3D EGridThermalNetworkBuilder::GetNeighbor(size_t index, Orientation o) const
 {
     return GetNeighbor(GetGridIndex(index), o);

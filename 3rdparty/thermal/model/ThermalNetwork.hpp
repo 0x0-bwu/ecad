@@ -24,9 +24,10 @@ public:
     inline static constexpr num_type unknownT = std::numeric_limits<num_type>::max();
     struct Node
     {
-        num_type t = unknownT;
-        num_type hf = 0;
-        num_type htc = 0;
+        num_type t = unknownT;//unit: K
+        num_type c = 0;
+        num_type hf = 0;//unit: W
+        num_type htc = 0;//unit: W/k
         std::vector<size_t> ns;
         std::vector<num_type> rs;
     };
@@ -34,7 +35,7 @@ public:
     struct Edge
     {
         size_t x, y;
-        num_type  r;
+        num_type  r;//unit: K/W
     };
 
     explicit ThermalNetwork(size_t nodes)
@@ -90,6 +91,11 @@ public:
     num_type GetHTC(size_t node) const
     {
         return m_nodes[node].htc;
+    }
+
+    void SetC(size_t node, num_type c)
+    {
+        m_nodes[node].c = c;
     }
 
     void SetR(size_t node1, size_t node2, num_type r)
@@ -191,7 +197,7 @@ private:
         num_type coeff = 0;
         const auto & nodes = m_network.m_nodes;
         for(const auto & r : nodes[nIndex].rs)
-            coeff += r;
+            coeff += 1 / r;
         coeff += nodes[nIndex].htc;
         return coeff;
     }
@@ -201,7 +207,7 @@ private:
         const auto & nodes = m_network.m_nodes;
         const auto & ns = nodes[nRow].ns;
         for(size_t i = 0; i < ns.size(); ++i){
-            if(ns[i] == nCol) return -(nodes[nRow].rs[i]);
+            if(ns[i] == nCol) return -1 / (nodes[nRow].rs[i]);
         }
         return 0;
     }
@@ -234,7 +240,7 @@ private:
                 auto nw = ns[i];
                 if(nodes[nw].t != ThermalNetwork<num_type>::unknownT) continue;
                 auto mw = m_nmMap.at(ns[i]);
-                edges.push_back(Edge{mv, mw, -rs[i]});
+                edges.push_back(Edge{mv, mw, -1 / rs[i]});
                 if(!mark[mw]){
                     mark[mw] = true;
                     queue->push(mw);

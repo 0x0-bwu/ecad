@@ -224,7 +224,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
-                    auto r0L = builder.GetR(k[0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
+                    auto r0L = builder.GetRes(k[0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0L);
                 }
@@ -235,7 +235,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
-                    auto r0F = builder.GetR(k[1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
+                    auto r0F = builder.GetRes(k[1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0F);
                 }
@@ -339,7 +339,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 }
 
                 //r
-                auto r01 = builder.GetR(k[0][0], halfXGridLen, k[1][0], halfXGridLen, xGridArea);
+                auto r01 = builder.GetRes(k[0][0], halfXGridLen, k[1][0], halfXGridLen, xGridArea);
                 network.SetR(0, 1, r01);
 
                 //left
@@ -348,7 +348,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
-                    auto r0L = builder.GetR(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
+                    auto r0L = builder.GetRes(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0L);
                 }
@@ -359,7 +359,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
-                    auto r0F = builder.GetR(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
+                    auto r0F = builder.GetRes(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0F);
 
@@ -367,7 +367,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     front = builder.GetNeighbor(ESize3D(lr, z), Orient::Front);
                     temperature = getT(front);
                     auto kF1 = builder.GetCompositeMatK(front, temperature);
-                    auto r1F = builder.GetR(k[1][1], halfYGridLen, kF1[1], halfYGridLen, yGridArea);
+                    auto r1F = builder.GetRes(k[1][1], halfYGridLen, kF1[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(1, node, r1F);
                 }
@@ -378,7 +378,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //1
                     temperature = getT(right);
                     auto kR1 = builder.GetCompositeMatK(right, temperature);
-                    auto r1R = builder.GetR(k[1][0], halfXGridLen, kR1[0], halfXGridLen, xGridArea);
+                    auto r1R = builder.GetRes(k[1][0], halfXGridLen, kR1[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(1, node, r1R);
                 }
@@ -491,7 +491,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 }
 
                 //r
-                auto r01 = builder.GetR(k[0][1], halfYGridLen, k[1][1], halfYGridLen, yGridArea);
+                auto r01 = builder.GetRes(k[0][1], halfYGridLen, k[1][1], halfYGridLen, yGridArea);
                 network.SetR(0, 1, r01);
                 
                 //left
@@ -500,14 +500,14 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
-                    auto r0L = builder.GetR(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
+                    auto r0L = builder.GetRes(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0L);
                     //1
                     left = builder.GetNeighbor(ESize3D(ul, z), Orient::Left);
                     temperature = getT(left);
                     auto kL1 = builder.GetCompositeMatK(left, temperature);
-                    auto r1L = builder.GetR(k[1][0], halfXGridLen, kL1[0], halfXGridLen, xGridArea);
+                    auto r1L = builder.GetRes(k[1][0], halfXGridLen, kL1[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(1, node, r1L);
                 }
@@ -518,7 +518,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
-                    auto r0F = builder.GetR(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
+                    auto r0F = builder.GetRes(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0F);
                 }
@@ -528,7 +528,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //1
                     temperature = getT(end);
                     auto kE1 = builder.GetCompositeMatK(end, temperature);
-                    auto r1E = builder.GetR(k[1][1], halfYGridLen, kE1[1], halfYGridLen, yGridArea);
+                    auto r1E = builder.GetRes(k[1][1], halfYGridLen, kE1[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(2, node, r1E);
                 }
@@ -642,16 +642,16 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 }
 
                 //r
-                auto r01 = builder.GetR(k[0][0], halfXGridLen, k[1][0], halfXGridLen, xGridArea);
+                auto r01 = builder.GetRes(k[0][0], halfXGridLen, k[1][0], halfXGridLen, xGridArea);
                 network.SetR(0, 1, r01);
 
-                auto r02 = builder.GetR(k[0][1], halfYGridLen, k[2][1], halfYGridLen, yGridArea);
+                auto r02 = builder.GetRes(k[0][1], halfYGridLen, k[2][1], halfYGridLen, yGridArea);
                 network.SetR(0, 2, r02);
 
-                auto r13 = builder.GetR(k[1][1], halfYGridLen, k[3][1], halfYGridLen, yGridArea);
+                auto r13 = builder.GetRes(k[1][1], halfYGridLen, k[3][1], halfYGridLen, yGridArea);
                 network.SetR(1, 3, r13);
 
-                auto r23 = builder.GetR(k[2][0], halfXGridLen, k[3][0], halfXGridLen, xGridArea);
+                auto r23 = builder.GetRes(k[2][0], halfXGridLen, k[3][0], halfXGridLen, xGridArea);
                 network.SetR(2, 3, r23);
                 
                 //left
@@ -660,14 +660,14 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(left);
                     auto kL0 = builder.GetCompositeMatK(left, temperature);
-                    auto r0L = builder.GetR(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
+                    auto r0L = builder.GetRes(k[0][0], halfXGridLen, kL0[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0L);
                     //2
                     left = builder.GetNeighbor(ESize3D(ul, z), Orient::Left);
                     temperature = getT(left);
                     auto kL2 = builder.GetCompositeMatK(left, temperature);
-                    auto r2L = builder.GetR(k[2][0], halfXGridLen, kL2[0], halfXGridLen, xGridArea);
+                    auto r2L = builder.GetRes(k[2][0], halfXGridLen, kL2[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(2, node, r2L);
                 }
@@ -678,7 +678,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //0
                     temperature = getT(front);
                     auto kF0 = builder.GetCompositeMatK(front, temperature);
-                    auto r0F = builder.GetR(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
+                    auto r0F = builder.GetRes(k[0][1], halfYGridLen, kF0[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(0, node, r0F);
 
@@ -686,7 +686,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     front = builder.GetNeighbor(ESize3D(lr, z), Orient::Front);
                     temperature = getT(front);
                     auto kF1 = builder.GetCompositeMatK(front, temperature);
-                    auto r1F = builder.GetR(k[1][1], halfYGridLen, kF1[1], halfYGridLen, yGridArea);
+                    auto r1F = builder.GetRes(k[1][1], halfYGridLen, kF1[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(1, node, r1F);
                 }
@@ -697,7 +697,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //1
                     temperature = getT(right);
                     auto kR1 = builder.GetCompositeMatK(right, temperature);
-                    auto r1R = builder.GetR(k[1][0], halfXGridLen, kR1[0], halfXGridLen, xGridArea);
+                    auto r1R = builder.GetRes(k[1][0], halfXGridLen, kR1[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(1, node, r1R);
                     
@@ -705,7 +705,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     right = builder.GetNeighbor(ESize3D(ur, z), Orient::Right);
                     temperature = getT(right);
                     auto kR3 = builder.GetCompositeMatK(right, temperature);
-                    auto r3R = builder.GetR(k[3][0], halfXGridLen, kR3[0], halfXGridLen, xGridArea);
+                    auto r3R = builder.GetRes(k[3][0], halfXGridLen, kR3[0], halfXGridLen, xGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(3, node, r3R);
                 }
@@ -716,7 +716,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     //2
                     temperature = getT(end);
                     auto kE2 = builder.GetCompositeMatK(end, temperature);
-                    auto r2E = builder.GetR(k[2][1], halfYGridLen, kE2[1], halfYGridLen, yGridArea);
+                    auto r2E = builder.GetRes(k[2][1], halfYGridLen, kE2[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(2, node, r2E);
 
@@ -724,7 +724,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                     end = builder.GetNeighbor(ESize3D(ur, z), Orient::End);
                     temperature = getT(end);
                     auto kE3 = builder.GetCompositeMatK(end, temperature);
-                    auto r3E = builder.GetR(k[3][1], halfYGridLen, kE3[1], halfYGridLen, yGridArea);
+                    auto r3E = builder.GetRes(k[3][1], halfYGridLen, kE3[1], halfYGridLen, yGridArea);
                     node = network.AppendNode(temperature);
                     network.SetR(3, node, r3E);
                 }
