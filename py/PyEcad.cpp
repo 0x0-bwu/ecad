@@ -147,7 +147,7 @@ namespace ecad {
     void EViaSetViaShapeWrap(EVia & via, Ptr<EShape> shape)
     {
         //todo, enhance, copy issue here
-        via.shape = std::move(shape->Clone());
+        via.shape = shape->Clone();
     }
 
     void EPadSetPadShapeWrap(EPad & pad, Ptr<EShape> shape)

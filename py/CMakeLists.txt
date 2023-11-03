@@ -20,8 +20,7 @@ endif()
 set_target_properties(boost_python PROPERTIES IMPORTED_LOCATION ${BOOST_PYTHON_LIB_PATH})
 
 set(CMAKE_SHARED_MODULE_PREFIX "")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-maybe-uninitialized")
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-maybe-uninitialized `python-config --ldflags`")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-uninitialized")
 
 add_library(PyEcad MODULE PyEcad.cpp)
 target_link_libraries(PyEcad Ecad boost_python ${Python3_LIBRARIES})

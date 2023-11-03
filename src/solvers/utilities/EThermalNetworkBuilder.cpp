@@ -36,7 +36,9 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
     for(size_t index1 = 0; index1 < size; ++index1) {
         auto grid1 = GetGridIndex(index1);
 
-        auto c1 = GetCompositeMatC(grid1, GetZGridLength(grid1.z), GetZGridArea(), iniT.at(index1));
+        auto c = GetCompositeMatC(grid1, GetZGridLength(grid1.z), GetZGridArea(), iniT.at(index1));
+        network->SetC(index1, c);
+
         auto k1 = GetCompositeMatK(grid1, iniT.at(index1));
         
         ESize3D grid2;
