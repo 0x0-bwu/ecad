@@ -1,5 +1,4 @@
-#ifndef THERMAL_MODEL_THERMALNETWORK_HPP
-#define THERMAL_MODEL_THERMALNETWORK_HPP
+#pragma once
 
 #include "generic/math/MathUtility.hpp"
 #include "generic/topology/IndexGraph.hpp"
@@ -103,8 +102,8 @@ public:
         m_nodes[node1].ns.push_back(node2);
         m_nodes[node1].rs.push_back(r);
 
-        m_nodes[node2].ns.push_back(node1);
-        m_nodes[node2].rs.push_back(r);
+        m_nodes[node2].ns.push_back(node1);//wbtest remove
+        m_nodes[node2].rs.push_back(r);//wbtest remove
     }
 
     std::vector<Node> & GetNodes()
@@ -258,4 +257,3 @@ private:
 
 }//namespace model
 }//namespace thermal
-#endif//THERMAL_MODEL_THERMALNETWORK_HPP

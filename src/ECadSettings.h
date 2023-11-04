@@ -36,6 +36,7 @@ struct EThermalNetworkExtractionSettings
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
     bool dumpHotmaps = false;
 #endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
+    bool dumpSpiceFile = false;
     bool dumpDensityFile = false;
     bool dumpTemperatureFile = false;
     EValue regionExtTop = 0;
@@ -50,6 +51,7 @@ struct EThermalNetworkSolveSettings
 {
     size_t iteration = 10;
     EValue residual = 0.5;
+    std::string spiceFile;
 };
 
 struct ELayout2CtmSettings

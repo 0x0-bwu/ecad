@@ -117,6 +117,10 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
 
     std::vector<ESimVal> results;
     EGridThermalNetworkDirectSolver solver(model);
+    EThermalNetworkSolveSettings solverSettings;
+    if (m_settings.dumpSpiceFile)
+        solverSettings.spiceFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "spice.sp";
+    solver.SetSolveSettings(solverSettings);
     if (not solver.Solve(iniT, results)) return false;
 
     auto modelSize = model.ModelSize();

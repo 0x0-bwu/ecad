@@ -121,7 +121,6 @@ add_subdirectory(test)
 add_subdirectory(examples)
 add_subdirectory(3rdparty/thermal/test)
 
-set(COMPILE_PYECAD true)
-if (${COMPILE_PYECAD})
+if (NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	add_subdirectory(py)
 endif()

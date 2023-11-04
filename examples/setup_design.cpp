@@ -161,10 +161,11 @@ int main(int argc, char * argv[])
 #ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpHotmaps = true;
 #endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
+    extSettings.dumpSpiceFile = true;
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
 
-    size_t xGrid = 600;
+    size_t xGrid = 100;
     auto bbox = layout->GetBoundary()->GetBBox();
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;

@@ -1,6 +1,6 @@
 #include "solvers/EThermalNetworkSolver.h"
-
 #include "models/thermal/utilities/EThermalModelReduction.h"
+#include "thermal/utilities/ThermalNetlistWriter.hpp"
 #include "thermal/solver/ThermalNetworkSolver.hpp"
 #include "utilities/EThermalNetworkBuilder.h"
 #include "generic/thread/ThreadPool.hpp"
@@ -41,6 +41,7 @@ ECAD_INLINE EGridThermalNetworkDirectSolver::~EGridThermalNetworkDirectSolver()
 
 ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vector<ESimVal> & results)
 {
+    using namespace thermal::utils;
     using namespace thermal::solver;
     ECAD_EFFICIENCY_TRACK("thermal network solve")
 
@@ -54,7 +55,14 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
         do {
             std::vector<ESimVal> lastRes(results);
             auto network = builder.Build(lastRes);
-            if(nullptr == network) return false;
+            if (nullptr == network) return false;
+
+            if (not m_settings.spiceFile.empty()) {
+                auto spiceWriter = ThermalNetlistWriter(*network);
+                spiceWriter.SetReferenceTemperature(refT);
+                auto res = spiceWriter.WriteSpiceNetlist(m_settings.spiceFile);
+                if (res) std::cout << "write out spice file " << m_settings.spiceFile << " successfully!" << std::endl;
+            }
 
             std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
             std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;

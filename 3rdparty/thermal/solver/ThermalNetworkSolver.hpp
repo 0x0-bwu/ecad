@@ -1,5 +1,4 @@
-#ifndef THERMAL_SOLVER_THERMALNETWORKSOLVER_HPP
-#define THERMAL_SOLVER_THERMALNETWORKSOLVER_HPP
+#pragma once
 #include "thermal/model/ThermalNetwork.hpp"
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
@@ -94,4 +93,3 @@ private:
 
 }//namespace solver
 }//namespace thermal
-#endif//THERMAL_SOLVER_THERMALNETWORKSOLVER_HPP
