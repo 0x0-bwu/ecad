@@ -52,6 +52,16 @@ public:
         return m_nodes.size();
     }
 
+    Node & operator[] (size_t i) 
+    {
+        return m_nodes[i]; 
+    }
+
+    const Node & operator[] (size_t i) const
+    {
+        return m_nodes.at(i);
+    }
+    
     size_t AppendNode(num_type t = unknownT)
     {
         size_t index = Size();

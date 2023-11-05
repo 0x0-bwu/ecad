@@ -17,32 +17,42 @@ namespace solver {
 
 using namespace model;
 
-template <typename T>
+template <typename num_type>
 class ThermalSpVector
 {
-    using ResultType = std::optonal<std::reference_wrapper<const T> >;
 public:
+    num_type operator[] (size_t index) const
+    {
+        if (auto iter = m_indexMap.find(index); iter != m_indexMap.cend())
+            return iter->second;
+        return 0;
+    }
+    
+    void emplace(size_t index, num_type value)
+    {
+        m_indexMap.emplace(index, value);
+    }
+private:
+    std::unordered_map<size_t, num_type> m_indexMap;
 };
-template <typename T>
+template <typename num_type>
 class ThermalSpMatrix
 {
     using Index2D = std::array<size_t, 2>;
-    using IndexMap = std::unordered_map<Index2D, T, boost::hash<Index2D> >; 
-    using ResultType = std::optional<std::reference_wrapper<const T> >;
+    using IndexMap = std::unordered_map<Index2D, num_type, boost::hash<Index2D> >; 
 public:
-    ResultType operator() (size_t x, size_t y) const
+    num_type operator() (size_t x, size_t y) const
     {
+        if (x > y) std::swap(x, y);
         if (auto iter = m_indexMap.find({x, y}); iter != m_indexMap.cend())
             return iter->second;
-        return nullptr;
+        return 0;
     }
 
-    void add(size_t x, size_t y, num_type value)
+    void emplace(size_t x, size_t y, num_type value)
     {
-        auto iter = m_indexMap.find({x, y});
-        if (iter == m_indexMap.cend())
-            m_indexMap.emplace({x, y}, value);
-        else iter->second += value;
+        if (x > y) std::swap(x, y);
+        m_indexMap.emplace(Index2D{x, y}, value);
     }
 
 private:
@@ -135,42 +145,64 @@ public:
      : m_network(network)
     {
     }
-
-    std::pair<Matrix, Matrix> GetMatrices() const //G, C
+    
+    ThermalSpMatrix<num_type> GetMatrixG() const
     {
         auto size = m_network.Size();
         const auto & nodes = m_network.GetNodes();
-        std::vector<Eigen::Triplet<num_type> > tG, tC;
+    
+        ThermalSpMatrix<num_type> spMat;
         for (size_t i = 0; i < size; ++i) {
             num_type diag = 0;
             const auto & node = nodes.at(i);
             for (size_t j = 0; j < node.ns.size(); ++j) {
                 auto g = 1 / node.rs.at(j);
-                tG.emplace_back(i, node.ns.at(j), -g);
+                spMat.emplace(i, node.ns.at(j), -g);
                 diag += g;
             }
 
             if (node.htc != 0) diag += node.htc;
-            if (diag > 0) tG.emplace_back(i, i, diag);
-            if (node.c > 0) tC.emplace_back(i, i, node.c);
+            if (diag > 0) spMat.emplace(i, i, diag);
         }
+        return spMat;
+    }
 
-        Eigen::SparseMatrix<double> G(size, size), C(size, size);
-        G.setFromTriplets(tG.begin(), tG.end());
-        C.setFromTriplets(tC.begin(), tC.end());
-        return {G, C};
-    }  
-
-    std::vector<num_type> GetRhs(num_type refT) const
+    ThermalSpVector<num_type> GetRhs(num_type refT) const
     {
+        ThermalSpVector<num_type> spVec;
         const auto & nodes = m_network.GetNodes();
-        std::vector<num_type> rhs(m_network.Size(), 0);
         for (size_t i = 0; i < nodes.size(); ++i) {
             const auto & node = nodes.at(i);
-            rhs[i] = node.hf + node.htc * refT;
+            auto res = node.hf + node.htc * refT;
+            if (res != 0) spVec.emplace(i, res);
         }
-        return rhs;
-    }  
+        return spVec;
+    }
+
+    // std::pair<Matrix, Matrix> GetMatrices() const //G, C
+    // {
+    //     auto size = m_network.Size();
+    //     const auto & nodes = m_network.GetNodes();
+    //     std::vector<Eigen::Triplet<num_type> > tG, tC;
+    //     for (size_t i = 0; i < size; ++i) {
+    //         num_type diag = 0;
+    //         const auto & node = nodes.at(i);
+    //         for (size_t j = 0; j < node.ns.size(); ++j) {
+    //             auto g = 1 / node.rs.at(j);
+    //             tG.emplace_back(i, node.ns.at(j), -g);
+    //             diag += g;
+    //         }
+
+    //         if (node.htc != 0) diag += node.htc;
+    //         if (diag > 0) tG.emplace_back(i, i, diag);
+    //         if (node.c > 0) tC.emplace_back(i, i, node.c);
+    //     }
+
+    //     Eigen::SparseMatrix<double> G(size, size), C(size, size);
+    //     G.setFromTriplets(tG.begin(), tG.end());
+    //     C.setFromTriplets(tC.begin(), tC.end());
+    //     return {G, C};
+    // }  
 private:
     const ThermalNetwork<num_type> & m_network;
 };
@@ -195,14 +227,14 @@ public:
     ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, size_t threads = 1)
      : m_refT(refT), m_threads(threads), m_network(network)
     {
-        // EigenMatrixBuilder<num_type> builder(m_network);
-        // std::tie(m_G, m_C) = builder.GetMatrices();
-        // m_rhs = builder.GetRhs(m_refT);
+        EigenMatrixBuilder<num_type> builder(m_network);
+        m_G = builder.GetMatrixG();
+        m_Rhs = builder.GetRhs(refT);
     }
 
     virtual ~ThermalNetworkTransientSolver() = default;
 
-    void operator() (const StateType x, StateType & dxdt, num_type t)
+    void operator() (const StateType  x, StateType & dxdt, num_type t)
     {
         for (size_t i = 0; i < dxdt.size(); ++i) {
             dxdt[i] = 0;
@@ -216,27 +248,33 @@ public:
 private:
     num_type G(size_t i, size_t j) const
     {
-        const auto & node = m_network.GetNodes().at(i);
-        if (i == j) {
-            num_type diag = 0;
-            for (size_t n = 0; n < node.ns.size(); ++n)
-                diag += 1 / node.rs.at(n);
+        // const auto & node = m_network.GetNodes().at(i);
+        // if (i == j) {
+        //     num_type diag = 0;
+        //     for (size_t n = 0; n < node.ns.size(); ++n)
+        //         diag += 1 / node.rs.at(n);
 
-            if (node.htc != 0) diag += node.htc;
-            return diag;
-        }
-        else {
-            for (size_t n = 0; n < node.ns.size(); ++n)
-                if (node.ns.at(n) == j) return -1 / node.rs.at(n);
-        }
-        return 0;
+        //     if (node.htc != 0) diag += node.htc;
+        //     return diag;
+        // }
+        // else {
+        //     for (size_t n = 0; n < node.ns.size(); ++n)
+        //         if (node.ns.at(n) == j) return -1 / node.rs.at(n);
+        // }
+        // return 0;
+        return m_G(i, j);
     }
 
-    num_type C(size_t i) const { return m_network.GetNodes().at(i).c; }
+    num_type C(size_t i) const
+    {
+        return m_network[i].c;
+    }
+
     num_type Rhs(size_t i) const
     {
-        const auto & node = m_network.GetNodes().at(i);
-        return node.hf + node.htc * m_refT;
+        // const auto & node = m_network[i];
+        // return node.hf + node.htc * m_refT;
+        return m_Rhs[i];
     }
 
 private:
@@ -244,6 +282,8 @@ private:
     int m_verbose = 0;
     num_type m_refT = 0;
     size_t m_threads = 1;
+    ThermalSpMatrix<num_type> m_G;
+    ThermalSpVector<num_type> m_Rhs;
     const ThermalNetwork<num_type> & m_network;
 };
 
