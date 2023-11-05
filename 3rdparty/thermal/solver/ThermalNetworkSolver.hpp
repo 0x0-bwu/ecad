@@ -3,6 +3,7 @@
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
 
+#include <boost/functional/hash.hpp>
 #include <boost/numeric/odeint.hpp>
 #include <memory>
 
@@ -15,6 +16,38 @@ namespace thermal {
 namespace solver {
 
 using namespace model;
+
+template <typename T>
+class ThermalSpVector
+{
+    using ResultType = std::optonal<std::reference_wrapper<const T> >;
+public:
+};
+template <typename T>
+class ThermalSpMatrix
+{
+    using Index2D = std::array<size_t, 2>;
+    using IndexMap = std::unordered_map<Index2D, T, boost::hash<Index2D> >; 
+    using ResultType = std::optional<std::reference_wrapper<const T> >;
+public:
+    ResultType operator() (size_t x, size_t y) const
+    {
+        if (auto iter = m_indexMap.find({x, y}); iter != m_indexMap.cend())
+            return iter->second;
+        return nullptr;
+    }
+
+    void add(size_t x, size_t y, num_type value)
+    {
+        auto iter = m_indexMap.find({x, y});
+        if (iter == m_indexMap.cend())
+            m_indexMap.emplace({x, y}, value);
+        else iter->second += value;
+    }
+
+private:
+    IndexMap m_indexMap;
+};
 
 template <typename num_type> 
 class ThermalNetworkSolver
