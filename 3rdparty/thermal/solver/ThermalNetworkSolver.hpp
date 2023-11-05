@@ -2,6 +2,8 @@
 #include "thermal/model/ThermalNetwork.hpp"
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
+
+#include <boost/numeric/odeint.hpp>
 #include <memory>
 
 #include "Eigen/IterativeLinearSolvers"
@@ -89,6 +91,127 @@ private:
     int m_verbose = 0;
     size_t m_threads = 1;
     ThermalNetwork<num_type> & m_network;
+};
+
+template <typename num_type>
+class EigenMatrixBuilder
+{
+public:
+    using Matrix = Eigen::SparseMatrix<num_type>;
+    explicit EigenMatrixBuilder(const ThermalNetwork<num_type> & network)
+     : m_network(network)
+    {
+    }
+
+    std::pair<Matrix, Matrix> GetMatrices() const //G, C
+    {
+        auto size = m_network.Size();
+        const auto & nodes = m_network.GetNodes();
+        std::vector<Eigen::Triplet<num_type> > tG, tC;
+        for (size_t i = 0; i < size; ++i) {
+            num_type diag = 0;
+            const auto & node = nodes.at(i);
+            for (size_t j = 0; j < node.ns.size(); ++j) {
+                auto g = 1 / node.rs.at(j);
+                tG.emplace_back(i, node.ns.at(j), -g);
+                diag += g;
+            }
+
+            if (node.htc != 0) diag += node.htc;
+            if (diag > 0) tG.emplace_back(i, i, diag);
+            if (node.c > 0) tC.emplace_back(i, i, node.c);
+        }
+
+        Eigen::SparseMatrix<double> G(size, size), C(size, size);
+        G.setFromTriplets(tG.begin(), tG.end());
+        C.setFromTriplets(tC.begin(), tC.end());
+        return {G, C};
+    }  
+
+    std::vector<num_type> GetRhs(num_type refT) const
+    {
+        const auto & nodes = m_network.GetNodes();
+        std::vector<num_type> rhs(m_network.Size(), 0);
+        for (size_t i = 0; i < nodes.size(); ++i) {
+            const auto & node = nodes.at(i);
+            rhs[i] = node.hf + node.htc * refT;
+        }
+        return rhs;
+    }  
+private:
+    const ThermalNetwork<num_type> & m_network;
+};
+
+template <typename num_type> 
+class ThermalNetworkTransientSolver
+{
+public:
+    using StateType = std::vector<num_type>;
+    using Matrix = typename EigenMatrixBuilder<num_type>::Matrix;
+   
+    struct Recorder
+    { 
+        size_t maxId = 0; 
+        Recorder(size_t id) : maxId(id) {}
+        void operator() (const StateType & x, num_type t)
+        {
+            std::cout << "t: " << t << ',';
+            std::cout << "max: " << x.at(maxId) << std::endl;
+        }
+    };
+    ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, size_t threads = 1)
+     : m_refT(refT), m_threads(threads), m_network(network)
+    {
+        // EigenMatrixBuilder<num_type> builder(m_network);
+        // std::tie(m_G, m_C) = builder.GetMatrices();
+        // m_rhs = builder.GetRhs(m_refT);
+    }
+
+    virtual ~ThermalNetworkTransientSolver() = default;
+
+    void operator() (const StateType x, StateType & dxdt, num_type t)
+    {
+        for (size_t i = 0; i < dxdt.size(); ++i) {
+            dxdt[i] = 0;
+            for (size_t j = 0; j < x.size(); ++j)
+                dxdt[i] += G(i, j) * x.at(j);
+            dxdt[i] *= -1 / C(i);
+            dxdt[i] += Rhs(i) / C(i);
+        }
+    }
+
+private:
+    num_type G(size_t i, size_t j) const
+    {
+        const auto & node = m_network.GetNodes().at(i);
+        if (i == j) {
+            num_type diag = 0;
+            for (size_t n = 0; n < node.ns.size(); ++n)
+                diag += 1 / node.rs.at(n);
+
+            if (node.htc != 0) diag += node.htc;
+            return diag;
+        }
+        else {
+            for (size_t n = 0; n < node.ns.size(); ++n)
+                if (node.ns.at(n) == j) return -1 / node.rs.at(n);
+        }
+        return 0;
+    }
+
+    num_type C(size_t i) const { return m_network.GetNodes().at(i).c; }
+    num_type Rhs(size_t i) const
+    {
+        const auto & node = m_network.GetNodes().at(i);
+        return node.hf + node.htc * m_refT;
+    }
+
+private:
+
+    int m_verbose = 0;
+    num_type m_refT = 0;
+    size_t m_threads = 1;
+    const ThermalNetwork<num_type> & m_network;
 };
 
 }//namespace solver

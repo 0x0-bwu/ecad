@@ -71,8 +71,21 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             solver.Solve(refT);
 
             const auto & nodes = network->GetNodes();
-            for(size_t n = 0; n < nodes.size(); ++n)
+            for (size_t n = 0; n < nodes.size(); ++n)
                 results[n] = nodes[n].t;
+
+            auto maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
+            ThermalNetworkTransientSolver<ESimVal> transSolver(*network, refT, EDataMgr::Instance().DefaultThreads());
+            ThermalNetworkTransientSolver<ESimVal>::Recorder recorder(maxId);
+
+            using namespace boost::numeric;
+            results.assign(nodes.size(), refT);
+            std::vector<ESimVal> initT(nodes.size(), refT);
+	        // using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<ESimVal> >;
+	        odeint::integrate(transSolver, results, 0.0, 10.0, 0.01, recorder);
+	        // odeint::integrate_adaptive(
+            //     odeint::make_controlled(1e-6, 1e-10,ErrorStepperType{}),
+            //     transSolver, initT, 0.0, 10.0, 0.01, recorder);
 
             iteration -= 1;
             if(!needIteration || iteration == 0) break;
@@ -80,7 +93,8 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             residual = CalculateResidual(results, lastRes);
             needIteration = math::GE(residual, m_settings.residual);
             std::cout << "Residual: " << residual << ", Remain Iteration: " << (needIteration ? iteration : 0) << std::endl;
-        } while(needIteration);
+    
+        } while (needIteration);
     }
 
     return true;

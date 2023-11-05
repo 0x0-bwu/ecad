@@ -14,6 +14,7 @@ namespace ecad {
 
 ECAD_INLINE EDataMgr::EDataMgr()
 {
+    m_settings.threads = std::thread::hardware_concurrency();
 }
 
 ECAD_INLINE EDataMgr::~EDataMgr()

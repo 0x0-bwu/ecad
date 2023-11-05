@@ -1,10 +1,13 @@
 #pragma once
 
-#include "generic/math/MathUtility.hpp"
 #include "generic/topology/IndexGraph.hpp"
+#include "generic/math/MathUtility.hpp"
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/properties.hpp>
+#include <Eigen/Sparse>
+
 #include <unordered_map>
 #include <queue>
 #include <map>
