@@ -14,7 +14,6 @@ namespace ecad {
 
 ECAD_INLINE EDataMgr::EDataMgr()
 {
-    m_settings.threads = std::thread::hardware_concurrency();
 }
 
 ECAD_INLINE EDataMgr::~EDataMgr()
@@ -285,6 +284,7 @@ ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponent
 ECAD_INLINE EDataMgr & EDataMgr::Instance()
 {
     static EDataMgr mgr;
+    mgr.m_settings.threads = std::thread::hardware_concurrency();
     return mgr;
 }
 

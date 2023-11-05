@@ -22,8 +22,9 @@ else()
 endif()
 
 # Compile options
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ffast-math -Wno-deprecated-declarations")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -ffast-math -Wno-deprecated-declarations")
+# -ffast-math ?
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -Wno-deprecated-declarations")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Wno-deprecated-declarations")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcompare-debug-second -Wall") #hide note message
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")

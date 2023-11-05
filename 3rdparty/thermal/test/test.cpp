@@ -23,7 +23,7 @@ int main(int argc, char * argv[])
 
 
     float_t refT = 25;
-    size_t threads = 4;
+    size_t threads{1};
     solver::ThermalNetworkSolver<float_t> staticSolver(network, threads);
     staticSolver.SetVerbose(1);
     staticSolver.Solve(refT);
@@ -33,14 +33,15 @@ int main(int argc, char * argv[])
         std::cout << "node " << i + 1 <<": " << nodes[i].t << std::endl;
     }
 
-    solver::ThermalNetworkTransientSolver<float_t> transSolver(network, refT, threads);
-    solver::ThermalNetworkTransientSolver<float_t>::Recorder recorder(0);
+    using TransSolver = solver::ThermalNetworkTransientSolver<float_t>;
+    typename TransSolver::Input in(network, refT, threads);
+    typename TransSolver::Recorder recorder(2, 0.1);
 
     std::vector<float_t> initT(nodes.size(), refT);
     using namespace boost::numeric;
 	using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<float_t> >;
 	odeint::integrate_adaptive(
         odeint::make_controlled(1e-12, 1e-10,ErrorStepperType{}),
-        transSolver, initT, 0.0, 10.0, 0.01, recorder);
+        TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
     return 0;
 }

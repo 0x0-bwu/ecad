@@ -63,7 +63,7 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
                 auto res = spiceWriter.WriteSpiceNetlist(m_settings.spiceFile);
                 if (res) std::cout << "write out spice file " << m_settings.spiceFile << " successfully!" << std::endl;
             }
-
+            std::cout << "total nodes: " << network->Size() << std::endl;
             std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
             std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
             
@@ -75,17 +75,20 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
                 results[n] = nodes[n].t;
 
             auto maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
-            ThermalNetworkTransientSolver<ESimVal> transSolver(*network, refT, EDataMgr::Instance().DefaultThreads());
-            ThermalNetworkTransientSolver<ESimVal>::Recorder recorder(maxId);
-
+            
+            using TransSolver = ThermalNetworkTransientSolver<ESimVal>;
+            size_t threads = EDataMgr::Instance().DefaultThreads();
+            typename TransSolver::Input in(*network, refT, threads);
+            typename TransSolver::Recorder recorder(maxId, 0.001);
+            
             using namespace boost::numeric;
             results.assign(nodes.size(), refT);
             std::vector<ESimVal> initT(nodes.size(), refT);
-	        // using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<ESimVal> >;
-	        odeint::integrate(transSolver, results, 0.0, 10.0, 0.01, recorder);
+	        using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<ESimVal> >;
+	        // odeint::integrate(TransSolver(&in), results, 0.0, 10.0, 0.01, recorder);
 	        // odeint::integrate_adaptive(
-            //     odeint::make_controlled(1e-6, 1e-10,ErrorStepperType{}),
-            //     transSolver, initT, 0.0, 10.0, 0.01, recorder);
+            //     odeint::make_controlled(1e-6, 1e-10, ErrorStepperType{}),
+            //     TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
 
             iteration -= 1;
             if(!needIteration || iteration == 0) break;

@@ -1,5 +1,6 @@
 #pragma once
 #include "thermal/model/ThermalNetwork.hpp"
+#include "generic/thread/ThreadPool.hpp" 
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
 
@@ -16,6 +17,7 @@ namespace thermal {
 namespace solver {
 
 using namespace model;
+using namespace generic;
 
 template <typename num_type>
 class ThermalSpVector
@@ -216,81 +218,93 @@ public:
    
     struct Recorder
     { 
-        size_t maxId = 0; 
-        Recorder(size_t id) : maxId(id) {}
+        size_t maxId;
+        num_type prev{0};
+        num_type count{0};
+        num_type interval;
+        Recorder(size_t id, num_type interval = 1) : maxId(id), interval(interval) {}
         void operator() (const StateType & x, num_type t)
         {
-            std::cout << "t: " << t << ',';
-            std::cout << "max: " << x.at(maxId) << std::endl;
+            if (count += t - prev; count > interval) {
+                std::cout << t << ':' << x.at(maxId) << std::endl;
+                count = 0;
+            }
+            prev = t;
         }
     };
-    ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, size_t threads = 1)
-     : m_refT(refT), m_threads(threads), m_network(network)
+    struct Input
     {
-#if defined(_OPENMP)
-    omp_set_num_threads(threads);
-#endif
-        EigenMatrixBuilder<num_type> builder(m_network);
-        m_G = builder.GetMatrixG();
-        m_Rhs = builder.GetRhs(refT);
-    }
+        num_type refT = 25;
+        size_t threads = 1;
+        ThermalSpMatrix<num_type> G;
+        ThermalSpVector<num_type> Rhs;
+        const ThermalNetwork<num_type> & network;
+        std::unique_ptr<thread::ThreadPool> pool;
+        
+        Input(const ThermalNetwork<num_type> & network, num_type refT, size_t threads)
+         : refT(refT), threads(threads), network(network)
+        {
+            pool.reset(new thread::ThreadPool(threads));
+            EigenMatrixBuilder<num_type> builder(network);
+            G = builder.GetMatrixG();
+            Rhs = builder.GetRhs(refT);
+        }
 
+        num_type C(size_t i) const { return network[i].c; }
+    };
+    const Input * in;
+    ThermalNetworkTransientSolver(const Input * in) : in(in) {}
     virtual ~ThermalNetworkTransientSolver() = default;
+    
+    // void operator() (const StateType  x, StateType & dxdt, num_type t)
+    // {
+    //     // #pragma omp parallel for
+    //     for (size_t i = 0; i < dxdt.size(); ++i) {
+    //         dxdt[i] = 0;
+    //         // #pragma omp parallel for
+    //         for (size_t j = 0; j < x.size(); ++j) {
+    //             dxdt[i] += G(i, j) * x.at(j);
+    //         }
+    //         dxdt[i] *= -1 / C(i);
+    //         dxdt[i] += Rhs(i) / C(i);
+    //     }
+    // }
 
-    void operator() (const StateType  x, StateType & dxdt, num_type t)
+    void operator() (const StateType & x, StateType & dxdt, num_type t)
     {
-        #pragma omp parallel for
-        for (size_t i = 0; i < dxdt.size(); ++i) {
+        if (in->threads == 1)
+            return UpdateDxDt(x, dxdt, t, 0, dxdt.size());
+
+        size_t begin = 0;
+        size_t size = dxdt.size();
+        size_t blocks = in->threads;
+        size_t blockSize = size / blocks;
+        for (size_t i = 0; i < blocks && blockSize > 0; ++i) {
+            size_t end = begin + blockSize;
+            in->pool->Submit(std::bind(&ThermalNetworkTransientSolver<num_type>::UpdateDxDt, this, std::ref(x), std::ref(dxdt), t, begin, end));
+            begin = end;
+        }
+        size_t end = size;
+        if (begin != end)
+            in->pool->Submit(std::bind(&ThermalNetworkTransientSolver<num_type>::UpdateDxDt, this, std::ref(x), std::ref(dxdt), t, begin, end));
+        
+        in->pool->Wait();
+    }
+private:
+    void UpdateDxDt(const StateType & x, StateType & dxdt, num_type t, size_t start, size_t end) const
+    {
+        for (size_t i = start; i < end; ++i) {
             dxdt[i] = 0;
-            #pragma omp parallel for
-            for (size_t j = 0; j < x.size(); ++j) {
+            for (size_t j = 0; j < x.size(); ++j)
                 dxdt[i] += G(i, j) * x.at(j);
-            }
-            dxdt[i] *= -1 / C(i);
-            dxdt[i] += Rhs(i) / C(i);
+            auto invC = 1 / C(i);
+            dxdt[i] *= - invC;
+            dxdt[i] += Rhs(i) * invC;
         }
     }
-
-private:
-    num_type G(size_t i, size_t j) const
-    {
-        // const auto & node = m_network.GetNodes().at(i);
-        // if (i == j) {
-        //     num_type diag = 0;
-        //     for (size_t n = 0; n < node.ns.size(); ++n)
-        //         diag += 1 / node.rs.at(n);
-
-        //     if (node.htc != 0) diag += node.htc;
-        //     return diag;
-        // }
-        // else {
-        //     for (size_t n = 0; n < node.ns.size(); ++n)
-        //         if (node.ns.at(n) == j) return -1 / node.rs.at(n);
-        // }
-        // return 0;
-        return m_G(i, j);
-    }
-
-    num_type C(size_t i) const
-    {
-        return m_network[i].c;
-    }
-
-    num_type Rhs(size_t i) const
-    {
-        // const auto & node = m_network[i];
-        // return node.hf + node.htc * m_refT;
-        return m_Rhs[i];
-    }
-
-private:
-
-    int m_verbose = 0;
-    num_type m_refT = 0;
-    size_t m_threads = 1;
-    ThermalSpMatrix<num_type> m_G;
-    ThermalSpVector<num_type> m_Rhs;
-    const ThermalNetwork<num_type> & m_network;
+    num_type G(size_t i, size_t j) const { return (in->G)(i, j); }
+    num_type C(size_t i) const { return in->C(i); }
+    num_type Rhs(size_t i) const { return (in->Rhs)[i]; }
 };
 
 }//namespace solver
