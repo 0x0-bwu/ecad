@@ -227,6 +227,9 @@ public:
     ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, size_t threads = 1)
      : m_refT(refT), m_threads(threads), m_network(network)
     {
+#if defined(_OPENMP)
+    omp_set_num_threads(threads);
+#endif
         EigenMatrixBuilder<num_type> builder(m_network);
         m_G = builder.GetMatrixG();
         m_Rhs = builder.GetRhs(refT);
@@ -236,10 +239,13 @@ public:
 
     void operator() (const StateType  x, StateType & dxdt, num_type t)
     {
+        #pragma omp parallel for
         for (size_t i = 0; i < dxdt.size(); ++i) {
             dxdt[i] = 0;
-            for (size_t j = 0; j < x.size(); ++j)
+            #pragma omp parallel for
+            for (size_t j = 0; j < x.size(); ++j) {
                 dxdt[i] += G(i, j) * x.at(j);
+            }
             dxdt[i] *= -1 / C(i);
             dxdt[i] += Rhs(i) / C(i);
         }
