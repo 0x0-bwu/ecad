@@ -52,6 +52,16 @@ public:
         return m_nodes.size();
     }
 
+    size_t SourceSize(num_type refT) const
+    {
+        size_t size{0};
+        for (const auto & node : m_nodes) {
+            if (auto q = node.hf + node.htc * refT; q != 0)
+                size++;
+        }
+        return size;//todo , remove
+    }
+
     Node & operator[] (size_t i) 
     {
         return m_nodes[i]; 

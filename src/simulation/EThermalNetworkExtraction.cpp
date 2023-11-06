@@ -112,7 +112,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
     bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
 
-    model.SetTopBotBCModel(bcModel, bcModel);
+    model.SetTopBotBCModel(nullptr, bcModel);
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<ESimVal> results;

@@ -165,7 +165,7 @@ int main(int argc, char * argv[])
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
 
-    size_t xGrid = 100;
+    size_t xGrid = 20;
     auto bbox = layout->GetBoundary()->GetBBox();
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;

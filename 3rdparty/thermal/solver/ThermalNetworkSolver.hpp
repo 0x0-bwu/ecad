@@ -15,6 +15,8 @@
 #include "Eigen/SparseLU"
 #include "Eigen/Sparse"
 
+#include "ThermalModelReduction.hpp"
+
 namespace thermal {
 namespace solver {
 
@@ -183,30 +185,36 @@ public:
         return spVec;
     }
 
-    // std::pair<Matrix, Matrix> GetMatrices() const //G, C
-    // {
-    //     auto size = m_network.Size();
-    //     const auto & nodes = m_network.GetNodes();
-    //     std::vector<Eigen::Triplet<num_type> > tG, tC;
-    //     for (size_t i = 0; i < size; ++i) {
-    //         num_type diag = 0;
-    //         const auto & node = nodes.at(i);
-    //         for (size_t j = 0; j < node.ns.size(); ++j) {
-    //             auto g = 1 / node.rs.at(j);
-    //             tG.emplace_back(i, node.ns.at(j), -g);
-    //             diag += g;
-    //         }
+    std::tuple<Matrix, Matrix, Matrix> GetMatrices(num_type refT, std::vector<num_type> & rhs) const //G, C, B
+    {
+        auto size = m_network.Size();
+        const auto & nodes = m_network.GetNodes();
+        size_t colIdex = 0;
+        std::vector<Eigen::Triplet<num_type> > tG, tC, tB;
+        for (size_t i = 0; i < size; ++i) {
+            num_type diag = 0;
+            const auto & node = nodes.at(i);
+            for (size_t j = 0; j < node.ns.size(); ++j) {
+                auto g = 1 / node.rs.at(j);
+                tG.emplace_back(i, node.ns.at(j), -g);
+                diag += g;
+            }
 
-    //         if (node.htc != 0) diag += node.htc;
-    //         if (diag > 0) tG.emplace_back(i, i, diag);
-    //         if (node.c > 0) tC.emplace_back(i, i, node.c);
-    //     }
+            if (node.htc != 0) diag += node.htc;
+            if (diag > 0) tG.emplace_back(i, i, diag);
+            if (node.c > 0) tC.emplace_back(i, i, node.c);
+            if (auto q = node.hf + node.htc * refT; q != 0) {
+                tB.emplace_back(i, colIdex++, 1);
+                rhs.emplace_back(q);
+            }
+        }
 
-    //     Eigen::SparseMatrix<double> G(size, size), C(size, size);
-    //     G.setFromTriplets(tG.begin(), tG.end());
-    //     C.setFromTriplets(tC.begin(), tC.end());
-    //     return {G, C};
-    // }  
+        Eigen::SparseMatrix<num_type> G(size, size), C(size, size), B(size, rhs.size());
+        G.setFromTriplets(tG.begin(), tG.end());
+        C.setFromTriplets(tC.begin(), tC.end());
+        B.setFromTriplets(tB.begin(), tB.end());
+        return {G, C, B};
+    }  
 private:
     const ThermalNetwork<num_type> & m_network;
 };
@@ -234,6 +242,7 @@ public:
                 for (auto p : probs)
                     os << ',' << x[p];
                 os << GENERIC_DEFAULT_EOL;
+                count = 0;
             }
             prev = t;
         }
@@ -331,6 +340,105 @@ private:
     num_type G(size_t i, size_t j) const { return (in->G)(i, j); }
     num_type C(size_t i) const { return in->C(i); }
     num_type Rhs(size_t i) const { return (in->Rhs)[i]; }
+};
+
+template <typename num_type> 
+class ThermalNetworkReducedTransientSolver
+{
+public:
+    using StateType = std::vector<num_type>;
+    using ProjMatrix = Eigen::Matrix<num_type, Eigen::Dynamic, Eigen::Dynamic>;
+    using ReducedMatrix = Eigen::Matrix<num_type, Eigen::Dynamic, Eigen::Dynamic>;
+
+    struct Input
+    {
+        int verbose{0};
+        num_type refT = 25;
+        size_t threads = 1;
+
+        ProjMatrix x;
+        ReducedMatrix rG;
+        ReducedMatrix rC;
+        ReducedMatrix rB;
+        ReducedMatrix coeff;
+        ReducedMatrix input;
+        std::vector<num_type> rhs;
+        const ThermalNetwork<num_type> & network;
+        std::unique_ptr<thread::ThreadPool> pool;
+        size_t StateSize() const { return rG.cols(); }
+        Input(const ThermalNetwork<num_type> & network, num_type refT, size_t q, size_t threads, int verbose = 0)
+         : verbose(verbose), refT(refT), threads(threads), network(network)
+        {
+            pool.reset(new thread::ThreadPool(threads));
+            ThermalMatrixBuilder<num_type> builder(network);
+            auto [G, C, B] = builder.GetMatrices(refT, rhs);
+            q = std::min(std::max(q, rhs.size()), network.Size());
+
+            x = Prima(C, G, B, q);
+            rG = x.transpose() * G * x;
+            rC = x.transpose() * C * x;
+            rB = x.transpose() * B;
+
+            auto CredQR = rC.fullPivHouseholderQr();
+            coeff = CredQR.solve(-1 * rG);
+            input = CredQR.solve(rB);
+            
+            if (verbose > 0) {
+                std::cout << "x:\n"  <<  x << std::endl;
+                std::cout << "rG:\n" << rG << std::endl;
+                std::cout << "rC:\n" << rC << std::endl;
+                std::cout << "rB:\n" << rB << std::endl;
+                std::cout << "rhs:[";
+                for (const auto & v : rhs)
+                    std::cout << v << ',' << std::endl;
+                std::cout << ']' << std::endl;
+                if (verbose > 1) {
+                    std::cout << "G:\n" << G << std::endl;
+                    std::cout << "C:\n" << C << std::endl;
+                    std::cout << "B:\n" << B << std::endl;
+                }
+            }
+        }
+    };
+
+    struct Recorder
+    { 
+        const Input * in;
+        num_type prev{0};
+        num_type count{0};
+        num_type interval;
+        std::ostream & os;
+        const std::vector<size_t> & probs;
+        Recorder(std::ostream & os, const Input * in, const std::vector<size_t> & probs, num_type interval)
+         : in(in), interval(interval), os(os), probs(probs) {}
+        void operator() (const StateType & x, num_type t)
+        {
+            if (count += t - prev; count > interval) {
+                os << t;
+
+    
+                Eigen::Map<const Eigen::Matrix<num_type, Eigen::Dynamic, 1>> state(x.data(), x.size(), 1);
+                auto result = in->x * state;
+                for (auto p : probs)
+                    os << ',' << result(p, 1);
+                os << GENERIC_DEFAULT_EOL;
+                count = 0;
+            }
+            prev = t;
+        }
+    };
+
+    const Input * in;
+    ThermalNetworkReducedTransientSolver(const Input * in) : in(in) {}
+    virtual ~ThermalNetworkReducedTransientSolver() = default;
+    
+    void operator() (const StateType & x, StateType & dxdt, num_type t)
+    {
+        Eigen::Map<const Eigen::Matrix<num_type, Eigen::Dynamic, 1>> xvec(x.data(), in->StateSize(), 1);
+        Eigen::Map<const Eigen::Matrix<num_type, Eigen::Dynamic, 1>> u(in->rhs.data(), in->rhs.size(), 1);
+        Eigen::Map<Eigen::Matrix<num_type, Eigen::Dynamic, 1>> result(dxdt.data(), in->StateSize(), 1);
+        result = in->coeff * xvec + in->input * u;
+    }
 };
 
 }//namespace solver
