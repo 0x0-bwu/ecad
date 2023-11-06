@@ -81,11 +81,11 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
     for (const auto & jc : m_model.GetJumpConnections()) {
         auto index1 = GetFlattenIndex(std::get<0>(jc));
         auto index2 = GetFlattenIndex(std::get<1>(jc));
+        if (index1 == index2) continue;
         auto k = GetConductingMatK(std::get<0>(jc), iniT.at(index1))[0];
         network->SetR(index1, index2, k * std::get<2>(jc));
     }
     
-
     //bc
     SPtr<EGridBCModel> topBC = nullptr, botBC = nullptr;
     m_model.GetTopBotBCModel(topBC, botBC);

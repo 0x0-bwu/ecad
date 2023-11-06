@@ -33,11 +33,13 @@ int main(int argc, char * argv[])
         std::cout << "node " << i + 1 <<": " << nodes[i].t << std::endl;
     }
 
+    std::vector<size_t> probs{0, 1, 2};
     using TransSolver = solver::ThermalNetworkTransientSolver<float_t>;
-    typename TransSolver::Input in(network, refT, threads);
-    typename TransSolver::Recorder recorder(2, 0.1);
+    using StateType = typename TransSolver::StateType;
+    auto in = typename TransSolver::Input(network, refT, threads);
+    auto recorder = typename TransSolver::Recorder(std::cout, probs, 0.01);
 
-    std::vector<float_t> initT(nodes.size(), refT);
+    StateType initT(nodes.size(), refT);
     using namespace boost::numeric;
 	using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<float_t> >;
 	odeint::integrate_adaptive(

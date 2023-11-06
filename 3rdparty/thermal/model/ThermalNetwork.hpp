@@ -112,6 +112,18 @@ public:
 
     void SetR(size_t node1, size_t node2, num_type r)
     {
+        //todo eff
+        for (size_t i = 0; i < m_nodes[node1].ns.size(); ++i) {
+            if (m_nodes[node1].ns[i] == node2) {
+                r = 1 / (1 / r + 1 / m_nodes[node1].rs[i]);
+                m_nodes[node1].rs[i] = r;
+                for (size_t j = 0; j < m_nodes[node2].ns.size(); ++j) {
+                    if (m_nodes[node2].ns[j] == node1)
+                        m_nodes[node2].rs[j] = r;
+                }
+                return;
+            }
+        }
         m_nodes[node1].ns.push_back(node2);
         m_nodes[node1].rs.push_back(r);
 

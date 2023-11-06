@@ -4,6 +4,8 @@
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
 
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/numeric/odeint.hpp>
 #include <memory>
@@ -139,11 +141,11 @@ private:
 };
 
 template <typename num_type>
-class EigenMatrixBuilder
+class ThermalMatrixBuilder
 {
 public:
     using Matrix = Eigen::SparseMatrix<num_type>;
-    explicit EigenMatrixBuilder(const ThermalNetwork<num_type> & network)
+    explicit ThermalMatrixBuilder(const ThermalNetwork<num_type> & network)
      : m_network(network)
     {
     }
@@ -213,21 +215,25 @@ template <typename num_type>
 class ThermalNetworkTransientSolver
 {
 public:
+    // using StateType = typename boost::numeric::ublas::vector<num_type>;
     using StateType = std::vector<num_type>;
-    using Matrix = typename EigenMatrixBuilder<num_type>::Matrix;
-   
+
     struct Recorder
     { 
-        size_t maxId;
         num_type prev{0};
         num_type count{0};
         num_type interval;
-        Recorder(size_t id, num_type interval = 1) : maxId(id), interval(interval) {}
+        std::ostream & os;
+        const std::vector<size_t> & probs;
+        Recorder(std::ostream & os, const std::vector<size_t> & probs, num_type interval)
+         : interval(interval), os(os), probs(probs) {}
         void operator() (const StateType & x, num_type t)
         {
             if (count += t - prev; count > interval) {
-                std::cout << t << ':' << x.at(maxId) << std::endl;
-                count = 0;
+                os << t;
+                for (auto p : probs)
+                    os << ',' << x[p];
+                os << GENERIC_DEFAULT_EOL;
             }
             prev = t;
         }
@@ -245,12 +251,32 @@ public:
          : refT(refT), threads(threads), network(network)
         {
             pool.reset(new thread::ThreadPool(threads));
-            EigenMatrixBuilder<num_type> builder(network);
+            ThermalMatrixBuilder<num_type> builder(network);
             G = builder.GetMatrixG();
             Rhs = builder.GetRhs(refT);
         }
 
         num_type C(size_t i) const { return network[i].c; }
+    };
+    struct Jacobi
+    {
+        using VectorType = typename ThermalNetworkTransientSolver::StateType;
+        using MatrixType = boost::numeric::ublas::matrix<num_type>;
+        const Input * in;
+        explicit Jacobi(const Input * in) : in(in) {}
+
+        void operator() (const VectorType & /* x */ , MatrixType &J , const num_type & /* t */ , VectorType &dfdt)
+        {
+            for(size_t i = 0; i < J.size1(); ++i) {
+                for(size_t j = 0; j < J.size2(); ++j)
+                    J(i, j) = -1 * G(i, j) / C(i);
+            }
+            for(size_t i = 0; i < dfdt.size(); ++i)
+                dfdt[i] = 0;
+
+        };
+        num_type G(size_t i, size_t j) const { return (in->G)(i, j); }
+        num_type C(size_t i) const { return in->C(i); }
     };
     const Input * in;
     ThermalNetworkTransientSolver(const Input * in) : in(in) {}
@@ -296,7 +322,7 @@ private:
         for (size_t i = start; i < end; ++i) {
             dxdt[i] = 0;
             for (size_t j = 0; j < x.size(); ++j)
-                dxdt[i] += G(i, j) * x.at(j);
+                dxdt[i] += G(i, j) * x[j];
             auto invC = 1 / C(i);
             dxdt[i] *= - invC;
             dxdt[i] += Rhs(i) * invC;

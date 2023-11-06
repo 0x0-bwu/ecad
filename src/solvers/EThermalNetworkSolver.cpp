@@ -74,21 +74,32 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             for (size_t n = 0; n < nodes.size(); ++n)
                 results[n] = nodes[n].t;
 
-            auto maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
+            size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
             
             using TransSolver = ThermalNetworkTransientSolver<ESimVal>;
-            size_t threads = EDataMgr::Instance().DefaultThreads();
-            typename TransSolver::Input in(*network, refT, threads);
-            typename TransSolver::Recorder recorder(maxId, 0.001);
+            using StateType = typename TransSolver::StateType;
+            using Jacobi = typename TransSolver::Jacobi;
+            size_t threads = 1;//EDataMgr::Instance().DefaultThreads();
+            auto in = typename TransSolver::Input(*network, refT, threads);
+
+            std::vector<size_t> probs{maxId};
+            std::ofstream out(std::filesystem::path(m_settings.spiceFile).parent_path().string() + "/trans.out");
+            auto recorder = typename TransSolver::Recorder(out, probs, 0.01);
             
-            using namespace boost::numeric;
-            results.assign(nodes.size(), refT);
-            std::vector<ESimVal> initT(nodes.size(), refT);
-	        using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<ESimVal> >;
-	        // odeint::integrate(TransSolver(&in), results, 0.0, 10.0, 0.01, recorder);
-	        // odeint::integrate_adaptive(
-            //     odeint::make_controlled(1e-6, 1e-10, ErrorStepperType{}),
-            //     TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
+            using namespace boost::numeric::odeint;
+            StateType initT(nodes.size(), refT);
+	        // size_t totalSteps = integrate(TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
+	        using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
+	        size_t totalSteps = integrate_adaptive(make_controlled(1e-6, 1e-10, ErrorStepperType{}),
+                                     TransSolver(&in), initT, 0.0, 10.0, 0.1, recorder);
+
+
+            // size_t totalSteps = integrate_const(runge_kutta4<StateType>(), TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
+            // size_t totalSteps = integrate_const(make_dense_output<rosenbrock4<ESimVal>>(1.0e-6 , 1.0e-6),
+            //                         std::make_pair(TransSolver(&in), Jacobi(&in)), initT, 0.0, 10.0, 0.01, recorder);
+
+            std::cout << "integrate step: " << totalSteps << std::endl;
+            out.close();
 
             iteration -= 1;
             if(!needIteration || iteration == 0) break;
