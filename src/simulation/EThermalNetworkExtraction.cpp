@@ -59,6 +59,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     layout->GetStackupLayers(layers);
     ECAD_ASSERT(layers.size() == mf->size());
 
+    std::unordered_map<ELayerId, size_t> lyrMap;
     for(size_t i = 0; i < layers.size(); ++i) {
         auto name = layers.at(i)->GetName();
         auto stackupLayer = layers.at(i)->GetStackupLayerFromLayer();
@@ -67,31 +68,11 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         auto layerMetalFraction = mf->at(i);
         EGridThermalLayer layer(name, layerMetalFraction);
         layer.SetThickness(thickness);
-        [[maybe_unused]] auto res = model.AppendLayer(std::move(layer));
-        ECAD_ASSERT(res)
+        auto index = model.AppendLayer(std::move(layer));
+        ECAD_ASSERT(index != invalidIndex)
+        lyrMap.emplace(layers.at(i)->GetLayerId(), index);
     }
-
-    ESimVal iniT = 25;
-    auto gridPower = EGridData(nx, ny, 0);
-    auto compIter = layout->GetComponentIter();
-    while (auto * component = compIter->Next()) {
-        if (auto power = component->GetLossPower(); power > 0) {
-            auto bbox = component->GetBoundingBox();
-            auto ll = mfInfo->GetIndex(bbox[0]);
-            auto ur = mfInfo->GetIndex(bbox[1]);
-            if (ll.isValid() && ur.isValid()) {
-                auto totalTiles = (ur[1] - ll[1] + 1) * (ur[0] - ll[0] + 1);
-                power /= totalTiles;
-                for (size_t i = ll[0]; i <= ur[0]; ++i)
-                    for (size_t j = ll[1]; j <= ur[1]; ++j)
-                        gridPower(i, j) = power;
-            }
-        }
-    }
-    auto powerModel = std::make_shared<EGridPowerModel>(ESize2D(nx, ny));
-    powerModel->AddSample(iniT, std::move(gridPower));
-    model.SetPowerModel(0, powerModel);
-
+    
     //bondwire
     auto primIter = layout->GetPrimitiveIter();
     while (auto * prim = primIter->Next()) {
@@ -108,12 +89,43 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         }
     }
 
-    //htc
-    auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
-    bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
+    ESimVal iniT = 25;
+    auto gridPower = EGridData(nx, ny, 0);
+    auto compIter = layout->GetComponentIter();
+    while (auto * component = compIter->Next()) {
+        if (auto power = component->GetLossPower(); power > 0) {
+            auto layer = component->GetPlacementLayer();
+            if (lyrMap.find(layer) == lyrMap.cend()) {
+                GENERIC_ASSERT(false)
+                continue;
+            }
+            auto bbox = component->GetBoundingBox();
+            auto ll = mfInfo->GetIndex(bbox[0]);
+            auto ur = mfInfo->GetIndex(bbox[1]);
+            if (not ll.isValid() || not ur.isValid()) {
+                GENERIC_ASSERT(false)
+                continue;
+            }
+            if constexpr (false) {
+                auto totalTiles = (ur[1] - ll[1] + 1) * (ur[0] - ll[0] + 1);
+                power /= totalTiles;
+                for (size_t i = ll[0]; i <= ur[0]; ++i)
+                    for (size_t j = ll[1]; j <= ur[1]; ++j)
+                        gridPower(i, j) = power;
+                auto powerModel = new EGridPowerModel(ESize2D(nx, ny));
+                powerModel->GetTable().AddSample(iniT, std::move(gridPower));
+                model.AddPowerModel(lyrMap.at(layer), std::shared_ptr<EThermalPowerModel>(powerModel));
+            }
+            else model.AddPowerModel(lyrMap.at(layer), std::shared_ptr<EThermalPowerModel>(new EBlockPowerModel(ll, ur, power)));
+        }
+    }
 
-    model.SetTopBotBCModel(nullptr, bcModel);
+    //htc
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
+    model.SetUniformTopBotBCValue(invalidValue, 2750);
+    // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
+    // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
+    // model.SetTopBotBCModel(nullptr, bcModel);
 
     std::vector<ESimVal> results;
     EGridThermalNetworkDirectSolver solver(model);

@@ -19,13 +19,16 @@ ECAD_INLINE EChipThermalModelV1Reduction::~EChipThermalModelV1Reduction()
 
 ECAD_INLINE bool EChipThermalModelV1Reduction::Reduce()
 {
-    if(m_model.header.tiles.x <= 1 || m_model.header.tiles.y <= 1) return false;
+    if (m_model.header.tiles.x <= 1 || m_model.header.tiles.y <= 1) return false;
 
     m_model.header.resolution *= 2;
     m_model.header.tiles = detail::Reduce(m_model.header.tiles, ReduceIndexMethod::Ceil);
 
-    if(m_model.powers)
-        m_model.powers = std::shared_ptr<EGridPowerModel>(detail::Reduce(m_model.powers, ReduceValueMethod::Acumulation));
+    if (m_model.powers) {
+        const auto & table = m_model.powers->GetTable();
+        auto reduced = detail::Reduce(table, ReduceValueMethod::Acumulation);
+        m_model.powers = std::make_shared<EGridPowerModel>(std::move(reduced));
+    }
 
     std::unordered_map<SPtr<EGridData>, SPtr<EGridData> > densityMap;
     densityMap.insert(std::make_pair(nullptr, nullptr));
@@ -56,14 +59,26 @@ ECAD_INLINE bool EGridThermalModelReduction::Reduce()
     m_model.m_size = detail::Reduce(m_model.m_size, ReduceIndexMethod::Ceil);
     m_model.m_resolution[0] *= 2; m_model.m_resolution[1] *= 2;
 
-    std::unordered_map<SPtr<EGridPowerModel>, SPtr<EGridPowerModel> > pwrMap;
+    std::unordered_map<SPtr<EThermalPowerModel>, SPtr<EThermalPowerModel> > pwrMap;
     std::unordered_map<SPtr<ELayerMetalFraction>, SPtr<ELayerMetalFraction> > mfMap { {nullptr, nullptr} };
     for(auto & layer : m_model.m_stackupLayers) {
-        if(!pwrMap.count(layer.m_powerModel)) {
-            auto reduced = std::shared_ptr<EGridPowerModel>(detail::Reduce(layer.m_powerModel, ReduceValueMethod::Acumulation));
-            pwrMap.insert(std::make_pair(layer.m_powerModel, reduced));
+        for (auto powerModel : layer.m_powerModel) {
+            if (not pwrMap.count(powerModel)) {
+                if (auto gridModel = dynamic_cast<CPtr<EGridPowerModel> >(powerModel.get()); gridModel) {
+                    auto table = detail::Reduce(gridModel->GetTable(), ReduceValueMethod::Acumulation);
+                    auto reduced = std::shared_ptr<EThermalPowerModel>(new EGridPowerModel(std::move(table)));
+                    pwrMap.emplace(powerModel, reduced);
+                }
+                else if (auto blockModel = dynamic_cast<CPtr<EBlockPowerModel> >(powerModel.get()); blockModel) {
+                    auto model = new EBlockPowerModel(*blockModel);
+                    model->ll = detail::Reduce(model->ll, ReduceIndexMethod::Ceil);
+                    model->ur = detail::Reduce(model->ur, ReduceIndexMethod::Ceil);
+                    auto reduced = std::shared_ptr<EThermalPowerModel>(model);
+                    pwrMap.emplace(powerModel, reduced);
+                }
+            }
+            layer.m_powerModel.emplace_back(pwrMap.at(powerModel));
         }
-        layer.m_powerModel = pwrMap.at(layer.m_powerModel);
 
         if(!mfMap.count(layer.m_metalFraction)){
             auto reduced = std::make_shared<ELayerMetalFraction>(detail::Reduce(*layer.m_metalFraction, ReduceValueMethod::Average));
@@ -76,10 +91,10 @@ ECAD_INLINE bool EGridThermalModelReduction::Reduce()
     for(size_t i = 0; i < 2; ++i) {
         auto & bc = m_model.m_bcTopBot[i];
         auto bcType = m_model.m_bcTypeTopBot[i];
-        if(!bcMap.count(bc)) {
+        if (not bcMap.count(bc)) {
             auto method = (bcType == EGridThermalModel::BCType::HeatFlow) ?
                             ReduceValueMethod::Acumulation : ReduceValueMethod::Average;
-            auto reduced = std::shared_ptr<EGridPowerModel>(detail::Reduce(bc, method));
+            auto reduced = std::shared_ptr<EGridBCModel>(detail::Reduce(*bc, method));
             bcMap.insert(std::make_pair(bc, reduced));
         }
         bc = bcMap.at(bc);
@@ -92,7 +107,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel &
     auto copy = model;
     while(order != 0) {
         EGridThermalModelReduction r(copy);
-        if(!r.Reduce()) return nullptr;
+        if (not r.Reduce()) return nullptr;
         order--;
     }
     return std::make_unique<EGridThermalModel>(std::move(copy));
@@ -103,7 +118,7 @@ ECAD_INLINE UPtr<EChipThermalModelV1> makeReductionModel(const EChipThermalModel
     auto copy = model;
     while(order != 0) {
         EChipThermalModelV1Reduction r(copy);
-        if(!r.Reduce()) return nullptr;
+        if (not r.Reduce()) return nullptr;
         order--;
     }
     return std::make_unique<EChipThermalModelV1>(std::move(copy));
@@ -134,7 +149,7 @@ ECAD_INLINE EGridData Reduce(const EGridData & data, ReduceValueMethod method)
     size_t nx = data.Width(), ny = data.Height();
     ESize2D size = Reduce(ESize2D(nx, ny), ReduceIndexMethod::Ceil);
     EGridData result(size.x, size.y, 0);
-    switch(method) {
+    switch (method) {
         case ReduceValueMethod::Average : {
             std::vector<size_t> count(size.x * size.y, 0);
             for(size_t x = 0; x < nx; ++x) {
@@ -180,16 +195,15 @@ ECAD_INLINE EGridData Reduce(const EGridData & data, ReduceValueMethod method)
     return result;
 }
 
-ECAD_INLINE UPtr<EGridDataTable> Reduce(SPtr<EGridDataTable> data, ReduceValueMethod method)
+ECAD_INLINE UPtr<EGridDataTable> Reduce(const EGridDataTable & data, ReduceValueMethod method)
 {
-    if(nullptr == data) return nullptr;
-    auto size = data->GetTableSize();
-    auto keys = data->GetAllKeys();
+    auto size = data.GetTableSize();
+    auto keys = data.GetAllKeys();
 
     auto result = std::make_unique<EGridDataTable>(Reduce(size, ReduceIndexMethod::Ceil));
 
-    for(auto key : keys) {
-        auto table = data->GetTable(key);
+    for (auto key : keys) {
+        auto table = data.GetTable(key);
         if(nullptr == table) continue;
         result->AddSample(key, Reduce(*table, method));
     }

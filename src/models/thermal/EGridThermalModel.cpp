@@ -197,18 +197,16 @@ ECAD_INLINE CPtr<IMaterialDef> EGridThermalLayer::GetDielectricMaterial() const
     return m_dielectricMat;
 }
 
-ECAD_INLINE bool EGridThermalLayer::SetPowerModel(SPtr<EGridPowerModel> pwrModel)
+ECAD_INLINE bool EGridThermalLayer::AddPowerModel(SPtr<EThermalPowerModel> pwrModel)
 {
     if(nullptr == pwrModel) return false;
-    if(GetSize() != pwrModel->GetTableSize()) return false;
-    m_powerModel = pwrModel;
+    m_powerModel.emplace_back(pwrModel);
     return true;
 }
 
-ECAD_INLINE CPtr<EGridPowerModel> EGridThermalLayer::GetPowerModel() const
+ECAD_INLINE const std::vector<SPtr<EThermalPowerModel> > & EGridThermalLayer::GetPowerModels() const
 {
-    if(nullptr == m_powerModel) return nullptr;
-    return m_powerModel.get();
+    return m_powerModel;
 }
 
 ECAD_INLINE bool EGridThermalLayer::SetMetalFraction(SPtr<ELayerMetalFraction> mf)
@@ -316,17 +314,17 @@ ECAD_INLINE std::array<FCoord, 2> EGridThermalModel::GetResolution(bool scaled) 
     return res;
 }
 
-ECAD_INLINE bool EGridThermalModel::AppendLayer(EGridThermalLayer layer)
+ECAD_INLINE size_t EGridThermalModel::AppendLayer(EGridThermalLayer layer)
 {
     if(math::LT<FCoord>(layer.GetThickness(), 0)) return false;
-    if(layer.GetSize() != m_size) return false;
+    if(layer.GetSize() != m_size) return invalidIndex;
     if(!m_stackupLayers.empty()) {
         auto & botLayer = m_stackupLayers.back();
         botLayer.SetBotLayer(layer.GetName());
         layer.SetTopLayer(botLayer.GetName());
     }
     m_stackupLayers.emplace_back(std::move(layer));
-    return true;
+    return m_stackupLayers.size() - 1;
 }
 
 ECAD_INLINE void EGridThermalModel::AppendJumpConnection(ESize3D start, ESize3D end, FCoord alpha)
@@ -349,16 +347,28 @@ ECAD_INLINE const std::vector<EGridThermalLayer> & EGridThermalModel::GetLayers(
     return m_stackupLayers;
 }
 
-ECAD_INLINE bool EGridThermalModel::SetPowerModel(size_t layer, SPtr<EGridPowerModel> pwrModel)
+ECAD_INLINE bool EGridThermalModel::AddPowerModel(size_t layer, SPtr<EThermalPowerModel> pwrModel)
 {
-    if(layer >= m_stackupLayers.size()) return false;
-    return m_stackupLayers.at(layer).SetPowerModel(pwrModel);
+    GENERIC_ASSERT(layer < m_stackupLayers.size())
+    return m_stackupLayers.at(layer).AddPowerModel(pwrModel);
 }
 
-ECAD_INLINE CPtr<EGridPowerModel> EGridThermalModel::GetPowerModel(size_t layer) const
+ECAD_INLINE const std::vector<SPtr<EThermalPowerModel> > & EGridThermalModel::GetPowerModels(size_t layer) const
 {
-    if(layer >= m_stackupLayers.size()) return nullptr;
-    return m_stackupLayers.at(layer).GetPowerModel();
+    GENERIC_ASSERT(layer < m_stackupLayers.size())
+    return m_stackupLayers.at(layer).GetPowerModels();
+}
+
+ECAD_INLINE void EGridThermalModel::SetUniformTopBotBCValue(ESimVal top, ESimVal bot)
+{
+    m_uniformBcTopBot[0] = top;
+    m_uniformBcTopBot[1] = bot;
+}
+
+ECAD_INLINE void EGridThermalModel::GetUniformTopBotBCValue(ESimVal & t, ESimVal & b) const
+{
+    t = m_uniformBcTopBot.at(0);
+    b = m_uniformBcTopBot.at(1);
 }
 
 ECAD_INLINE bool EGridThermalModel::SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot)
@@ -393,8 +403,9 @@ ECAD_INLINE bool EGridThermalModel::NeedIteration() const
         if(bc && bc->NeedInterpolation()) return true;
 
     for(const auto & layer : m_stackupLayers) {
-        auto pwr = layer.GetPowerModel();
-        if(pwr && pwr->NeedInterpolation()) return true;
+        auto pwrs = layer.GetPowerModels();
+        for (const auto & pwr : pwrs)
+            if(pwr && pwr->NeedInterpolation()) return true;
     }
     return false;
 }

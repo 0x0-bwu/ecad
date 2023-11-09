@@ -1,10 +1,6 @@
 #pragma once
 #include "EThermalModel.h"
-#include "utilities/EMetalFractionMapping.h"
 
-namespace boost::math::interpolators { 
-template <class RandomAccessContainer> class pchip;
-}
 namespace ecad {
 
 class IMaterialDef;
@@ -12,46 +8,13 @@ namespace emodel {
 namespace etherm {
 
 using namespace eutils;
-using namespace generic::geometry;
-
-using EGridData = OccupancyGridMap<ESimVal>;
-using Interpolator = boost::math::interpolators::pchip<std::vector<ESimVal> >;
-using EGridInterpolator = OccupancyGridMap<SPtr<Interpolator> >;
-
-class ECAD_API EGridDataTable
-{
-public:
-    explicit EGridDataTable(const ESize2D & size);
-    virtual ~EGridDataTable();
-
-    size_t GetSampleSize() const;
-    const ESize2D & GetTableSize() const;
-
-    bool AddSample(ESimVal key, EGridData data);
-    ESimVal Query(ESimVal key, size_t x, size_t y, bool * success = nullptr) const;
-
-    std::list<ESimVal> GetAllKeys() const;
-    CPtr<EGridData> GetTable(ESimVal key) const;
-    std::pair<ESimVal, ESimVal> GetRange() const;
-
-    bool NeedInterpolation() const;
-
-private:
-    void BuildInterpolater() const;
-    void ResetInterpolater();
-
-private:
-    ESize2D m_size;
-    std::map<ESimVal, EGridData> m_dataTable;//<key, table>
-    mutable UPtr<EGridInterpolator> m_interpolator = nullptr;
-};
 
 using EGridBCModel = EGridDataTable;
-using EGridPowerModel = EGridDataTable;
 
 namespace utils {
 class EGridThermalModelReduction;
 }//namespace utils;
+
 class ECAD_API EGridThermalLayer
 {
     friend class utils::EGridThermalModelReduction;
@@ -79,8 +42,8 @@ public:
     void SetDielectricMaterial(CPtr<IMaterialDef> material);
     CPtr<IMaterialDef> GetDielectricMaterial() const;
 
-    bool SetPowerModel(SPtr<EGridPowerModel> pwrModel);
-    CPtr<EGridPowerModel> GetPowerModel() const;
+    bool AddPowerModel(SPtr<EThermalPowerModel> pwrModel);
+    const std::vector<SPtr<EThermalPowerModel> > & GetPowerModels() const;
 
     bool SetMetalFraction(SPtr<ELayerMetalFraction> mf);
     SPtr<ELayerMetalFraction> GetMetalFraction() const;
@@ -96,7 +59,7 @@ private:
     std::string m_botLayer;
     CPtr<IMaterialDef> m_conductingMat = nullptr;
     CPtr<IMaterialDef> m_dielectricMat = nullptr;
-    SPtr<EGridPowerModel> m_powerModel = nullptr;
+    std::vector<SPtr<EThermalPowerModel> > m_powerModel;
     SPtr<ELayerMetalFraction> m_metalFraction = nullptr;
 };
 
@@ -123,7 +86,7 @@ public:
     void GetResolution(FCoord & x, FCoord & y, bool scaled = false) const;
     std::array<FCoord, 2> GetResolution(bool scaled = false) const;
 
-    bool AppendLayer(EGridThermalLayer layer);
+    size_t AppendLayer(EGridThermalLayer layer);
 
     void AppendJumpConnection(ESize3D start, ESize3D end, FCoord alpha); //alpha = pi * r * r / L
     const std::vector<std::tuple<ESize3D, ESize3D, FCoord> > & GetJumpConnections() const;
@@ -131,9 +94,11 @@ public:
     std::vector<EGridThermalLayer> & GetLayers();
     const std::vector<EGridThermalLayer> & GetLayers() const; 
 
-    bool SetPowerModel(size_t layer, SPtr<EGridPowerModel> pwrModel);
-    CPtr<EGridPowerModel> GetPowerModel(size_t layer) const;
+    bool AddPowerModel(size_t layer, SPtr<EThermalPowerModel> pwrModel);
+    const std::vector<SPtr<EThermalPowerModel> > & GetPowerModels(size_t layer) const;
 
+    void SetUniformTopBotBCValue(ESimVal top, ESimVal bot);
+    void GetUniformTopBotBCValue(ESimVal & t, ESimVal & b) const;
     bool SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot);
     void GetTopBotBCModel(SPtr<EGridBCModel> & top, SPtr<EGridBCModel> & bot) const;
 
@@ -154,6 +119,7 @@ private:
     FCoord m_scaleH = 1.0;//only apply for horizontal
     std::array<FCoord, 2> m_resolution = {0, 0};//unit: m
     std::vector<EGridThermalLayer> m_stackupLayers;
+    std::array<ESimVal, 2> m_uniformBcTopBot = {0, 0};
     std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
     std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
     std::vector<std::tuple<ESize3D, ESize3D, FCoord> > m_jumpConnects;

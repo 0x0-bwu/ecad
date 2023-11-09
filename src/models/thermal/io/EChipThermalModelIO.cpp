@@ -36,7 +36,7 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
         auto powerFile = dir + GENERIC_FOLDER_SEPS + Fmt2Str("power_T[%1%].ctm", i + 1);
         EGridData powers(tiles.x, tiles.y);
         if(!ParseCTMv1PowerFile(powerFile, powers, err)) return nullptr;
-        model->powers->AddSample(temperature, std::move(powers));
+        model->powers->GetTable().AddSample(temperature, std::move(powers));
     }
 
     //density
@@ -78,7 +78,7 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
     const auto & powers = *(model.powers);
     for(size_t i = 0; i < model.header.temperatures.size(); ++i) {
         auto temperature = model.header.temperatures.at(i);
-        auto table = powers.GetTable(temperature);
+        auto table = powers.GetTable().GetTable(temperature);
         if(nullptr == table) {
             if(err) *err = Fmt2Str("Error: failed to get power table at temperature: %1%", temperature);
             return false;
@@ -117,22 +117,22 @@ ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, c
     if(!PathExists(dirName)) MakeDir(dirName);
 
     //power
-    if(model.powers) {
+    if (model.powers) {
         auto range = model.powers->GetRange();
-        size_t size = std::min(model.header.temperatures.size(), model.powers->GetSampleSize());
-        for(size_t i = 0; i < size; ++i) {
+        size_t size = std::min(model.header.temperatures.size(), model.powers->GetTable().GetSampleSize());
+        for (size_t i = 0; i < size; ++i) {
             auto t = model.header.temperatures.at(i);
-            auto table = model.powers->GetTable(t);
-            if(nullptr == table) continue;
+            auto table = model.powers->GetTable().GetTable(t);
+            if (nullptr == table) continue;
             std::string filename = dirName + GENERIC_FOLDER_SEPS + "power_" + std::to_string(t) + "c.png";
-            if(!GenerateImageProfile(filename, *table, range.first, range.second)) continue;
+            if (not GenerateImageProfile(filename, *table, range.first, range.second)) continue;
         }
     }
     //density
-    for(const auto & density : model.densities) {
-        if(nullptr == density.second) continue;
+    for (const auto & density : model.densities) {
+        if (nullptr == density.second) continue;
         std::string filename = dirName + GENERIC_FOLDER_SEPS + "layer_" + density.first + ".png";
-        if(!GenerateImageProfile(filename, *(density.second), 0.0, 1.0)) continue;
+        if (not GenerateImageProfile(filename, *(density.second), 0.0, 1.0)) continue;
     }
     return true;
 }

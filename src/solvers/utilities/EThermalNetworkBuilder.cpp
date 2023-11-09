@@ -4,7 +4,7 @@ namespace ecad {
 namespace esolver {
 
 using namespace emodel;
-
+inline static constexpr ESimVal THERMAL_RD = 0.01;
 ECAD_INLINE EGridThermalNetworkBuilder::EGridThermalNetworkBuilder(const EGridThermalModel & model)
  : m_model(model), m_size(model.ModelSize())
 {
@@ -22,15 +22,6 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
     summary.Reset();
     summary.totalNodes = size;
     auto network = std::make_unique<ThermalNetwork<ESimVal> >(size);
-
-    //power
-    const auto & layers = m_model.GetLayers();
-    for(size_t z = 0; z < layers.size(); ++z) {
-        const auto & layer = layers.at(z);
-        auto pwrModel = layer.GetPowerModel();
-        if(nullptr == pwrModel) continue;
-        ApplyBoundaryConditionForLayer(iniT, *pwrModel, EGridThermalModel::BCType::HeatFlow, z, *network);
-    }
 
     //r, c
     for(size_t index1 = 0; index1 < size; ++index1) {
@@ -85,25 +76,60 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
         auto k = GetConductingMatK(std::get<0>(jc), iniT.at(index1))[0];
         network->SetR(index1, index2, k * std::get<2>(jc));
     }
-    
-    //bc
-    SPtr<EGridBCModel> topBC = nullptr, botBC = nullptr;
-    m_model.GetTopBotBCModel(topBC, botBC);
 
+    //power
+    const auto & layers = m_model.GetLayers();
+    for(size_t z = 0; z < layers.size(); ++z) {
+        const auto & layer = layers.at(z);
+        auto pwrModels = layer.GetPowerModels();
+        for (const auto & pwrModel : pwrModels) {
+            if (auto model = dynamic_cast<CPtr<EGridPowerModel>>(pwrModel.get()); model)
+                ApplyBoundaryConditionForLayer(iniT, model->GetTable(), EGridThermalModel::BCType::HeatFlow, z, *network);
+            else if (auto model = dynamic_cast<CPtr<EBlockPowerModel>>(pwrModel.get()); model) {
+                auto node = network->AppendNode();
+                auto aveP = model->totalPower / model->Size();
+                for (size_t x = model->ll.x; x <= model->ur.x; ++x) {
+                    for (size_t y = model->ll.y; y <= model->ur.y; ++y) {
+                        auto index = GetFlattenIndex(ESize3D(x, y, z));
+                        network->SetR(index, node, THERMAL_RD);
+                        network->SetHF(node, aveP);
+                    }
+                }
+            }
+        }
+    }
+
+    //bc
     EGridThermalModel::BCType topT, botT;
     m_model.GetTopBotBCType(topT, botT);
 
-    if(topBC) ApplyBoundaryConditionForLayer(iniT, *topBC, topT, 0, *network);
-    if(botBC) ApplyBoundaryConditionForLayer(iniT, *botBC, botT, m_size.z - 1, *network);
+    SPtr<EGridBCModel> topBC = nullptr, botBC = nullptr;
+    m_model.GetTopBotBCModel(topBC, botBC);\
 
+    ESimVal uniformTopBC, uniformBotBC;
+    m_model.GetUniformTopBotBCValue(uniformTopBC, uniformBotBC);
+
+    //top
+    if(topBC) ApplyBoundaryConditionForLayer(iniT, *topBC, topT, 0, *network);
+    else if (invalidValue != uniformTopBC) {
+        auto bcNode = network->AppendNode();
+        ApplyUniformBoundaryConditionForLayer(bcNode, uniformTopBC, topT, 0, *network);
+    }
+
+    //bot
+    if(botBC) ApplyBoundaryConditionForLayer(iniT, *botBC, botT, m_size.z - 1, *network);
+    else if (invalidValue != uniformBotBC) {
+        auto bcNode = network->AppendNode();
+        ApplyUniformBoundaryConditionForLayer(bcNode, uniformBotBC, botT, 0, *network);
+    }
     return network;
 }
 
 ECAD_INLINE void EGridThermalNetworkBuilder::ApplyBoundaryConditionForLayer(const std::vector<ESimVal> & iniT, const EGridDataTable & dataTable, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const
 {
     bool success;
-    for(size_t x = 0; x < m_size.x; ++x) {
-        for(size_t y = 0; y < m_size.y; ++y) {
+    for (size_t x = 0; x < m_size.x; ++x) {
+        for (size_t y = 0; y < m_size.y; ++y) {
             auto grid = ESize3D(x, y, layer);
             auto index = GetFlattenIndex(grid);
             auto val = dataTable.Query(iniT.at(index), x, y, &success);
@@ -125,7 +151,44 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyBoundaryConditionForLayer(cons
                     network.SetT(index, val);
                     break;
                 }
+                default : {
+                 GENERIC_ASSERT(false)
+                }
             }
+        }
+    }
+}
+
+ECAD_INLINE void EGridThermalNetworkBuilder::ApplyUniformBoundaryConditionForLayer(size_t node, ESimVal value, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const
+{
+    const auto & res = m_model.GetResolution();
+    auto area = res.at(0) * res.at(1);
+    switch (type) {
+        case EGridThermalModel::BCType::HTC : {
+            summary.boundaryNodes += 1;
+            network.SetHTC(node, value * area);
+            break;
+        }
+        case EGridThermalModel::BCType::HeatFlow : {
+            if(value > 0) summary.iHeatFlow += value;
+            else summary.oHeatFlow -= value;
+            network.SetHF(node, value);
+            break;
+        }
+        case EGridThermalModel::BCType::Temperature : {
+            summary.fixedTNodes += 1;
+            network.SetT(node, value);
+            break;
+        }
+        default : {
+            GENERIC_ASSERT(false);
+        }
+    }
+        
+    for (size_t x = 0; x < m_size.x; ++x) {
+        for (size_t y = 0; y < m_size.y; ++y) {
+            auto index = GetFlattenIndex(ESize3D(x, y, layer));
+            network.SetR(index, node, THERMAL_RD);
         }
     }
 }

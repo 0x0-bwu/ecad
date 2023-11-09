@@ -71,7 +71,7 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             solver.Solve(refT);
 
             const auto & nodes = network->GetNodes();
-            for (size_t n = 0; n < nodes.size(); ++n)
+            for (size_t n = 0; n < results.size(); ++n)
                 results[n] = nodes[n].t;
 
             size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
@@ -217,10 +217,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
     size_t index;
     bool success;
     ESimVal temperature;
-    auto pwrModel = m_model.GetPowerModel(z);
-    pwrModel = nullptr;//wbtest
-    topBC = nullptr;//wbtest
-    botBC = nullptr;//wbtest
+    const auto & pwrModels = m_model.GetPowerModels(z);
     auto xGridArea = builder.GetXGridArea(z);
     auto yGridArea = builder.GetYGridArea(z);
     auto halfXGridLen = 0.5 * builder.GetXGridLength();
@@ -240,7 +237,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 ThermalNetwork<ESimVal> network(1);
                 
                 //power
-                if(pwrModel) {
+                for (const auto & pwrModel : pwrModels) {
                     auto p = pwrModel->Query(temperature, grid.x, grid.y, &success);
                     if(success) network.SetHF(0, p);
                 }
@@ -349,7 +346,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 ThermalNetwork<ESimVal> network(2);
 
                 //power
-                if(pwrModel) {
+                for (const auto & pwrModel : pwrModels) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
                         temperature = getT(ESize3D(curr, z));
@@ -501,7 +498,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
 
                 ThermalNetwork<ESimVal> network(2);
                 //power
-                if(pwrModel) {
+                for (const auto & pwrModel : pwrModels) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
                         temperature = getT(ESize3D(curr, z));
@@ -652,7 +649,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 ThermalNetwork<ESimVal> network(4);
                 
                 //power
-                if(pwrModel) {
+                for (const auto & pwrModel : pwrModels) {
                     for(size_t n = 0; n < tiles.size(); ++n) {
                         const auto & curr = tiles[n];
                         temperature = getT(ESize3D(curr, z));

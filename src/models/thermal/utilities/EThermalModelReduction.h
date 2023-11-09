@@ -44,7 +44,7 @@ namespace detail {
 
 ECAD_API ESize2D Reduce(const ESize2D & size, ReduceIndexMethod method);
 ECAD_API EGridData Reduce(const EGridData & data, ReduceValueMethod method);
-ECAD_API UPtr<EGridDataTable> Reduce(SPtr<EGridDataTable> data, ReduceValueMethod method);
+ECAD_API UPtr<EGridDataTable> Reduce(const EGridDataTable & data, ReduceValueMethod method);
 
 }//namespace detail
 

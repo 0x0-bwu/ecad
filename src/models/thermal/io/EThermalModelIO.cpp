@@ -72,7 +72,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const ECh
         gridLayer.SetThickness(layer.thickness * 1e-6);//um to m
 
         if(layer.name == devLyr)
-            gridLayer.SetPowerModel(pCtm->powers);
+            gridLayer.AddPowerModel(pCtm->powers);
 
         model->AppendLayer(std::move(gridLayer));
     }
@@ -152,24 +152,26 @@ ECAD_INLINE UPtr<EChipThermalModelV1> makeChipThermalModelV1FromGridThermalModel
     
     bool success;
     for(const auto & layer : pModel->GetLayers()) {
-        auto pwrModel = layer.GetPowerModel();
-        if(nullptr == pwrModel) continue;
+        auto pwrModels = layer.GetPowerModels();
+        if(pwrModels.empty()) continue;
 
-        for(size_t x = 0; x < tiles.x; ++x) {
-            for(size_t y = 0; y < tiles.y; ++y) {
-                for(size_t i = 0; i < pts.size(); ++i) {
-                    auto val = pwrModel->Query(header.temperatures.at(i), x, y, &success);
-                    if(!success) continue;
-                    pts[i](x, y) += val;
+        for (const auto & pwrModel : pwrModels) {
+            for (size_t x = 0; x < tiles.x; ++x) {
+                for (size_t y = 0; y < tiles.y; ++y) {
+                    for (size_t i = 0; i < pts.size(); ++i) {
+                        auto val = pwrModel->Query(header.temperatures.at(i), x, y, &success);
+                        if (not success) continue;
+                        pts[i](x, y) += val;
+                    }
                 }
             }
         }
     }
 
-    ctm->powers = std::make_shared<EGridPowerModel>(tiles);
-    for(size_t i = 0; i < pts.size(); ++i) {
-        ctm->powers->AddSample(header.temperatures.at(i), std::move(pts[i]));
-    }
+    auto powers = new EGridPowerModel(tiles);
+    for(size_t i = 0; i < pts.size(); ++i)
+        powers->GetTable().AddSample(header.temperatures.at(i), std::move(pts[i]));
+    ctm->powers.reset(powers);
 
     //density
     for(const auto & layer : pModel->GetLayers()) {
