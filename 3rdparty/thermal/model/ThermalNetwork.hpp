@@ -1,14 +1,9 @@
 #pragma once
 
-#include "generic/topology/IndexGraph.hpp"
 #include "generic/math/MathUtility.hpp"
-
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/properties.hpp>
-#include <Eigen/Sparse>
-
+#include "generic/circuit/MNA.hpp"
 #include <unordered_map>
+#include <memory>
 #include <queue>
 #include <map>
 
@@ -52,11 +47,11 @@ public:
         return m_nodes.size();
     }
 
-    size_t SourceSize(num_type refT) const
+    size_t Source() const
     {
         size_t size{0};
         for (const auto & node : m_nodes) {
-            if (auto q = node.hf + node.htc * refT; q != 0)
+            if (node.hf != 0 || node.htc != 0)
                 size++;
         }
         return size;//todo , remove
@@ -288,6 +283,39 @@ private:
     std::unordered_map<size_t, size_t> m_nmMap;//node index->matrix index;
     const ThermalNetwork<num_type> & m_network;
 };
+
+using namespace generic::ckt;
+
+template <typename num_type>
+inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network, num_type refT)
+{
+    using Matrix = SparseMatrix<num_type>;
+    
+    MNA<Matrix> m;
+    const size_t nodes = network.Size();
+    const size_t source = network.Source();
+    m.G = Matrix(nodes, nodes);
+    m.C = Matrix(nodes, nodes);
+    m.L = Matrix(nodes, nodes);
+    m.B = Matrix(nodes, source);
+    
+    size_t s = 0;
+    for (size_t i = 0; i < nodes; ++i) {
+        const auto & node = network[i];
+        for (size_t j = 0; j < node.ns.size(); ++j) {
+            if (auto n = node.ns.at(j); n > i) { //todo, remove ">"" check after modify to single edage 
+                if (auto r = node.rs.at(j); r > 0)
+                    mna::Stamp(m.G, i, n, 1 / r);
+            }
+        }
+        if (node.c > 0) mna::Stamp(m.C, i, node.c);
+        if (node.hf != 0 || node.htc != 0)
+            mna::Stamp(m.B, i, s++, 1);
+        mna::Stamp(m.L, i, 1);
+    }
+    return m;
+}
+
 
 
 }//namespace model

@@ -88,6 +88,9 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
             else if (auto model = dynamic_cast<CPtr<EBlockPowerModel>>(pwrModel.get()); model) {
                 auto node = network->AppendNode();
                 auto aveP = model->totalPower / model->Size();
+                if(model->totalPower > 0)
+                    summary.iHeatFlow += model->totalPower;
+                else summary.oHeatFlow -= model->totalPower;
                 for (size_t x = model->ll.x; x <= model->ur.x; ++x) {
                     for (size_t y = model->ll.y; y <= model->ur.y; ++y) {
                         auto index = GetFlattenIndex(ESize3D(x, y, z));

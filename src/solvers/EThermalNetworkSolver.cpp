@@ -68,6 +68,7 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
             
             ThermalNetworkSolver<ESimVal> solver(*network, EDataMgr::Instance().DefaultThreads());
+            solver.SetVerbose(true);
             solver.Solve(refT);
 
             const auto & nodes = network->GetNodes();
@@ -76,12 +77,12 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
 
             size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
             std::cout << "hotspot: " << maxId << std::endl;
-            if (false) {
+            if (true) {
                 ECAD_EFFICIENCY_TRACK("transient mor")
                 using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
                 using StateType = typename TransSolver::StateType;
                 size_t threads = 1;//EDataMgr::Instance().DefaultThreads();
-                size_t sourceSize = network->SourceSize(refT);
+                size_t sourceSize = network->Source();
                 std::cout << "source size: " << sourceSize << std::endl;
                 auto in = typename TransSolver::Input(*network, ESimVal{refT}, sourceSize, threads);
                 
