@@ -90,8 +90,9 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     }
 
     ESimVal iniT = 25;
-    auto gridPower = EGridData(nx, ny, 0);
+    constexpr bool useGridPower = false;
     auto compIter = layout->GetComponentIter();
+    std::unordered_map<size_t, EGridData> gridMap;
     while (auto * component = compIter->Next()) {
         if (auto power = component->GetLossPower(); power > 0) {
             auto layer = component->GetPlacementLayer();
@@ -99,6 +100,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
                 GENERIC_ASSERT(false)
                 continue;
             }
+            auto lyrId = lyrMap.at(layer);
             auto bbox = component->GetBoundingBox();
             auto ll = mfInfo->GetIndex(bbox[0]);
             auto ur = mfInfo->GetIndex(bbox[1]);
@@ -106,23 +108,30 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
                 GENERIC_ASSERT(false)
                 continue;
             }
-            if constexpr (false) {
+            if constexpr (useGridPower) {
+                auto iter = gridMap.find(lyrId);
+                if (iter == gridMap.cend())
+                    iter = gridMap.emplace(lyrId, EGridData(nx, ny, 0)).first;
+                auto & gridData = iter->second;
                 auto totalTiles = (ur[1] - ll[1] + 1) * (ur[0] - ll[0] + 1);
                 power /= totalTiles;
                 for (size_t i = ll[0]; i <= ur[0]; ++i)
                     for (size_t j = ll[1]; j <= ur[1]; ++j)
-                        gridPower(i, j) = power;
-                auto powerModel = new EGridPowerModel(ESize2D(nx, ny));
-                powerModel->GetTable().AddSample(iniT, std::move(gridPower));
-                model.AddPowerModel(lyrMap.at(layer), std::shared_ptr<EThermalPowerModel>(powerModel));
+                        gridData(i, j) += power;
             }
             else model.AddPowerModel(lyrMap.at(layer), std::shared_ptr<EThermalPowerModel>(new EBlockPowerModel(ll, ur, power)));
         }
     }
 
+    for (auto & [lyrId, gridData] : gridMap) {
+        auto powerModel = new EGridPowerModel(ESize2D(nx, ny));
+        powerModel->GetTable().AddSample(iniT, std::move(gridData));
+        model.AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
+    }
+
     //htc
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model.SetUniformTopBotBCValue(invalidValue, 2750);
+    model.SetUniformTopBotBCValue(invalidSimVal, 2750);
     // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
     // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
     // model.SetTopBotBCModel(nullptr, bcModel);

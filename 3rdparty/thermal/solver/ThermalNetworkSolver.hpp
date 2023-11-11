@@ -79,76 +79,40 @@ namespace thermal
                 : m_threads(threads), m_network(network) {}
 
             virtual ~ThermalNetworkSolver() = default;
-
             void SetVerbose(int verbose) { m_verbose = verbose; }
 
             void Solve(num_type refT) const
             {
-                SolveEigen(refT);
-            }
-            void SolveEigen(num_type refT) const
-            {
-
-                ThermalNetworkMatrixBuilder<num_type> builder(m_network);
-                size_t size = builder.GetMatrixSize();
-                const auto &mnMap = builder.GetMatrixNodeIndicesMap();
-                // const auto & nmMap = builder.GetNodeMatrixIndicesMap();
-
-                Eigen::SparseMatrix<num_type> spMat(size, size);
-                spMat.reserve(Eigen::VectorXi::Constant(size, 10));
-
-                auto diagCoeffs = std::unique_ptr<std::vector<num_type>>(new std::vector<num_type>{});
-                auto edges = std::unique_ptr<std::list<typename ThermalNetwork<num_type>::Edge>>(new std::list<typename ThermalNetwork<num_type>::Edge>{});
-
-                builder.GetCoeffs(*edges);
-                builder.GetDiagCoeffs(*diagCoeffs);
-                for (size_t i = 0; i < size; ++i)
-                    spMat.insert(i, i) = (*diagCoeffs)[i];
-
-                for (const auto &edge : *edges)
-                    spMat.insert(edge.x, edge.y) = edge.r;
-
-                edges.reset();
-                diagCoeffs.reset();
-                spMat.makeCompressed();
-
-                Eigen::VectorXd b(size);
-                for (size_t i = 0; i < size; ++i)
-                    b[i] = builder.GetRhs(i, refT);
-
-                if (m_verbose)
-                {
-                    const auto & nw = m_network;
-                    auto mna = makeMNA(nw);
-                    std::cout << mna << std::endl; // wbtest
-                }
-
+                constexpr bool direct = true;
                 Eigen::setNbThreads(std::max<size_t>(1, m_threads));
+                ThermalNetworkMatrixBuilder<num_type> builder(m_network);
 
-                Eigen::VectorXd x;
-                // iterator
-                Eigen::ConjugateGradient<Eigen::SparseMatrix<num_type>, Eigen::Lower | Eigen::Upper> solver;
-                solver.compute(spMat);
-                x = solver.solve(b);
-                std::cout << "#iterations:     " << solver.iterations() << std::endl;
-                std::cout << "estimated error: " << solver.error() << std::endl;
-
-                // direct
-                //  Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver;
-                //  // Eigen::SimplicialCholesky<Eigen::SparseMatrix<num_type> > solver;
-                //  solver.analyzePattern(spMat);
-                //  solver.factorize(spMat);
-                //  x = solver.solve(b);
-
-                auto &nodes = m_network.GetNodes();
-                for (size_t i = 0; i < size; ++i)
-                    nodes[mnMap.at(i)].t = x[i];
+                auto m = makeMNA(m_network); 
+                auto rhs = makeRhs(m_network, refT);
+                Eigen::Matrix<num_type, Eigen::Dynamic, 1> x;
+                if (direct) {
+                    // Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver;
+                    Eigen::SimplicialCholesky<Eigen::SparseMatrix<num_type> > solver;
+                    solver.analyzePattern(m.G);
+                    solver.factorize(m.G);
+                    x = solver.solve(m.B * rhs);
+                }
+                else {
+                    Eigen::ConjugateGradient<Eigen::SparseMatrix<num_type>, Eigen::Lower | Eigen::Upper> solver;
+                    solver.compute(m.G);
+                    x = m.L * solver.solve(m.B * rhs);
+                    std::cout << "#iterations:     " << solver.iterations() << std::endl;
+                    std::cout << "estimated error: " << solver.error() << std::endl;
+                }
+                auto & nodes = m_network.GetNodes();
+                for (size_t i = 0; i < nodes.size(); ++i)
+                    nodes[i].t = x[i];
             }
 
         private:
             int m_verbose = 0;
             size_t m_threads = 1;
-            ThermalNetwork<num_type> &m_network;
+            ThermalNetwork<num_type> & m_network;
         };
 
         template <typename num_type>

@@ -77,7 +77,7 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
 
             size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
             std::cout << "hotspot: " << maxId << std::endl;
-            if (true) {
+            if (false) {
                 ECAD_EFFICIENCY_TRACK("transient mor")
                 using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
                 using StateType = typename TransSolver::StateType;
@@ -329,7 +329,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 //     network.SetR(0, node, rNB);
                 // }
                 ThermalNetworkSolver solver(network);
-                solver.SolveEigen(refT);
+                solver.Solve(refT);
 
                 const auto & nodes = network.GetNodes();
                 index = m_model.GetFlattenIndex(grid);
@@ -480,7 +480,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 //     }
                 // }
                 ThermalNetworkSolver solver(network);
-                solver.SolveEigen(refT);
+                solver.Solve(refT);
 
                 const auto & nodes = network.GetNodes();
                 for(size_t n = 0; n < tiles.size(); ++n) {
@@ -630,7 +630,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 //     }
                 // }
                 ThermalNetworkSolver solver(network);
-                solver.SolveEigen(refT);
+                solver.Solve(refT);
 
                 const auto & nodes = network.GetNodes();
                 for(size_t n = 0; n < tiles.size(); ++n) {
@@ -826,7 +826,7 @@ ECAD_INLINE void EGridThermalNetworkIterativeSolver::SolveOneLayer(size_t z, ESi
                 //     }
                 // }
                 ThermalNetworkSolver solver(network);
-                solver.SolveEigen(refT);
+                solver.Solve(refT);
 
                 const auto & nodes = network.GetNodes();
                 for(size_t n = 0; n < tiles.size(); ++n) {

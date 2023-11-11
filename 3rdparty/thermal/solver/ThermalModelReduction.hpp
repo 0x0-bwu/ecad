@@ -30,18 +30,18 @@ Prima(Eigen::SparseMatrix<Float> const& C,   // derivative conductance terms
   // Step 1 of PRIMA creates the B and L matrices, and is performed by the caller.
 
   // Step 2: Solve GR = B for R
-  SparseLU<SparseMatrix<Float>, COLAMDOrdering<int> > G_LU(G);
+  Eigen::SparseLU<Eigen::SparseMatrix<Float>, COLAMDOrdering<int> > G_LU(G);
   assert(G_LU.info() == Success);
-  SparseMatrix<Float> R = G_LU.solve(B);
+  Eigen::SparseMatrix<Float> R = G_LU.solve(B);
 
   // Step 3: Set X[0] to the orthonormal basis of R as determined by QR factorization
-  typedef Matrix<Float, Dynamic, Dynamic> MatrixXX;
+  typedef Eigen::Matrix<Float, Dynamic, Dynamic> MatrixXX;
   // The various X matrices are stored in a std::vector.  Eigen requires us to use a special
   // allocator to retain alignment:
   typedef aligned_allocator<MatrixXX> AllocatorXX;
   typedef vector<MatrixXX, AllocatorXX> MatrixXXList;
   
-  SparseQR<SparseMatrix<Float>, COLAMDOrdering<int> > R_QR(R);
+  Eigen::SparseQR<Eigen::SparseMatrix<Float>, COLAMDOrdering<int> > R_QR(R);
   assert(R_QR.info() == Success);
   // QR stores the Q "matrix" as a series of Householder reflection operations
   // that it will perform for you with the * operator.  If you store it in a matrix

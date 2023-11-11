@@ -119,10 +119,10 @@ private:
     FCoord m_scaleH = 1.0;//only apply for horizontal
     std::array<FCoord, 2> m_resolution = {0, 0};//unit: m
     std::vector<EGridThermalLayer> m_stackupLayers;
-    std::array<ESimVal, 2> m_uniformBcTopBot = {0, 0};
     std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
     std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
     std::vector<std::tuple<ESize3D, ESize3D, FCoord> > m_jumpConnects;
+    std::array<ESimVal, 2> m_uniformBcTopBot{invalidSimVal, invalidSimVal};
 };
 
 ECAD_ALWAYS_INLINE size_t EGridThermalModel::GetFlattenIndex(const ESize3D & index) const

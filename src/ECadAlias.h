@@ -50,5 +50,8 @@ ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
 
 ECAD_ALWAYS_INLINE static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
-ECAD_ALWAYS_INLINE static constexpr double invalidValue = std::numeric_limits<double>::quiet_NaN();
+ECAD_ALWAYS_INLINE static constexpr ESimVal invalidSimVal = std::numeric_limits<ESimVal>::max();//std::nan(quiet_Nan) has issue with AppleClang with -ffast-math
+
+template <typename NumType>
+ECAD_ALWAYS_INLINE  bool isValid(NumType value) { return value != std::numeric_limits<NumType>::max(); }
 }//namespace ecad

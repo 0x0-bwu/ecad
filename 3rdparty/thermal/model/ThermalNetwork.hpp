@@ -1,6 +1,7 @@
 #pragma once
 
 #include "generic/math/MathUtility.hpp"
+#include "generic/tools/Format.hpp"
 #include "generic/circuit/MNA.hpp"
 #include <unordered_map>
 #include <memory>
@@ -27,6 +28,20 @@ public:
         num_type htc = 0;//unit: W/k
         std::vector<size_t> ns;
         std::vector<num_type> rs;
+
+        std::string msg(size_t index) const
+        {
+            using namespace generic::fmt;
+            std::stringstream ss;
+            ss << Fmt2Str("ID: %1%, T:%2%, C:%3%, HF:%4%, HTC:%5%", index, t, c, hf, htc);
+            if (not ns.empty()) {
+                ss << ", N:[";
+                for (size_t i = 0; i < ns.size(); ++i)
+                    ss << Fmt2Str("%1%(%2%) ", ns.at(i), rs.at(i));
+                ss << ']';
+            }
+            return ss.str();
+        }
     };
 
     struct Edge
@@ -144,6 +159,14 @@ public:
     const std::vector<Node> & GetNodes() const
     {
         return m_nodes;
+    }
+
+    num_type TotalHF() const
+    {
+        num_type total{0};
+        for (const auto & node : m_nodes)
+            total += node.hf;
+        return total;
     }
 
 private:
@@ -287,9 +310,24 @@ private:
 using namespace generic::ckt;
 
 template <typename num_type>
-inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network, num_type refT)
+inline DenseVector<num_type> makeRhs(const ThermalNetwork<num_type> & network, num_type refT)
+{
+    const size_t nodes = network.Size();
+    const size_t source = network.Source();
+    DenseVector<num_type> rhs(source);
+    for(size_t i = 0, s = 0; i < nodes; ++i) {
+        const auto & node = network[i];
+        if (node.hf != 0 || node.htc != 0)
+            rhs[s++] = node.hf + node.htc * refT;
+    }
+    return rhs;
+}
+
+template <typename num_type>
+inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network)
 {
     using Matrix = SparseMatrix<num_type>;
+    using Triplets = std::vector<Eigen::Triplet<num_type> >;
     
     MNA<Matrix> m;
     const size_t nodes = network.Size();
@@ -298,25 +336,28 @@ inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & net
     m.C = Matrix(nodes, nodes);
     m.L = Matrix(nodes, nodes);
     m.B = Matrix(nodes, source);
-    
-    size_t s = 0;
-    for (size_t i = 0; i < nodes; ++i) {
+
+    Triplets tG, tC, tL, tB;
+    for (size_t i = 0, s = 0; i < nodes; ++i) {
         const auto & node = network[i];
         for (size_t j = 0; j < node.ns.size(); ++j) {
             if (auto n = node.ns.at(j); n > i) { //todo, remove ">"" check after modify to single edage 
                 if (auto r = node.rs.at(j); r > 0)
-                    mna::Stamp(m.G, i, n, 1 / r);
+                    mna::Stamp(tG, i, n, num_type{1} / r);
             }
         }
-        if (node.c > 0) mna::Stamp(m.C, i, node.c);
+        if (node.htc != 0) mna::Stamp(tG, i, node.htc);
+        if (node.c > 0) mna::Stamp(tC, i, node.c);
         if (node.hf != 0 || node.htc != 0)
-            mna::Stamp(m.B, i, s++, 1);
-        mna::Stamp(m.L, i, 1);
+            tB.emplace_back(i, s++, 1);
+        tL.emplace_back(i, i, 1);//todo identity mat
     }
+    m.G.setFromTriplets(tG.begin(), tG.end());
+    m.C.setFromTriplets(tC.begin(), tC.end());
+    m.B.setFromTriplets(tB.begin(), tB.end());
+    m.L.setFromTriplets(tL.begin(), tL.end());
     return m;
 }
-
-
 
 }//namespace model
 }//namespace thermal

@@ -29,7 +29,7 @@ public:
 
 private:
     void ApplyBoundaryConditionForLayer(const std::vector<ESimVal> & iniT, const EGridDataTable & dataTable, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const;
-    void ApplyUniformBoundaryConditionForLayer(size_t node, ESimVal value, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const;
+    void ApplyUniformBoundaryConditionForLayer(ESimVal value, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const;
 
 public:
     ESimVal GetMetalComposite(const ESize3D & index) const;
