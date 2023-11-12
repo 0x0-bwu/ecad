@@ -76,7 +76,8 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
                 results[n] = nodes[n].t;
 
             size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
-            std::cout << "hotspot: " << maxId << std::endl;
+            size_t minId = std::distance(results.begin(), std::min_element(results.begin(), results.end()));
+            std::cout << "hotspot: " << maxId << ", coolspot: " << minId << std::endl;
             // if (false) {
             //     ECAD_EFFICIENCY_TRACK("transient mor")
             //     using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
@@ -111,16 +112,17 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
                 using StateType = typename TransSolver::StateType;
                 size_t threads = EDataMgr::Instance().DefaultThreads();
 
-                std::vector<size_t> probs{maxId};
-                // std::ofstream out(std::filesystem::path(m_settings.spiceFile).parent_path().string() + "/trans.out");
-                auto recorder = typename TransSolver::Recorder(std::cout, probs, 0.1);
-                
+                std::vector<size_t> probs{maxId};                
                 ThermalNetworkTransientSolver tranSolver(*network, refT, threads);
 
                 StateType initState;
-                auto totalSteps = tranSolver.Solve(initState, 0.0, 10.0, 0.01, &recorder);
-
-
+                size_t totalSteps{0};
+                ESimVal t0{0}, dt{0.1}, endT{10};
+                while (t0 < endT) {
+                    totalSteps += tranSolver.Solve(initState, t0, t0 + dt, dt / 10);
+                    std::cout << "t: " << t0 << ", " << initState.at(minId) << ", " << initState.at(maxId) << ECAD_EOL;
+                    t0 += dt;
+                }
                 std::cout << "integrate step: " << totalSteps << std::endl;
             }
 
