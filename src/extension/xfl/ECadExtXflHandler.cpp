@@ -74,12 +74,12 @@ ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string 
 
 ECAD_INLINE void ECadExtXflHandler::ImportComponentDefs()
 {
-    auto & mgr = EDataMgr::Instance();
+    // auto & mgr = EDataMgr::Instance();
     
     for (const auto & xflPart : m_xflDB->parts) {
         auto name = m_database->GetNextDefName(xflPart.name, EDefinitionType::ComponentDef);
         m_partNameMap.emplace(xflPart.name, name);
-        
+
     }
 }
 

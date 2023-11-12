@@ -75,8 +75,8 @@ namespace thermal
                 num_type interval;
                 std::ostream & os;
                 const std::vector<size_t> & probs;
-                Recorder(std::ostream & os, const std::vector<size_t> & probs, num_type interval)
-                    : interval(interval), os(os), probs(probs) {}
+                Recorder(std::ostream & os = std::cout, const std::vector<size_t> & probs = {}, num_type interval = 0.1)
+                 : interval(interval), os(os), probs(probs) {}
                 void operator()(const StateType & x, num_type t)
                 {
                     if (count += t - prev; count > interval)
@@ -115,19 +115,26 @@ namespace thermal
                     for (auto [rhs, node] : rhs2Nodes)
                         hf[rhs] = network[node].hf;
                 }
+                virtual ~Intermidiate() = default;
                 size_t StateSize() const { return coeff.cols(); }
             };
-            
+
+            struct NullExcitation { num_type operator() ([[maybe_unused]] num_type t) const { return 1; } };
+
+            template<typename Excitation>
             struct Solver
             {
                 Intermidiate & im;
-                explicit Solver(Intermidiate & im) : im(im) {}
-                void operator() (const StateType & x, StateType & dxdt, [[maybe_unused ]] num_type t)
+                const Excitation & e;
+                DenseVector<num_type> hf;
+                explicit Solver(Intermidiate & im, const Excitation & e) : im(im), e(e) { hf = DenseVector<num_type>(im.hf.size());}
+                void operator() (const StateType & x, StateType & dxdt, num_type t)
                 {
                     using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
                     Eigen::Map<const VectorType> xM(x.data(), x.size());
                     Eigen::Map<VectorType> dxdtM(dxdt.data(), dxdt.size());
-                    dxdtM = im.coeff * xM + im.htcM + im.hfP * im.hf;
+                    for (size_t i = 0; i < im.hf.size(); ++i) hf[i] = e(t) * im.hf[i];
+                    dxdtM = im.coeff * xM + im.htcM + im.hfP * hf;
                 }
             };
            
@@ -135,23 +142,25 @@ namespace thermal
              : m_refT(refT), m_threads(threads), m_network(network)
             {
                 Eigen::setNbThreads(std::max<size_t>(1, threads));
+                m_im.reset(new Intermidiate(m_network, m_refT, m_threads));
             }
 
             virtual ~ThermalNetworkTransientSolver() = default;
+            size_t StateSize() const { return m_im->StateSize(); }
 
-            size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt)
+            template <typename Observer = Recorder, typename Excitation = NullExcitation>
+            size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt, const Observer & observer, const Excitation & e = NullExcitation{})
             {
-                Intermidiate im(m_network, m_refT, m_threads);
-                if (initState.size() != im.StateSize())
-                    initState.assign(im.StateSize(), m_refT);
+                if (initState.size() != StateSize()) return 0;
                 using namespace boost::numeric::odeint;
                 using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
                 return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
-                                        Solver(im), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt});
+                                        Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
             }
         private:
             num_type m_refT;
             size_t m_threads;
+            std::unique_ptr<Intermidiate> m_im;
             const ThermalNetwork<num_type> & m_network;
         };
 

@@ -106,24 +106,76 @@ ECAD_INLINE bool EGridThermalNetworkDirectSolver::Solve(ESimVal refT, std::vecto
             //     out.close();
             // }
 
-            if (true) {
+            if (false) {
                 ECAD_EFFICIENCY_TRACK("transient origin")
                 using TransSolver = ThermalNetworkTransientSolver<ESimVal>;
                 using StateType = typename TransSolver::StateType;
+                using Recorder = typename TransSolver::Recorder;
                 size_t threads = EDataMgr::Instance().DefaultThreads();
+                
+                struct Excitation
+                {
+                    ESimVal cycle, duty;
+                    Excitation(ESimVal cycle, ESimVal duty = 0.5) : cycle(cycle), duty(duty * cycle) {}
+                    ESimVal operator() (ESimVal t) const
+                    {
+                        return std::fmod(t, cycle) < duty ? 1 : 0;
+                    }
+                };
+                
+                struct MaxRecorder
+                {
+                    ESimVal & hotest;
+                    ESimVal & coolest;
+                    const std::vector<size_t> & probs;
+                    MaxRecorder(ESimVal & h, ESimVal & c, const std::vector<size_t> & probs) : hotest(h), coolest(c), probs(probs)
+                    {
+                        coolest = hotest = - std::numeric_limits<ESimVal>::max();
+                    }
+                    void operator()(const StateType & x, ESimVal t)
+                    {
+                        coolest = std::max(x.at(probs[0]), coolest);
+                        hotest = std::max(x.at(probs[1]), hotest);
+                    }
+                };
 
-                std::vector<size_t> probs{maxId};                
-                ThermalNetworkTransientSolver tranSolver(*network, refT, threads);
-
-                StateType initState;
-                size_t totalSteps{0};
-                ESimVal t0{0}, dt{0.1}, endT{10};
-                while (t0 < endT) {
-                    totalSteps += tranSolver.Solve(initState, t0, t0 + dt, dt / 10);
-                    std::cout << "t: " << t0 << ", " << initState.at(minId) << ", " << initState.at(maxId) << ECAD_EOL;
-                    t0 += dt;
+                // size_t totalSteps{0};
+                std::vector<size_t> probs{minId, maxId};
+                // std::vector<ESimVal> cycles {1e-5, 5e-5, 1e-4, 5e-4, 1e-3, 5e-3, 1e-2, 5e-2, 1e-1};
+                // std::vector<ESimVal> dutys {0.01, 0.02, 0.05, 0.1, 0.3, 0.5};
+                std::vector<ESimVal> cycles{0.5, 1};
+                std::vector<ESimVal> dutys{0.5};
+                std::vector<std::vector<ESimVal>> results(cycles.size() * dutys.size());
+                generic::thread::ThreadPool pool;
+                for (size_t i = 0; i < cycles.size(); ++i) {
+                    for (size_t j = 0; j < dutys.size(); ++j) {
+                        auto cycle = cycles.at(i);
+                        auto duty = dutys.at(j);
+                        Excitation excitation(cycle, duty);
+                        ESimVal t0{0}, dt{0.1 * cycle}, endT{2};//wbtest
+                        ESimVal hot, cool;
+                        MaxRecorder recorder(hot, cool, probs);
+                        ThermalNetworkTransientSolver tranSolver(*network, refT, threads);
+                        StateType initState(tranSolver.StateSize(), refT);
+                        auto task = [&]{
+                            tranSolver.Solve(initState, t0, endT, dt, recorder, excitation);
+                            results[i * dutys.size() + j] = {cycle, duty, hot, cool};
+                            std::cout << "c: " << cycle << ", d: " << duty << ", h: " << hot << ", c: " << cool << std::endl;
+                        };
+                        pool.Submit(task);
+                        // tranSolver.Solve(initState, t0, endT, dt, recorder, excitation);
+                        // results[i * dutys.size() + j] = {cycle, duty, hot, cool};
+                        // std::cout << "c: " << cycle << ", d: " << duty << ", h: " << hot << ", c: " << cool << std::endl;
+                    }
                 }
-                std::cout << "integrate step: " << totalSteps << std::endl;
+                pool.Wait();
+                std::ofstream out("./impedance.txt");
+                for (const auto & res : results) {
+                    for (size_t i = 0; i < 4; ++i)
+                        out << res[i] << ' ';
+                    out << std::endl;
+                }
+                out.close();
             }
 
             iteration -= 1;
