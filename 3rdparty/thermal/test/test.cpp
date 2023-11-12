@@ -1,6 +1,5 @@
 #include "thermal/solver/ThermalNetworkSolver.hpp"
 #include "thermal/utilities/ThermalNetlistWriter.hpp"
-#include "thermal/solver/ThermalModelReduction.hpp"
 #include <iostream>
 
 int main(int argc, char * argv[])
@@ -34,38 +33,24 @@ int main(int argc, char * argv[])
         std::cout << "node " << i + 1 <<": " << nodes[i].t << std::endl;
     }
 
-    {
-        std::vector<size_t> probs{0};
-        using TransSolver = solver::ThermalNetworkTransientSolver<float_t>;
-        using StateType = typename TransSolver::StateType;
-        auto in = typename TransSolver::Input(network, refT, threads);
-        auto recorder = typename TransSolver::Recorder(std::cout, probs, 0.01);
 
-        StateType initT(nodes.size(), refT);
-        using namespace boost::numeric;
-        using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<float_t> >;
-        odeint::integrate_adaptive(
-            odeint::make_controlled(1e-12, 1e-10,ErrorStepperType{}),
-            TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
-    }
-
-    {
-        std::vector<size_t> probs{0};
-        using TransSolver = solver::ThermalNetworkReducedTransientSolver<float_t>;
-        using StateType = typename TransSolver::StateType;
-        auto in = typename TransSolver::Input(network, refT, 2, threads, 1);
-        auto recorder = typename TransSolver::Recorder(std::cout, &in, probs, 0.01);
-        StateType state(in.StateSize());
-        StateType initT(network.Size(), refT);
-        Eigen::Map<const Eigen::Matrix<float_t, Eigen::Dynamic, 1>> init(initT.data(), initT.size(), 1);
-        Eigen::Map<Eigen::Matrix<float_t, Eigen::Dynamic, 1>> result(state.data(), state.size(), 1);
-        result = in.x.transpose() * init;
-        std::cout << "init State: \n" << result << std::endl;//wbtest
-        using namespace boost::numeric;
-        using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<float_t> >;
-        odeint::integrate_adaptive(
-            odeint::make_controlled(1e-12, 1e-10,ErrorStepperType{}),
-            TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
-    }
+    // {
+    //     std::vector<size_t> probs{0};
+    //     using TransSolver = solver::ThermalNetworkReducedTransientSolver<float_t>;
+    //     using StateType = typename TransSolver::StateType;
+    //     auto in = typename TransSolver::Input(network, refT, 2, threads, 1);
+    //     auto recorder = typename TransSolver::Recorder(std::cout, &in, probs, 0.01);
+    //     StateType state(in.StateSize());
+    //     StateType initT(network.Size(), refT);
+    //     Eigen::Map<const Eigen::Matrix<float_t, Eigen::Dynamic, 1>> init(initT.data(), initT.size(), 1);
+    //     Eigen::Map<Eigen::Matrix<float_t, Eigen::Dynamic, 1>> result(state.data(), state.size(), 1);
+    //     result = in.x.transpose() * init;
+    //     std::cout << "init State: \n" << result << std::endl;//wbtest
+    //     using namespace boost::numeric;
+    //     using ErrorStepperType = odeint::runge_kutta_cash_karp54<std::vector<float_t> >;
+    //     odeint::integrate_adaptive(
+    //         odeint::make_controlled(1e-12, 1e-10,ErrorStepperType{}),
+    //         TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
+    // }
     return 0;
 }

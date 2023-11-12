@@ -12,12 +12,8 @@ namespace thermal {
 namespace model {
 
 template <typename num_type>
-class ThermalNetworkMatrixBuilder;
-
-template <typename num_type>
 class ThermalNetwork
 {
-    friend class ThermalNetworkMatrixBuilder<num_type>;
 public:
     inline static constexpr num_type unknownT = std::numeric_limits<num_type>::max();
     struct Node
@@ -173,140 +169,6 @@ private:
     std::vector<Node> m_nodes;
 };
 
-template <typename num_type>
-class ThermalNetworkMatrixBuilder
-{
-    using Edge = typename ThermalNetwork<num_type>::Edge;
-public:
-    explicit ThermalNetworkMatrixBuilder(const ThermalNetwork<num_type> & network)
-     : m_network(network) { BuildMatrixIndicesMap(); }
-    
-    size_t GetMatrixSize() const
-    {
-        return m_mnMap.size();
-    }
-
-    num_type GetDiagCoeff(size_t mIndex) const
-    {
-        size_t nIndex = m_mnMap.at(mIndex);
-        return GetDiagCoeffInternal(nIndex);
-    }
-
-    num_type GetCoeff(size_t mRow, size_t mCol) const
-    {
-        size_t nRow = m_mnMap.at(mRow);
-        size_t nCol = m_mnMap.at(mCol);
-        return GetCoeffInternal(nRow, nCol);
-    }
-
-    num_type GetRhs(size_t mIndex, const num_type & refT) const
-    {
-        size_t nIndex = m_mnMap.at(mIndex);
-        return GetRhsInternal(nIndex, refT);
-    }
-
-    void GetCoeffs(std::list<Edge> & edges) const
-    {
-        edges.clear();
-        auto mSize = GetMatrixSize();
-        auto mark = std::unique_ptr<std::vector<bool> >(new std::vector<bool>(mSize, false));
-        GetCoeffsBFS(m_mnMap.begin()->first, *mark, edges);
-    }
-    
-    void GetDiagCoeffs(std::vector<num_type> & diagCoeffs) const
-    {
-        auto mSize = GetMatrixSize();
-        diagCoeffs.resize(mSize);
-        for(size_t mIdx = 0; mIdx < mSize; ++mIdx)
-            diagCoeffs[mIdx] = GetDiagCoeff(mIdx);
-    }
-
-    const std::unordered_map<size_t, size_t> & GetMatrixNodeIndicesMap() const
-    {
-        return m_mnMap;
-    }
-
-    const std::unordered_map<size_t, size_t> & GetNodeMatrixIndicesMap() const
-    {
-        return m_nmMap;
-    }
-
-private:
-    void BuildMatrixIndicesMap()
-    {
-        size_t index = 0;
-        for(size_t i = 0; i < m_network.m_nodes.size(); ++i) {
-            const auto & node = m_network.m_nodes.at(i);
-            if(node.t != ThermalNetwork<num_type>::unknownT) continue;
-            m_mnMap.insert(std::make_pair(index, i));
-            m_nmMap.insert(std::make_pair(i, index));
-            index++;
-        }
-    }
-
-    num_type GetDiagCoeffInternal(size_t nIndex) const
-    {
-        num_type coeff = 0;
-        const auto & nodes = m_network.m_nodes;
-        for(const auto & r : nodes[nIndex].rs)
-            coeff += 1 / r;
-        coeff += nodes[nIndex].htc;
-        return coeff;
-    }
-
-    num_type GetCoeffInternal(size_t nRow, size_t nCol) const
-    {
-        const auto & nodes = m_network.m_nodes;
-        const auto & ns = nodes[nRow].ns;
-        for(size_t i = 0; i < ns.size(); ++i){
-            if(ns[i] == nCol) return -1 / (nodes[nRow].rs[i]);
-        }
-        return 0;
-    }
-
-    num_type GetRhsInternal(size_t nIndex, const num_type & refT) const
-    {
-        const auto & nodes = m_network.m_nodes;
-        num_type rhs = nodes[nIndex].hf + nodes[nIndex].htc * refT;
-        const auto & ns = nodes[nIndex].ns;
-        for(auto n : ns) {
-            if(nodes[n].t != ThermalNetwork<num_type>::unknownT)
-                rhs -= GetCoeffInternal(nIndex, n) * nodes[n].t;
-        }
-        return rhs;
-    }
-
-    void GetCoeffsBFS(size_t mIndex, std::vector<bool> & mark, std::list<Edge> & edges) const
-    {
-        const auto & nodes = m_network.m_nodes;
-        auto queue = std::unique_ptr<std::queue<size_t> >(new std::queue<size_t>{});
-        mark[mIndex] = true;
-        queue->push(mIndex);
-        while(!(queue->empty())){
-            auto mv = queue->front();
-            auto nv = m_mnMap.at(mv);
-            queue->pop();
-            const auto & ns = nodes[nv].ns;
-            const auto & rs = nodes[nv].rs;
-            for(size_t i = 0; i < ns.size(); ++i){
-                auto nw = ns[i];
-                if(nodes[nw].t != ThermalNetwork<num_type>::unknownT) continue;
-                auto mw = m_nmMap.at(ns[i]);
-                edges.push_back(Edge{mv, mw, -1 / rs[i]});
-                if(!mark[mw]){
-                    mark[mw] = true;
-                    queue->push(mw);
-                }
-            }
-        }
-    }
-
-private:
-    std::unordered_map<size_t, size_t> m_mnMap;//matrix index->node index;
-    std::unordered_map<size_t, size_t> m_nmMap;//node index->matrix index;
-    const ThermalNetwork<num_type> & m_network;
-};
-
 using namespace generic::ckt;
 
 template <typename num_type>
@@ -321,6 +183,82 @@ inline DenseVector<num_type> makeRhs(const ThermalNetwork<num_type> & network, n
             rhs[s++] = node.hf + node.htc * refT;
     }
     return rhs;
+}
+
+template <typename num_type>
+inline DenseVector<num_type> makeFullRhs(const ThermalNetwork<num_type> & network, num_type refT)
+{
+    const size_t nodes = network.Size();
+    DenseVector<num_type> rhs(nodes);
+    for(size_t i = 0 ; i < nodes; ++i) {
+        const auto & node = network[i];
+        rhs[i] = node.hf + node.htc * refT;
+    }
+    return rhs;
+}
+
+template <typename num_type>
+inline SparseMatrix<num_type> makeBondsRhs(const ThermalNetwork<num_type> & network, num_type refT)
+{
+    using Matrix = SparseMatrix<num_type>;
+    using Triplets = std::vector<Eigen::Triplet<num_type> >;
+
+    Triplets triplets;
+    const size_t nodes = network.Size();
+    for(size_t i = 0 ; i < nodes; ++i) {
+        const auto & node = network[i];
+        if (auto res = node.htc * refT; res != 0)
+            triplets.emplace_back(i, 0, res);
+    }
+    Matrix rhs(triplets.size(), 1);
+    rhs.setFromTriplets(triplets.begin(), triplets.end());
+    return rhs;
+}
+
+template <typename num_type>
+inline SparseMatrix<num_type> makeSourceProjMatrix(const ThermalNetwork<num_type> & network, std::unordered_map<size_t, size_t> & rhs2Nodes)
+{
+    using Matrix = SparseMatrix<num_type>;
+    using Triplets = std::vector<Eigen::Triplet<num_type> >;
+    
+    Triplets tB;
+    const size_t nodes = network.Size();    
+    for (size_t i = 0, s = 0; i < nodes; ++i) {
+        const auto & node = network[i];
+        if (node.hf != 0) {
+            rhs2Nodes.emplace(s, i);
+            tB.emplace_back(i, s++, 1);
+        }
+    }
+    auto B = Matrix(nodes, tB.size());
+    m.B.setFromTriplets(tB.begin(), tB.end());
+    return m;
+}
+
+template <typename num_type>
+inline std::pair<SparseMatrix<num_type>, SparseMatrix<num_type>> makeInvCandNegG(const ThermalNetwork<num_type> & network)
+{
+    using Matrix = SparseMatrix<num_type>;
+    using Triplets = std::vector<Eigen::Triplet<num_type> >;
+    
+    const size_t nodes = network.Size();
+    auto invC = Matrix(nodes, nodes);
+    auto negG = Matrix(nodes, nodes);
+    Triplets tG, tC;
+    for (size_t i = 0; i < nodes; ++i) {
+        const auto & node = network[i];
+        for (size_t j = 0; j < node.ns.size(); ++j) {
+            if (auto n = node.ns.at(j); n > i) { //todo, remove ">"" check after modify to single edage 
+                if (auto r = node.rs.at(j); r > 0)
+                    mna::Stamp(tG, i, n, -num_type{1} / r);
+            }
+        }
+        if (node.htc != 0) mna::Stamp(tG, i, -node.htc);
+        if (node.c > 0) mna::Stamp(tC, i, 1 / node.c);
+    }
+    negG.setFromTriplets(tG.begin(), tG.end());
+    invC.setFromTriplets(tC.begin(), tC.end());
+    return {invC, negG};
 }
 
 template <typename num_type>

@@ -90,7 +90,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     }
 
     ESimVal iniT = 25;
-    constexpr bool useGridPower = false;
+    constexpr bool useGridPower = true;
     auto compIter = layout->GetComponentIter();
     std::unordered_map<size_t, EGridData> gridMap;
     while (auto * component = compIter->Next()) {
