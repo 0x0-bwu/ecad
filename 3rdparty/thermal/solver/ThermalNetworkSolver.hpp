@@ -88,71 +88,44 @@ namespace thermal
                     prev = t;
                 }
             };
-
-            // struct Intermidiate
-            // {
-            //     num_type refT = 25;
-            //     size_t threads = 1;
-            //     DenseVector<num_type> rhs;
-            //     MNA<SparseMatrix<num_type> > m;
-            //     const ThermalNetwork<num_type> & network;
-            //     Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, size_t threads)
-            //         : refT(refT), threads(threads), network(network)
-            //     {
-            //         Eigen::setNbThreads(std::max<size_t>(1, threads));
-            //         m = makeMNA(network);
-            //         rhs = m.B * makeRhs(network, refT);
-            //     }
-            //     num_type G(size_t i, size_t j) const { return m.G.coeff(i, j); }
-            //     num_type C(size_t i) const { return m.C.coeff(i, i); }
-            //     num_type Rhs(size_t i) const { return rhs[i]; }
-            //     size_t StateSize() const { return m.G.cols(); }
-            // };
-            
+        
             struct Intermidiate
             {
                 num_type refT = 25;
                 size_t threads = 1;
-                DenseVector<num_type>  rhs;
-                SparseMatrix<num_type> invC;
+                DenseVector<num_type> hf;
+                SparseMatrix<num_type> hfP;
+                SparseMatrix<num_type> htcM;
                 SparseMatrix<num_type> coeff;
                 const ThermalNetwork<num_type> & network;
+                std::unordered_map<size_t, size_t> rhs2Nodes;
                 Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, size_t threads)
                     : refT(refT), threads(threads), network(network)
                 {
                     Eigen::setNbThreads(std::max<size_t>(1, threads));
 
-                    SparseMatrix<num_type> negG;
-                    std::tie(invC, negG) = makeInvCandNegG(network);
+                    auto [invC, negG] = makeInvCandNegG(network);
                     coeff = invC * negG;
-                    rhs = makeFullRhs(network, refT);
+
+                    htcM = invC * makeBondsRhs(network, refT);
+                    hfP = invC * makeSourceProjMatrix(network, rhs2Nodes);
+                    hf = DenseVector<num_type>(rhs2Nodes.size());
+                    for (auto [rhs, node] : rhs2Nodes)
+                        hf[rhs] = network[node].hf;
                 }
-                size_t StateSize() const { return invC.cols(); }
+                size_t StateSize() const { return coeff.cols(); }
             };
             
             struct Solver
             {
                 Intermidiate & im;
                 explicit Solver(Intermidiate & im) : im(im) {}
-                // void operator() (const StateType & x, StateType & dxdt, num_type t)
-                // {
-                //     // #pragma omp parallel for
-                //     for (size_t i = 0; i < dxdt.size(); ++i) {
-                //         dxdt[i] = 0;
-                //         // #pragma omp parallel for
-                //         for (size_t j = 0; j < x.size(); ++j) {
-                //             dxdt[i] += im.G(i, j) * x.at(j);
-                //         }
-                //         dxdt[i] *= -1 / im.C(i);
-                //         dxdt[i] += im.Rhs(i) / im.C(i);
-                //     }
-                // }
                 void operator() (const StateType & x, StateType & dxdt, [[maybe_unused ]] num_type t)
                 {
                     using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
                     Eigen::Map<const VectorType> xM(x.data(), x.size());
                     Eigen::Map<VectorType> dxdtM(dxdt.data(), dxdt.size());
-                    dxdtM = im.coeff * xM + im.invC * im.rhs;
+                    dxdtM = im.coeff * xM + im.htcM + im.hfP * im.hf;
                 }
             };
            

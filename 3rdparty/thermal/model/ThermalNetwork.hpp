@@ -210,7 +210,7 @@ inline SparseMatrix<num_type> makeBondsRhs(const ThermalNetwork<num_type> & netw
         if (auto res = node.htc * refT; res != 0)
             triplets.emplace_back(i, 0, res);
     }
-    Matrix rhs(triplets.size(), 1);
+    Matrix rhs(nodes, 1);
     rhs.setFromTriplets(triplets.begin(), triplets.end());
     return rhs;
 }
@@ -221,18 +221,19 @@ inline SparseMatrix<num_type> makeSourceProjMatrix(const ThermalNetwork<num_type
     using Matrix = SparseMatrix<num_type>;
     using Triplets = std::vector<Eigen::Triplet<num_type> >;
     
-    Triplets tB;
+    rhs2Nodes.clear();
+    Triplets triplets;
     const size_t nodes = network.Size();    
     for (size_t i = 0, s = 0; i < nodes; ++i) {
         const auto & node = network[i];
         if (node.hf != 0) {
             rhs2Nodes.emplace(s, i);
-            tB.emplace_back(i, s++, 1);
+            triplets.emplace_back(i, s++, 1);
         }
     }
-    auto B = Matrix(nodes, tB.size());
-    m.B.setFromTriplets(tB.begin(), tB.end());
-    return m;
+    auto B = Matrix(nodes, triplets.size());
+    B.setFromTriplets(triplets.begin(), triplets.end());
+    return B;
 }
 
 template <typename num_type>
