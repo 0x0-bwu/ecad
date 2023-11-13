@@ -24,17 +24,18 @@ namespace thermal
         class ThermalNetworkSolver
         {
         public:
-            explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network, size_t threads = 1)
-                : m_threads(threads), m_network(network) {}
+            explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network, size_t threads)
+                : m_network(network)
+            {
+                Eigen::setNbThreads(std::max<size_t>(1, threads));
+            }
 
             virtual ~ThermalNetworkSolver() = default;
             void SetVerbose(int verbose) { m_verbose = verbose; }
 
             void Solve(num_type refT) const
             {
-                constexpr bool direct = true;
-                Eigen::setNbThreads(std::max<size_t>(1, m_threads));
-
+                constexpr bool direct = false;
                 auto m = makeMNA(m_network); 
                 auto rhs = makeRhs(m_network, refT);
                 Eigen::Matrix<num_type, Eigen::Dynamic, 1> x;
@@ -59,7 +60,6 @@ namespace thermal
 
         private:
             int m_verbose = 0;
-            size_t m_threads = 1;
             ThermalNetwork<num_type> & m_network;
         };
 
@@ -77,6 +77,7 @@ namespace thermal
                 const std::vector<size_t> & probs;
                 Recorder(std::ostream & os = std::cout, const std::vector<size_t> & probs = {}, num_type interval = 0.1)
                  : interval(interval), os(os), probs(probs) {}
+                virtual ~Recorder() = default;
                 void operator()(const StateType & x, num_type t)
                 {
                     if (count += t - prev; count > interval)
@@ -94,18 +95,15 @@ namespace thermal
             struct Intermidiate
             {
                 num_type refT = 25;
-                size_t threads = 1;
                 DenseVector<num_type> hf;
                 SparseMatrix<num_type> hfP;
                 SparseMatrix<num_type> htcM;
                 SparseMatrix<num_type> coeff;
                 const ThermalNetwork<num_type> & network;
                 std::unordered_map<size_t, size_t> rhs2Nodes;
-                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, size_t threads)
-                    : refT(refT), threads(threads), network(network)
+                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT)
+                    : refT(refT), network(network)
                 {
-                    Eigen::setNbThreads(std::max<size_t>(1, threads));
-
                     auto [invC, negG] = makeInvCandNegG(network);
                     coeff = invC * negG;
 
@@ -119,30 +117,35 @@ namespace thermal
                 size_t StateSize() const { return coeff.cols(); }
             };
 
-            struct NullExcitation { num_type operator() ([[maybe_unused]] num_type t) const { return 1; } };
+            struct NullExcitation
+            {
+                virtual ~NullExcitation() = default;
+                num_type operator() ([[maybe_unused]] num_type t) const { return 1; }
+            };
 
             template<typename Excitation>
             struct Solver
             {
-                Intermidiate & im;
                 const Excitation & e;
+                const Intermidiate & im;
                 DenseVector<num_type> hf;
-                explicit Solver(Intermidiate & im, const Excitation & e) : im(im), e(e) { hf = DenseVector<num_type>(im.hf.size());}
+                explicit Solver(const Intermidiate & im, const Excitation & e) : e(e), im(im) { hf = DenseVector<num_type>(im.hf.size());}
+                virtual ~Solver() = default;
+
                 void operator() (const StateType & x, StateType & dxdt, num_type t)
                 {
                     using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
                     Eigen::Map<const VectorType> xM(x.data(), x.size());
                     Eigen::Map<VectorType> dxdtM(dxdt.data(), dxdt.size());
-                    for (size_t i = 0; i < im.hf.size(); ++i) hf[i] = e(t) * im.hf[i];
+                    for (int i = 0; i < im.hf.size(); ++i) hf[i] = e(t) * im.hf[i];
                     dxdtM = im.coeff * xM + im.htcM + im.hfP * hf;
                 }
             };
            
-            ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, size_t threads)
-             : m_refT(refT), m_threads(threads), m_network(network)
+            ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT)
+             : m_refT(refT), m_network(network)
             {
-                Eigen::setNbThreads(std::max<size_t>(1, threads));
-                m_im.reset(new Intermidiate(m_network, m_refT, m_threads));
+                m_im.reset(new Intermidiate(m_network, m_refT));
             }
 
             virtual ~ThermalNetworkTransientSolver() = default;
@@ -159,7 +162,6 @@ namespace thermal
             }
         private:
             num_type m_refT;
-            size_t m_threads;
             std::unique_ptr<Intermidiate> m_im;
             const ThermalNetwork<num_type> & m_network;
         };
@@ -171,20 +173,16 @@ namespace thermal
             using StateType = std::vector<num_type>;    
             struct Intermidiate
             {
-                num_type refT = 25;
-                size_t threads = 1;
-                
                 PermutMatrix p;
+                num_type refT = 25;
                 size_t stateSize{0};
                 DenseVector<num_type> u;
                 DenseMatrix<num_type> rL, rLT;
                 DenseMatrix<num_type> coeff, input;
                 const ThermalNetwork<num_type> & network;
-                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, size_t threads)
-                    : refT(refT), threads(threads), network(network)
+                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT)
+                    : refT(refT), network(network)
                 {
-                    Eigen::setNbThreads(std::max<size_t>(1, threads));
-
                     const size_t source = network.Source();
                     auto m = makeMNA(network);
                     auto rom = Reduce(m, source);
@@ -264,17 +262,16 @@ namespace thermal
                 }
             };
            
-            ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, size_t threads)
-             : m_refT(refT), m_threads(threads), m_network(network)
+            ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT)
+             : m_refT(refT), m_network(network)
             {
-                Eigen::setNbThreads(std::max<size_t>(1, threads));
             }
 
             virtual ~ThermalNetworkReducedTransientSolver() = default;
 
             size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt)
             {
-                Intermidiate im(m_network, m_refT, m_threads);
+                Intermidiate im(m_network, m_refT);
                 StateType initT(m_network.Size(), m_refT);
                 im.Input2State(initT, initState);
 
@@ -286,7 +283,6 @@ namespace thermal
             }
         private:
             num_type m_refT;
-            size_t m_threads;
             const ThermalNetwork<num_type> & m_network;
         };
 

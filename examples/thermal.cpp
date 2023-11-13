@@ -60,7 +60,7 @@ int main(int argc, char * argv[])
 
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
-    ne.GenerateThermalNetwork(layout);
+    auto gridModel = ne.GenerateGridThermalModel(layout);
 
     EDataMgr::Instance().ShutDown();
 

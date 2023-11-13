@@ -39,10 +39,7 @@ void t_grid_thermal_model_solver_test()
     // etherm::utils::EGridThermalModelReduction r(*model);
     // BOOST_CHECK(r.Reduce());
 
-    // EGridThermalNetworkDirectSolver solver(*model);
-    // BOOST_CHECK(solver.Solve(iniT, results));
-
-    EGridThermalNetworkReductionSolver solver(*model, 3);
+    EGridThermalNetworkStaticSolver solver(*model);
     BOOST_CHECK(solver.Solve(iniT, results));
 
     auto resModel = std::make_unique<EGridThermalModel>(*model);

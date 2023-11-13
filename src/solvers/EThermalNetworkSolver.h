@@ -12,56 +12,36 @@ ECAD_API ESimVal CalculateResidual(const std::vector<ESimVal> & v1, const std::v
 class ECAD_API EThermalNetworkSolver
 {
 public:
-    virtual ~EThermalNetworkSolver();
+    virtual ~EThermalNetworkSolver() = default;
     void SetSolveSettings(const EThermalNetworkSolveSettings & settings);
 protected:
     EThermalNetworkSolveSettings m_settings;
 };
 
-class ECAD_API EGridThermalNetworkDirectSolver : public EThermalNetworkSolver
+class ECAD_API EGridThermalNetworkSolver : public EThermalNetworkSolver
 {
 public:
-    explicit EGridThermalNetworkDirectSolver(const EGridThermalModel & model);
-    virtual ~EGridThermalNetworkDirectSolver();
-    bool Solve(ESimVal refT, std::vector<ESimVal> & results);
-private:
+    virtual ~EGridThermalNetworkSolver() = default;    
+
+protected:
+    explicit EGridThermalNetworkSolver(const EGridThermalModel & model);
     const EGridThermalModel & m_model;
 };
 
-class ECAD_API EGridThermalNetworkIterativeSolver : public EThermalNetworkSolver
+class ECAD_API EGridThermalNetworkStaticSolver : public EGridThermalNetworkSolver
 {
 public:
-    explicit EGridThermalNetworkIterativeSolver(const EGridThermalModel & model, std::vector<ESimVal> iniT);
-    virtual ~EGridThermalNetworkIterativeSolver();
+    explicit EGridThermalNetworkStaticSolver(const EGridThermalModel & model);
+    virtual ~EGridThermalNetworkStaticSolver() = default;
     bool Solve(ESimVal refT, std::vector<ESimVal> & results);
-
-private:
-    void SolveOneIteration(ESimVal refT, std::vector<ESimVal> & results);
-    void SolveOneLayer(size_t z, ESimVal refT, std::vector<ESimVal> & results);
-    
-private:
-    const EGridThermalModel & m_model;
-    std::vector<ESimVal> m_iniT;
 };
 
-class ECAD_API EGridThermalNetworkReductionSolver : public EThermalNetworkSolver
+class ECAD_API EGridThermalNetworkTransientSolver : public EGridThermalNetworkSolver
 {
 public:
-    explicit EGridThermalNetworkReductionSolver(const EGridThermalModel & model, size_t reduceOrder = 0);
-    virtual ~EGridThermalNetworkReductionSolver();
+    explicit EGridThermalNetworkTransientSolver(const EGridThermalModel & model);
+    virtual ~EGridThermalNetworkTransientSolver() = default;
     bool Solve(ESimVal refT, std::vector<ESimVal> & results);
-
-private:
-    bool SolveRecursively(const EGridThermalModel & model, ESimVal refT, std::vector<ESimVal> & results, size_t reduceOrder);
-    bool SolveDirectly(const EGridThermalModel & model, ESimVal refT, std::vector<ESimVal> & results);
-
-public:
-    static ESize2D LowLeftIndexFromReducedModelIndex(const ESize2D & index);
-    static ESize2D ReducedModelIndexFromModelIndex(const ESize2D & index);
-
-private:
-    const EGridThermalModel & m_model;
-    size_t m_reduceOrder = 0;
 };
 
 }//namesapce esolver

@@ -36,8 +36,7 @@ int main(int argc, char * argv[])
 
 
     float_t refT = 25;
-    size_t threads{1};
-    solver::ThermalNetworkSolver<float_t> staticSolver(network, threads);
+    solver::ThermalNetworkSolver<float_t> staticSolver(network, 1);
     staticSolver.SetVerbose(1);
     staticSolver.Solve(refT);
 
@@ -53,7 +52,7 @@ int main(int argc, char * argv[])
         using StateType = typename TransSolver::StateType;
 
         StateType initState;
-        TransSolver transSolver(network, refT, threads);
+        TransSolver transSolver(network, refT);
         transSolver.Solve(initState, float_t{0}, float_t{10}, float_t{0.1});
     }
     return 0;

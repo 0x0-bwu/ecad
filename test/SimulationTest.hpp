@@ -38,7 +38,7 @@ void t_thermal_network_extraction()
 
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(settings);
-    BOOST_CHECK(ne.GenerateThermalNetwork(layout));
+    BOOST_CHECK(ne.GenerateGridThermalModel(layout));
 
     EDataMgr::Instance().ShutDown();
 }

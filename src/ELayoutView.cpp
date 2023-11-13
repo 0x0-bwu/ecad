@@ -306,7 +306,7 @@ ECAD_INLINE bool ELayoutView::ExtractThermalNetwork(const EThermalNetworkExtract
 {
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(settings);
-    return ne.GenerateThermalNetwork(this);
+    return nullptr != ne.GenerateGridThermalModel(this);
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)

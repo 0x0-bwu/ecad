@@ -14,15 +14,16 @@ namespace esim {
 
 using namespace eutils;
 using namespace esolver;
+using namespace emodel::etherm;
 
 ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetworkExtractionSettings settings)
 {
     m_settings = std::move(settings);
 }
 
-ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutView> layout)
+ECAD_INLINE UPtr<EGridThermalModel> EThermalNetworkExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout)
 {
-    ECAD_EFFICIENCY_TRACK("generate thermal network")
+    ECAD_EFFICIENCY_TRACK("generate grid thermal model")
 
     EMetalFractionMappingSettings settings;
     settings.grid = m_settings.grid;
@@ -35,11 +36,11 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         settings.outFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mf.txt";
 
     ELayoutMetalFractionMapper mapper(settings);
-    if(!mapper.GenerateMetalFractionMapping(layout)) return false;
+    if(!mapper.GenerateMetalFractionMapping(layout)) return nullptr;
 
     auto mf = mapper.GetLayoutMetalFraction();
     auto mfInfo = mapper.GetMetalFractionInfo();
-    if(nullptr == mf || nullptr == mfInfo) return false;
+    if(nullptr == mf || nullptr == mfInfo) return nullptr;
 
     if(!m_settings.outDir.empty() && m_settings.dumpDensityFile) {
         auto densityFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "density.txt";
@@ -137,12 +138,13 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
     // model.SetTopBotBCModel(nullptr, bcModel);
 
     std::vector<ESimVal> results;
-    EGridThermalNetworkDirectSolver solver(model);
+    EGridThermalNetworkStaticSolver solver(model);
+    // EGridThermalNetworkTransientSolver solver(model);
     EThermalNetworkSolveSettings solverSettings;
     if (m_settings.dumpSpiceFile)
         solverSettings.spiceFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "spice.sp";
     solver.SetSolveSettings(solverSettings);
-    if (not solver.Solve(iniT, results)) return false;
+    if (not solver.Solve(iniT, results)) return nullptr;
 
     auto modelSize = model.ModelSize();
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
@@ -181,7 +183,7 @@ ECAD_INLINE bool EThermalNetworkExtraction::GenerateThermalNetwork(Ptr<ILayoutVi
         }
     }
 #endif//BOOST_GIL_IO_PNG_SUPPORT
-    return true;
+    return std::make_unique<EGridThermalModel>(std::move(model));
 }
 
 }//namespace esim

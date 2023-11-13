@@ -22,7 +22,6 @@ int main(int argc, char * argv[])
 
     using namespace ecad;
     auto & eDataMgr = EDataMgr::Instance();
-    eDataMgr.SetDefaultThreads(1);
 
     //database
     auto database = eDataMgr.CreateDatabase("RobGrant");
@@ -113,15 +112,21 @@ int main(int argc, char * argv[])
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec7));
 
     eDataMgr.CreateBondwire(sicLayout, "SourceBW1", iLyrWire, sourceNet->GetNetId(), {3000000, 7500000}, {4450000, 16000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "SourceBW2", iLyrWire, sourceNet->GetNetId(), {3000000, 2500000}, {4450000, 14000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "SourceBW3", iLyrWire, sourceNet->GetNetId(), {4450000, 16000000}, {18000000, 16000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "SourceBW4", iLyrWire, sourceNet->GetNetId(), {4450000, 14000000}, {18000000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW2", iLyrWire, sourceNet->GetNetId(), {3000000, 5000000}, {4450000, 15000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW3", iLyrWire, sourceNet->GetNetId(), {3000000, 2500000}, {4450000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW4", iLyrWire, sourceNet->GetNetId(), {4450000, 16000000}, {18000000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW5", iLyrWire, sourceNet->GetNetId(), {4450000, 15000000}, {18000000, 15000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "SourceBW6", iLyrWire, sourceNet->GetNetId(), {4450000, 14000000}, {18000000, 14000000}, bwRadius);
+    
     eDataMgr.CreateBondwire(sicLayout, "DrainBW1", iLyrWire, drainNet->GetNetId(), {10800000, 12200000}, {19350000, 7500000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "DrainBW2", iLyrWire, drainNet->GetNetId(), {10800000, 7500000}, {19350000, 2500000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "GateBW1", iLyrWire, gateNet->GetNetId(), {3250000, 24000000}, {2450000, 14000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "GateBW2", iLyrWire, gateNet->GetNetId(), {5750000, 24000000}, {2450000, 16000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "GateBW3", iLyrWire, gateNet->GetNetId(), {19750000, 24000000}, {20000000, 16000000}, bwRadius);
-    eDataMgr.CreateBondwire(sicLayout, "GateBW4", iLyrWire, gateNet->GetNetId(), {22250000, 24000000}, {20000000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "DrainBW2", iLyrWire, drainNet->GetNetId(), {10800000, 10200000}, {19350000, 5500000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "DrainBW3", iLyrWire, drainNet->GetNetId(), {10800000,  8200000}, {19350000, 3500000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "DrainBW4", iLyrWire, drainNet->GetNetId(), {10800000,  6200000}, {19350000, 1500000}, bwRadius);
+
+    eDataMgr.CreateBondwire(sicLayout, "GateBW1_1", iLyrWire, gateNet->GetNetId(), {3250000, 24000000}, {2450000, 14000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "GateBW2_1", iLyrWire, gateNet->GetNetId(), {5750000, 24000000}, {2450000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "GateBW3_1", iLyrWire, gateNet->GetNetId(), {19750000, 24000000}, {20000000, 16000000}, bwRadius);
+    eDataMgr.CreateBondwire(sicLayout, "GateBW4_1", iLyrWire, gateNet->GetNetId(), {22250000, 24000000}, {20000000, 14000000}, bwRadius);
     
     auto primIter = sicLayout->GetPrimitiveIter();
     while (auto * prim = primIter->Next()) {
@@ -165,14 +170,14 @@ int main(int argc, char * argv[])
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
 
-    size_t xGrid = 200;
+    size_t xGrid = 300;
     auto bbox = layout->GetBoundary()->GetBBox();
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
-    ne.GenerateThermalNetwork(layout);
+    auto model = ne.GenerateGridThermalModel(layout);
 
     EDataMgr::Instance().ShutDown();
 
