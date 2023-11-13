@@ -1,1 +1,1 @@
-- thermal refactoring
+- thermal subnetwork

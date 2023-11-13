@@ -115,35 +115,7 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
 
     size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
     std::cout << "hotspot: " << maxId << std::endl;
-    // if (false) {
-    //     ECAD_EFFICIENCY_TRACK("transient mor")
-    //     using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
-    //     using StateType = typename TransSolver::StateType;
-    //     size_t threads = 1;//EDataMgr::Instance().DefaultThreads();
-    //     size_t sourceSize = network->Source();
-    //     std::cout << "source size: " << sourceSize << std::endl;
-    //     auto in = typename TransSolver::Input(*network, ESimVal{refT}, sourceSize, threads);
-        
-    //     std::vector<size_t> probs{maxId};
-    //     std::ofstream out(std::filesystem::path(m_settings.spiceFile).parent_path().string() + "/trans2.out");
-    //     auto recorder = typename TransSolver::Recorder(out, &in, probs, 0.0001);
-    //     StateType state(in.StateSize());
-    //     StateType initT(network->Size(), refT);
-    //     Eigen::Map<const Eigen::Matrix<ESimVal, Eigen::Dynamic, 1>> init(initT.data(), initT.size(), 1);
-    //     Eigen::Map<Eigen::Matrix<ESimVal, Eigen::Dynamic, 1>> result(state.data(), state.size(), 1);
-    //     result = in.x.colPivHouseholderQr().solve(init);
-    //     // result = in.x.transpose() * init;
-    //     // std::cout << "init State: \n" << result << std::endl;//wbtest
-    //     using namespace boost::numeric::odeint;
-    //     using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
-    //     size_t totalSteps = integrate_adaptive(make_controlled(1e-12, 1e-10,ErrorStepperType{}),
-    //                             TransSolver(&in), initT, 0.0, 10.0, 0.01, recorder);
-        
-    //     std::cout << "integrate step: " << totalSteps << std::endl;
-    //     out.close();
-    // }
-
-    if (true) {
+    if (false) {
         ECAD_EFFICIENCY_TRACK("transient origin")
         using TransSolver = ThermalNetworkTransientSolver<ESimVal>;
         using StateType = typename TransSolver::StateType;
@@ -213,7 +185,19 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
             out << std::endl;
         }
         out.close();
-    }    
+    }  
+    if (true) {
+        ECAD_EFFICIENCY_TRACK("transient mor")
+        using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
+        using StateType = typename TransSolver::StateType;
+        using Recorder = typename TransSolver::Recorder;
+        StateType initState;
+        std::vector<size_t> probs{maxId};
+        TransSolver solver(*network, refT);
+        Recorder recorder(solver.Im(), std::cout, probs, 0.1);
+        solver.Solve(initState, float_t{0}, float_t{10}, float_t{0.1}, std::move(recorder));
+
+    }   
     return true;
 }
 } //namespace ecad::esolver

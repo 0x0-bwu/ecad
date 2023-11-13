@@ -36,7 +36,7 @@ namespace thermal
             void Solve(num_type refT) const
             {
                 constexpr bool direct = false;
-                auto m = makeMNA(m_network); 
+                auto m = makeMNA(m_network);
                 auto rhs = makeRhs(m_network, refT);
                 Eigen::Matrix<num_type, Eigen::Dynamic, 1> x;
                 if (direct) {
@@ -152,18 +152,18 @@ namespace thermal
             size_t StateSize() const { return m_im->StateSize(); }
 
             template <typename Observer = Recorder, typename Excitation = NullExcitation>
-            size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt, const Observer & observer, const Excitation & e = NullExcitation{})
+            size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt, Observer observer, const Excitation & e = NullExcitation{})
             {
                 if (initState.size() != StateSize()) return 0;
                 using namespace boost::numeric::odeint;
                 using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
                 return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
-                                        Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
+                                        Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, std::move(observer));
             }
         private:
             num_type m_refT;
-            std::unique_ptr<Intermidiate> m_im;
             const ThermalNetwork<num_type> & m_network;
+            std::unique_ptr<Intermidiate> m_im{nullptr};
         };
 
         template <typename num_type>
@@ -185,8 +185,11 @@ namespace thermal
                 {
                     const size_t source = network.Source();
                     auto m = makeMNA(network);
+                    tools::Timer timer;
                     auto rom = Reduce(m, source);
-                    auto [rG, rC, rB, rL] = mna::RegularizeSuDynamic(rom.m, p);
+                    std::cout << "reduce time: " << timer.Count() << std::endl;
+                    DenseMatrix<num_type> rG, rC, rB;
+                    std::tie(rG, rC, rB, rL) = mna::RegularizeSuDynamic(rom.m, p);
                     auto dcomp = rC.ldlt();
                     coeff = dcomp.solve(-1 * rG);
                     input = dcomp.solve(rB);
@@ -194,6 +197,8 @@ namespace thermal
                     stateSize = rG.cols();
                     rLT = rL.transpose();
                 }           
+
+                virtual ~Intermidiate() = default;
 
                 void Input2State(const StateType & in, StateType & x) const
                 {
@@ -222,13 +227,16 @@ namespace thermal
                 num_type prev{0};
                 num_type count{0};
                 num_type interval;
-                Intermidiate & im;
                 std::ostream & os;
+                const Intermidiate & im;
                 const std::vector<size_t> & probs;
-                Recorder(Intermidiate & im, std::ostream & os, const std::vector<size_t> & probs, num_type interval)
-                 : interval(interval), im(im), os(os), probs(probs) {}
+                Recorder(const Intermidiate & im, std::ostream & os, const std::vector<size_t> & probs, num_type interval)
+                 : interval(interval), os(os), im(im), probs(probs) {}
+
+                virtual ~Recorder() = default;
+    
                 void operator()(const StateType & x, num_type t)
-                {
+                {   
                     if (count += t - prev; count > interval)
                     {
                         os << t;
@@ -246,6 +254,7 @@ namespace thermal
             {
                 Intermidiate & im;
                 explicit Solver(Intermidiate & im) : im(im) {}
+                virtual ~Solver() = default;
                 void operator() (const StateType & x, StateType & dxdt, [[maybe_unused ]] num_type t)
                 {
                     using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
@@ -265,134 +274,27 @@ namespace thermal
             ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT)
              : m_refT(refT), m_network(network)
             {
+                m_im.reset(new Intermidiate(network, refT));
             }
 
             virtual ~ThermalNetworkReducedTransientSolver() = default;
 
-            size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt)
+            template <typename Observer = Recorder>
+            size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt, Observer observer)
             {
-                Intermidiate im(m_network, m_refT);
                 StateType initT(m_network.Size(), m_refT);
-                im.Input2State(initT, initState);
-
-                std::vector<size_t> probs{0};
+                m_im->Input2State(initT, initState);
                 using namespace boost::numeric::odeint;
                 using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
                 return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
-                                        Solver(im), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt});
+                                        Solver(*m_im), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
             }
+
+            const Intermidiate & Im() const { return *m_im; }
         private:
             num_type m_refT;
             const ThermalNetwork<num_type> & m_network;
+            std::unique_ptr<Intermidiate> m_im{nullptr};
         };
-
-        // template <typename num_type>
-        // class ThermalNetworkReducedTransientSolver
-        // {
-        // public:
-        //     using StateType = std::vector<num_type>;
-        //     using ProjMatrix = Eigen::Matrix<num_type, Eigen::Dynamic, Eigen::Dynamic>;
-        //     using ReducedMatrix = Eigen::Matrix<num_type, Eigen::Dynamic, Eigen::Dynamic>;
-
-        //     struct Input
-        //     {
-        //         int verbose{0};
-        //         num_type refT = 25;
-        //         size_t threads = 1;
-
-        //         ProjMatrix x;
-        //         ReducedMatrix rG;
-        //         ReducedMatrix rC;
-        //         ReducedMatrix rB;
-        //         ReducedMatrix coeff;
-        //         ReducedMatrix input;
-        //         std::vector<num_type> rhs;
-        //         const ThermalNetwork<num_type> &network;
-        //         std::unique_ptr<thread::ThreadPool> pool;
-        //         size_t StateSize() const { return rG.cols(); }
-        //         Input(const ThermalNetwork<num_type> &network, num_type refT, size_t q, size_t threads, int verbose = 0)
-        //             : verbose(verbose), refT(refT), threads(threads), network(network)
-        //         {
-        //             pool.reset(new thread::ThreadPool(threads));
-        //             ThermalMatrixBuilder<num_type> builder(network);
-        //             auto [G, C, B] = builder.GetMatrices(refT, rhs);
-        //             q = std::min(std::max(q, rhs.size()), network.Size());
-
-        //             x = Prima(C, G, B, q);
-        //             rG = x.transpose() * G * x;
-        //             rC = x.transpose() * C * x;
-        //             rB = x.transpose() * B;
-
-        //             auto CredQR = rC.fullPivHouseholderQr();
-        //             coeff = CredQR.solve(-1 * rG);
-        //             input = CredQR.solve(rB);
-
-        //             if (verbose > 0)
-        //             {
-        //                 std::cout << "x:\n"
-        //                           << x << std::endl;
-        //                 std::cout << "rG:\n"
-        //                           << rG << std::endl;
-        //                 std::cout << "rC:\n"
-        //                           << rC << std::endl;
-        //                 std::cout << "rB:\n"
-        //                           << rB << std::endl;
-        //                 std::cout << "rhs:[";
-        //                 for (const auto &v : rhs)
-        //                     std::cout << v << ',' << std::endl;
-        //                 std::cout << ']' << std::endl;
-        //                 if (verbose > 1)
-        //                 {
-        //                     std::cout << "G:\n"
-        //                               << G << std::endl;
-        //                     std::cout << "C:\n"
-        //                               << C << std::endl;
-        //                     std::cout << "B:\n"
-        //                               << B << std::endl;
-        //                 }
-        //             }
-        //         }
-        //     };
-
-        //     struct Recorder
-        //     {
-        //         const Input *in;
-        //         num_type prev{0};
-        //         num_type count{0};
-        //         num_type interval;
-        //         std::ostream &os;
-        //         const std::vector<size_t> &probs;
-        //         Recorder(std::ostream &os, const Input *in, const std::vector<size_t> &probs, num_type interval)
-        //             : in(in), interval(interval), os(os), probs(probs) {}
-        //         void operator()(const StateType &x, num_type t)
-        //         {
-        //             if (count += t - prev; count > interval)
-        //             {
-        //                 os << t;
-
-        //                 Eigen::Map<const Eigen::Matrix<num_type, Eigen::Dynamic, 1>> state(x.data(), x.size(), 1);
-        //                 auto result = in->x * state;
-        //                 for (auto p : probs)
-        //                     os << ',' << result(p, 1);
-        //                 os << GENERIC_DEFAULT_EOL;
-        //                 count = 0;
-        //             }
-        //             prev = t;
-        //         }
-        //     };
-
-        //     const Input *in;
-        //     ThermalNetworkReducedTransientSolver(const Input *in) : in(in) {}
-        //     virtual ~ThermalNetworkReducedTransientSolver() = default;
-
-        //     void operator()(const StateType &x, StateType &dxdt, num_type t)
-        //     {
-        //         Eigen::Map<const Eigen::Matrix<num_type, Eigen::Dynamic, 1>> xvec(x.data(), in->StateSize(), 1);
-        //         Eigen::Map<const Eigen::Matrix<num_type, Eigen::Dynamic, 1>> u(in->rhs.data(), in->rhs.size(), 1);
-        //         Eigen::Map<Eigen::Matrix<num_type, Eigen::Dynamic, 1>> result(dxdt.data(), in->StateSize(), 1);
-        //         result = in->coeff * xvec + in->input * u;
-        //     }
-        // };
-
     } // namespace solver
 } // namespace thermal
