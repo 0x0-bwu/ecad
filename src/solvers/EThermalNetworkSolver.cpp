@@ -176,7 +176,9 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
         };
 
         std::vector<size_t> probs{maxId};
-        std::vector<ESimVal> cycles {5e-3, 1e-2, 5e-2, 1e-1, 1, 5, 10, 50, 100};
+        std::vector<ESimVal> cycles;
+        for (size_t i = 0; i < 12; ++i)
+            cycles.emplace_back(std::pow(10, 0.5 * i - 2.5));
         std::vector<ESimVal> dutys {0.01, 0.02, 0.05, 0.1, 0.3, 0.5};
         TransSolver solver(*network, refT);
         generic::thread::ThreadPool pool(threads);
@@ -192,7 +194,7 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
                         MaxRecorder recorder(maxId, maxVal);
                         Excitation excitation(cycle, duty);
                         StateType initState(solver.StateSize(), refT);
-                        ESimVal t0 = 0, t1 = cycle * 150, dt = 0.25 * cycle * duty;
+                        ESimVal t0 = 0, t1 = std::min<ESimVal>(std::max<ESimVal>(10, cycle * 50), 20), dt = 0.5 * cycle * duty;
                         solver.Solve(initState, t0, t1, dt, recorder, excitation);
                         std::cout << "c: " << cycle << ", d: " << duty << ", t: " << maxVal << std::endl;
                         return std::vector<ESimVal>{cycle, duty, maxVal};
