@@ -141,23 +141,20 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
         TransSolver solver(*network, refT, probs);
         generic::thread::ThreadPool pool(threads);
         std::cout << "available threads: " << pool.Threads() << std::endl;
-    
-        std::vector<std::ofstream> oftreams;
-        for (size_t i = 0; i < cycles.size(); ++i)
-            for (size_t j = 0; j < dutys.size(); ++j)
-                oftreams.emplace_back(std::ofstream(fmt::Fmt2Str("./origin_%1%_%2%.txt", i, j)));
-                
+            
         for (size_t i = 0, index = 0; i < cycles.size(); ++i) {
             for (size_t j = 0; j < dutys.size(); ++j) {
                 auto cycle = cycles.at(i);
                 auto duty = dutys.at(j);
                 pool.Submit(
-                    [cycle, duty, maxId, refT, index, &solver, &oftreams, &network] {
+                    [cycle, duty, refT, index, &solver, &network] {
                         Excitation excitation(cycle, duty);
                         StateType initState(network->Size(), refT);
-                        ESimVal t0 = 0, t1 = std::min<ESimVal>(std::max<ESimVal>(10, cycle * 50), 20), dt = 0.5 * cycle * duty;
-                        solver.Solve(initState, t0, t1, dt, Recorder(solver, oftreams[index], dt), excitation);
-                        oftreams[index].close();
+                        ESimVal t0 = 0, t1 = std::min<ESimVal>(std::max<ESimVal>(10, cycle * 50), 20), dt = std::min<ESimVal>(0.5 * cycle * duty, 0.1);
+                        std::ofstream ofs(fmt::Fmt2Str("./origin_%1%.txt", index));
+                        Recorder recorder(solver, ofs, dt * 0.05);
+                        solver.Solve(initState, t0, t1, dt, recorder, excitation);
+                        ofs.close();
                         std::cout << "done with c: " << cycle << ", d: " << duty << std::endl;
                     }
                 );
@@ -165,13 +162,6 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
             }
         }
     }  
-    bool reduceBounds = true;
-    if (reduceBounds) {
-        auto minT = network->MinT();
-        auto maxT = network->MaxT();
-        BoundaryNodeReduction bnReduction(*network);
-        bnReduction.Reduce(minT, minT + (maxT - minT) * 0.3, 3);
-    }
     if (false) {
         ECAD_EFFICIENCY_TRACK("impedence reduce")
         using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
@@ -195,24 +185,20 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
         std::vector<ESimVal> dutys {0.01, 0.02, 0.05, 0.1, 0.3, 0.5};
         TransSolver solver(*network, refT, probs);
         generic::thread::ThreadPool pool(threads);
-        std::cout << "available threads: " << pool.Threads() << std::endl;
-    
-        std::vector<std::ofstream> oftreams;
-        for (size_t i = 0; i < cycles.size(); ++i)
-            for (size_t j = 0; j < dutys.size(); ++j)
-                oftreams.emplace_back(std::ofstream(fmt::Fmt2Str("./reduce_%1%_%2%.txt", i, j)));
-                
+        std::cout << "available threads: " << pool.Threads() << std::endl;            
         for (size_t i = 0, index = 0; i < cycles.size(); ++i) {
             for (size_t j = 0; j < dutys.size(); ++j) {
                 auto cycle = cycles.at(i);
                 auto duty = dutys.at(j);
                 pool.Submit(
-                    [cycle, duty, maxId, refT, index, &solver, &oftreams, &network] {
+                    [cycle, duty, refT, index, &solver, &network] {
                         Excitation excitation(cycle, duty);
                         StateType initState(network->Size(), refT);
-                        ESimVal t0 = 0, t1 = std::min<ESimVal>(std::max<ESimVal>(10, cycle * 50), 20), dt = 0.5 * cycle * duty;
-                        solver.Solve(initState, t0, t1, dt, Recorder(solver, oftreams[index], dt), excitation);
-                        oftreams[index].close();
+                        ESimVal t0 = 0, t1 = std::min<ESimVal>(std::max<ESimVal>(10, cycle * 50), 20), dt = std::min<ESimVal>(0.5 * cycle * duty, 0.1);
+                        std::ofstream ofs(fmt::Fmt2Str("./reduce_%1%.txt", index));
+                        Recorder recorder(solver, ofs, dt * 0.05);
+                        solver.Solve(initState, t0, t1, dt, recorder, excitation);
+                        ofs.close();
                         std::cout << "done with c: " << cycle << ", d: " << duty << std::endl;
                     }
                 );
@@ -221,7 +207,37 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
         }
     }  
 
-    if (true) {
+    struct Excitation
+    {
+        ESimVal cycle, duty;
+        Excitation(ESimVal cycle, ESimVal duty = 0.5) : cycle(cycle), duty(duty * cycle) {}
+        ESimVal operator() (ESimVal t) const
+        {
+            return std::abs(std::sin(math::pi * t / cycle));
+        }
+    };
+    ESimVal cycle = 0.5, duty = 0.5;
+    Excitation excitation(cycle, duty);  
+    generic::thread::ThreadPool pool(2);
+    pool.Submit([&]{
+        ECAD_EFFICIENCY_TRACK("transient orig")
+        using TransSolver = ThermalNetworkTransientSolver<ESimVal>;
+        using StateType = typename TransSolver::StateType;
+        using Recorder = typename TransSolver::Recorder;
+        TransSolver solver(*network, refT, probs);
+        std::ofstream ofs("./orig.txt");
+        Recorder recorder(solver, ofs, 0.01);
+        StateType initState(solver.StateSize(), refT);
+        solver.Solve(initState, ESimVal{0}, ESimVal{10}, ESimVal{0.01}, std::move(recorder), excitation);
+    });
+    // bool reduceBounds = false;
+    // if (reduceBounds) {
+    //     auto minT = network->MinT();
+    //     auto maxT = network->MaxT();
+    //     BoundaryNodeReduction bnReduction(*network);
+    //     bnReduction.Reduce(minT, minT + (maxT - minT) * 0.3, 3);
+    // }
+    pool.Submit([&]{
         ECAD_EFFICIENCY_TRACK("transient mor")
         using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
         using StateType = typename TransSolver::StateType;
@@ -229,20 +245,9 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
         StateType initT(network->Size(), refT);
         TransSolver solver(*network, refT, probs);
         std::ofstream ofs("./mor.txt");
-        Recorder recorder(solver, ofs, 0.1);
-        solver.Solve(initT, float_t{0}, float_t{10}, float_t{0.1}, std::move(recorder));
-    }   
-    if (true) {
-        ECAD_EFFICIENCY_TRACK("transient orig")
-        using TransSolver = ThermalNetworkTransientSolver<ESimVal>;
-        using StateType = typename TransSolver::StateType;
-        using Recorder = typename TransSolver::Recorder;
-        TransSolver solver(*network, refT, probs);
-        std::ofstream ofs("./orig.txt");
-        Recorder recorder(solver, ofs, 0.1);
-        StateType initState(solver.StateSize(), refT);
-        solver.Solve(initState, float_t{0}, float_t{10}, float_t{0.1}, std::move(recorder));
-    }
+        Recorder recorder(solver, ofs, 0.01);
+        solver.Solve(initT, ESimVal{0}, ESimVal{10}, ESimVal{0.01}, std::move(recorder), excitation);
+    }); 
     return true;
 }
 } //namespace ecad::esolver
