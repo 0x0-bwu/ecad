@@ -36,8 +36,8 @@ namespace thermal
             void Solve(num_type refT) const
             {
                 constexpr bool direct = false;
-                auto m = makeMNA(m_network);
-                auto rhs = makeRhs(m_network, refT);
+                auto m = makeMNA(m_network, true);
+                auto rhs = makeRhs(m_network, true, refT);
                 Eigen::Matrix<num_type, Eigen::Dynamic, 1> x;
                 if (direct) {
                     // Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver;
@@ -123,7 +123,7 @@ namespace thermal
                 num_type operator() ([[maybe_unused]] num_type t) const { return 1; }
             };
 
-            template<typename Excitation>
+            template <typename Excitation>
             struct Solver
             {
                 const Excitation & e;
@@ -182,19 +182,21 @@ namespace thermal
                 const ThermalNetwork<num_type> & network;
 
                 PermutMatrix p;
-                bool regularize{false};
-                DenseVector<num_type> u;
+                bool regularize{true};
+                bool includeBonds{true};
+                DenseVector<num_type> uh;
+                DenseVector<num_type> ub;
                 DenseMatrix<num_type> rLT;
                 ReducedModel<num_type> rom;
                 DenseMatrix<num_type> coeff, input;
-                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::set<size_t> & probs)
+                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::set<size_t> & probs, size_t order)
                     : refT(refT), probs(probs), network(network)
                 {
-                    const size_t source = network.Source();
-                    auto m = makeMNA(network, probs);
+                    const size_t source = network.Source(includeBonds);
+                    auto m = makeMNA(network, includeBonds, probs);
                     {
                         tools::ProgressTimer t("reduce");
-                        rom = Reduce(m, source);
+                        rom = Reduce(m, std::max(source, order));
                         std::cout << "mor: " << rom.x.rows() << "->" << rom.x.cols() << std::endl;
                     }
                     if (regularize)
@@ -203,7 +205,12 @@ namespace thermal
                     coeff = dcomp.solve(-1 * rom.m.G);
                     input = dcomp.solve(rom.m.B);
                     rLT = rom.m.L.transpose();
-                    u.resize(input.cols());
+                    uh.resize(input.cols());
+                    if (not includeBonds) {
+                        auto bondsRhs = makeBondsRhs(network, refT);
+                        ub = rom.xT * bondsRhs;
+                        if (regularize) ub = p * ub;
+                    }
                 }           
 
                 virtual ~Intermidiate() = default;
@@ -263,10 +270,18 @@ namespace thermal
                 }
             };
 
+            struct NullExcitation
+            {
+                virtual ~NullExcitation() = default;
+                num_type operator() ([[maybe_unused]] num_type t) const { return 1; }
+            };
+
+            template <typename Excitation>
             struct Solver
             {
                 Intermidiate & im;
-                explicit Solver(Intermidiate & im) : im(im) {}
+                const Excitation & e;
+                explicit Solver(Intermidiate & im, const Excitation & e) : im(im), e(e) {}
                 virtual ~Solver() = default;
                 void operator() (const StateType & x, StateType & dxdt, [[maybe_unused]] num_type t)
                 {
@@ -274,26 +289,27 @@ namespace thermal
                     const size_t nodes = im.network.Size();
                     for (size_t i = 0, s = 0; i < nodes; ++i) {
                         const auto & node = im.network[i];
-                        if (node.hf != 0 || node.htc != 0)
-                            im.u[s++] = node.hf + node.htc * im.refT;
+                        if (node.hf != 0 || (im.includeBonds && node.htc != 0))
+                            im.uh[s++] = node.hf * e(t) + node.htc * im.refT;
                     }
                     Eigen::Map<VectorType> result(dxdt.data(), dxdt.size());
                     Eigen::Map<const VectorType> xvec(x.data(), x.size());
                     Eigen::Map<VectorType> dxdtM(dxdt.data(), dxdt.size());
-                    result = im.coeff * xvec + im.input * im.u;
+                    result = im.coeff * xvec + im.input * im.uh;
+                    if (not im.includeBonds) result += im.ub;
                 }
             };
-           
-            ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::set<size_t> probs = {})
+
+            ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::set<size_t> probs = {}, size_t order = 99)
              : m_refT(refT), m_probs(std::move(probs)), m_network(network)
             {
-                m_im.reset(new Intermidiate(m_network, m_refT, m_probs));
+                m_im.reset(new Intermidiate(m_network, m_refT, m_probs, order));
             }
 
             virtual ~ThermalNetworkReducedTransientSolver() = default;
 
-            template <typename Observer = Recorder>
-            size_t Solve(StateType & initT, num_type t0, num_type duration, num_type dt, Observer observer)
+            template <typename Observer = Recorder, typename Excitation = NullExcitation>
+            size_t Solve(StateType & initT, num_type t0, num_type duration, num_type dt, Observer observer, const Excitation & e = NullExcitation{})
             {
                 StateType initState;
                 if (not m_im->Input2State(initT, initState)) return 0;
@@ -301,7 +317,7 @@ namespace thermal
                 using namespace boost::numeric::odeint;
                 using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
                 return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
-                                        Solver(*m_im), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
+                                        Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
             }
             const std::set<size_t> Probs() const { return m_probs; }
             const Intermidiate & Im() const { return *m_im; }

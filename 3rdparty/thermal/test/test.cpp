@@ -52,7 +52,7 @@ int main(int argc, char * argv[])
         using Recorder = typename TransSolver::Recorder;
 
         StateType initState(network.Size(), refT);
-        TransSolver transSolver(network, refT);
+        TransSolver transSolver(network, refT, probs);
         Recorder recorder(transSolver, std::cout, 0);
         transSolver.Solve(initState, float_t{0}, float_t{10}, float_t{0.1}, std::move(recorder));
     }

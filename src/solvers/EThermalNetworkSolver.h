@@ -2,7 +2,6 @@
 #include "models/thermal/EGridThermalModel.h"
 #include "ECadSettings.h"
 #include "ECadCommon.h"
-#include <atomic>
 namespace ecad {
 namespace esolver {
 using namespace emodel;

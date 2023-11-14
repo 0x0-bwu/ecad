@@ -57,11 +57,11 @@ public:
         return m_nodes.size();
     }
 
-    size_t Source() const
+    size_t Source(bool includeBonds) const
     {
         size_t size{0};
         for (const auto & node : m_nodes) {
-            if (node.hf != 0 || node.htc != 0)
+            if (node.hf != 0 || (includeBonds && node.htc != 0))
                 size++;
         }
         return size;//todo , remove
@@ -114,6 +114,11 @@ public:
     {
         m_nodes[node].htc = htc;
     }
+    
+    void AddHTC(size_t node, num_type htc)
+    {
+        m_nodes[node].htc += htc;
+    }
 
     num_type GetHTC(size_t node) const
     {
@@ -164,6 +169,26 @@ public:
         return total;
     }
 
+    num_type MinT() const
+    {
+        num_type minT = std::numeric_limits<num_type>::max();
+        for (const auto & node : m_nodes) {
+            if (node.t == unknownT) continue;
+            minT = std::min<num_type>(minT, node.t);
+        }
+        return minT;
+    }
+
+    num_type MaxT() const
+    {
+        num_type maxT = -std::numeric_limits<num_type>::max();
+        for (const auto & node : m_nodes) {
+            if (node.t == unknownT) continue;
+            maxT = std::max<num_type>(maxT, node.t);
+        }
+        return maxT;
+    }
+
 private:
     std::vector<Node> m_nodes;
 };
@@ -171,14 +196,14 @@ private:
 using namespace generic::ckt;
 
 template <typename num_type>
-inline DenseVector<num_type> makeRhs(const ThermalNetwork<num_type> & network, num_type refT)
+inline DenseVector<num_type> makeRhs(const ThermalNetwork<num_type> & network, bool includeBonds, num_type refT)
 {
     const size_t nodes = network.Size();
-    const size_t source = network.Source();
+    const size_t source = network.Source(includeBonds);
     DenseVector<num_type> rhs(source);
     for(size_t i = 0, s = 0; i < nodes; ++i) {
         const auto & node = network[i];
-        if (node.hf != 0 || node.htc != 0)
+        if (node.hf != 0 || (includeBonds && node.htc != 0))
             rhs[s++] = node.hf + node.htc * refT;
     }
     return rhs;
@@ -262,14 +287,14 @@ inline std::pair<SparseMatrix<num_type>, SparseMatrix<num_type>> makeInvCandNegG
 }
 
 template <typename num_type>
-inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network, const std::set<size_t> & probs = {})
+inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network, bool includeBonds, const std::set<size_t> & probs = {})
 {
     using Matrix = SparseMatrix<num_type>;
     using Triplets = std::vector<Eigen::Triplet<num_type> >;
     
     MNA<Matrix> m;
     const size_t nodes = network.Size();
-    const size_t source = network.Source();
+    const size_t source = network.Source(includeBonds);
     Triplets tG, tC, tB;
     m.G = Matrix(nodes, nodes);
     m.C = Matrix(nodes, nodes);
@@ -284,7 +309,7 @@ inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & net
         }
         if (node.htc != 0) mna::Stamp(tG, i, node.htc);
         if (node.c > 0) mna::Stamp(tC, i, node.c);
-        if (node.hf != 0 || node.htc != 0)
+        if (node.hf != 0 || (includeBonds && node.htc != 0))
             tB.emplace_back(i, s++, 1);
     }
     m.G.setFromTriplets(tG.begin(), tG.end());
