@@ -206,8 +206,8 @@ inline SparseMatrix<num_type> makeBondsRhs(const ThermalNetwork<num_type> & netw
     const size_t nodes = network.Size();
     for(size_t i = 0 ; i < nodes; ++i) {
         const auto & node = network[i];
-        if (auto res = node.htc * refT; res != 0)
-            triplets.emplace_back(i, 0, res);
+        if (node.htc != 0)
+            triplets.emplace_back(i, 0, node.htc * refT);
     }
     Matrix rhs(nodes, 1);
     rhs.setFromTriplets(triplets.begin(), triplets.end());
