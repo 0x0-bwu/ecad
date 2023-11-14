@@ -191,13 +191,25 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
         using TransSolver = ThermalNetworkReducedTransientSolver<ESimVal>;
         using StateType = typename TransSolver::StateType;
         using Recorder = typename TransSolver::Recorder;
-        StateType initState;
+        std::set<size_t> probs{maxId};
+        StateType initT(network->Size(), refT);
+        TransSolver solver(*network, refT, probs);
+        std::ofstream ofs("./mor.txt");
+        Recorder recorder(solver.Im(), ofs, 0.1);
+        solver.Solve(initT, float_t{0}, float_t{10}, float_t{0.1}, std::move(recorder));
+    }   
+    if (true) {
+        ECAD_EFFICIENCY_TRACK("transient orig")
+        using TransSolver = ThermalNetworkTransientSolver<ESimVal>;
+        using StateType = typename TransSolver::StateType;
+        using Recorder = typename TransSolver::Recorder;
         std::vector<size_t> probs{maxId};
         TransSolver solver(*network, refT);
-        Recorder recorder(solver.Im(), std::cout, probs, 0.1);
+        std::ofstream ofs("./orig.txt");
+        Recorder recorder(ofs, probs, 0.1);
+        StateType initState(solver.StateSize(), refT);
         solver.Solve(initState, float_t{0}, float_t{10}, float_t{0.1}, std::move(recorder));
-
-    }   
+    }
     return true;
 }
 } //namespace ecad::esolver

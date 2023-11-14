@@ -5,8 +5,7 @@
 #include "generic/circuit/MNA.hpp"
 #include <unordered_map>
 #include <memory>
-#include <queue>
-#include <map>
+#include <set>
 
 namespace thermal {
 namespace model {
@@ -263,7 +262,7 @@ inline std::pair<SparseMatrix<num_type>, SparseMatrix<num_type>> makeInvCandNegG
 }
 
 template <typename num_type>
-inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network)
+inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network, const std::set<size_t> & probs = {})
 {
     using Matrix = SparseMatrix<num_type>;
     using Triplets = std::vector<Eigen::Triplet<num_type> >;
@@ -271,12 +270,10 @@ inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & net
     MNA<Matrix> m;
     const size_t nodes = network.Size();
     const size_t source = network.Source();
+    Triplets tG, tC, tB;
     m.G = Matrix(nodes, nodes);
     m.C = Matrix(nodes, nodes);
-    m.L = Matrix(nodes, nodes);
     m.B = Matrix(nodes, source);
-
-    Triplets tG, tC, tL, tB;
     for (size_t i = 0, s = 0; i < nodes; ++i) {
         const auto & node = network[i];
         for (size_t j = 0; j < node.ns.size(); ++j) {
@@ -289,12 +286,25 @@ inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & net
         if (node.c > 0) mna::Stamp(tC, i, node.c);
         if (node.hf != 0 || node.htc != 0)
             tB.emplace_back(i, s++, 1);
-        tL.emplace_back(i, i, 1);//todo identity mat
     }
     m.G.setFromTriplets(tG.begin(), tG.end());
     m.C.setFromTriplets(tC.begin(), tC.end());
     m.B.setFromTriplets(tB.begin(), tB.end());
-    m.L.setFromTriplets(tL.begin(), tL.end());
+
+    if (probs.empty()) {
+        m.L = Matrix(nodes, nodes);
+        m.L.setIdentity();
+    }
+    else {
+        size_t j{0};
+        Triplets tL;
+        for (auto p : probs) {
+            GENERIC_ASSERT(p < nodes)
+            tL.emplace_back(p, j++, 1);
+        }
+        m.L = Matrix(nodes, probs.size());
+        m.L.setFromTriplets(tL.begin(), tL.end());
+    }
     return m;
 }
 

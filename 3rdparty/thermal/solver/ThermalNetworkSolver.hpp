@@ -173,40 +173,49 @@ namespace thermal
             using StateType = std::vector<num_type>;    
             struct Intermidiate
             {
-                PermutMatrix p;
-                num_type refT = 25;
-                size_t stateSize{0};
-                DenseVector<num_type> u;
-                DenseMatrix<num_type> rL, rLT;
-                DenseMatrix<num_type> coeff, input;
+                num_type refT;
+                const std::set<size_t> & probs;
                 const ThermalNetwork<num_type> & network;
-                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT)
-                    : refT(refT), network(network)
+
+                PermutMatrix p;
+                bool regularize{false};
+                DenseVector<num_type> u;
+                DenseMatrix<num_type> rL;
+                DenseMatrix<num_type> rLT;
+                ReducedModel<num_type> rom;
+                DenseMatrix<num_type> coeff, input;
+                Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::set<size_t> & probs)
+                    : refT(refT), probs(probs), network(network)
                 {
                     const size_t source = network.Source();
-                    auto m = makeMNA(network);
+                    auto m = makeMNA(network, probs);
                     tools::Timer timer;
-                    auto rom = Reduce(m, source);
+                    rom = Reduce(m, source);
                     std::cout << "reduce time: " << timer.Count() << std::endl;
-                    DenseMatrix<num_type> rG, rC, rB;
-                    std::tie(rG, rC, rB, rL) = mna::RegularizeSuDynamic(rom.m, p);
-                    auto dcomp = rC.ldlt();
-                    coeff = dcomp.solve(-1 * rG);
-                    input = dcomp.solve(rB);
+                    if (regularize)
+                        std::tie(rom.m, p) = mna::RegularizeSuDynamic(rom.m);
+                    auto dcomp = rom.m.C.ldlt();
+                    coeff = dcomp.solve(-1 * rom.m.G);
+                    input = dcomp.solve(rom.m.B);
+                    rLT =  rom.m.L.transpose();
                     u.resize(input.cols());
-                    stateSize = rG.cols();
-                    rLT = rL.transpose();
                 }           
 
                 virtual ~Intermidiate() = default;
 
-                void Input2State(const StateType & in, StateType & x) const
+                bool Input2State(const StateType & in, StateType & x) const
                 {
+                    if (in.size() != network.Size()) return false;
                     using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
-                    x.resize(rL.rows());
+                    x.resize(rom.m.G.cols());
                     Eigen::Map<VectorType> xvec(x.data(), x.size());
                     Eigen::Map<const VectorType> ivec(in.data(), in.size());
-                    xvec = rL * ivec;
+                    xvec = rom.x * ivec;
+                    if (regularize) {
+                        xvec = p * xvec;
+                        x.resize(StateSize());
+                    }
+                    return true;
                 }
 
                 void State2Output(const StateType & x, StateType & out) const
@@ -218,7 +227,7 @@ namespace thermal
                     ovec = rLT * xvec;
                 }
 
-                size_t StateSize() const { return stateSize; }
+                size_t StateSize() const { return rom.m.G.cols(); }
             };
 
             struct Recorder
@@ -229,9 +238,8 @@ namespace thermal
                 num_type interval;
                 std::ostream & os;
                 const Intermidiate & im;
-                const std::vector<size_t> & probs;
-                Recorder(const Intermidiate & im, std::ostream & os, const std::vector<size_t> & probs, num_type interval)
-                 : interval(interval), os(os), im(im), probs(probs) {}
+                Recorder(const Intermidiate & im, std::ostream & os, num_type interval)
+                 : interval(interval), os(os), im(im) {}
 
                 virtual ~Recorder() = default;
     
@@ -241,8 +249,8 @@ namespace thermal
                     {
                         os << t;
                         im.State2Output(x, out);
-                        for (auto p : probs)
-                            os << ',' << out[p];
+                        for (auto o : out)
+                            os << ',' << o;
                         os << GENERIC_DEFAULT_EOL;
                         count = 0;
                     }
@@ -255,7 +263,7 @@ namespace thermal
                 Intermidiate & im;
                 explicit Solver(Intermidiate & im) : im(im) {}
                 virtual ~Solver() = default;
-                void operator() (const StateType & x, StateType & dxdt, [[maybe_unused ]] num_type t)
+                void operator() (const StateType & x, StateType & dxdt, [[maybe_unused]] num_type t)
                 {
                     using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
                     const size_t nodes = im.network.Size();
@@ -271,19 +279,20 @@ namespace thermal
                 }
             };
            
-            ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT)
-             : m_refT(refT), m_network(network)
+            ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::set<size_t> probs = {})
+             : m_refT(refT), m_probs(std::move(probs)), m_network(network)
             {
-                m_im.reset(new Intermidiate(network, refT));
+                m_im.reset(new Intermidiate(m_network, m_refT, m_probs));
             }
 
             virtual ~ThermalNetworkReducedTransientSolver() = default;
 
             template <typename Observer = Recorder>
-            size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt, Observer observer)
+            size_t Solve(StateType & initT, num_type t0, num_type duration, num_type dt, Observer observer)
             {
-                StateType initT(m_network.Size(), m_refT);
-                m_im->Input2State(initT, initState);
+                StateType initState;
+                if (not m_im->Input2State(initT, initState)) return 0;
+
                 using namespace boost::numeric::odeint;
                 using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
                 return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
@@ -293,6 +302,7 @@ namespace thermal
             const Intermidiate & Im() const { return *m_im; }
         private:
             num_type m_refT;
+            std::set<size_t> m_probs;
             const ThermalNetwork<num_type> & m_network;
             std::unique_ptr<Intermidiate> m_im{nullptr};
         };

@@ -45,17 +45,15 @@ int main(int argc, char * argv[])
         std::cout << "node " << i + 1 <<": " << nodes[i].t << std::endl;
     }
 
-
     {
-        std::vector<size_t> probs{0};
+        std::set<size_t> probs{0};
         using TransSolver = solver::ThermalNetworkReducedTransientSolver<float_t>;
         using StateType = typename TransSolver::StateType;
         using Recorder = typename TransSolver::Recorder;
 
-
-        StateType initState;
-        TransSolver transSolver(network, refT);
-        Recorder recorder(transSolver.Im(), std::cout, probs, 0.1);
+        StateType initState(network.Size(), refT);
+        TransSolver transSolver(network, refT, probs);
+        Recorder recorder(transSolver.Im(), std::cout, 0);
         transSolver.Solve(initState, float_t{0}, float_t{10}, float_t{0.1}, std::move(recorder));
     }
     return 0;
