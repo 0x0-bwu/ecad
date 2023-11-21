@@ -181,8 +181,6 @@ namespace thermal
                 const std::set<size_t> & probs;
                 const ThermalNetwork<num_type> & network;
 
-                PermutMatrix p;
-                bool regularize{true};
                 bool includeBonds{true};
                 DenseVector<num_type> uh;
                 DenseVector<num_type> ub;
@@ -199,8 +197,6 @@ namespace thermal
                         rom = Reduce(m, std::max(source, order));
                         std::cout << "mor: " << rom.x.rows() << "->" << rom.x.cols() << std::endl;
                     }
-                    if (regularize)
-                        std::tie(rom.m, p) = mna::RegularizeSuDynamic(rom.m);
                     auto dcomp = rom.m.C.ldlt();
                     coeff = dcomp.solve(-1 * rom.m.G);
                     input = dcomp.solve(rom.m.B);
@@ -209,7 +205,6 @@ namespace thermal
                     if (not includeBonds) {
                         auto bondsRhs = makeBondsRhs(network, refT);
                         ub = rom.xT * bondsRhs;
-                        if (regularize) ub = p * ub;
                     }
                 }           
 
@@ -223,10 +218,6 @@ namespace thermal
                     Eigen::Map<VectorType> xvec(x.data(), x.size());
                     Eigen::Map<const VectorType> ivec(in.data(), in.size());
                     xvec = rom.xT * ivec;
-                    if (regularize) {
-                        xvec = p * xvec;
-                        x.resize(StateSize());
-                    }
                     return true;
                 }
 
