@@ -190,11 +190,10 @@ namespace thermal
                 Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::set<size_t> & probs, size_t order)
                     : refT(refT), probs(probs), network(network)
                 {
-                    const size_t source = network.Source(includeBonds);
                     auto m = makeMNA(network, includeBonds, probs);
                     {
                         tools::ProgressTimer t("reduce");
-                        rom = Reduce(m, std::max(source, order));
+                        rom = Reduce(m, order);
                         std::cout << "mor: " << rom.x.rows() << "->" << rom.x.cols() << std::endl;
                     }
                     auto dcomp = rom.m.C.ldlt();
@@ -274,18 +273,17 @@ namespace thermal
                 const Excitation & e;
                 explicit Solver(Intermidiate & im, const Excitation & e) : im(im), e(e) {}
                 virtual ~Solver() = default;
-                void operator() (const StateType & x, StateType & dxdt, [[maybe_unused]] num_type t)
+                void operator() (const StateType & x, StateType & dxdt, num_type t)
                 {
-                    using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
                     const size_t nodes = im.network.Size();
                     for (size_t i = 0, s = 0; i < nodes; ++i) {
                         const auto & node = im.network[i];
                         if (node.hf != 0 || (im.includeBonds && node.htc != 0))
                             im.uh[s++] = node.hf * e(t) + node.htc * im.refT;
                     }
-                    Eigen::Map<VectorType> result(dxdt.data(), dxdt.size());
-                    Eigen::Map<const VectorType> xvec(x.data(), x.size());
-                    Eigen::Map<VectorType> dxdtM(dxdt.data(), dxdt.size());
+                    Eigen::Map<DenseVector<num_type>> result(dxdt.data(), dxdt.size());
+                    Eigen::Map<const DenseVector<num_type>> xvec(x.data(), x.size());
+                    Eigen::Map<DenseVector<num_type>> dxdtM(dxdt.data(), dxdt.size());
                     result = im.coeff * xvec + im.input * im.uh;
                     if (not im.includeBonds) result += im.ub;
                 }
@@ -318,5 +316,159 @@ namespace thermal
             const ThermalNetwork<num_type> & m_network;
             std::unique_ptr<Intermidiate> m_im{nullptr};
         };
+
+        // template <typename num_type>
+        // class ThermalNetworkReducedResponseSolver
+        // {
+        // public:
+        //     using StateType = std::vector<num_type>;
+        //     struct ResponsePara
+        //     {
+        //         DenseMatrix<num_type> E;
+        //         DenseMatrix<num_type> InvE;
+        //         DenseMatrix<num_type> LT;
+                
+        //         DenseVector<num_type> A;
+        //         DenseMatrix<num_type> B;
+        //         DenseVector<num_type> Lambda;
+        //         const ReducedModel<num_type> & rom;
+        //         ResponsePara(const ReducedModel<num_type> & rom) : rom(rom)
+        //         {
+        //             LT = rom.m.L.transpose();
+        //             auto InvG = rom.m.G.inverse();
+                    
+        //             Eigen::EigenSolver<DenseMatrix<num_type>> solver(InvG * rom.m.C);
+        //             GENERIC_ASSERT(Eigen::Success == solver.info())
+        //             E = solver.eigenvectors().real();
+        //             InvE = E.inverse();
+        //             B = InvE * InvG * rom.m.B;
+        //             Lambda = solver.eigenvalues().real();
+        //         }
+                
+        //         virtual ~ResponsePara() = default;
+
+        //         void update(const StateType & state)
+        //         {
+        //             Eigen::Map<const DenseVector<num_type>> stateVec(state.data(), state.size());
+        //             A = InvE * stateVec;
+        //         }  
+        //     };
+        //     struct Intermidiate
+        //     {
+        //         num_type refT;
+        //         const std::set<size_t> & probs;
+        //         const ThermalNetwork<num_type> & network;
+
+        //         bool includeBonds{true};
+        //         DenseVector<num_type> uh;
+        //         DenseVector<num_type> ub;
+        //         ReducedModel<num_type> rom;
+        //         std::unique_ptr<ResponsePara> para{nullptr};
+        //         Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::set<size_t> & probs, size_t order)
+        //             : refT(refT), probs(probs), network(network)
+        //         {
+        //             auto m = makeMNA(network, includeBonds, probs);
+        //             {
+        //                 tools::ProgressTimer t("reduce");
+        //                 rom = Reduce(m, order);
+        //                 std::cout << "mor: " << rom.x.rows() << "->" << rom.x.cols() << std::endl;
+        //             }
+        //             para.reset(new ResponsePara(mna));
+        //             uh.resize(rom.m.B.cols());
+        //             if (not includeBonds) {
+        //                 auto bondsRhs = makeBondsRhs(network, refT);
+        //                 ub = rom.xT * bondsRhs;
+        //             }
+        //         }           
+
+        //         virtual ~Intermidiate() = default;
+
+        //         bool Input2State(const StateType & in, StateType & x) const
+        //         {
+        //             if (in.size() != network.Size()) return false;
+        //             using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
+        //             x.resize(rom.m.G.cols());
+        //             Eigen::Map<VectorType> xvec(x.data(), x.size());
+        //             Eigen::Map<const VectorType> ivec(in.data(), in.size());
+        //             xvec = rom.xT * ivec;
+        //             return true;
+        //         }
+
+        //         void State2Output(const StateType & x, StateType & out) const
+        //         {
+        //             using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
+        //             out.resize(rLT.rows());
+        //             Eigen::Map<VectorType> ovec(out.data(), out.size());
+        //             Eigen::Map<const VectorType> xvec(x.data(), x.size());
+        //             ovec = rLT * xvec;
+        //         }
+
+        //         size_t StateSize() const { return rom.m.G.cols(); }
+        //     };
+        //     struct NullExcitation
+        //     {
+        //         virtual ~NullExcitation() = default;
+        //         num_type operator() ([[maybe_unused]] num_type t) const { return 1; }
+        //     };
+
+        //     template <typename Excitation>
+        //     struct Solver
+        //     {
+        //         const Excitation & e;
+        //         const Intermidiate & im;
+        //         DenseVector<num_type> hf;
+        //         explicit Solver(const Intermidiate & im, const Excitation & e) : e(e), im(im) { hf = DenseVector<num_type>(im.hf.size());}
+        //         virtual ~Solver() = default;
+
+        //         void Solve(StateType & state, numt_type t, num_type dt) const
+        //         {
+        //             const size_t nodes = im.network.Size();
+        //             StateType q(nodes, 0), dq(nodes, 0);
+        //             for (size_t i = 0, s = 0; i < nodes; ++i) {
+        //                 const auto & node = im.network[i];
+        //                 if (node.hf != 0 || (im.includeBonds && node.htc != 0)) {
+        //                     q[s] = node.hf * e(t) + node.htc * im.refT;
+        //                     dq[s] = node.hf * e(t + dt) + node.htc * im.refT - q[s];
+        //                     s++;
+        //                 }
+        //             }
+        //             im.para->update(state);
+        //             const auto & lambda = im.pare->Lambda;
+        //             DenseVector<num_type> a(state.size()), b(nodes);
+        //             for (size_t k = 0; k < state.size(); ++k)
+        //                 a[k] = std::exp(-t / lambda[k]);
+        //             for (size_t k = 0; k < nodes; ++k)
+        //                 b[k] = dq[k] * (lambda[k] * std::exp(-t / lambda[k]) / dt + (t - lambda[k]) / dt) + q[k]
+
+        //         }
+        //     };
+           
+        //     ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::set<size_t> probs = {})
+        //      : m_refT(refT), m_probs(std::move(probs)), m_network(network)
+        //     {
+        //         m_im.reset(new Intermidiate(m_network, m_refT));
+        //     }
+
+        //     virtual ~ThermalNetworkTransientSolver() = default;
+        //     size_t StateSize() const { return m_im->StateSize(); }
+
+        //     template <typename Observer = Recorder, typename Excitation = NullExcitation>
+        //     size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt, Observer observer, const Excitation & e = NullExcitation{})
+        //     {
+        //         if (initState.size() != StateSize()) return 0;
+        //         using namespace boost::numeric::odeint;
+        //         using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
+        //         return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
+        //                                 Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, std::move(observer));
+        //     }
+
+        //     const std::set<size_t> Probs() const { return m_probs; }
+        //     const Intermidiate & Im() const { return *m_im; }
+        // private:
+        //     num_type m_refT;
+        //     std::set<size_t> m_probs;
+        //     const ThermalNetwork<num_type> & m_network;
+        //     std::unique_ptr<Intermidiate> m_im{nullptr};
+        // };
     } // namespace solver
 } // namespace thermal
