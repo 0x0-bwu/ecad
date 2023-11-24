@@ -190,10 +190,11 @@ namespace thermal
                 Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::set<size_t> & probs, size_t order)
                     : refT(refT), probs(probs), network(network)
                 {
+                    const size_t source = network.Source(includeBonds);
                     auto m = makeMNA(network, includeBonds, probs);
                     {
                         tools::ProgressTimer t("reduce");
-                        rom = Reduce(m, order);
+                        rom = Reduce(m, std::max(order, source));
                         std::cout << "mor: " << rom.x.rows() << "->" << rom.x.cols() << std::endl;
                     }
                     auto dcomp = rom.m.C.ldlt();
