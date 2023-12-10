@@ -33,9 +33,7 @@ struct EMetalFractionMappingSettings
 struct EThermalNetworkExtractionSettings
 {
     std::string outDir;
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
     bool dumpHotmaps = false;
-#endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
     bool dumpSpiceFile = false;
     bool dumpDensityFile = false;
     bool dumpTemperatureFile = false;

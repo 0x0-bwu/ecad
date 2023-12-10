@@ -82,7 +82,6 @@ ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, const std::
 
 namespace detail {
 
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
 ECAD_INLINE bool GenerateImageProfile(const std::string & filename, const EGridData & data, double min, double max)
 {
     if(min > max)
@@ -96,8 +95,6 @@ ECAD_INLINE bool GenerateImageProfile(const std::string & filename, const EGridD
 
     return data.WriteImgProfile(filename, rgbaFunc);    
 }
-
-#endif//BOOST_GIL_IO_PNG_SUPPORT
 
 }//namespace detail
 }//namespace io

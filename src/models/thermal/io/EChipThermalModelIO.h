@@ -10,10 +10,7 @@ namespace io {
 ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::string & filename, std::string * err = nullptr);
 ECAD_API bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModelV1 & model, const std::string & dirName, const std::string & filename, std::string * err = nullptr);
 
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
 ECAD_API bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, const std::string & dirName, std::string * err = nullptr);
-#endif//BOOST_GIL_IO_PNG_SUPPORT
-
 
 namespace detail {
 

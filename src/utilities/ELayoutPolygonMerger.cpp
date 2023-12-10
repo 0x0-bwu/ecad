@@ -53,10 +53,8 @@ ECAD_INLINE void ELayoutPolygonMerger::Merge()
 
     MergeLayers();
 
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
     if (not m_settings.outFile.empty())
         WritePngFiles(m_settings.outFile);
-#endif//BOOST_GIL_IO_PNG_SUPPORT
 
     FillPolygonsBackToLayout();
 }
@@ -201,7 +199,6 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
     return true;
 }
 
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
 ECAD_INLINE bool ELayoutPolygonMerger::WritePngFiles(const std::string & filename, size_t width)
 {
     auto dir = filesystem::DirName(filename);
@@ -233,7 +230,6 @@ ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(const std::string
     }
     return GeometryIO::WritePNG<Polygon2D<ECoord> >(filename, outs.begin(), outs.end(), width);
 }
-#endif//BOOST_GIL_IO_PNG_SUPPORT
 
 ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(const std::string & filename)
 {

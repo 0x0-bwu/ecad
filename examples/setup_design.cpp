@@ -163,9 +163,7 @@ int main(int argc, char * argv[])
 
     EThermalNetworkExtractionSettings extSettings;
     extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpHotmaps = true;
-#endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpSpiceFile = true;
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;

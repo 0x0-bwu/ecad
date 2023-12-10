@@ -48,13 +48,11 @@ int main(int argc, char * argv[])
 
     EThermalNetworkExtractionSettings extSettings;
     extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpHotmaps = true;
-#endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
     extSettings.dumpDensityFile = true;
     extSettings.dumpTemperatureFile = true;
 
-    size_t xGrid = 200;
+    size_t xGrid = 50;
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 

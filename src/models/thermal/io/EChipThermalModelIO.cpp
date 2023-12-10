@@ -110,7 +110,6 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
     return true;
 }
 
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
 ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, const std::string & dirName, std::string * err)
 {
     using namespace detail;
@@ -136,7 +135,6 @@ ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, c
     }
     return true;
 }
-#endif//BOOST_GIL_IO_PNG_SUPPORT
 
 namespace detail {
 ECAD_INLINE std::string UntarCTMv1File(const std::string & filename, std::string * err)

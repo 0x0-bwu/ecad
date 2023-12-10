@@ -28,9 +28,7 @@ void t_thermal_network_extraction()
 
     EThermalNetworkExtractionSettings settings;
     settings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
     settings.dumpHotmaps = true;
-#endif//#ifdef BOOST_GIL_IO_PNG_SUPPORT
     settings.dumpDensityFile = true;
     settings.dumpTemperatureFile = true;
     settings.grid = {25, 25};

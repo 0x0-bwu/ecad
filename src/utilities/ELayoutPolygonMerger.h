@@ -31,10 +31,8 @@ private:
     void MergeOneLayer(Ptr<LayerMerger> merger);
     void FillPolygonsBackToLayout();
     bool FillOneShape(ENetId netId, ELayerId layerId, Ptr<EShape> shape);
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
     bool WritePngFiles(const std::string & filename, size_t width = 1920);
     bool WritePngFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger, size_t width);
-#endif//BOOST_GIL_IO_PNG_SUPPORT
     bool WriteVtkFiles(const std::string & filename);
     bool WriteVtkFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger);
     bool WriteDomDmcFiles(const std::string & filename);

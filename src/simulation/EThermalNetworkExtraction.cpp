@@ -163,8 +163,6 @@ ECAD_INLINE UPtr<EGridThermalModel> EThermalNetworkExtraction::GenerateGridTherm
         WriteThermalProfile(htMapInfo, *htMap, tFile);
     }
 
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
-
     using ValueType = typename ELayerMetalFraction::ResultType;
     if (not m_settings.outDir.empty() && m_settings.dumpHotmaps) {        
         for (size_t index = 0; index < mfInfo->layers.size(); ++index) {
@@ -182,7 +180,6 @@ ECAD_INLINE UPtr<EGridThermalModel> EThermalNetworkExtraction::GenerateGridTherm
             lyr->WriteImgProfile(filepng, rgbaFunc);
         }
     }
-#endif//BOOST_GIL_IO_PNG_SUPPORT
     return std::make_unique<EGridThermalModel>(std::move(model));
 }
 

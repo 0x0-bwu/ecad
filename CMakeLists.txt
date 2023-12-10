@@ -107,6 +107,7 @@ set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
 include_directories(${THIRD_LIBRARY_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
 
 # Compile definition
+add_definitions("-DBOOST_GIL_IO_PNG_SUPPORT=1")
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 

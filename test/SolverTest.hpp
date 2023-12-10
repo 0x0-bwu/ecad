@@ -59,8 +59,6 @@ void t_grid_thermal_model_solver_test()
     std::string txtProfile = outDir + "/ThermalProfile_rhsc_ctm5.txt";
     io::GenerateTxtProfile(*resModel, txtProfile);
 
-#ifdef BOOST_GIL_IO_PNG_SUPPORT
-
     using ValueType = typename ELayerMetalFraction::ResultType;
     ValueType min = std::numeric_limits<ValueType>::max(), max = -min;
     for(const auto & layer :  resModel->GetLayers()) {
@@ -89,7 +87,6 @@ void t_grid_thermal_model_solver_test()
         std::string filepng = outDir + GENERIC_FOLDER_SEPS + "layer_" + std::to_string(++i) + ".png";
         htMap->WriteImgProfile(filepng, rgbaFunc);
     }
-#endif//BOOST_GIL_IO_PNG_SUPPORT
 }
 
 test_suite * create_ecad_solver_test_suite()
