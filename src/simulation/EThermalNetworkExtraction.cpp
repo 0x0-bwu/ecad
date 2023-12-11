@@ -1,5 +1,7 @@
 #include "EThermalNetworkExtraction.h"
 
+#include "models/thermal/EPrismaThermalModel.h"
+#include "models/thermal/EGridThermalModel.h"
 #include "utilities/EMetalFractionMapping.h"
 #include "solvers/EThermalNetworkSolver.h"
 #include "generic/tools/FileSystem.hpp"
@@ -21,7 +23,7 @@ ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetwor
     m_settings = std::move(settings);
 }
 
-ECAD_INLINE UPtr<EGridThermalModel> EThermalNetworkExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout)
+ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("generate grid thermal model")
 
@@ -180,7 +182,12 @@ ECAD_INLINE UPtr<EGridThermalModel> EThermalNetworkExtraction::GenerateGridTherm
             lyr->WriteImgProfile(filepng, rgbaFunc);
         }
     }
-    return std::make_unique<EGridThermalModel>(std::move(model));
+    return std::make_unique<EThermalModel>(std::move(model));
+}
+
+ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout)
+{
+    return nullptr;//wbtest
 }
 
 }//namespace esim

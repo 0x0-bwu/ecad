@@ -1,6 +1,5 @@
 #include "models/thermal/EGridThermalModel.h"
 #include "interfaces/IMaterialDef.h"
-
 #include <boost/math/interpolators/pchip.hpp>
 namespace ecad::emodel::etherm {
 
@@ -316,9 +315,9 @@ ECAD_INLINE std::array<FCoord, 2> EGridThermalModel::GetResolution(bool scaled) 
 
 ECAD_INLINE size_t EGridThermalModel::AppendLayer(EGridThermalLayer layer)
 {
-    if(math::LT<FCoord>(layer.GetThickness(), 0)) return false;
-    if(layer.GetSize() != m_size) return invalidIndex;
-    if(!m_stackupLayers.empty()) {
+    if (math::LT<FCoord>(layer.GetThickness(), 0)) return invalidIndex;
+    if (layer.GetSize() != m_size) return invalidIndex;
+    if (not m_stackupLayers.empty()) {
         auto & botLayer = m_stackupLayers.back();
         botLayer.SetBotLayer(layer.GetName());
         layer.SetTopLayer(botLayer.GetName());

@@ -12,18 +12,12 @@ namespace io {
 
 using namespace generic::str;
 using namespace generic::fmt;
-using namespace generic::filesystem;
+using namespace generic::fs;
 
-ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, const std::string & filename, std::string * err)
+ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, std::string_view filename, std::string * err)
 {
-    auto dir = DirName(filename);
-    if(!PathExists(dir)) MakeDir(dir);
-    if(!PathExists(dir) || !isDirWritable(dir)) {
-        if(err) *err = Fmt2Str("Error: unwritable folder: %1%.", dir);
-        return false;
-    }
-    
-    std::ofstream out(filename);
+    CreateDir(DirName(filename));    
+    std::ofstream out(filename.data());
     if(!out.is_open()) {
         if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
@@ -82,7 +76,7 @@ ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, const std::
 
 namespace detail {
 
-ECAD_INLINE bool GenerateImageProfile(const std::string & filename, const EGridData & data, double min, double max)
+ECAD_INLINE bool GenerateImageProfile(std::string_view filename, const EGridData & data, double min, double max)
 {
     if(min > max)
         std::swap(min, max);

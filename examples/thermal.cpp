@@ -21,7 +21,7 @@ int main(int argc, char * argv[])
     ::signal(SIGABRT, &SignalHandler);
 
     using namespace ecad;
-    using namespace generic::filesystem;
+    using namespace generic::fs;
 
     auto & eDataMgr = EDataMgr::Instance();
     eDataMgr.SetDefaultThreads(1);

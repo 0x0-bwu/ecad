@@ -15,7 +15,7 @@ public:
     EGdsParser(EGdsReader & reader);
     virtual ~EGdsParser();
 
-    bool operator() (const std::string & filename);
+    bool operator() (std::string_view filename);
     bool operator() (std::istream & fp);
 
 protected:

@@ -12,7 +12,7 @@ public:
     EGdsReader(EGdsDB & db);
     virtual ~EGdsReader();
 
-    virtual bool operator() (const std::string & filename);
+    virtual bool operator() (std::string_view filename);
 
     virtual void ReadBitArray(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data);
     virtual void ReadInteger2(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data);

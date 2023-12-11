@@ -30,7 +30,7 @@ bool f_serialization_database_varify(SPtr<IDatabase> database)
 
 void t_boost_serialization()
 {
-    using namespace generic::filesystem;
+    using namespace generic::fs;
 
     std::string err;
     std::string dmc = ecad_test::GetTestDataPath() + "/dmcdom/import.dmc";

@@ -40,9 +40,9 @@ ECAD_INLINE EGdsLayerMapParser::~EGdsLayerMapParser()
 {
 }
 
-ECAD_INLINE bool EGdsLayerMapParser::operator() (const std::string & filename)
+ECAD_INLINE bool EGdsLayerMapParser::operator() (std::string_view filename)
 {
-    std::ifstream fp(filename.c_str());
+    std::ifstream fp(filename.data());
     if(!fp.good()) return false;
 
     m_layerMap.Clear();

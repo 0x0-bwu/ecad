@@ -79,7 +79,7 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
         layer.SetIsMetal(layers.at(i)->GetLayerType() == ELayerType::ConductingLayer);
         layer.SetThickness(thickness);
         [[maybe_unused]] auto res = gridModel->AppendLayer(std::move(layer));
-        ECAD_ASSERT(res)
+        ECAD_ASSERT(res != invalidIndex)
     }
 
     auto ctm = io::makeChipThermalModelV1FromGridThermalModel(*gridModel, false, 0, err);

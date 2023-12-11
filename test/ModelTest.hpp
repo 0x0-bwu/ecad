@@ -14,8 +14,8 @@ void s_ctm_model_io_test()
     std::string ctm = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5.tar.gz";
     std::string ctmFolder = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5";
     auto model = io::makeChipThermalModelFromCTMv1File(ctm, &err);
-    BOOST_CHECK(generic::filesystem::PathExists(ctmFolder));
-    generic::filesystem::RemoveDir(ctmFolder);
+    BOOST_CHECK(generic::fs::PathExists(ctmFolder));
+    generic::fs::RemoveDir(ctmFolder);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(model);
 

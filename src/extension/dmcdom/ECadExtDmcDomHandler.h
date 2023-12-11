@@ -32,8 +32,8 @@ public:
     SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:
-    bool ParseDomFile(const std::string & filename, std::vector<EPoint2D> & points, std::string * err = nullptr);
-    bool ParseDmcFile(const std::string & filename, std::vector<EDmcData> & record, std::string * err = nullptr);
+    bool ParseDomFile(std::string_view filename, std::vector<EPoint2D> & points, std::string * err = nullptr);
+    bool ParseDmcFile(std::string_view filename, std::vector<EDmcData> & record, std::string * err = nullptr);
 
 private:
     std::string m_dmc, m_dom;

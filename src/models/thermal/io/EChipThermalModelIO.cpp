@@ -11,9 +11,9 @@ namespace io {
 
 using namespace generic::str;
 using namespace generic::fmt;
-using namespace generic::filesystem;
+using namespace generic::fs;
 
-ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::string & filename, std::string * err)
+ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(std::string_view filename, std::string * err)
 {
     using namespace detail;
     auto dir = UntarCTMv1File(filename, err);
@@ -51,11 +51,10 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(const std::
     return model;
 }
 
-ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModelV1 & model, const std::string & dirName, const std::string & filename, std::string * err)
+ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModelV1 & model, std::string_view dirName, std::string_view filename, std::string * err)
 {
-    auto ctmDir = dirName + GENERIC_FOLDER_SEPS + filename;
-    if(!PathExists(ctmDir)) MakeDir(ctmDir);
-    if(!PathExists(ctmDir) || !isDirWritable(ctmDir)) {
+    auto ctmDir = std::string(dirName) + GENERIC_FOLDER_SEPS + std::string(filename);
+    if (not CreateDir(ctmDir)) {
         if(err) *err = Fmt2Str("Error: unwritable folder: %1%.", ctmDir);
         return false;
     }
@@ -104,16 +103,16 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
     if(!WriteCTMv1DensityFile(densityFile, size, model.header.resolution, rf, density, err)) return false;
 
     //make package
-    std::string ctmFile = dirName + GENERIC_FOLDER_SEPS + filename + ".tar.gz";
+    std::string ctmFile = std::string(dirName) + GENERIC_FOLDER_SEPS + std::string(filename) + ".tar.gz";
     if(!GenerateCTMv1Package(ctmDir, ctmFile, false, err)) return false;
 
     return true;
 }
 
-ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, const std::string & dirName, std::string * err)
+ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, std::string_view dirName, std::string * err)
 {
     using namespace detail;
-    if(!PathExists(dirName)) MakeDir(dirName);
+    if (not CreateDir(dirName)) return false;
 
     //power
     if (model.powers) {
@@ -123,21 +122,21 @@ ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, c
             auto t = model.header.temperatures.at(i);
             auto table = model.powers->GetTable().GetTable(t);
             if (nullptr == table) continue;
-            std::string filename = dirName + GENERIC_FOLDER_SEPS + "power_" + std::to_string(t) + "c.png";
+            std::string filename = std::string(dirName) + GENERIC_FOLDER_SEPS + "power_" + std::to_string(t) + "c.png";
             if (not GenerateImageProfile(filename, *table, range.first, range.second)) continue;
         }
     }
     //density
     for (const auto & density : model.densities) {
         if (nullptr == density.second) continue;
-        std::string filename = dirName + GENERIC_FOLDER_SEPS + "layer_" + density.first + ".png";
+        std::string filename = std::string(dirName) + GENERIC_FOLDER_SEPS + "layer_" + density.first + ".png";
         if (not GenerateImageProfile(filename, *(density.second), 0.0, 1.0)) continue;
     }
     return true;
 }
 
 namespace detail {
-ECAD_INLINE std::string UntarCTMv1File(const std::string & filename, std::string * err)
+ECAD_INLINE std::string UntarCTMv1File(std::string_view filename, std::string * err)
 {
     if (not FileExists(filename)) {
         if(err) *err = Fmt2Str("Error: file %1% not exists!", filename);
@@ -145,24 +144,22 @@ ECAD_INLINE std::string UntarCTMv1File(const std::string & filename, std::string
     }
 
     auto dir = DirName(filename);
-    if (not isDirWritable(dir)) dir = "/tmp";
     auto baseName = BaseName(filename);
     
     //unzip ctm file
-    auto untarDir = dir + GENERIC_FOLDER_SEPS + baseName;
-    if (PathExists(untarDir))
-        RemoveDir(untarDir);
-    MakeDir(untarDir);
+    auto untarDir = dir.string() + GENERIC_FOLDER_SEPS + baseName.string();
+    if (PathExists(untarDir)) RemoveDir(untarDir);
+    CreateDir(untarDir);
 
-    std::string cmd = "tar -zxf" + filename + " -C " + untarDir;
+    std::string cmd = "tar -zxf" + std::string(filename) + " -C " + untarDir;
     int res = std::system(cmd.c_str());
     return res == 0 ? untarDir : std::string{};
 }
 
-ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header & header, std::string * err)
+ECAD_INLINE bool ParseCTMv1HeaderFile(std::string_view filename, ECTMv1Header & header, std::string * err)
 {
-    std::ifstream fp(filename.c_str(), std::ios::in);
-    if(!fp.good()) {
+    std::ifstream fp(filename.data(), std::ios::in);
+    if (not fp.good()) {
         if(err) *err = Fmt2Str("Error: failed to open file %1%!", filename);
         return false;
     }
@@ -335,11 +332,11 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(const std::string & filename, ECTMv1Header
     return true;
 }
 
-ECAD_INLINE bool ParseCTMv1PowerFile(const std::string & filename, EGridData & powers, std::string * err)
+ECAD_INLINE bool ParseCTMv1PowerFile(std::string_view filename, EGridData & powers, std::string * err)
 {
-    std::ifstream fp(filename.c_str(), std::ios::in | std::ios::binary);
-    if(!fp.good()) {
-        if(err) *err = Fmt2Str("Error: failed to open file %1%!", filename);
+    std::ifstream fp(filename.data(), std::ios::in | std::ios::binary);
+    if (not fp.good()) {
+        if (err) *err = Fmt2Str("Error: failed to open file %1%!", filename);
         return false;
     }
 
@@ -351,10 +348,10 @@ ECAD_INLINE bool ParseCTMv1PowerFile(const std::string & filename, EGridData & p
     return true;
 }
 
-ECAD_API bool ParseCTMv1DensityFile(const std::string & filename, const size_t size, std::vector<SPtr<EGridData> > & density, std::string * err)
+ECAD_API bool ParseCTMv1DensityFile(std::string_view filename, const size_t size, std::vector<SPtr<EGridData> > & density, std::string * err)
 {
-    std::ifstream fp(filename.c_str(), std::ios::in | std::ios::binary);
-    if(!fp.good()) {
+    std::ifstream fp(filename.data(), std::ios::in | std::ios::binary);
+    if (not fp.good()) {
         if(err) *err = Fmt2Str("Error: failed to open file %1%!", filename);
         return false;
     }
@@ -383,10 +380,10 @@ ECAD_API bool ParseCTMv1DensityFile(const std::string & filename, const size_t s
     return true;
 }
 
-ECAD_INLINE bool WriteCTMv1HeaderFile(const std::string & filename, const ECTMv1Header & header, std::string * err)
+ECAD_INLINE bool WriteCTMv1HeaderFile(std::string_view filename, const ECTMv1Header & header, std::string * err)
 {
-    std::ofstream out(filename);
-    if(!out.is_open()) {
+    std::ofstream out(filename.data());
+    if (not out.is_open()) {
         if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
     }
@@ -455,9 +452,9 @@ ECAD_INLINE bool WriteCTMv1HeaderFile(const std::string & filename, const ECTMv1
     return true;
 }
 
-ECAD_INLINE bool WriteCTMv1PowerFile(const std::string & filename, const EGridData & powers, std::string * err)
+ECAD_INLINE bool WriteCTMv1PowerFile(std::string_view filename, const EGridData & powers, std::string * err)
 {
-    std::ofstream out(filename, std::ios::out |std::ios::binary);
+    std::ofstream out(filename.data(), std::ios::out |std::ios::binary);
     if(!out.is_open()) {
         if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
@@ -472,23 +469,23 @@ ECAD_INLINE bool WriteCTMv1PowerFile(const std::string & filename, const EGridDa
     return true;
 }
 
-ECAD_INLINE bool WriteCTMv1DensityFile(const std::string & filename, const size_t size, FCoord res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err)
+ECAD_INLINE bool WriteCTMv1DensityFile(std::string_view filename, const size_t size, FCoord res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err)
 {
-    if(density.empty()) return false;
-    for(const auto & layer : density) {
-        if(nullptr == layer) {
+    if (density.empty()) return false;
+    for (const auto & layer : density) {
+        if (nullptr == layer) {
             if(err) *err = "Error: missing data in metal density!";
             return false;
         }
-        if(layer->Size() != size) {
+        if (layer->Size() != size) {
             if(err) *err = "Error: metal density data mismatch with size!";
             return false;
         }
     } 
 
-    std::ofstream out(filename, std::ios::out |std::ios::binary);
-    if(!out.is_open()) {
-        if(err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
+    std::ofstream out(filename.data(), std::ios::out |std::ios::binary);
+    if (not out.is_open()) {
+        if (err) *err = Fmt2Str("Error: failed to open file: %1%.", filename);
         return false;
     }
 
@@ -496,9 +493,9 @@ ECAD_INLINE bool WriteCTMv1DensityFile(const std::string & filename, const size_
     float temp;
     auto nx = density.front()->Width();
     auto ny = density.front()->Height();
-    for(size_t x = 0; x < nx; ++x) {
+    for (size_t x = 0; x < nx; ++x) {
         float x0 = ref[0] + x * res, x1 = x0 + res;
-        for(size_t y = 0; y < ny; ++y) {
+        for (size_t y = 0; y < ny; ++y) {
             id++;
             float y0 = ref[1] + y * res, y1 = y0 + res;
             out.write(reinterpret_cast<char*>(&id), sizeof(int));
@@ -518,16 +515,16 @@ ECAD_INLINE bool WriteCTMv1DensityFile(const std::string & filename, const size_
     return true;
 }
 
-ECAD_INLINE bool GenerateCTMv1Package(const std::string & dirName, const std::string & packName, bool removeDir, std::string * err)
+ECAD_INLINE bool GenerateCTMv1Package(std::string_view dirName, const std::string & packName, bool removeDir, std::string * err)
 {
     std::string cmd = Fmt2Str("tar zcf %1% -C %2% .", packName, dirName);
     int res = std::system(cmd.c_str());
-    if(res == 0 && FileExists(packName)) {
+    if (res == 0 && FileExists(packName)) {
         if(removeDir) RemoveDir(dirName);
         return true;
     }
 
-    if(err) *err = Fmt2Str("Error: failed to generate ctm package: %1%.", packName);
+    if (err) *err = Fmt2Str("Error: failed to generate ctm package: %1%.", packName);
     return false;
 }
 

@@ -13,6 +13,7 @@ models/thermal/io/EThermalModelIO.cpp
 models/thermal/utilities/EThermalModelReduction.cpp
 models/thermal/EChipThermalModel.cpp
 models/thermal/EGridThermalModel.cpp
+models/thermal/EPrismaThermalModel.cpp
 models/thermal/EThermalModel.cpp
 simulation/EThermalNetworkExtraction.cpp
 solvers/utilities/EThermalNetworkBuilder.cpp

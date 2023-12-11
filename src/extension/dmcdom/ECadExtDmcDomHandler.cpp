@@ -187,10 +187,10 @@ ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::stri
     return database;
 }
 
-ECAD_INLINE bool ECadExtDmcDomHandler::ParseDomFile(const std::string & filename, std::vector<EPoint2D> & points, std::string * err)
+ECAD_INLINE bool ECadExtDmcDomHandler::ParseDomFile(std::string_view filename, std::vector<EPoint2D> & points, std::string * err)
 {
-    std::ifstream in(filename);
-    if(!in.is_open()) return false;
+    std::ifstream in(filename.data());
+    if (not in.is_open()) return false;
     
     auto scale = m_units.Scale2Coord();
     points.clear();
@@ -211,10 +211,10 @@ ECAD_INLINE bool ECadExtDmcDomHandler::ParseDomFile(const std::string & filename
     return true;
 }
 
-ECAD_INLINE bool ECadExtDmcDomHandler::ParseDmcFile(const std::string & filename, std::vector<EDmcData> & record, std::string * err)
+ECAD_INLINE bool ECadExtDmcDomHandler::ParseDmcFile(std::string_view filename, std::vector<EDmcData> & record, std::string * err)
 {
-    std::ifstream in(filename);
-    if(!in.is_open()) return false;
+    std::ifstream in(filename.data());
+    if (not in.is_open()) return false;
     
     auto scale = m_units.Scale2Coord();
     record.clear();

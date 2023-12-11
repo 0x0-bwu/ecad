@@ -12,7 +12,7 @@ using namespace ecad;
 
 void t_thermal_network_extraction()
 {
-    using namespace generic::filesystem;
+    using namespace generic::fs;
 
     std::string err;
     std::string qcomXfl = ecad_test::GetTestDataPath() + "/xfl/qcom.xfl";
@@ -25,7 +25,7 @@ void t_thermal_network_extraction()
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
-
+    
     EThermalNetworkExtractionSettings settings;
     settings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     settings.dumpHotmaps = true;

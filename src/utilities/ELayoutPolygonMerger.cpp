@@ -54,7 +54,7 @@ ECAD_INLINE void ELayoutPolygonMerger::Merge()
     MergeLayers();
 
     if (not m_settings.outFile.empty())
-        WritePngFiles(m_settings.outFile);
+        WritePngFiles(m_settings.outFile.c_str());
 
     FillPolygonsBackToLayout();
 }
@@ -199,21 +199,20 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
     return true;
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WritePngFiles(const std::string & filename, size_t width)
+ECAD_INLINE bool ELayoutPolygonMerger::WritePngFiles(std::string_view filename, size_t width)
 {
-    auto dir = filesystem::DirName(filename);
-    if (not filesystem::PathExists(dir))
-        filesystem::CreateDir(dir);
+    auto dir = fs::DirName(filename);
+    if (not fs::CreateDir(dir)) return false;
     
     bool res = true;
     for (const auto & merger : m_mergers) {
-        std::string filePath = filename + '_' + std::to_string(static_cast<int>(merger.first)) + ".png";
-        /*res = res && */WritePngFileForOneLayer(filePath, merger.second.get(), width);
+        std::string filePath = std::string(filename) + '_' + std::to_string(static_cast<int>(merger.first)) + ".png";
+        /*res = res && */WritePngFileForOneLayer(filePath.c_str(), merger.second.get(), width);
     }
     return res;   
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger, size_t width)
+ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(std::string_view filename, Ptr<LayerMerger> merger, size_t width)
 {
     using PolygonData = typename LayerMerger::PolygonData;
 
@@ -231,21 +230,20 @@ ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(const std::string
     return GeometryIO::WritePNG<Polygon2D<ECoord> >(filename, outs.begin(), outs.end(), width);
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(const std::string & filename)
+ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(std::string_view filename)
 {
-    auto dir = filesystem::DirName(filename);
-    if (not filesystem::PathExists(dir))
-        filesystem::CreateDir(dir);
+    auto dir = fs::DirName(filename);
+    if (not fs::CreateDir(dir)) return false;
     
     bool res = true;
     for(const auto & merger : m_mergers) {
-        std::string filePath = filename + '_' + std::to_string(static_cast<int>(merger.first)) + ".vtk";
+        std::string filePath = std::string(filename) + '_' + std::to_string(static_cast<int>(merger.first)) + ".vtk";
         res = res && WriteVtkFileForOneLayer(filePath, merger.second.get());
     }
     return res;
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger)
+ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(std::string_view filename, Ptr<LayerMerger> merger)
 {
     using PolygonData = typename LayerMerger::PolygonData;
 
@@ -263,14 +261,13 @@ ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(const std::string
     return GeometryIO::WriteVTK<Polygon2D<ECoord> >(filename, outs.begin(), outs.end());
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WriteDomDmcFiles(const std::string & filename)
+ECAD_INLINE bool ELayoutPolygonMerger::WriteDomDmcFiles(std::string_view filename)
 {
-    auto dir = filesystem::DirName(filename);
-    if ( not filesystem::PathExists(dir))
-        filesystem::CreateDir(dir);
+    auto dir = fs::DirName(filename);
+    if (not fs::CreateDir(dir)) return false;
 
-    std::string dom = filename + ".dom";
-    std::string dmc = filename + ".dmc";
+    std::string dom = std::string(filename) + ".dom";
+    std::string dmc = std::string(filename) + ".dmc";
     std::fstream f_dom(dom, std::ios::out | std::ios::trunc);
     std::fstream f_dmc(dmc, std::ios::out | std::ios::trunc);
     if(f_dom.bad() || f_dmc.bad()) return false;

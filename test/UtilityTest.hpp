@@ -76,7 +76,7 @@ void t_layout_polygon_merge()
 
 void t_metal_fraction_mapping()
 {
-    using namespace generic::filesystem;
+    using namespace generic::fs;
 
     std::string err;
     std::string name = "4004";
@@ -103,7 +103,7 @@ void t_metal_fraction_mapping()
 
 void t_metal_fraction_mapping_select_nets()
 {
-    using namespace generic::filesystem;
+    using namespace generic::fs;
 
     std::string err;
     std::string dmc = ecad_test::GetTestDataPath() + "/dmcdom/import.dmc";

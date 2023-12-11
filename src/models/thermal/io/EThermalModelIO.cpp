@@ -9,7 +9,7 @@ namespace emodel {
 namespace etherm {
 namespace io {
 
-ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(const std::string & filename, size_t reduceOrder, std::string * err)
+ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(std::string_view filename, size_t reduceOrder, std::string * err)
 {
     auto ctm = makeChipThermalModelFromCTMv1File(filename, err);
     if(nullptr == ctm) return nullptr;

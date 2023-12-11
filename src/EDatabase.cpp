@@ -88,9 +88,8 @@ ECAD_INLINE EDatabase & EDatabase::operator= (const EDatabase & other)
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt) const
 {
-    auto dir = generic::filesystem::DirName(archive);
-    if (not generic::filesystem::PathExists(dir))
-        generic::filesystem::CreateDir(dir);
+    auto dir = generic::fs::DirName(archive);
+    if (not generic::fs::CreateDir(dir)) return false;
 
     std::ofstream ofs(archive);
     if (not ofs.is_open()) return false;

@@ -38,7 +38,7 @@ public:
     explicit EGdsLayerMapParser(EGdsLayerMap & layerMap);
     virtual ~EGdsLayerMapParser();
 
-    virtual bool operator() (const std::string & filename);
+    virtual bool operator() (std::string_view filename);
     virtual bool operator() (std::istream & fp);
 
 protected:

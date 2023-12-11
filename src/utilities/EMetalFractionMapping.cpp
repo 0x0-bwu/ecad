@@ -160,8 +160,8 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
             return std::make_tuple(r, g, b, a);
         };
 
-        std::string dirPath  = generic::filesystem::DirName(m_settings.outFile);
-        std::string fileName = generic::filesystem::FileName(m_settings.outFile);
+        auto dirPath  = generic::fs::DirName(m_settings.outFile).string();
+        auto fileName = generic::fs::FileName(m_settings.outFile).string();
         for(size_t index = 0; index < m_result->size(); ++index){
             std::string filepng = dirPath + GENERIC_FOLDER_SEPS + fileName + "_" + std::to_string(index) + ".png";
             m_result->at(index)->WriteImgProfile(filepng, rgbaFunc);
@@ -244,8 +244,8 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
         return std::make_tuple(r, g, b, a);
     };
 
-    std::string dirPath  = generic::filesystem::DirName(m_settings.outFile);
-    std::string fileName = generic::filesystem::FileName(m_settings.outFile);
+    auto dirPath  = generic::fs::DirName(m_settings.outFile).string();
+    auto fileName = generic::fs::FileName(m_settings.outFile).string();
     for(index = 0; index < layers; ++index){
         std::string filepng = dirPath + GENERIC_FOLDER_SEPS + fileName + "_" + info.layers[index].name + ".png";
         m_result->at(index)->WriteImgProfile(filepng, rgbaFunc);
@@ -255,16 +255,15 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
     return true;
 }
 
-ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, const std::string & filename)
+ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, std::string_view filename)
 {
     if(info.layers.size() != mf.size()) return false;
 
-    auto dir = generic::filesystem::DirName(filename);
-    if(!generic::filesystem::PathExists(dir))
-        generic::filesystem::CreateDir(dir);
+    auto dir = generic::fs::DirName(filename);
+    if(not generic::fs::CreateDir(dir)) return false;
 
-    std::ofstream out(filename);
-    if(!out.is_open()) return false;
+    std::ofstream out(filename.data());
+    if (not out.is_open()) return false;
     char sp(32);
 
     const auto & bbox = info.extension;

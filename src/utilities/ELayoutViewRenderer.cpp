@@ -75,7 +75,7 @@ ECAD_INLINE bool ELayoutViewRenderer::RendererPNG(CPtr<ILayoutView> layout)
 
     auto cellName = layout->GetCell()->GetName();
     auto filename = m_settings.dirName  + ECAD_SEPS + cellName + ".png";
-    return GeometryIO::WritePNG<Polygon2D<ECoord> >(filename, outs.begin(), outs.end(), m_settings.width);
+    return GeometryIO::WritePNG<Polygon2D<ECoord> >(filename.c_str(), outs.begin(), outs.end(), m_settings.width);
 }
 
 }//namespace eutils

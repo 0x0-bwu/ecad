@@ -16,11 +16,11 @@ ECAD_INLINE EGdsReader::~EGdsReader()
 {
 }
 
-ECAD_INLINE bool EGdsReader::operator() (const std::string & filename)
+ECAD_INLINE bool EGdsReader::operator() (std::string_view filename)
 {
     // calculate file size 
-    std::ifstream in (filename.c_str());
-    if (!in.good()) return false;
+    std::ifstream in (filename.data());
+    if (not in.good()) return false;
     std::streampos begin = in.tellg();
     in.seekg(0, std::ios::end);
     std::streampos end = in.tellg();

@@ -83,10 +83,10 @@ private:
     EMetalFractionMappingSettings m_settings;
     UPtr<ELayoutMetalFraction> m_result = nullptr;
     UPtr<EMetalFractionInfo> m_mfInfo = nullptr;
-    filesystem::FileHelper m_fileHelper;
+    fs::FileHelper m_fileHelper;
 };
 
-ECAD_API bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, const std::string & filename);
+ECAD_API bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, std::string_view filename);
 
 }//namespace eutils
 }//namespace ecad

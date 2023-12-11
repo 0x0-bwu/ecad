@@ -31,11 +31,11 @@ private:
     void MergeOneLayer(Ptr<LayerMerger> merger);
     void FillPolygonsBackToLayout();
     bool FillOneShape(ENetId netId, ELayerId layerId, Ptr<EShape> shape);
-    bool WritePngFiles(const std::string & filename, size_t width = 1920);
-    bool WritePngFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger, size_t width);
-    bool WriteVtkFiles(const std::string & filename);
-    bool WriteVtkFileForOneLayer(const std::string & filename, Ptr<LayerMerger> merger);
-    bool WriteDomDmcFiles(const std::string & filename);
+    bool WritePngFiles(std::string_view filename, size_t width = 1920);
+    bool WritePngFileForOneLayer(std::string_view  filename, Ptr<LayerMerger> merger, size_t width);
+    bool WriteVtkFiles(std::string_view filename);
+    bool WriteVtkFileForOneLayer(std::string_view filename, Ptr<LayerMerger> merger);
+    bool WriteDomDmcFiles(std::string_view filename);
     void WriteDomDmcForOneLayer(std::fstream & dom, std::fstream & dmc, ELayerId layerId, Ptr<LayerMerger> merger);
 private:
     Ptr<ILayoutView> m_layout;

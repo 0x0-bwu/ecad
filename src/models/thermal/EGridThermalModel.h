@@ -1,6 +1,5 @@
 #pragma once
 #include "EThermalModel.h"
-
 namespace ecad {
 
 class IMaterialDef;

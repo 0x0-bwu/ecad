@@ -1,12 +1,19 @@
 #pragma once
 #include "ECadCommon.h"
 #include "utilities/EMetalFractionMapping.h"
-#include <boost/math/interpolators/pchip.hpp>
+
+namespace boost::math::interpolators {
+template <class RandomAccessContainer> class pchip;
+} // namespace boost::math::interpolators
+
+namespace generic::geometry {
+template <typename T> class OccupancyGridMap;
+} //namespace generic::geometry
+
 namespace ecad {
 namespace emodel {
 namespace etherm {
 
-using namespace eutils;
 using namespace generic::geometry;
 
 class ECAD_API EThermalModel

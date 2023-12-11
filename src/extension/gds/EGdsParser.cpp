@@ -21,10 +21,10 @@ ECAD_INLINE EGdsParser::~EGdsParser()
 {
 }
 
-ECAD_INLINE bool EGdsParser::operator() (const std::string & filename)
+ECAD_INLINE bool EGdsParser::operator() (std::string_view filename)
 {
-    std::ifstream fp(filename.c_str());
-    if(!fp.good()){
+    std::ifstream fp(filename.data());
+    if (not fp.good()) {
         //todo, report error
         return false;
     }
