@@ -26,6 +26,7 @@ ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, ELayerId layerId, CPtr<E
         for (auto iter = pwh.ConstBeginHoles(); iter != pwh.ConstEndHoles(); ++iter)
             addPolygon(netId, layerId, std::move(*iter), true);
     }
+    else addPolygon(netId, layerId, shape->GetContour(), false);
 }
 
 ECAD_INLINE bool ECompactLayout::WriteImgView(std::string_view filename, size_t width) const
@@ -36,7 +37,10 @@ ECAD_INLINE bool ECompactLayout::WriteImgView(std::string_view filename, size_t 
 ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
 {
     ECompactLayout compact;
-    //todo, reserve size    
+    //todo, reserve size   
+
+    compact.AddShape(ENetId::noNet, ELayerId::noLayer, layout->GetBoundary());
+
     auto primitives = layout->GetPrimitiveCollection();
     for (size_t i = 0; i < primitives->Size(); ++i) {
         auto prim = primitives->GetPrimitive(i);

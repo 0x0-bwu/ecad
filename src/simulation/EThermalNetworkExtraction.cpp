@@ -187,7 +187,8 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
 
 ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout)
 {
-    return nullptr;//wbtest
+    auto compact = makeCompactLayout(layout);
+    return nullptr;
 }
 
 }//namespace esim

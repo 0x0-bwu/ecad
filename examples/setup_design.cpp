@@ -175,7 +175,8 @@ int main(int argc, char * argv[])
 
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
-    auto model = ne.GenerateGridThermalModel(layout);
+    // auto model = ne.GenerateGridThermalModel(layout);
+    auto model = ne.GeneratePrismaThermalModel(layout);
 
     EDataMgr::Instance().ShutDown();
 
