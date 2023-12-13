@@ -6,6 +6,7 @@
 #include "solvers/EThermalNetworkSolver.h"
 #include "generic/tools/FileSystem.hpp"
 
+#include "Mesher2D.h"
 #include "interfaces/ILayoutView.h"
 #include "interfaces/IComponent.h"
 #include "interfaces/IPrimitive.h"
@@ -188,6 +189,20 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
 ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout)
 {
     auto compact = makeCompactLayout(layout);
+
+    //todo wrapper to mesh
+    using namespace emesh;
+    using namespace generic::geometry;
+    std::list<tri::IndexEdge> edges;
+    std::vector<Point2D<ECoord> > points;
+    std::vector<Segment2D<ECoord> > segments;
+    tri::Triangulation<Point2D<ECoord> > triangulation;
+    MeshFlow2D::ExtractIntersections(compact->polygons, segments);
+    MeshFlow2D::ExtractTopology(segments, points, edges);
+    MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
+    MeshFlow2D::TriangulationRefinement(triangulation, math::Rad(15), 100, 1e3, 1000);
+    GeometryIO::WritePNG("/home/bwu/code/myRepo/ecad/test/data/simulation/tri.png", triangulation, 1024);
+     //todo wrapper to mesh
     return nullptr;
 }
 

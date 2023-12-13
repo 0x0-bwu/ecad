@@ -67,4 +67,4 @@ EPrimitiveCollection.cpp
 EShape.cpp
 )
 
-target_link_libraries(Ecad ${PNG_LIBRARY} boost_serialization)
+target_link_libraries(Ecad Emesh ${PNG_LIBRARY} boost_serialization)

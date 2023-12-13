@@ -31,7 +31,7 @@ ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, ELayerId layerId, CPtr<E
 
 ECAD_INLINE bool ECompactLayout::WriteImgView(std::string_view filename, size_t width) const
 {
-    return generic::geometry::GeometryIO::WritePNG<EPolygonData>(filename, polygons.begin(), polygons.end(), width);
+    return generic::geometry::GeometryIO::WritePNG(filename, polygons.begin(), polygons.end(), width);
 }
 
 ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)

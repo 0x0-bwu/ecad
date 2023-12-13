@@ -227,7 +227,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(std::string_view 
             outs.push_back(hole);
         }
     }
-    return GeometryIO::WritePNG<Polygon2D<ECoord> >(filename, outs.begin(), outs.end(), width);
+    return GeometryIO::WritePNG(filename, outs.begin(), outs.end(), width);
 }
 
 ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(std::string_view filename)

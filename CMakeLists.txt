@@ -104,7 +104,8 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
-include_directories(${THIRD_LIBRARY_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
+set(EMESH_INCLUDE_PATH ${THIRD_LIBRARY_PATH}/emesh/include)
+include_directories(${THIRD_LIBRARY_PATH} ${EMESH_INCLUDE_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
 
 # Compile definition
 add_definitions("-DBOOST_GIL_IO_PNG_SUPPORT=1")
@@ -129,6 +130,8 @@ message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 # Tracting build time
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
+
+add_subdirectory(3rdparty/emesh/src)
 
 add_subdirectory(src)
 add_subdirectory(test)
