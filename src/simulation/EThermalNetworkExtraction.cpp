@@ -35,17 +35,17 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
     settings.regionExtLeft  = m_settings.regionExtLeft;
     settings.regionExtRight = m_settings.regionExtRight;
     settings.mergeGeomBeforeMapping = m_settings.mergeGeomBeforeMetalMapping;
-    if(!m_settings.outDir.empty() && m_settings.dumpDensityFile)
+    if (not m_settings.outDir.empty() && m_settings.dumpDensityFile)
         settings.outFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mf.txt";
 
     ELayoutMetalFractionMapper mapper(settings);
-    if(!mapper.GenerateMetalFractionMapping(layout)) return nullptr;
+    if (not mapper.GenerateMetalFractionMapping(layout)) return nullptr;
 
     auto mf = mapper.GetLayoutMetalFraction();
     auto mfInfo = mapper.GetMetalFractionInfo();
-    if(nullptr == mf || nullptr == mfInfo) return nullptr;
+    if (nullptr == mf || nullptr == mfInfo) return nullptr;
 
-    if(!m_settings.outDir.empty() && m_settings.dumpDensityFile) {
+    if (not m_settings.outDir.empty() && m_settings.dumpDensityFile) {
         auto densityFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "density.txt";
         WriteThermalProfile(*mfInfo, *mf, densityFile);
     }
@@ -188,7 +188,10 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
 
 ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout)
 {
+    ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
     auto compact = makeCompactLayout(layout);
+    auto compactModelFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "compact.png";
+    compact->WriteImgView(compactModelFile, 1024);
 
     //todo wrapper to mesh
     using namespace emesh;
@@ -201,8 +204,85 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     MeshFlow2D::ExtractTopology(segments, points, edges);
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
     MeshFlow2D::TriangulationRefinement(triangulation, math::Rad(15), 100, 1e3, 1000);
-    GeometryIO::WritePNG("/home/bwu/code/myRepo/ecad/test/data/simulation/tri.png", triangulation, 1024);
-     //todo wrapper to mesh
+    auto meshTemplateFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.png";
+    GeometryIO::WritePNG(meshTemplateFile, triangulation, 2048);
+    std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
+    //todo wrapper to mesh
+
+    EPrismaThermalModel model;
+    std::vector<Ptr<ILayer> > layers;//todo, refinement
+    std::vector<Ptr<IStackupLayer> > stackupLayers;
+    layout->GetStackupLayers(layers);
+    for (auto layer : layers) {
+        EPrismaThermalModel::PrismaLayer prismaLayer;
+        auto stackupLayer = layer->GetStackupLayerFromLayer();
+        prismaLayer.layerId = layer->GetLayerId();
+        prismaLayer.elevation = stackupLayer->GetElevation();
+        prismaLayer.thickness = stackupLayer->GetThickness();
+        //todo material
+        model.AppendLayer(std::move(prismaLayer));
+    }
+
+    std::unordered_map<ELayerId, std::unordered_map<size_t, size_t> > templateIdMap;//[ELayerId, [tempId, eleId]]
+
+    auto buildOnePrismaLayer = [&](size_t index) {
+        auto & prismaLayer = model.layers.at(index);   
+        auto idMap = templateIdMap.emplace(prismaLayer.layerId, std::unordered_map<size_t, size_t>{}).first->second;    
+        for (size_t it = 0; it < triangulation.triangles.size(); ++it) {
+            if (compact->hasPolygon(prismaLayer.layerId)) {
+                auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
+                auto pid = compact->SearchPolygon(prismaLayer.layerId, ctPoint);
+                if (pid != invalidIndex) {
+                    auto & ele = prismaLayer.AddElement(it);
+                    idMap.emplace(it, ele.id);
+                    ele.matId = compact->materials.at(pid);
+                    ele.netId = compact->nets.at(pid);
+                }
+                else if (prismaLayer.dielectricMatId != EMaterialId::noMaterial) {
+                    auto & ele = prismaLayer.AddElement(it);
+                    idMap.emplace(it, ele.id);
+                    ele.matId = prismaLayer.dielectricMatId;
+                    ele.netId = ENetId::noNet;    
+                }
+            }
+            else if (prismaLayer.dielectricMatId != EMaterialId::noMaterial) {
+                auto & ele = prismaLayer.AddElement(it);
+                idMap.emplace(it, ele.id);
+                ele.matId = prismaLayer.dielectricMatId;
+                ele.netId = ENetId::noNet;    
+            }  
+        }
+        std::cout << "layer " << index << " 's total elements: " << prismaLayer.elements.size() << std::endl; 
+    };
+
+    for (size_t index = 0; index < model.TotalLayers(); ++index)
+        buildOnePrismaLayer(index);
+    
+    //build connection
+    for (size_t index = 1; index < model.TotalLayers(); ++index) {
+        auto & upperLayer = model.layers.at(index - 1);
+        auto & lowerLayer = model.layers.at(index);
+        auto & upperEles = upperLayer.elements;
+        auto & lowerEles = lowerLayer.elements;
+        const auto & upperIdMap = templateIdMap.at(upperLayer.layerId);
+        const auto & lowerIdMap = templateIdMap.at(lowerLayer.layerId);
+        for (auto & ele : upperEles) {
+            //layer neighbors
+            const auto & triangle = triangulation.triangles.at(ele.templateId);
+            for (size_t nid = 0; nid < triangle.neighbors.size(); ++nid) {
+                if (tri::noNeighbor == triangle.neighbors.at(nid)) continue;
+                auto iter = upperIdMap.find(triangle.neighbors.at(nid));
+                if (iter != upperIdMap.cend()) ele.neighbors[nid] = iter->second;
+            }
+            auto iter = lowerIdMap.find(ele.templateId);
+            if (iter != lowerIdMap.cend()) {
+                auto & lowerEle = lowerEles.at(iter->second);
+                lowerEle.neighbors[EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX] = ele.id;
+                ele.neighbors[EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX] = lowerEle.id;
+            }
+        }
+    }
+
     return nullptr;
 }
 

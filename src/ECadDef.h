@@ -63,6 +63,8 @@ enum class ECellType
     CircuitCell = 0
 };
 
+enum EMaterialId { noMaterial = -1 };
+
 enum ELayerId { noLayer = -1 };
 
 enum ENetId { noNet = -1 };
