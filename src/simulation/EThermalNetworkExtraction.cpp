@@ -7,10 +7,7 @@
 #include "generic/tools/FileSystem.hpp"
 
 #include "Mesher2D.h"
-#include "interfaces/ILayoutView.h"
-#include "interfaces/IComponent.h"
-#include "interfaces/IPrimitive.h"
-#include "interfaces/ILayer.h"
+#include "Interface.h"
 
 namespace ecad {
 namespace esim {
@@ -219,8 +216,19 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
         prismaLayer.layerId = layer->GetLayerId();
         prismaLayer.elevation = stackupLayer->GetElevation();
         prismaLayer.thickness = stackupLayer->GetThickness();
-        //todo material
+        auto condMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetConductingMaterial());
+        auto dielMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetDielectricMaterial());
+        ECAD_ASSERT(condMat && dielMat);
+        prismaLayer.conductingMatId = condMat->GetMaterialId();
+        prismaLayer.dielectricMatId = dielMat->GetMaterialId();
         model.AppendLayer(std::move(prismaLayer));
+    }
+
+    std::unordered_set<EMaterialId> fluidMaterials;
+    auto matIter = layout->GetDatabase()->GetMaterialDefIter();
+    while (auto * material = matIter->Next()) {
+        if (EMaterialType::Fluid == material->GetMaterialType())
+            fluidMaterials.emplace(material->GetMaterialId());
     }
 
     std::unordered_map<ELayerId, std::unordered_map<size_t, size_t> > templateIdMap;//[ELayerId, [tempId, eleId]]
@@ -233,26 +241,28 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
                 auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
                 auto pid = compact->SearchPolygon(prismaLayer.layerId, ctPoint);
                 if (pid != invalidIndex) {
-                    auto & ele = prismaLayer.AddElement(it);
-                    idMap.emplace(it, ele.id);
-                    ele.matId = compact->materials.at(pid);
-                    ele.netId = compact->nets.at(pid);
+                    if (not fluidMaterials.count(compact->materials.at(pid))) {
+                        auto & ele = prismaLayer.AddElement(it);
+                        idMap.emplace(it, ele.id);
+                        ele.matId = compact->materials.at(pid);
+                        ele.netId = compact->nets.at(pid);
+                    }
                 }
-                else if (prismaLayer.dielectricMatId != EMaterialId::noMaterial) {
+                else if (not fluidMaterials.count(prismaLayer.dielectricMatId)) {
                     auto & ele = prismaLayer.AddElement(it);
                     idMap.emplace(it, ele.id);
                     ele.matId = prismaLayer.dielectricMatId;
                     ele.netId = ENetId::noNet;    
                 }
             }
-            else if (prismaLayer.dielectricMatId != EMaterialId::noMaterial) {
+            else if (not fluidMaterials.count(prismaLayer.dielectricMatId)) {
                 auto & ele = prismaLayer.AddElement(it);
                 idMap.emplace(it, ele.id);
                 ele.matId = prismaLayer.dielectricMatId;
                 ele.netId = ENetId::noNet;    
             }  
         }
-        std::cout << "layer " << index << " 's total elements: " << prismaLayer.elements.size() << std::endl; 
+        std::cout << "layer " << index << " 's total elements: " << prismaLayer.elements.size() << std::endl; //wbtest
     };
 
     for (size_t index = 0; index < model.TotalLayers(); ++index)

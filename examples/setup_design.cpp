@@ -26,6 +26,11 @@ int main(int argc, char * argv[])
     //database
     auto database = eDataMgr.CreateDatabase("RobGrant");
 
+    auto matAl = database->CreateMaterialDef("Al");
+    auto matCu = database->CreateMaterialDef("Cu");
+    auto matAir = database->CreateMaterialDef("Air");
+    matAir->SetMaterialType(EMaterialType::Fluid);
+    auto matSi3N4 = database->CreateMaterialDef("Si3N4");    
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Micrometer);
     database->SetCoordUnits(coordUnits);
@@ -41,9 +46,9 @@ int main(int argc, char * argv[])
     eDataMgr.CreateNet(topLayout, "Source");
 
     //substrate
-    [[maybe_unused]] auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 400, "Cu", "Air"));
-    [[maybe_unused]] auto iLyrSubstrate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("Substrate", ELayerType::DielectricLayer, -400, 635, "", "Si3N4"));
-    [[maybe_unused]] auto iLyrCuPlate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("CuPlate", ELayerType::ConductingLayer, -1035, 300, "Cu", ""));
+    [[maybe_unused]] auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 400, matCu->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto iLyrSubstrate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("Substrate", ELayerType::DielectricLayer, -400, 635, matSi3N4->GetName(), matSi3N4->GetName()));
+    [[maybe_unused]] auto iLyrCuPlate = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("CuPlate", ELayerType::ConductingLayer, -1035, 300, matCu->GetName(), matCu->GetName()));
     assert(iLyrTopCu != ELayerId::noLayer);
     assert(iLyrSubstrate != ELayerId::noLayer);
     assert(iLyrCuPlate != ELayerId::noLayer);
@@ -58,7 +63,7 @@ int main(int argc, char * argv[])
     auto sicBonds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{0, 0}, {23000000, 0}, {23000000, 26000000}, {0, 26000000}});
     sicLayout->SetBoundary(std::move(sicBonds));
 
-    auto iLyrWire = sicLayout->AppendLayer(eDataMgr.CreateStackupLayer("Wire", ELayerType::ConductingLayer, 0, 400, "Cu", ""));
+    auto iLyrWire = sicLayout->AppendLayer(eDataMgr.CreateStackupLayer("Wire", ELayerType::ConductingLayer, 0, 400, matCu->GetName(), matAir->GetName()));
     assert(iLyrWire != ELayerId::noLayer);
 
     //component
@@ -131,7 +136,7 @@ int main(int argc, char * argv[])
     auto primIter = sicLayout->GetPrimitiveIter();
     while (auto * prim = primIter->Next()) {
         if (auto * bw = prim->GetBondwireFromPrimitive(); bw)
-            bw->SetMaterial("Al");
+            bw->SetMaterial(matAl->GetName());
     }
 
     //layer map

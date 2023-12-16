@@ -36,9 +36,10 @@ public:
     bool Flatten(Ptr<ICell> cell) const override;
     
     ///Material
-    Ptr<IMaterialDefCollection> GetMaterialCollection() const override;
+    Ptr<IMaterialDefCollection> GetMaterialDefCollection() const override;
     Ptr<IMaterialDef> CreateMaterialDef(const std::string & name) override;
     Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const override;
+    Ptr<IMaterialDef> FindMaterialDefById(EMaterialId id) const override;
 
     ///ComponentDef
     Ptr<IComponentDefCollection> GetComponentDefCollection() const override;
@@ -59,6 +60,7 @@ public:
     ///Iterator
     CellIter GetCellIter() const override;
     LayerMapIter GetLayerMapIter() const override;
+    MaterialDefIter GetMaterialDefIter() const override;
     PadstackDefIter GetPadstackDefIter() const override;
     
     const std::string & GetName() const override;

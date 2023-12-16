@@ -196,23 +196,30 @@ ECAD_INLINE bool EDatabase::Flatten(Ptr<ICell> cell) const
     return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, EDataMgr::Instance().DefaultThreads());
 }
 
-ECAD_INLINE Ptr<IMaterialDefCollection> EDatabase::GetMaterialCollection() const
+ECAD_INLINE Ptr<IMaterialDefCollection> EDatabase::GetMaterialDefCollection() const
 {
     return dynamic_cast<Ptr<IMaterialDefCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::MaterialDef));
 }
 
 ECAD_INLINE Ptr<IMaterialDef> EDatabase::CreateMaterialDef(const std::string & name)
 {
-    if(EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef)) return nullptr;
+    if (EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef)) return nullptr;
 
-    auto material = new EMaterialDef(name);
-    return dynamic_cast<Ptr<IMaterialDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(material)));
+    EMaterialId id = static_cast<EMaterialId>(GetDefinitionCollection(EDefinitionType::MaterialDef)->Size());
+    return dynamic_cast<Ptr<IMaterialDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(new EMaterialDef(name, id))));
 }
 
 ECAD_INLINE Ptr<IMaterialDef> EDatabase::FindMaterialDefByName(const std::string & name) const
 {
     auto material = EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef);
     return dynamic_cast<Ptr<IMaterialDef> >(material);
+}
+
+ECAD_INLINE Ptr<IMaterialDef> EDatabase::FindMaterialDefById(EMaterialId id) const
+{
+    auto matLib = dynamic_cast<Ptr<EMaterialDefCollection>>(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::MaterialDef));
+    ECAD_ASSERT(nullptr != matLib);
+    return matLib->FindMaterialDefById(id);
 }
 
 ECAD_INLINE Ptr<IComponentDefCollection> EDatabase::GetComponentDefCollection() const
@@ -290,6 +297,11 @@ ECAD_INLINE CellIter EDatabase::GetCellIter() const
 ECAD_INLINE LayerMapIter EDatabase::GetLayerMapIter() const
 {
     return GetLayerMapCollection()->GetLayerMapIter();
+}
+
+ECAD_INLINE MaterialDefIter EDatabase::GetMaterialDefIter() const
+{
+    return GetMaterialDefCollection()->GetMaterialDefIter();
 }
 
 ECAD_INLINE PadstackDefIter EDatabase::GetPadstackDefIter() const

@@ -43,9 +43,10 @@ public:
     virtual bool GetTopCells(std::vector<Ptr<ICell> > & cells) const = 0;
     virtual bool Flatten(Ptr<ICell> cell) const = 0;
 
-    virtual Ptr<IMaterialDefCollection> GetMaterialCollection() const = 0;
+    virtual Ptr<IMaterialDefCollection> GetMaterialDefCollection() const = 0;
     virtual Ptr<IMaterialDef> CreateMaterialDef(const std::string & name) = 0;
     virtual Ptr<IMaterialDef> FindMaterialDefByName(const std::string & name) const = 0;
+    virtual Ptr<IMaterialDef> FindMaterialDefById(EMaterialId id) const = 0;
 
     virtual Ptr<IComponentDefCollection> GetComponentDefCollection() const = 0;
     virtual Ptr<IComponentDef> CreateComponentDef(const std::string & name) = 0;
@@ -63,6 +64,7 @@ public:
     ///Iterator
     virtual CellIter GetCellIter() const = 0;
     virtual LayerMapIter GetLayerMapIter() const = 0;
+    virtual MaterialDefIter GetMaterialDefIter() const = 0;
     virtual PadstackDefIter GetPadstackDefIter() const = 0;
 };
 

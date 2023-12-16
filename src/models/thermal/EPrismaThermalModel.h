@@ -18,10 +18,11 @@ struct ECAD_API ECompactLayout
     std::vector<ENetId> nets;
     std::vector<ELayerId> layers;
     std::vector<EMaterialId> materials;
-    std::vector<EPolygonData> polygons;//front is layout boundary
+    std::vector<EPolygonData> polygons;
     virtual ~ECompactLayout() = default;
 
-    void AddShape(ENetId netId, ELayerId layerId, EMaterialId matId, CPtr<EShape> shape);
+    void AddShape(ENetId netId, ELayerId layerId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape);
+    void AddPolygon(ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole);
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
     void BuildLayerPolygonLUT();
@@ -60,8 +61,8 @@ public:
         ELayerId layerId;
         FCoord elevation;
         FCoord thickness;
-        EMaterialId conductingMatId{static_cast<EMaterialId>(0)};//wbtest
-        EMaterialId dielectricMatId{static_cast<EMaterialId>(0)};//wbtest
+        EMaterialId conductingMatId;
+        EMaterialId dielectricMatId;
         std::vector<PrismaElement> elements;
         
         PrismaElement & AddElement(size_t templateId)

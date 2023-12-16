@@ -11,6 +11,7 @@ class IText;
 class EShape;
 class ILayer;
 class EPolygon;
+class IDatabase;
 class ILayerMap;
 class ICellInst;
 class IPrimitive;
@@ -45,6 +46,9 @@ public:
     virtual PrimitiveIter GetPrimitiveIter() const = 0;
     virtual HierarchyObjIter GetHierarchyObjIter() const = 0;
     virtual PadstackInstIter GetPadstackInstIter() const = 0;
+
+    ///Database
+    virtual CPtr<IDatabase> GetDatabase() const = 0;
 
     ///Cell
     virtual void SetCell(Ptr<ICell> cell) = 0;

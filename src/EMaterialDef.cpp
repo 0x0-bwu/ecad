@@ -11,6 +11,8 @@ ECAD_INLINE void EMaterialDef::save(Archive & ar, const unsigned int version) co
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialDef, IMaterialDef>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
+    ar & boost::serialization::make_nvp("id", m_id);
+    ar & boost::serialization::make_nvp("type", m_type);
     ar & boost::serialization::make_nvp("properties", m_properties);
 }
 
@@ -20,6 +22,8 @@ ECAD_INLINE void EMaterialDef::load(Archive & ar, const unsigned int version)
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialDef, IMaterialDef>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
+    ar & boost::serialization::make_nvp("id", m_id);
+    ar & boost::serialization::make_nvp("type", m_type);
     ar & boost::serialization::make_nvp("properties", m_properties);
 }
 
@@ -27,12 +31,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialDef)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EMaterialDef::EMaterialDef()
- : EMaterialDef(std::string{})
+ : EMaterialDef(std::string{}, EMaterialId::noMaterial)
 {
 }
 
-ECAD_INLINE EMaterialDef::EMaterialDef(std::string name)
- : EDefinition(std::move(name))
+ECAD_INLINE EMaterialDef::EMaterialDef(std::string name, EMaterialId id)
+ : EDefinition(std::move(name)), m_id(id)
 {
 }
 
@@ -48,11 +52,18 @@ ECAD_INLINE EMaterialDef::EMaterialDef(const EMaterialDef & other)
 ECAD_INLINE EMaterialDef & EMaterialDef::operator= (const EMaterialDef & other)
 {
     EDefinition::operator=(other);
+    m_id = other.m_id;
+    m_type = other.m_type;
     m_properties.clear();
     for(const auto & property : other.m_properties){
         m_properties.insert(std::make_pair(property.first, CloneHelper(property.second)));
     }
     return *this;
+}
+
+ECAD_INLINE EMaterialId EMaterialDef::GetMaterialId() const
+{
+    return m_id;
 }
 
 ECAD_INLINE bool EMaterialDef::hasProperty(EMaterialPropId id) const
@@ -70,6 +81,21 @@ ECAD_INLINE CPtr<IMaterialProp> EMaterialDef::GetProperty(EMaterialPropId id) co
     auto iter = m_properties.find(id);
     if(iter == m_properties.end()) return nullptr;
     else return iter->second.get();
+}
+
+ECAD_INLINE void EMaterialDef::SetMaterialType(EMaterialType type)
+{
+    m_type = type;
+}
+
+ECAD_INLINE EMaterialType EMaterialDef::GetMaterialType() const
+{
+    return m_type;
+}
+
+ECAD_INLINE EDefinitionType EMaterialDef::GetDefinitionType() const
+{
+    return EDefinitionType::MaterialDef;
 }
 
 }//namespace ecad

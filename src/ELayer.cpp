@@ -138,6 +138,8 @@ ECAD_INLINE EStackupLayer & EStackupLayer::operator= (const EStackupLayer & othe
     ELayer::operator=(other);
     m_elevation = other.m_elevation;
     m_thickness = other.m_thickness;
+    m_conductingMat = other.m_conductingMat;
+    m_dielectricMat = other.m_dielectricMat;
     return *this;
 }
 

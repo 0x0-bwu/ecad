@@ -1,11 +1,5 @@
 #include "models/thermal/EPrismaThermalModel.h"
-#include "interfaces/IPrimitiveCollection.h"
-#include "interfaces/IPadstackInst.h"
-#include "interfaces/IPadstackDef.h"
-#include "interfaces/IMaterialDef.h"
-#include "interfaces/ILayoutView.h"
-#include "interfaces/IPrimitive.h"
-#include "interfaces/ILayer.h"
+#include "Interface.h"
 
 #include "generic/geometry/BoostGeometryRegister.hpp"
 #include "generic/geometry/Triangulation.hpp"
@@ -13,25 +7,25 @@
 
 namespace ecad::emodel::etherm {
 
-ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, ELayerId layerId, EMaterialId matId, CPtr<EShape> shape)
+ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, ELayerId layerId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape)
 {
-    auto addPolygon = [&](ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole)
-    {
-        if (not polygon.isCCW()) polygon.Reverse();
-        polygons.emplace_back(std::move(polygon));
-        materials.emplace_back(matId);
-        layers.emplace_back(layerId);
-        nets.emplace_back(netId);
-    };
-
     if (shape->hasHole()) {
         auto pwh = shape->GetPolygonWithHoles();
-        addPolygon(netId, layerId, matId, std::move(pwh.outline), false);
+        AddPolygon(netId, layerId, solidMat, std::move(pwh.outline), false);
         for (auto iter = pwh.ConstBeginHoles(); iter != pwh.ConstEndHoles(); ++iter)
-            addPolygon(netId, layerId, matId, std::move(*iter), true);//todo matId
+            AddPolygon(netId, layerId, holeMat, std::move(*iter), true);//todo matId
     }
-    else addPolygon(netId, layerId, matId, shape->GetContour(), false);
+    else AddPolygon(netId, layerId, solidMat, shape->GetContour(), false);
 }
+
+ECAD_INLINE void ECompactLayout::AddPolygon(ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole)
+{
+    if (isHole == polygon.isCCW()) polygon.Reverse();
+    polygons.emplace_back(std::move(polygon));
+    materials.emplace_back(matId);
+    layers.emplace_back(layerId);
+    nets.emplace_back(netId);
+};
 
 ECAD_INLINE bool ECompactLayout::WriteImgView(std::string_view filename, size_t width) const
 {
@@ -42,12 +36,15 @@ ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
 {
     m_rtrees.clear();
     m_lyrPolygons.clear();
-    for (size_t i = 1; i < polygons.size(); ++i) {
+    for (size_t i = 0; i < polygons.size(); ++i) {
+        if (EMaterialId::noMaterial == materials.at(i)) continue;
+
         auto iter = m_lyrPolygons.find(layers.at(i));
         if (iter == m_lyrPolygons.cend())
             iter = m_lyrPolygons.emplace(layers.at(i), std::vector<size_t>{}).first;
         iter->second.emplace_back(i);
     }
+
     for (const auto & [layer, pIndices] : m_lyrPolygons) {
         auto & rtree = m_rtrees.emplace(layer, std::make_shared<Rtree>()).first->second;
         for (auto i : pIndices) {
@@ -88,8 +85,15 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
 {
     ECompactLayout compact;
     //todo, reserve size   
-    compact.AddShape(ENetId::noNet, ELayerId::noLayer, static_cast<EMaterialId>(0), layout->GetBoundary());
+    compact.AddShape(ENetId::noNet, ELayerId::noLayer, EMaterialId::noMaterial,  EMaterialId::noMaterial, layout->GetBoundary());
 
+    auto compIter = layout->GetComponentIter();
+    while (auto * comp = compIter->Next()) {
+        if (comp->GetLossPower() > 0)
+            compact.AddPolygon(ENetId::noNet, ELayerId::noLayer, EMaterialId::noMaterial, toPolygon(comp->GetBoundingBox()), false);
+    }
+
+    std::unordered_map<ELayerId, std::pair<EMaterialId, EMaterialId> > layerMaterialMap;
     auto primitives = layout->GetPrimitiveCollection();
     for (size_t i = 0; i < primitives->Size(); ++i) {
         auto prim = primitives->GetPrimitive(i);
@@ -99,7 +103,19 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
         auto shape = geom->GetShape();
         auto netId = prim->GetNet();
         auto lyrId = prim->GetLayer();
-        compact.AddShape(netId, lyrId,static_cast<EMaterialId>(0), shape);//todo, material
+        auto iter = layerMaterialMap.find(lyrId);
+        if (iter == layerMaterialMap.cend()) {
+            auto layer = layout->GetLayerCollection()->FindLayerByLayerId(lyrId);
+            if (nullptr == layer) { ECAD_ASSERT(false); continue; }
+            auto stackupLayer = layer->GetStackupLayerFromLayer();
+            ECAD_ASSERT(nullptr != stackupLayer);
+            auto condMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetConductingMaterial());
+            auto dielMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetDielectricMaterial());
+            ECAD_ASSERT(condMat && dielMat);
+            iter = layerMaterialMap.emplace(lyrId, std::make_pair(condMat->GetMaterialId(), dielMat->GetMaterialId())).first;
+        }
+        const auto & [condMatId, dielMatId] = iter->second;
+        compact.AddShape(netId, lyrId, condMatId, dielMatId, shape);
     }
     auto psInstIter = layout->GetPadstackInstIter();
     while (auto psInst = psInstIter->Next()){
@@ -107,12 +123,15 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
         auto defData = psInst->GetPadstackDef()->GetPadstackDefData();
         if (nullptr == defData) continue;
 
+        auto material = layout->GetDatabase()->FindMaterialDefByName(defData->GetMaterial());
+        ECAD_ASSERT(nullptr != material);
+
         ELayerId top, bot;
         psInst->GetLayerRange(top, bot);
         for (int lyrId = std::min(top, bot); lyrId <= std::max(top, bot); lyrId++) {
             auto layerId = static_cast<ELayerId>(lyrId);
             auto shape = psInst->GetLayerShape(static_cast<ELayerId>(lyrId));
-            compact.AddShape(netId, layerId, static_cast<EMaterialId>(0), shape.get());//todo, material
+            compact.AddShape(netId, layerId, material->GetMaterialId(), material->GetMaterialId(), shape.get());
         }
     }
     compact.BuildLayerPolygonLUT();

@@ -39,6 +39,9 @@ public:
     HierarchyObjIter GetHierarchyObjIter() const override;
     PadstackInstIter GetPadstackInstIter() const override;
 
+    ///Database
+    CPtr<IDatabase> GetDatabase() const override;
+
     ///Cell
     void SetCell(Ptr<ICell> cell) override;
     Ptr<ICell> GetCell() const override;

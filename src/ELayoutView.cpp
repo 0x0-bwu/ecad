@@ -129,6 +129,11 @@ ECAD_INLINE PadstackInstIter ELayoutView::GetPadstackInstIter() const
     return GetConnObjCollection()->GetPadstackInstCollection()->GetPadstackInstIter();
 }
 
+ECAD_INLINE CPtr<IDatabase> ELayoutView::GetDatabase() const
+{
+    return m_cell->GetDatabase();
+}
+
 ECAD_INLINE void ELayoutView::SetCell(Ptr<ICell> cell)
 {
     m_cell = cell;

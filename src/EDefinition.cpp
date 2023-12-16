@@ -52,6 +52,7 @@ ECAD_INLINE EDefinition & EDefinition::operator= (const EDefinition & other)
 
 ECAD_INLINE EDefinitionType EDefinition::GetDefinitionType() const
 {
+    ECAD_ASSERT(false)
     return EDefinitionType::Invalid;
 }
 

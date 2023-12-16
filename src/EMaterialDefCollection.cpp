@@ -83,6 +83,17 @@ ECAD_INLINE std::string EMaterialDefCollection::GetNextDefName(const std::string
     return std::string{};
 }
 
+ECAD_INLINE Ptr<IMaterialDef> EMaterialDefCollection::FindMaterialDefById(EMaterialId id) const
+{
+    //todo, performance
+    auto iter = GetMaterialDefIter();
+    while (auto * material = iter->Next()) {
+        if (id == material->GetMaterialId())
+            return material;
+    }
+    return nullptr;
+}
+
 ECAD_INLINE MaterialDefIter EMaterialDefCollection::GetMaterialDefIter() const
 {
     return MaterialDefIter(new EMaterialDefIterator(*this));
