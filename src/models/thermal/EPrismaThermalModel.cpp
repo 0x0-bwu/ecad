@@ -175,21 +175,23 @@ void EPrismaThermalModel::Build(FCoord hScale)
             auto topVtxIter = topPtIdxMap.find(vertices.at(v));
             if (topVtxIter == topPtIdxMap.cend()) {
                 m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v));
-                topVtxIter = topPtIdxMap.emplace(v, m_points.size() - 1).first;
+                topVtxIter = topPtIdxMap.emplace(vertices.at(v), m_points.size() - 1).first;
             }
             instance.points[v] = topVtxIter->second;
             auto botVtxIter = botPtIdxMap.find(vertices.at(v));
             if (botVtxIter == botPtIdxMap.cend()) {
                 m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v + 3));
-                botVtxIter = botPtIdxMap.emplace(v, m_points.size() - 1).first;
+                botVtxIter = botPtIdxMap.emplace(vertices.at(v), m_points.size() - 1).first;
             }
             instance.points[v + 3] = botVtxIter->second;
         }
 
         //neighbors
-        for (size_t n = 0; n < instance.element->neighbors.size(); ++n) {
-            auto nb = GlobalIndex(lyrIdx, instance.element->neighbors.at(n));
-            instance.neighbors[i] = nb;
+        for (size_t n = 0; n < 3; ++n) {
+            if (auto nid = instance.element->neighbors.at(n); noNeighbor != nid) {
+                auto nb = GlobalIndex(lyrIdx, instance.element->neighbors.at(n));
+                instance.neighbors[i] = nb;
+            }
         }
         ///top
         if (auto nid = instance.element->neighbors.at(PrismaElement::TOP_NEIGHBOR_INDEX); noNeighbor != nid) {
@@ -211,7 +213,7 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
     const auto & element = layers.at(lyrIndex).elements.at(eleIndex);
     const auto & triangle = triangles.at(element.templateId);
     FCoord height = vtxIndex < 3 ? layers.at(lyrIndex).elevation :
-            isBotLayer(lyrIndex) ? layers.at(lyrIndex).thickness :
+            isBotLayer(lyrIndex) ? layers.at(lyrIndex).elevation - layers.at(lyrIndex).thickness :
                                    layers.at(lyrIndex + 1).elevation;
     vtxIndex = vtxIndex % 3;
     const auto & pt2d = points.at(triangle.vertices.at(vtxIndex));

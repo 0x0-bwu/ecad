@@ -22,7 +22,7 @@ ECAD_INLINE bool GenerateVTKFile(const EPrismaThermalModel & model, std::string_
     out << "DATASET UNSTRUCTURED_GRID" << ECAD_EOL;
     
     const auto & points = model.GetPoints();
-    out << "POINTS" << sp << points.size() << sp << generic::common::toString<FCoord>() << ECAD_EOL;
+    out << "POINTS" << sp << points.size() << sp << "FLOAT" << ECAD_EOL;
     for(const auto & point : points){
         out << point[0] << sp << point[1] << sp << point[2] << ECAD_EOL;
     }

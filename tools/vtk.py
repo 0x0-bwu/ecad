@@ -22,7 +22,7 @@ from vtkmodules.vtkRenderingCore import (
 )
 
 def main():
-    filename = '/home/bwu/code/myRepo/ecad/test/data/simulation/thermal/prisma.vtk'
+    filename = os.path.dirname(__file__) + '/../test/data/simulation/thermal/prisma.vtk'
 
     # Create the reader for the data.
     reader = vtkUnstructuredGridReader()
@@ -44,20 +44,20 @@ def main():
     interactor = vtkRenderWindowInteractor()
     interactor.SetRenderWindow(renderWindow)
     
-    shrink = vtkShrinkFilter()
-    shrink.SetInputConnection(reader.GetOutputPort())
-    shrink.SetShrinkFactor(0.6)
+    # shrink = vtkShrinkFilter()
+    # shrink.SetInputConnection(reader.GetOutputPort())
+    # shrink.SetShrinkFactor(0.6)
         
     dataSetMapper = vtkDataSetMapper()
-    dataSetMapper.SetInputConnection(shrink.GetOutputPort())
+    dataSetMapper.SetInputConnection(reader.GetOutputPort())
     dataSetMapper.ScalarVisibilityOff()
 
     actor = vtkActor()
     actor.SetMapper(dataSetMapper)
-    actor.GetProperty().SetDiffuseColor(colors.GetColor3d('tomato'))
+    # actor.GetProperty().SetDiffuseColor(colors.GetColor3d('tomato'))
     actor.GetProperty().EdgeVisibilityOn()
     actor.GetProperty().SetLineWidth(0.2)
-    # actor.SetScale(1.0, 1.0, 50)
+    actor.SetScale(1.0, 1.0, 3)
 
     trans = vtkTransform()
     trans.Translate(-center[0], -center[1], -center[2])
