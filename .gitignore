@@ -11,6 +11,7 @@
 *.png
 *.xml
 *.ctm
+*.vtk
 *.tar.gz
 *.DS_Store
 build

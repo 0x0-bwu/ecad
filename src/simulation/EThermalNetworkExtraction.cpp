@@ -1,5 +1,6 @@
 #include "EThermalNetworkExtraction.h"
 
+#include "models/thermal/io/EPrismaThermalModelIO.h"
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
 #include "utilities/EMetalFractionMapping.h"
@@ -186,6 +187,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
 ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
+    EPrismaThermalModel model;
     auto compact = makeCompactLayout(layout);
     auto compactModelFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "compact.png";
     compact->WriteImgView(compactModelFile, 1024);
@@ -196,7 +198,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     std::list<tri::IndexEdge> edges;
     std::vector<Point2D<ECoord> > points;
     std::vector<Segment2D<ECoord> > segments;
-    tri::Triangulation<Point2D<ECoord> > triangulation;
+    auto & triangulation = model.prismaTemplate;
     MeshFlow2D::ExtractIntersections(compact->polygons, segments);
     MeshFlow2D::ExtractTopology(segments, points, edges);
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
@@ -206,7 +208,6 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
     //todo wrapper to mesh
 
-    EPrismaThermalModel model;
     std::vector<Ptr<ILayer> > layers;//todo, refinement
     std::vector<Ptr<IStackupLayer> > stackupLayers;
     layout->GetStackupLayers(layers);
@@ -293,7 +294,12 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
         }
     }
 
-    return nullptr;
+    auto hScale = layout->GetDatabase()->GetCoordUnits().Scale2Unit();
+    model.Build(hScale);
+
+    auto vtkFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "prisma.vtk";
+    io::GenerateVTKFile(model, vtkFile);
+    return std::make_unique<EThermalModel>(std::move(model));
 }
 
 }//namespace esim

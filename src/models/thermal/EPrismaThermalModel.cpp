@@ -143,4 +143,79 @@ ECAD_INLINE EPrismaThermalModel::PrismaLayer & EPrismaThermalModel::AppendLayer(
     return layers.emplace_back(std::move(layer));
 }
 
+void EPrismaThermalModel::Build(FCoord hScale)
+{
+    this->hScale = hScale;
+    m_indexOffset = std::vector<size_t>{0};
+    for (size_t i = 0; i < TotalLayers(); ++i)
+        m_indexOffset.emplace_back(m_indexOffset.back() + layers.at(i).TotalElements());
+    
+    const auto & triangles = prismaTemplate.triangles;
+    std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;
+    auto getPtIdxMap = [&templateIdMap](size_t lyrIdx) -> std::unordered_map<size_t, size_t> & {
+        auto iter = templateIdMap.find(lyrIdx);
+        if (iter == templateIdMap.cend())
+            iter = templateIdMap.emplace(lyrIdx, std::unordered_map<size_t, size_t>{}).first;
+        return iter->second;
+    };
+    
+    auto total = TotalElements();
+    m_prismas.resize(total);
+    m_points.clear();
+    for (size_t i = 0; i < total; ++i) {
+        auto & instance = m_prismas[i];
+        auto [lyrIdx, eleIdx] = LocalIndex(i);
+        instance.layer = &layers.at(lyrIdx);
+        instance.element = &instance.layer->elements.at(eleIdx);    
+        //points
+        auto & topPtIdxMap = getPtIdxMap(lyrIdx);
+        auto & botPtIdxMap = getPtIdxMap(lyrIdx + 1);
+        const auto & vertices = triangles.at(instance.element->templateId).vertices;
+        for (size_t v = 0; v < vertices.size(); ++v) {
+            auto topVtxIter = topPtIdxMap.find(vertices.at(v));
+            if (topVtxIter == topPtIdxMap.cend()) {
+                m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v));
+                topVtxIter = topPtIdxMap.emplace(v, m_points.size() - 1).first;
+            }
+            instance.points[v] = topVtxIter->second;
+            auto botVtxIter = botPtIdxMap.find(vertices.at(v));
+            if (botVtxIter == botPtIdxMap.cend()) {
+                m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v + 3));
+                botVtxIter = botPtIdxMap.emplace(v, m_points.size() - 1).first;
+            }
+            instance.points[v + 3] = botVtxIter->second;
+        }
+
+        //neighbors
+        for (size_t n = 0; n < instance.element->neighbors.size(); ++n) {
+            auto nb = GlobalIndex(lyrIdx, instance.element->neighbors.at(n));
+            instance.neighbors[i] = nb;
+        }
+        ///top
+        if (auto nid = instance.element->neighbors.at(PrismaElement::TOP_NEIGHBOR_INDEX); noNeighbor != nid) {
+            auto nb = GlobalIndex(lyrIdx - 1, nid);
+            instance.neighbors[PrismaElement::TOP_NEIGHBOR_INDEX] = nb;
+        }
+        ///bot
+        if (auto nid = instance.element->neighbors.at(PrismaElement::BOT_NEIGHBOR_INDEX); noNeighbor != nid) {
+            auto nb = GlobalIndex(lyrIdx + 1, nid);
+            instance.neighbors[PrismaElement::BOT_NEIGHBOR_INDEX] = nb;
+        }
+    }
+}
+
+FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const
+{
+    const auto & points = prismaTemplate.points;
+    const auto & triangles = prismaTemplate.triangles;
+    const auto & element = layers.at(lyrIndex).elements.at(eleIndex);
+    const auto & triangle = triangles.at(element.templateId);
+    FCoord height = vtxIndex < 3 ? layers.at(lyrIndex).elevation :
+            isBotLayer(lyrIndex) ? layers.at(lyrIndex).thickness :
+                                   layers.at(lyrIndex + 1).elevation;
+    vtxIndex = vtxIndex % 3;
+    const auto & pt2d = points.at(triangle.vertices.at(vtxIndex));
+    return FPoint3D{pt2d[0] * hScale, pt2d[1] * hScale, height};
+}
+
 } //namespace ecad::emodel::etherm

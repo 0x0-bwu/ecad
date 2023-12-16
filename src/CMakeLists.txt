@@ -9,6 +9,7 @@ extension/xfl/ECadExtXflHandler.cpp
 extension/ECadExtension.cpp
 models/thermal/io/EChipThermalModelIO.cpp
 models/thermal/io/EGridThermalModelIO.cpp
+models/thermal/io/EPrismaThermalModelIO.cpp
 models/thermal/io/EThermalModelIO.cpp
 models/thermal/utilities/EThermalModelReduction.cpp
 models/thermal/EChipThermalModel.cpp

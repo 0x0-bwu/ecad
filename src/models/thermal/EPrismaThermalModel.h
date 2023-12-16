@@ -1,14 +1,14 @@
 #pragma once
 
+#include "generic/geometry/Triangulation.hpp"
 #include <boost/geometry/index/rtree.hpp>
+
 #include "EThermalModel.h"
 #include "EShape.h"
 
-namespace generic::geometry::tri {
-template <typename> class Triangulation;
-} //namespace generic::geometry::tri
 namespace ecad {
 
+using namespace generic::geometry::tri;
 class ILayoutView;
 class IMaterialDef;
 namespace emodel::etherm {
@@ -53,7 +53,7 @@ public:
         size_t templateId{invalidIndex};
         inline static constexpr size_t TOP_NEIGHBOR_INDEX = 3;
         inline static constexpr size_t BOT_NEIGHBOR_INDEX = 4;
-        std::array<size_t, BOT_NEIGHBOR_INDEX + 1> neighbors = {invalidIndex, invalidIndex, invalidIndex, invalidIndex, invalidIndex};//[edge1, edge2, edge3, top, bot];
+        std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
     };
 
     struct PrismaLayer
@@ -65,6 +65,9 @@ public:
         EMaterialId dielectricMatId;
         std::vector<PrismaElement> elements;
         
+        PrismaElement & operator[] (size_t index) { return elements[index]; }
+        const PrismaElement & operator[] (size_t index) const { return elements.at(index); }
+
         PrismaElement & AddElement(size_t templateId)
         {
             auto & ele = elements.emplace_back(PrismaElement{});
@@ -72,13 +75,73 @@ public:
             ele.templateId = templateId;
             return ele;
         }
-    };
-    std::vector<PrismaLayer> layers;
 
+        size_t TotalElements() const { return elements.size(); }
+    };
+
+    struct PrismaInstance
+    {
+        CPtr<PrismaLayer> layer{nullptr};
+        CPtr<PrismaElement> element{nullptr};
+        std::array<size_t, 6> points;//top, bot
+        std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
+    };
+    
+    FCoord hScale{1};
+    PrismaTemplate prismaTemplate;
+    std::vector<PrismaLayer> layers;
     PrismaLayer & AppendLayer(PrismaLayer layer);
 
-    size_t TotalLayers() const { return layers.size(); }
+    void Build(FCoord hScale);    
+    size_t TotalLayers() const;
+    size_t TotalElements() const;
+    size_t GlobalIndex(size_t lyrIndex, size_t eleIndex) const;
+    std::pair<size_t, size_t> LocalIndex(size_t index) const;//[lyrIndex, eleIndex]
+
+    const std::vector<FPoint3D> GetPoints() const { return m_points; }
+    const PrismaInstance & operator[] (size_t index) const { return m_prismas[index]; }
+private:
+    bool isTopLayer(size_t lyrIndex) const;
+    bool isBotLayer(size_t lyrIndex) const;
+    FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
+
+private:
+    std::vector<FPoint3D> m_points;
+    std::vector<PrismaInstance> m_prismas;
+    std::vector<size_t> m_indexOffset;
 };
+
+ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalLayers() const
+{
+    return layers.size();
+}
+
+ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalElements() const
+{
+    return m_indexOffset.back();
+}
+
+ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::GlobalIndex(size_t lyrIndex, size_t eleIndex) const
+{
+    return m_indexOffset[lyrIndex] + eleIndex;
+}
+
+ECAD_ALWAYS_INLINE std::pair<size_t, size_t> EPrismaThermalModel::LocalIndex(size_t index) const
+{
+    size_t lyrIdex = 0;
+    while (not (m_indexOffset[lyrIdex] <= index && index < m_indexOffset[lyrIdex + 1])) lyrIdex++;
+    return std::make_pair(lyrIdex, index - m_indexOffset[lyrIdex]);
+}
+
+ECAD_ALWAYS_INLINE bool EPrismaThermalModel::isTopLayer(size_t lyrIndex) const
+{
+    return 0 == lyrIndex;
+}
+
+ECAD_ALWAYS_INLINE bool EPrismaThermalModel::isBotLayer(size_t lyrIndex) const
+{
+    return lyrIndex + 1 == TotalLayers();
+}
 
 } // namespace emodel::etherm
 } // namespace ecad
