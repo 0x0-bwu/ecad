@@ -29,13 +29,14 @@ def main():
     geometryMapper = vtk.vtkDataSetMapper()
     geometryMapper.SetInputConnection(geometryShrink.GetOutputPort())
     geometryMapper.SetScalarModeToUseCellData()
-    geometryMapper.SetScalarRange(25, 60)
+    geometryMapper.SetScalarRange(0, 1)
 
     geometryActor = vtk.vtkActor()
     geometryActor.SetMapper(geometryMapper)
     geometryActor.GetProperty().SetLineWidth(0.3)
     geometryActor.GetProperty().EdgeVisibilityOn()
     geometryActor.GetProperty().SetEdgeColor(0, 0, 0)
+    geometryActor.SetScale(1.0, 1.0, 2)
 
     contextView = vtk.vtkContextView()
 

@@ -47,11 +47,13 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermal
         out << "CELL_DATA" << sp << model.TotalElements() << ECAD_EOL;
         out << "SCALARS SCALARS FLOAT 1 " << ECAD_EOL;
         out << "LOOKUP_TABLE TEMPERATURE" << ECAD_EOL;
+        auto minT = *std::min_element(temperature->begin(), temperature->end());
+        auto delT = *std::max_element(temperature->begin(), temperature->end()) - minT;
         for (const auto & t : *temperature)
-            out << t << ECAD_EOL;
+            out << (t - minT) / delT << ECAD_EOL;
 
         out << ECAD_EOL;
-out << "LOOKUP_TABLE TEMPERATURE 100" << ECAD_EOL;
+        out << "LOOKUP_TABLE TEMPERATURE 100" << ECAD_EOL;
         int r, g, b;
         for (size_t i = 0; i < 100; ++i) {
             generic::color::RGBFromScalar(i * 0.01, r, g, b);
