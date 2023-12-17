@@ -236,7 +236,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
 
     auto buildOnePrismaLayer = [&](size_t index) {
         auto & prismaLayer = model.layers.at(index);   
-        auto idMap = templateIdMap.emplace(prismaLayer.layerId, std::unordered_map<size_t, size_t>{}).first->second;    
+        auto & idMap = templateIdMap.emplace(prismaLayer.layerId, std::unordered_map<size_t, size_t>{}).first->second;    
         for (size_t it = 0; it < triangulation.triangles.size(); ++it) {
             if (compact->hasPolygon(prismaLayer.layerId)) {
                 auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
