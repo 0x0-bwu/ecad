@@ -294,10 +294,7 @@ ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(ESimVal refT, std::vec
                 results[n] = nodes[n].t;
 
             size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
-            std::cout << "hotspot: " << maxId << ", maxT: " << results.at(maxId) << std::endl;
-            for (size_t i = 0; i < 100; ++i) {
-                std::cout << "tem:" << results[i] << std::endl;//wbtest
-            }
+            std::cout << "hotspot: " << maxId << ", maxT: " << results.at(maxId) << ", minT: " << *std::min_element(results.begin(), results.end()) << std::endl;
 
             iteration -= 1;
             if(!needIteration || iteration == 0) break;

@@ -4,7 +4,7 @@
 #include "generic/geometry/BoostGeometryRegister.hpp"
 #include "generic/geometry/Triangulation.hpp"
 #include "generic/geometry/GeometryIO.hpp"
-
+#include <queue>
 namespace ecad::emodel::etherm {
 
 ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, ELayerId layerId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape)
@@ -78,9 +78,13 @@ ECAD_INLINE size_t ECompactLayout::SearchPolygon(ELayerId layerId, const EPoint2
     if (not hasPolygon(layerId)) return invalidIndex;
     std::vector<RtVal> results;
     m_rtrees.at(layerId)->query(boost::geometry::index::intersects(EBox2D(pt, pt)), std::back_inserter(results));
-    for (const auto & result : results)
+    auto cmp = [&](auto i1, auto i2){ return polygons.at(i1).Area() > polygons.at(i2).Area(); };
+    std::priority_queue<size_t, std::vector<size_t>, decltype(cmp)> pq(cmp);
+    for (const auto & result : results) {
         if (generic::geometry::Contains(polygons.at(result.second), pt))
-            return result.second;
+            pq.emplace(result.second);
+    }
+    if (not pq.empty()) return pq.top();
     return invalidIndex;
 }
 
@@ -200,7 +204,7 @@ void EPrismaThermalModel::Build(EValue scaleH2Unit, EValue scale2Meter)
         for (size_t n = 0; n < 3; ++n) {
             if (auto nid = instance.element->neighbors.at(n); noNeighbor != nid) {
                 auto nb = GlobalIndex(lyrIdx, instance.element->neighbors.at(n));
-                instance.neighbors[i] = nb;
+                instance.neighbors[n] = nb;
             }
         }
         ///top

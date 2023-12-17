@@ -15,11 +15,73 @@ void SignalHandler(int signum)
     ::raise(SIGABRT);
 }
 
-int main(int argc, char * argv[])
+void test0()
 {
-    ::signal(SIGSEGV, &SignalHandler);
-    ::signal(SIGABRT, &SignalHandler);
+    using namespace ecad;
+    auto & eDataMgr = EDataMgr::Instance();
 
+    //database
+    auto database = eDataMgr.CreateDatabase("Simple");
+    auto matCu = database->CreateMaterialDef("Cu");
+
+    //coord units
+    ECoordUnits coordUnits(ECoordUnits::Unit::Micrometer);
+    database->SetCoordUnits(coordUnits);
+    
+    //top cell
+    auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
+    auto topLayout = topCell->GetLayoutView();
+    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {5000000, -5000000}, {5000000, 5000000}, {-5000000, 5000000}});
+    topLayout->SetBoundary(std::move(topBouds));
+
+    [[maybe_unused]] auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 400, matCu->GetName(), matCu->GetName()));
+
+    //component
+    auto compDef = eDataMgr.CreateComponentDef(database, "CPMF-1200-S080B Z-FET");
+    assert(compDef);
+    compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
+    compDef->SetMaterial(matCu->GetName());
+    compDef->SetHeight(365);
+
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(topLayout, "M1", compDef, iLyrTopCu, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , coordUnits.toCoord(0))));
+    assert(comp1);
+    comp1->SetLossPower(33.8);
+
+    //flatten
+    database->Flatten(topCell);
+    auto layout = topCell->GetFlattenedLayoutView();
+
+    ELayoutViewRendererSettings rendererSettings;
+    rendererSettings.format = ELayoutViewRendererSettings::Format::PNG;
+    rendererSettings.dirName = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    layout->Renderer(rendererSettings);
+    
+    ELayoutPolygonMergeSettings mergeSettings;
+    mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    layout->MergeLayerPolygons(mergeSettings);
+
+    EThermalNetworkExtractionSettings extSettings;
+    extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    extSettings.dumpHotmaps = true;
+    extSettings.dumpSpiceFile = true;
+    extSettings.dumpDensityFile = true;
+    extSettings.dumpTemperatureFile = true;
+
+    size_t xGrid = 3;
+    auto bbox = layout->GetBoundary()->GetBBox();
+    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
+    extSettings.mergeGeomBeforeMetalMapping = false;
+
+    esim::EThermalNetworkExtraction ne;
+    ne.SetExtractionSettings(extSettings);
+    auto model1 = ne.GenerateGridThermalModel(layout);
+    auto model2 = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(30), 1e6, 1e10, 100);
+
+    EDataMgr::Instance().ShutDown();
+}
+
+void test1()
+{
     using namespace ecad;
     auto & eDataMgr = EDataMgr::Instance();
 
@@ -183,9 +245,16 @@ int main(int argc, char * argv[])
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
     // auto model = ne.GenerateGridThermalModel(layout);
-    auto model = ne.GeneratePrismaThermalModel(layout);
+    auto model = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(30), 0, 100, 5000);
 
     EDataMgr::Instance().ShutDown();
+}
+int main(int argc, char * argv[])
+{
+    ::signal(SIGSEGV, &SignalHandler);
+    ::signal(SIGABRT, &SignalHandler);
 
+    test0();
+    test1();
     return EXIT_SUCCESS;
 }

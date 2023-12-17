@@ -41,11 +41,11 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
         const auto & neighbors = inst.neighbors;
         //edges
         for (size_t ie = 0; ie < 3; ++ie) {
-            auto area = GetElementSideArea(i, ie);
+            auto vArea = GetElementSideArea(i, ie);
             if (auto nid = neighbors.at(ie); tri::noNeighbor == nid) {
                 if (m_model.uniformBcSide != invalidSimVal) {
                     if (EThermalModel::BCType::HTC == m_model.sideBCType) {
-                        network->AddHTC(i, m_model.uniformBcSide * area);
+                        network->AddHTC(i, m_model.uniformBcSide * vArea);
                         summary.boundaryNodes += 1;
                     }
                     else if (EThermalModel::BCType::HeatFlow == m_model.sideBCType) {
@@ -60,27 +60,28 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
                 const auto & nb = m_model[nid];
                 auto ctNb = GetElementCenterPoint2D(nid);
                 auto vec = ctNb - ct;
-                auto dist = vec.Norm2();
-                auto cos2 = std::pow(vec[0] / dist, 2);
-                auto sin2 = std::pow(vec[1] / dist, 2);
-                auto kxy = cos2 * k[0] + sin2 * k[1];
+                auto dist = vec.Norm2() * m_model.Scale2Meter();
+                // auto cos2 = std::pow(vec[0] / dist, 2);
+                // auto sin2 = std::pow(vec[1] / dist, 2);
+                auto kxy = 0.5 * (k[0] + k[1]);//todo
                 auto dist2edge = GetElementCenterDist2Side(i, ie);
-                auto r1 = dist2edge / kxy / area;
+                auto r1 = dist2edge / kxy / vArea;
 
                 auto kNb = GetMaterialK(nb.element->matId, iniT.at(nid));
-                auto kNbxy = cos2 * kNb[0] + sin2 * kNb[1];
-                auto r2 = (dist - dist2edge) / kNbxy / area;
+                // auto kNbxy = cos2 * kNb[0] + sin2 * kNb[1];
+                auto kNbxy = 0.5 * (kNb[0] + kNb[1]);//todo
+                auto r2 = (dist - dist2edge) / kNbxy / vArea;
                 network->SetR(i, nid, r1 + r2);
             }
         }
         auto height = GetElementHeight(i);
-        auto area = GetElementTopBotArea(i);
+        auto hArea = GetElementTopBotArea(i);
         //top
         auto nTop = neighbors.at(EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nTop) {
             if (uniformTopBC != invalidSimVal) {
                 if (EThermalModel::BCType::HTC == topType) {
-                    network->AddHTC(i, uniformTopBC * area);
+                    network->AddHTC(i, uniformTopBC * hArea);
                     summary.boundaryNodes += 1;
                 }
                 else if (EThermalModel::BCType::HeatFlow == topType) {
@@ -95,7 +96,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
             const auto & nb = m_model[nTop];
             auto hNb = GetElementHeight(nTop);
             auto kNb = GetMaterialK(nb.element->matId, iniT.at(nTop));
-            auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
+            auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
             network->SetR(i, nTop, r);
         }
         //bot
@@ -103,7 +104,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
         if (tri::noNeighbor == nBot) {
             if (uniformBotBC != invalidSimVal) {
                 if (EThermalModel::BCType::HTC == botType) {
-                    network->AddHTC(i, uniformBotBC * area);
+                    network->AddHTC(i, uniformBotBC * hArea);
                     summary.boundaryNodes += 1;
                 }
                 else if (EThermalModel::BCType::HeatFlow == botType) {
@@ -118,7 +119,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
             const auto & nb = m_model[nBot];
             auto hNb = GetElementHeight(nBot);
             auto kNb = GetMaterialK(nb.element->matId, iniT.at(nBot));
-            auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
+            auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
             network->SetR(i, nBot, r);
         }
     }

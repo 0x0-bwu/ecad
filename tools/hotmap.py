@@ -12,20 +12,6 @@ def main():
     reader.SetFileName(filename)
     reader.Update()
 
-    # extractEdges = vtk.vtkExtractEdges()
-    # extractEdges.SetInputConnection(reader.GetOutputPort())
-
-    legendValues = vtk.vtkVariantArray()
-    it = reader.GetOutput().NewCellIterator()
-    it.InitTraversal()
-    while not it.IsDoneWithTraversal():
-        cell = vtk.vtkGenericCell()
-        it.GetCell(cell)
-        cellName = vtk.vtkCellTypes.GetClassNameFromTypeId(cell.GetCellType())
-        # print(cellName, 'NumberOfPoints:', cell.GetNumberOfPoints(), 'CellDimension:', cell.GetCellDimension())
-        legendValues.InsertNextValue(cellName)
-        it.GoToNextCell()
-
     # The geometry
     geometryShrink = vtk.vtkShrinkFilter()
     geometryShrink.SetInputConnection(reader.GetOutputPort())
@@ -43,11 +29,11 @@ def main():
     geometryMapper = vtk.vtkDataSetMapper()
     geometryMapper.SetInputConnection(geometryShrink.GetOutputPort())
     geometryMapper.SetScalarModeToUseCellData()
-    geometryMapper.SetScalarRange(0, 11)
+    geometryMapper.SetScalarRange(25, 60)
 
     geometryActor = vtk.vtkActor()
     geometryActor.SetMapper(geometryMapper)
-    geometryActor.GetProperty().SetLineWidth(3)
+    geometryActor.GetProperty().SetLineWidth(0.3)
     geometryActor.GetProperty().EdgeVisibilityOn()
     geometryActor.GetProperty().SetEdgeColor(0, 0, 0)
 

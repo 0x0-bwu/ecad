@@ -184,7 +184,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
     return std::make_unique<EThermalModel>(std::move(model));
 }
 
-ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout)
+ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout,  EValue minAlpha, EValue minLen, EValue maxLen, size_t iteration)
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
     EPrismaThermalModel model;
@@ -202,7 +202,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     MeshFlow2D::ExtractIntersections(compact->polygons, segments);
     MeshFlow2D::ExtractTopology(segments, points, edges);
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
-    MeshFlow2D::TriangulationRefinement(triangulation, math::Rad(15), 0, 1e20, 5000);
+    MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, iteration);
     auto meshTemplateFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.png";
     GeometryIO::WritePNG(meshTemplateFile, triangulation, 2048);
     std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
@@ -275,26 +275,30 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
         buildOnePrismaLayer(index);
     
     //build connection
-    for (size_t index = 1; index < model.TotalLayers(); ++index) {
-        auto & upperLayer = model.layers.at(index - 1);
-        auto & lowerLayer = model.layers.at(index);
-        auto & upperEles = upperLayer.elements;
-        auto & lowerEles = lowerLayer.elements;
-        const auto & upperIdMap = templateIdMap.at(upperLayer.layerId);
-        const auto & lowerIdMap = templateIdMap.at(lowerLayer.layerId);
-        for (auto & ele : upperEles) {
+    for (size_t index = 0; index < model.TotalLayers(); ++index) {
+        auto & layer = model.layers.at(index);
+        auto & elements = layer.elements;
+        const auto & currIdMap = templateIdMap.at(layer.layerId);
+        for (auto & ele : elements) {
             //layer neighbors
             const auto & triangle = triangulation.triangles.at(ele.templateId);
             for (size_t nid = 0; nid < triangle.neighbors.size(); ++nid) {
                 if (tri::noNeighbor == triangle.neighbors.at(nid)) continue;
-                auto iter = upperIdMap.find(triangle.neighbors.at(nid));
-                if (iter != upperIdMap.cend()) ele.neighbors[nid] = iter->second;
+                auto iter = currIdMap.find(triangle.neighbors.at(nid));
+                if (iter != currIdMap.cend()) ele.neighbors[nid] = iter->second;
             }
-            auto iter = lowerIdMap.find(ele.templateId);
-            if (iter != lowerIdMap.cend()) {
-                auto & lowerEle = lowerEles.at(iter->second);
-                lowerEle.neighbors[EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX] = ele.id;
-                ele.neighbors[EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX] = lowerEle.id;
+        }
+        if (not model.isBotLayer(index)) {
+            auto & lowerLayer = model.layers.at(index + 1);
+            auto & lowerEles = lowerLayer.elements;
+            const auto & lowerIdMap = templateIdMap.at(lowerLayer.layerId);
+            for (auto & ele : elements) {
+                auto iter = lowerIdMap.find(ele.templateId);
+                if (iter != lowerIdMap.cend()) {
+                    auto & lowerEle = lowerEles.at(iter->second);
+                    lowerEle.neighbors[EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX] = ele.id;
+                    ele.neighbors[EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX] = lowerEle.id;
+                }
             }
         }
     }

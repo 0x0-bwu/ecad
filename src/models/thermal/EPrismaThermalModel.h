@@ -107,7 +107,6 @@ public:
     const PrismaInstance & operator[] (size_t index) const { return m_prismas[index]; }
 
     bool NeedIteration() const { return false; } //wbtest,todo
-private:
     bool isTopLayer(size_t lyrIndex) const;
     bool isBotLayer(size_t lyrIndex) const;
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;

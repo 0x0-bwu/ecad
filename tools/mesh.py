@@ -2,23 +2,13 @@ import os
 import vtk
 
 def main():
-    # filename = os.path.dirname(__file__) + '/../test/data/simulation/thermal/prisma.vtk'
-    filename = os.path.dirname(__file__) + '/test.vtk'
+    filename = os.path.dirname(__file__) + '/../test/data/simulation/thermal/mesh.vtk'
+    # filename = os.path.dirname(__file__) + '/test.vtk'
 
     # Create the reader for the data.
     reader = vtk.vtkUnstructuredGridReader()
     reader.SetFileName(filename)
     reader.Update()
-
-    cell_data = reader.GetOutput().GetCellData()
-    color_array = cell_data.GetArray("CellColors")  # Replace "CellColor" with your actual array name
-    print(color_array)
-
-    # Configure color mapping
-    lut = vtk.vtkLookupTable()
-    lut.SetNumberOfTableValues(256)
-    lut.SetRange(color_array.GetMinValue(), color_array.GetMaxValue())
-    lut.SetShader(vtk.vtkColorTransferFunction())  # Choose your desired colormap
 
     # Set mapper and renderer
     # mapper = vtk.vtkUnstructuredGridMapper()
