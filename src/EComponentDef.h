@@ -30,6 +30,9 @@ public:
     void SetBondingBox(const EBox2D & bbox) override;
     const EBox2D & GetBondingBox() const override;
 
+    void SetMaterial(const std::string & name) override;
+    const std::string & GetMaterial() const override;
+
     void SetHeight(FCoord height) override;
     FCoord GetHeight() const override;
 

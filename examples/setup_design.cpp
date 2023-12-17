@@ -30,7 +30,8 @@ int main(int argc, char * argv[])
     auto matCu = database->CreateMaterialDef("Cu");
     auto matAir = database->CreateMaterialDef("Air");
     matAir->SetMaterialType(EMaterialType::Fluid);
-    auto matSi3N4 = database->CreateMaterialDef("Si3N4");    
+    auto matSiC = database->CreateMaterialDef("SiC");  
+    auto matSi3N4 = database->CreateMaterialDef("Si3N4");  
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Micrometer);
     database->SetCoordUnits(coordUnits);
@@ -70,6 +71,7 @@ int main(int argc, char * argv[])
     auto compDef = eDataMgr.CreateComponentDef(database, "CPMF-1200-S080B Z-FET");
     assert(compDef);
     compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
+    compDef->SetMaterial(matSiC->GetName());
     compDef->SetHeight(365);
 
     [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(15000))));
@@ -78,7 +80,7 @@ int main(int argc, char * argv[])
     assert(comp2);
     comp1->SetLossPower(33.8);
     comp2->SetLossPower(31.9);
-
+ 
     //net
     auto gateNet = eDataMgr.CreateNet(sicLayout, "Gate");
     auto drainNet = eDataMgr.CreateNet(sicLayout, "Drain");

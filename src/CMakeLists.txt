@@ -17,7 +17,8 @@ models/thermal/EGridThermalModel.cpp
 models/thermal/EPrismaThermalModel.cpp
 models/thermal/EThermalModel.cpp
 simulation/EThermalNetworkExtraction.cpp
-solvers/utilities/EThermalNetworkBuilder.cpp
+solvers/utilities/EGridThermalNetworkBuilder.cpp
+solvers/utilities/EPrismaThermalNetworkBuilder.cpp
 solvers/EThermalNetworkSolver.cpp
 utilities/EBoundaryCalculator.cpp
 utilities/EFlattenUtility.cpp

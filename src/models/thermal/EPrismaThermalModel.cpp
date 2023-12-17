@@ -18,14 +18,22 @@ ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, ELayerId layerId, EMater
     else AddPolygon(netId, layerId, solidMat, shape->GetContour(), false);
 }
 
-ECAD_INLINE void ECompactLayout::AddPolygon(ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole)
+ECAD_INLINE size_t ECompactLayout::AddPolygon(ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole)
 {
     if (isHole == polygon.isCCW()) polygon.Reverse();
     polygons.emplace_back(std::move(polygon));
     materials.emplace_back(matId);
     layers.emplace_back(layerId);
     nets.emplace_back(netId);
+    return polygons.size() - 1;
 };
+
+ECAD_INLINE void ECompactLayout::AddPowerBlock(ELayerId layerId, EMaterialId matId, EPolygonData polygon, ESimVal totalP)
+{
+    auto area = polygon.Area();
+    auto index = AddPolygon(ENetId::noNet, layerId, matId, std::move(polygon), false);
+    powerBlocks.emplace(index, totalP / area);
+}
 
 ECAD_INLINE bool ECompactLayout::WriteImgView(std::string_view filename, size_t width) const
 {
@@ -89,8 +97,9 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
 
     auto compIter = layout->GetComponentIter();
     while (auto * comp = compIter->Next()) {
-        if (comp->GetLossPower() > 0)
-            compact.AddPolygon(ENetId::noNet, ELayerId::noLayer, EMaterialId::noMaterial, toPolygon(comp->GetBoundingBox()), false);
+        auto totalP = comp->GetLossPower();
+        auto material = layout->GetDatabase()->FindMaterialDefByName(comp->GetComponentDef()->GetMaterial());
+        compact.AddPowerBlock(comp->GetPlacementLayer(), material->GetMaterialId(), toPolygon(comp->GetBoundingBox()), totalP);    
     }
 
     std::unordered_map<ELayerId, std::pair<EMaterialId, EMaterialId> > layerMaterialMap;
@@ -143,9 +152,10 @@ ECAD_INLINE EPrismaThermalModel::PrismaLayer & EPrismaThermalModel::AppendLayer(
     return layers.emplace_back(std::move(layer));
 }
 
-void EPrismaThermalModel::Build(FCoord hScale)
+void EPrismaThermalModel::Build(EValue scaleH2Unit, EValue scale2Meter)
 {
-    this->hScale = hScale;
+    m_scaleH2Unit = scaleH2Unit;
+    m_scale2Meter = scale2Meter;
     m_indexOffset = std::vector<size_t>{0};
     for (size_t i = 0; i < TotalLayers(); ++i)
         m_indexOffset.emplace_back(m_indexOffset.back() + layers.at(i).TotalElements());
@@ -177,13 +187,13 @@ void EPrismaThermalModel::Build(FCoord hScale)
                 m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v));
                 topVtxIter = topPtIdxMap.emplace(vertices.at(v), m_points.size() - 1).first;
             }
-            instance.points[v] = topVtxIter->second;
+            instance.vertices[v] = topVtxIter->second;
             auto botVtxIter = botPtIdxMap.find(vertices.at(v));
             if (botVtxIter == botPtIdxMap.cend()) {
                 m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v + 3));
                 botVtxIter = botPtIdxMap.emplace(vertices.at(v), m_points.size() - 1).first;
             }
-            instance.points[v + 3] = botVtxIter->second;
+            instance.vertices[v + 3] = botVtxIter->second;
         }
 
         //neighbors
@@ -217,7 +227,7 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
                                    layers.at(lyrIndex + 1).elevation;
     vtxIndex = vtxIndex % 3;
     const auto & pt2d = points.at(triangle.vertices.at(vtxIndex));
-    return FPoint3D{pt2d[0] * hScale, pt2d[1] * hScale, height};
+    return FPoint3D{pt2d[0] * m_scaleH2Unit, pt2d[1] * m_scaleH2Unit, height};
 }
 
 } //namespace ecad::emodel::etherm

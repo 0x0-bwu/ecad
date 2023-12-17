@@ -19,7 +19,18 @@ using namespace generic::geometry;
 class ECAD_API EThermalModel
 {
 public:
+    enum class BCType { HTC, HeatFlow, Temperature/*not work currently*/ };
     virtual ~EThermalModel() = default;
+
+    virtual void SetUniformTopBotBCValue(ESimVal top, ESimVal bot);
+    virtual void GetUniformTopBotBCValue(ESimVal & t, ESimVal & b) const;
+
+    virtual void SetTopBotBCType(BCType top, BCType bot);
+    virtual void GetTopBotBCType(BCType & top, BCType & bot) const;
+
+protected:
+    std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
+    std::array<ESimVal, 2> m_uniformBcTopBot{invalidSimVal, invalidSimVal};
 };
 
 using EGridData = OccupancyGridMap<ESimVal>;

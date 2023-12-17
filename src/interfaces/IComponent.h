@@ -12,6 +12,8 @@ public:
     virtual ~IComponent() = default;
     virtual const std::string & GetName() const = 0;
 
+    virtual CPtr<IComponentDef> GetComponentDef() const = 0;
+
     virtual void SetPlacementLayer(ELayerId layer) = 0;
     virtual ELayerId GetPlacementLayer() const = 0;
 

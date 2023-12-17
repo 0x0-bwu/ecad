@@ -66,7 +66,6 @@ class ECAD_API EGridThermalModel : public EThermalModel
 {
     friend class utils::EGridThermalModelReduction;
 public:
-    enum class BCType { HTC, HeatFlow, Temperature/*not work currently*/ };
     explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), FCoord elevation = 0);
     virtual ~EGridThermalModel();
 
@@ -96,13 +95,8 @@ public:
     bool AddPowerModel(size_t layer, SPtr<EThermalPowerModel> pwrModel);
     const std::vector<SPtr<EThermalPowerModel> > & GetPowerModels(size_t layer) const;
 
-    void SetUniformTopBotBCValue(ESimVal top, ESimVal bot);
-    void GetUniformTopBotBCValue(ESimVal & t, ESimVal & b) const;
     bool SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot);
     void GetTopBotBCModel(SPtr<EGridBCModel> & top, SPtr<EGridBCModel> & bot) const;
-
-    void SetTopBotBCType(BCType top, BCType bot);
-    void GetTopBotBCType(BCType & top, BCType & bot) const;
 
     size_t GetFlattenIndex(const ESize3D & index) const;
     ESize3D GetGridIndex(size_t index) const;
@@ -119,9 +113,7 @@ private:
     std::array<FCoord, 2> m_resolution = {0, 0};//unit: m
     std::vector<EGridThermalLayer> m_stackupLayers;
     std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
-    std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
     std::vector<std::tuple<ESize3D, ESize3D, FCoord> > m_jumpConnects;
-    std::array<ESimVal, 2> m_uniformBcTopBot{invalidSimVal, invalidSimVal};
 };
 
 ECAD_ALWAYS_INLINE size_t EGridThermalModel::GetFlattenIndex(const ESize3D & index) const

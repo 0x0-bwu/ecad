@@ -19,10 +19,12 @@ struct ECAD_API ECompactLayout
     std::vector<ELayerId> layers;
     std::vector<EMaterialId> materials;
     std::vector<EPolygonData> polygons;
+    std::unordered_map<size_t, ESimVal> powerBlocks;
     virtual ~ECompactLayout() = default;
 
     void AddShape(ENetId netId, ELayerId layerId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape);
-    void AddPolygon(ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole);
+    size_t AddPolygon(ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole);
+    void AddPowerBlock(ELayerId layerId, EMaterialId matId, EPolygonData polygon, ESimVal totalP);
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
     void BuildLayerPolygonLUT();
@@ -49,6 +51,7 @@ public:
     {
         ENetId netId;
         EMaterialId matId;
+        ESimVal avePower{0};
         size_t id{invalidIndex};
         size_t templateId{invalidIndex};
         inline static constexpr size_t TOP_NEIGHBOR_INDEX = 3;
@@ -83,16 +86,18 @@ public:
     {
         CPtr<PrismaLayer> layer{nullptr};
         CPtr<PrismaElement> element{nullptr};
-        std::array<size_t, 6> points;//top, bot
+        std::array<size_t, 6> vertices;//top, bot
         std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
     };
     
-    FCoord hScale{1};
+    ESimVal uniformBcSide{0};
+    BCType sideBCType{BCType::HTC};
     PrismaTemplate prismaTemplate;
     std::vector<PrismaLayer> layers;
     PrismaLayer & AppendLayer(PrismaLayer layer);
 
-    void Build(FCoord hScale);    
+    void Build(EValue scaleH2Unit, EValue scale2Meter);  
+    EValue Scale2Meter() const;  
     size_t TotalLayers() const;
     size_t TotalElements() const;
     size_t GlobalIndex(size_t lyrIndex, size_t eleIndex) const;
@@ -100,16 +105,25 @@ public:
 
     const std::vector<FPoint3D> GetPoints() const { return m_points; }
     const PrismaInstance & operator[] (size_t index) const { return m_prismas[index]; }
+
+    bool NeedIteration() const { return false; } //wbtest,todo
 private:
     bool isTopLayer(size_t lyrIndex) const;
     bool isBotLayer(size_t lyrIndex) const;
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
 
 private:
+    EValue m_scaleH2Unit;
+    EValue m_scale2Meter;
     std::vector<FPoint3D> m_points;
     std::vector<PrismaInstance> m_prismas;
     std::vector<size_t> m_indexOffset;
 };
+
+ECAD_ALWAYS_INLINE EValue EPrismaThermalModel::Scale2Meter() const
+{
+    return m_scale2Meter;
+}
 
 ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalLayers() const
 {

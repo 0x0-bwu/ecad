@@ -1,4 +1,5 @@
 #pragma once
+#include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
 #include "ECadSettings.h"
 #include "ECadCommon.h"
@@ -40,6 +41,32 @@ class ECAD_API EGridThermalNetworkTransientSolver : public EGridThermalNetworkSo
 public:
     explicit EGridThermalNetworkTransientSolver(const EGridThermalModel & model);
     virtual ~EGridThermalNetworkTransientSolver() = default;
+    bool Solve(ESimVal refT, std::vector<ESimVal> & results);
+};
+
+class ECAD_API EPrismaThermalNetworkSolver : public EThermalNetworkSolver
+{
+public:
+    virtual ~EPrismaThermalNetworkSolver() = default;
+
+protected:
+    explicit EPrismaThermalNetworkSolver(const EPrismaThermalModel & model);
+    const EPrismaThermalModel & m_model;
+};
+
+class ECAD_API EPrismaThermalNetworkStaticSolver : public EPrismaThermalNetworkSolver
+{
+public:
+    explicit EPrismaThermalNetworkStaticSolver(const EPrismaThermalModel & model);
+    virtual ~EPrismaThermalNetworkStaticSolver() = default;
+    bool Solve(ESimVal refT, std::vector<ESimVal> & results);
+};
+
+class ECAD_API EPrismaThermalNetworkTransientSolver : public EPrismaThermalNetworkSolver
+{
+public:
+    explicit EPrismaThermalNetworkTransientSolver(const EPrismaThermalModel & model);
+    virtual ~EPrismaThermalNetworkTransientSolver() = default;
     bool Solve(ESimVal refT, std::vector<ESimVal> & results);
 };
 

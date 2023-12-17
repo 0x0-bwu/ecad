@@ -133,7 +133,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
 
     //htc
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model.SetUniformTopBotBCValue(invalidSimVal, 2750);
+    model.SetUniformTopBotBCValue(0, 2750);
     // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
     // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
     // model.SetTopBotBCModel(nullptr, bcModel);
@@ -202,7 +202,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     MeshFlow2D::ExtractIntersections(compact->polygons, segments);
     MeshFlow2D::ExtractTopology(segments, points, edges);
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
-    MeshFlow2D::TriangulationRefinement(triangulation, math::Rad(15), 100, 1e3, 1000);
+    MeshFlow2D::TriangulationRefinement(triangulation, math::Rad(15), 0, 1e20, 5000);
     auto meshTemplateFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.png";
     GeometryIO::WritePNG(meshTemplateFile, triangulation, 2048);
     std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
@@ -247,6 +247,11 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
                         idMap.emplace(it, ele.id);
                         ele.matId = compact->materials.at(pid);
                         ele.netId = compact->nets.at(pid);
+                        auto iter = compact->powerBlocks.find(pid);
+                        if (iter != compact->powerBlocks.cend()) {
+                            auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
+                            ele.avePower = area * iter->second;
+                        }
                     }
                 }
                 else if (not fluidMaterials.count(prismaLayer.dielectricMatId)) {
@@ -293,12 +298,32 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
             }
         }
     }
+    const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
+    auto scal2H2Unit = coordUnit.Scale2Unit();
+    auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
+    std::cout << "scale2Meter:" << scale2Meter << std::endl;
+    model.Build(scal2H2Unit, scale2Meter);
 
-    auto hScale = layout->GetDatabase()->GetCoordUnits().Scale2Unit();
-    model.Build(hScale);
+    auto meshFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.vtk";
+    io::GenerateVTKFile(meshFile, model);
 
-    auto vtkFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "prisma.vtk";
-    io::GenerateVTKFile(model, vtkFile);
+    //htc
+    model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
+    model.SetUniformTopBotBCValue(invalidSimVal, 2750);
+    model.uniformBcSide = invalidSimVal;
+    // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
+    // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
+    // model.SetTopBotBCModel(nullptr, bcModel);
+
+    ESimVal iniT = 25;
+    std::vector<ESimVal> results;
+    EPrismaThermalNetworkStaticSolver solver(model);
+    EThermalNetworkSolveSettings solverSettings;
+    solver.SetSolveSettings(solverSettings);
+    if (not solver.Solve(iniT, results)) return nullptr;
+    auto hotmapFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "hotmap.vtk";
+    io::GenerateVTKFile(hotmapFile, model, &results);
+
     return std::make_unique<EThermalModel>(std::move(model));
 }
 

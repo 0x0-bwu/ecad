@@ -61,6 +61,11 @@ ECAD_INLINE EComponent & EComponent::operator= (const EComponent & other)
     return *this;
 }
 
+ECAD_INLINE CPtr<IComponentDef> EComponent::GetComponentDef() const
+{
+    return m_compDef;
+}
+
 ECAD_INLINE void EComponent::SetPlacementLayer(ELayerId layer)
 {
     m_placement = layer;

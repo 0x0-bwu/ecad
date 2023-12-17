@@ -1,8 +1,9 @@
 #include "solvers/EThermalNetworkSolver.h"
 #include "thermal/utilities/BoundaryNodeReduction.hpp"
 #include "thermal/utilities/ThermalNetlistWriter.hpp"
+#include "utilities/EPrismaThermalNetworkBuilder.h"
 #include "thermal/solver/ThermalNetworkSolver.hpp"
-#include "utilities/EThermalNetworkBuilder.h"
+#include "utilities/EGridThermalNetworkBuilder.h"
 #include "generic/thread/ThreadPool.hpp"
 #include "generic/tools/Format.hpp"
 #include "EDataMgr.h"
@@ -40,7 +41,7 @@ ECAD_INLINE bool EGridThermalNetworkStaticSolver::Solve(ESimVal refT, std::vecto
 {
     using namespace thermal::utils;
     using namespace thermal::solver;
-    ECAD_EFFICIENCY_TRACK("thermal network static solve")
+    ECAD_EFFICIENCY_TRACK("grid thermal network static solve")
 
     results.assign(m_model.TotalGrids(), refT);
     bool needIteration = m_model.NeedIteration();
@@ -95,7 +96,7 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
 {
     using namespace thermal::utils;
     using namespace thermal::solver;
-    ECAD_EFFICIENCY_TRACK("thermal network transient solve")
+    ECAD_EFFICIENCY_TRACK("grid thermal network transient solve")
 
     results.assign(m_model.TotalGrids(), refT);
     EGridThermalNetworkBuilder builder(m_model);
@@ -250,4 +251,78 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(ESimVal refT, std::ve
     }); 
     return true;
 }
+
+ECAD_INLINE EPrismaThermalNetworkSolver::EPrismaThermalNetworkSolver(const EPrismaThermalModel & model)
+ : m_model(model)
+{
+}
+
+ECAD_INLINE EPrismaThermalNetworkStaticSolver::EPrismaThermalNetworkStaticSolver(const EPrismaThermalModel & model)
+ : EPrismaThermalNetworkSolver(model)
+{
+}
+
+ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(ESimVal refT, std::vector<ESimVal> & results)
+{
+    using namespace thermal::utils;
+    using namespace thermal::solver;
+    ECAD_EFFICIENCY_TRACK("prisma thermal network static solve")
+
+    results.assign(m_model.TotalElements(), refT);
+    bool needIteration = m_model.NeedIteration();
+    if (m_settings.iteration > 0 && math::GT<EValue>(m_settings.residual, 0)) {
+
+        EValue residual = m_settings.residual;
+        size_t iteration = m_settings.iteration;
+        EPrismaThermalNetworkBuilder builder(m_model);
+        do {
+            std::vector<ESimVal> lastRes(results);
+            auto network = builder.Build(lastRes);
+            if (nullptr == network) return false;
+
+            std::cout << "total nodes: " << network->Size() << std::endl;
+            std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
+            std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
+            
+            size_t threads = EDataMgr::Instance().DefaultThreads();
+            ThermalNetworkSolver<ESimVal> solver(*network, threads);
+            solver.SetVerbose(true);
+            solver.Solve(refT);
+
+            const auto & nodes = network->GetNodes();
+            for (size_t n = 0; n < results.size(); ++n)
+                results[n] = nodes[n].t;
+
+            size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
+            std::cout << "hotspot: " << maxId << ", maxT: " << results.at(maxId) << std::endl;
+            for (size_t i = 0; i < 100; ++i) {
+                std::cout << "tem:" << results[i] << std::endl;//wbtest
+            }
+
+            iteration -= 1;
+            if(!needIteration || iteration == 0) break;
+
+            residual = CalculateResidual(results, lastRes);
+            needIteration = math::GE(residual, m_settings.residual);
+            std::cout << "Residual: " << residual << ", Remain Iteration: " << (needIteration ? iteration : 0) << std::endl;
+    
+        } while (needIteration);
+    }
+
+    return true;
+}
+
+ECAD_INLINE EPrismaThermalNetworkTransientSolver::EPrismaThermalNetworkTransientSolver(const EPrismaThermalModel & model)
+ : EPrismaThermalNetworkSolver(model)
+{
+}
+
+ECAD_INLINE bool EPrismaThermalNetworkTransientSolver::Solve(ESimVal refT, std::vector<ESimVal> & results)
+{
+    using namespace thermal::utils;
+    using namespace thermal::solver;
+    ECAD_EFFICIENCY_TRACK("prisma thermal network transient solve")
+    return false;
+}
+
 } //namespace ecad::esolver

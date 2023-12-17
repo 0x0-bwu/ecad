@@ -1,4 +1,4 @@
-#include "solvers/utilities/EThermalNetworkBuilder.h"
+#include "EGridThermalNetworkBuilder.h"
 
 namespace ecad {
 namespace esolver {
@@ -7,10 +7,6 @@ using namespace emodel;
 inline static constexpr ESimVal THERMAL_RD = 0.01;
 ECAD_INLINE EGridThermalNetworkBuilder::EGridThermalNetworkBuilder(const EGridThermalModel & model)
  : m_model(model), m_size(model.ModelSize())
-{
-}
-
-ECAD_INLINE EGridThermalNetworkBuilder::~EGridThermalNetworkBuilder()
 {
 }
 
@@ -102,11 +98,11 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EGridThermalNetworkBuilder::Build(con
     }
 
     //bc
-    EGridThermalModel::BCType topType, botType;
+    EThermalModel::BCType topType, botType;
     m_model.GetTopBotBCType(topType, botType);
 
     SPtr<EGridBCModel> topBC = nullptr, botBC = nullptr;
-    m_model.GetTopBotBCModel(topBC, botBC);\
+    m_model.GetTopBotBCModel(topBC, botBC);
 
     ESimVal uniformTopBC, uniformBotBC;
     m_model.GetUniformTopBotBCValue(uniformTopBC, uniformBotBC);

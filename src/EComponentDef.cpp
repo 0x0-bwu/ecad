@@ -61,6 +61,10 @@ ECAD_INLINE EComponentDef::EComponentDef(const EComponentDef & other)
 ECAD_INLINE EComponentDef & EComponentDef::operator= (const EComponentDef & other)
 {
     EDefinition::operator=(other);
+    m_type = other.m_type;
+    m_bondingBox = other.m_bondingBox;
+    m_height = other.m_height;
+    m_material = other.m_material;
     return *this;
 }
 
@@ -87,6 +91,16 @@ ECAD_INLINE void EComponentDef::SetBondingBox(const EBox2D & bbox)
 ECAD_INLINE const EBox2D & EComponentDef::GetBondingBox() const
 {
     return m_bondingBox;
+}
+
+ECAD_INLINE void EComponentDef::SetMaterial(const std::string & name)
+{
+    m_material = name;
+}
+
+ECAD_INLINE const std::string & EComponentDef::GetMaterial() const
+{
+    return m_material;
 }
 
 ECAD_INLINE void EComponentDef::SetHeight(FCoord height)

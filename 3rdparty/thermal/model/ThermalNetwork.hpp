@@ -105,6 +105,11 @@ public:
         m_nodes[node].hf = hf;
     }
 
+    void AddHF(size_t node, num_type hf)
+    {
+        m_nodes[node].hf += hf;
+    }
+
     num_type GetHF(size_t node) const
     {
         return m_nodes[node].hf;

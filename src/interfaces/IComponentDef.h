@@ -20,6 +20,9 @@ public:
     virtual void SetBondingBox(const EBox2D & bbox) = 0;
     virtual const EBox2D & GetBondingBox() const = 0;
 
+    virtual void SetMaterial(const std::string & name) = 0;
+    virtual const std::string & GetMaterial() const = 0;
+
     virtual void SetHeight(FCoord height) = 0;
     virtual FCoord GetHeight() const = 0;
 

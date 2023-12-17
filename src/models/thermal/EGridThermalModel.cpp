@@ -358,18 +358,6 @@ ECAD_INLINE const std::vector<SPtr<EThermalPowerModel> > & EGridThermalModel::Ge
     return m_stackupLayers.at(layer).GetPowerModels();
 }
 
-ECAD_INLINE void EGridThermalModel::SetUniformTopBotBCValue(ESimVal top, ESimVal bot)
-{
-    m_uniformBcTopBot[0] = top;
-    m_uniformBcTopBot[1] = bot;
-}
-
-ECAD_INLINE void EGridThermalModel::GetUniformTopBotBCValue(ESimVal & t, ESimVal & b) const
-{
-    t = m_uniformBcTopBot.at(0);
-    b = m_uniformBcTopBot.at(1);
-}
-
 ECAD_INLINE bool EGridThermalModel::SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot)
 {
     if(top && top->GetTableSize() != m_size) return false;
@@ -382,18 +370,6 @@ ECAD_INLINE void EGridThermalModel::GetTopBotBCModel(SPtr<EGridBCModel> & top, S
 {
     top = m_bcTopBot[0];
     bot = m_bcTopBot[1];
-}
-
-ECAD_INLINE void EGridThermalModel::SetTopBotBCType(BCType top, BCType bot)
-{
-    m_bcTypeTopBot[0] = top;
-    m_bcTypeTopBot[1] = bot;
-}
-
-ECAD_INLINE void EGridThermalModel::GetTopBotBCType(BCType & top, BCType & bot) const
-{
-    top = m_bcTypeTopBot[0];
-    bot = m_bcTypeTopBot[1];
 }
 
 ECAD_INLINE bool EGridThermalModel::NeedIteration() const

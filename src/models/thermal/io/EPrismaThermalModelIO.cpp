@@ -1,8 +1,8 @@
 #include "EPrismaThermalModelIO.h"
-
+#include "generic/tools/Color.hpp"
 namespace ecad::emodel::etherm::io {
 
-ECAD_INLINE bool GenerateVTKFile(const EPrismaThermalModel & model, std::string_view filename, std::string * err)
+ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermalModel & model, const std::vector<ESimVal> * temperature, std::string * err)
 {
     if (not fs::CreateDir(fs::DirName(filename))) {
         if (err) *err = "Error: fail to create folder " + fs::DirName(filename).string();
@@ -32,7 +32,7 @@ ECAD_INLINE bool GenerateVTKFile(const EPrismaThermalModel & model, std::string_
     for (size_t i = 0; i < model.TotalElements(); ++i) {
         const auto & prisma = model[i];
         out << '6';
-        for (auto vertex : prisma.points)
+        for (auto vertex : prisma.vertices)
             out << sp << vertex;
         out << ECAD_EOL; 
     }
@@ -41,6 +41,22 @@ ECAD_INLINE bool GenerateVTKFile(const EPrismaThermalModel & model, std::string_
     out << "CELL_TYPES" << sp << model.TotalElements() << ECAD_EOL;
     for (size_t i = 0; i < model.TotalElements(); ++i) {
         out << "13" << ECAD_EOL;
+    }
+
+    if (temperature && temperature->size() == model.TotalElements()) {
+        out << "CELL_DATA" << sp << model.TotalElements() << ECAD_EOL;
+        out << "SCALARS SCALARS FLOAT 1 " << ECAD_EOL;
+        out << "LOOKUP_TABLE TEMPERATURE" << ECAD_EOL;
+        for (const auto & t : *temperature)
+            out << t << ECAD_EOL;
+        
+        out << ECAD_EOL;
+        out << "LOOKUP_TABLE TEMPERATURE 100" << ECAD_EOL;
+        int r, g, b;
+        for (size_t i = 0; i < 100; ++i) {
+            generic::color::RGBFromScalar(i * 0.01, r, g, b);
+            out << r / 255.0 << sp << g / 255.0 << sp << b / 255.0 << sp << 1.0 << ECAD_EOL;
+        }
     }
 
     out.close();

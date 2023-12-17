@@ -23,7 +23,7 @@ public:
     mutable EGridThermalNetworkBuildSummary summary;
     enum class Orientation { Top, Bot, Left, Right, Front, End };
     explicit EGridThermalNetworkBuilder(const EGridThermalModel & model);
-    virtual ~EGridThermalNetworkBuilder();
+    virtual ~EGridThermalNetworkBuilder() = default;
 
     UPtr<ThermalNetwork<ESimVal> > Build(const std::vector<ESimVal> & iniT) const;
 

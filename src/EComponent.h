@@ -16,6 +16,8 @@ public:
     EComponent(const EComponent & other);
     EComponent & operator= (const EComponent & other);
 
+    CPtr<IComponentDef> GetComponentDef() const override;
+
     void SetPlacementLayer(ELayerId layer) override;
     ELayerId GetPlacementLayer() const override;
 
