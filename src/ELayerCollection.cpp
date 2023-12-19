@@ -89,18 +89,22 @@ ECAD_INLINE UPtr<ILayerMap> ELayerCollection::GetDefaultLayerMap() const
     return lyrMap;
 }
 
-ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const
+ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const
 {
     layers.clear();
-    for(const auto & layer : m_collection)
-        layers.push_back(layer.get());
+    for(const auto & layer : m_collection) {
+        auto stackupLayer = layer->GetStackupLayerFromLayer();
+        if (stackupLayer) layers.emplace_back(stackupLayer);
+    }
 }
 
-ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const
+ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const
 {
     layers.clear();
-    for(const auto & layer : m_collection)
-        layers.push_back(layer.get());
+    for(const auto & layer : m_collection) {
+        auto stackupLayer = layer->GetStackupLayerFromLayer();
+        if (stackupLayer) layers.push_back(stackupLayer);
+    }
 }
 
 ECAD_INLINE LayerIter ELayerCollection::GetLayerIter() const

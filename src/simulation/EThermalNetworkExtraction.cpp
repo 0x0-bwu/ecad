@@ -57,14 +57,14 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
     auto ry = coordUnits.toUnit(mfInfo->stride[1], ECoordUnits::Unit::Meter);
     model.SetResolution(rx, ry);
 
-    std::vector<Ptr<ILayer> > layers;
+    std::vector<Ptr<IStackupLayer> > layers;
     layout->GetStackupLayers(layers);
     ECAD_ASSERT(layers.size() == mf->size());
 
     std::unordered_map<ELayerId, size_t> lyrMap;
     for(size_t i = 0; i < layers.size(); ++i) {
-        auto name = layers.at(i)->GetName();
-        auto stackupLayer = layers.at(i)->GetStackupLayerFromLayer();
+        auto stackupLayer = layers.at(i);
+        auto name = stackupLayer->GetName();
         auto thickness = coordUnits.toCoordF(stackupLayer->GetThickness());
         thickness = coordUnits.toUnit(thickness, ECoordUnits::Unit::Meter);
         auto layerMetalFraction = mf->at(i);
@@ -208,13 +208,11 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
     //todo wrapper to mesh
 
-    std::vector<Ptr<ILayer> > layers;//todo, refinement
-    std::vector<Ptr<IStackupLayer> > stackupLayers;
-    layout->GetStackupLayers(layers);
-    for (auto layer : layers) {
+    std::vector<CPtr<IStackupLayer> > stackupLayers;
+    layout->GetStackupLayers(stackupLayers);
+    for (auto stackupLayer : stackupLayers) {
         EPrismaThermalModel::PrismaLayer prismaLayer;
-        auto stackupLayer = layer->GetStackupLayerFromLayer();
-        prismaLayer.layerId = layer->GetLayerId();
+        prismaLayer.layerId = stackupLayer->GetLayerId();
         prismaLayer.elevation = stackupLayer->GetElevation();
         prismaLayer.thickness = stackupLayer->GetThickness();
         auto condMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetConductingMaterial());

@@ -25,7 +25,10 @@ class ECAD_API IStackupLayer
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:
     virtual ~IStackupLayer() = default;
-
+    virtual std::string GetName() const = 0;
+    virtual void SetLayerId(ELayerId id) = 0;
+    virtual ELayerId GetLayerId() const = 0;
+    virtual ELayerType GetLayerType() const = 0;
     virtual void SetElevation(FCoord elevation) = 0;
     virtual FCoord GetElevation() const = 0;
     virtual void SetThickness(FCoord thickness) = 0;

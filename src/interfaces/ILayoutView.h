@@ -17,6 +17,7 @@ class ICellInst;
 class IPrimitive;
 class ETransform2D;
 class IPadstackDef;
+class IStackupLayer;
 class IPadstackInst;
 class INetCollection;
 class ILayerCollection;
@@ -57,8 +58,8 @@ public:
     ///Layer
     virtual ELayerId AppendLayer(UPtr<ILayer> layer) const = 0;
     virtual std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers) const = 0;
-    virtual void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const = 0;
-    virtual void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const = 0;
+    virtual void GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const = 0;
+    virtual void GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const = 0;
     virtual UPtr<ILayerMap> AddDefaultDielectricLayers() const = 0;
     virtual Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const = 0;
     virtual Ptr<ILayer> FindLayerByName(const std::string & name) const = 0;

@@ -17,6 +17,8 @@ ECAD_INLINE void EComponent::save(Archive & ar, const unsigned int version) cons
     ar & boost::serialization::make_nvp("component_def", m_compDef);
     ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("loss_power", m_lossPower);
+    ar & boost::serialization::make_nvp("flipped", m_flipped);
+    ar & boost::serialization::make_nvp("height", m_height);
 }
 
 template <typename Archive>
@@ -28,6 +30,8 @@ ECAD_INLINE void EComponent::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("component_def", m_compDef);
     ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("loss_power", m_lossPower);
+    ar & boost::serialization::make_nvp("flipped", m_flipped);
+    ar & boost::serialization::make_nvp("height", m_height);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponent)
@@ -58,6 +62,8 @@ ECAD_INLINE EComponent & EComponent::operator= (const EComponent & other)
     m_compDef = other.m_compDef;
     m_placement = other.m_placement;
     m_lossPower = other.m_lossPower;
+    m_flipped = other.m_flipped;
+    m_height = other.m_height;
     return *this;
 }
 
@@ -108,11 +114,33 @@ ECAD_INLINE EBox2D EComponent::GetBoundingBox() const
     return bbox.shape;
 }
 
+ECAD_INLINE void EComponent::SetFlipped(bool flipped)
+{
+    m_flipped = flipped;
+}
+
+ECAD_INLINE bool EComponent::isFlipped() const
+{
+    return m_flipped;
+}
+
+ECAD_INLINE void EComponent::SetHeight(FCoord height)
+{
+    m_height = height;
+}
+
+ECAD_INLINE FCoord EComponent::GetHeight() const
+{
+    return m_height;
+}
+
 ECAD_INLINE void EComponent::PrintImp(std::ostream & os) const
 {
     os << "COMPONENT DEFINE: " << m_compDef->GetName() << ECAD_EOL;
     os << "PLACEMENT: " << m_placement << ECAD_EOL;
     os << "LOSS POWER: " << m_lossPower << 'W' << ECAD_EOL;
+    os << "FLIPPED: " << std::boolalpha << m_flipped << ECAD_EOL;
+    os << "HEIGHT: " << m_height << ECAD_EOL;
     EHierarchyObj::PrintImp(os);
 }
 

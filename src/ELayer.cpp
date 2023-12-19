@@ -143,6 +143,25 @@ ECAD_INLINE EStackupLayer & EStackupLayer::operator= (const EStackupLayer & othe
     return *this;
 }
 
+ECAD_INLINE std::string EStackupLayer::GetName() const
+{
+    return ELayer::GetName();
+}
+ECAD_INLINE void EStackupLayer::SetLayerId(ELayerId id)
+{
+    return ELayer::SetLayerId(id);
+}
+
+ECAD_INLINE ELayerId EStackupLayer::GetLayerId() const
+{
+    return ELayer::GetLayerId();
+}
+
+ECAD_INLINE ELayerType EStackupLayer::GetLayerType() const
+{
+    return ELayer::GetLayerType();
+}
+
 ECAD_INLINE void EStackupLayer::SetElevation(FCoord elevation)
 {
     m_elevation = elevation;

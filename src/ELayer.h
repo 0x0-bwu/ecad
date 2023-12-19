@@ -18,10 +18,10 @@ public:
     ELayer(const ELayer & other);
     ELayer & operator= (const ELayer & other);
 
-    std::string GetName() const;
-    void SetLayerId(ELayerId id);
-    ELayerId GetLayerId() const;
-    ELayerType GetLayerType() const;
+    virtual std::string GetName() const;
+    virtual void SetLayerId(ELayerId id);
+    virtual ELayerId GetLayerId() const;
+    virtual ELayerType GetLayerType() const;
 
     Ptr<IStackupLayer> GetStackupLayerFromLayer();
     Ptr<IViaLayer> GetViaLayerFromLayer();
@@ -47,6 +47,11 @@ public:
     ///Copy
     EStackupLayer(const EStackupLayer & other);
     EStackupLayer & operator= (const EStackupLayer & other);
+
+    std::string GetName() const override;
+    void SetLayerId(ELayerId id) override;
+    ELayerId GetLayerId() const override;
+    ELayerType GetLayerType() const override;
 
     void SetElevation(FCoord elevation) override;
     FCoord GetElevation() const override;

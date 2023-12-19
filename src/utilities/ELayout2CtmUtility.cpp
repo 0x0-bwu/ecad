@@ -66,13 +66,13 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
     auto rx = coordUnits.toUnit(stride, ECoordUnits::Unit::Meter), ry = rx;
     gridModel->SetResolution(rx, ry);
 
-    std::vector<Ptr<ILayer> > layers;
+    std::vector<Ptr<IStackupLayer> > layers;
     m_layout->GetStackupLayers(layers);
     ECAD_ASSERT(layers.size() == mf->size());
 
     for(size_t i = 0; i < layers.size(); ++i) {
+        auto stackupLayer = layers.at(i);
         auto name = layers.at(i)->GetName();
-        auto stackupLayer = layers.at(i)->GetStackupLayerFromLayer();
         auto thickness = coordUnits.toUnit(stackupLayer->GetThickness(), ECoordUnits::Unit::Meter);
         auto layerMetalFraction = mf->at(i);
         EGridThermalLayer layer(name, layerMetalFraction);

@@ -49,8 +49,8 @@ public:
     ///Layer
     ELayerId AppendLayer(UPtr<ILayer> layer) const override;
     std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers) const override;
-    void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const override;
-    void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const override;
+    void GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const override;
+    void GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const override;
     UPtr<ILayerMap> AddDefaultDielectricLayers() const override;
     Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const override;
     Ptr<ILayer> FindLayerByName(const std::string & name) const override;

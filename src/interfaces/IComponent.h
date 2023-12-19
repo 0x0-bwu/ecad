@@ -26,6 +26,12 @@ public:
 
     virtual EBox2D GetBoundingBox() const = 0;
 
+    virtual void SetFlipped(bool flipped) = 0;
+    virtual bool isFlipped() const = 0;
+
+    virtual void SetHeight(FCoord height) = 0;
+    virtual FCoord GetHeight() const = 0;
+
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IComponent)

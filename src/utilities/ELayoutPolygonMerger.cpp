@@ -22,7 +22,7 @@ using namespace generic::geometry;
 ECAD_INLINE ELayoutPolygonMerger::ELayoutPolygonMerger(Ptr<ILayoutView> layout)
  : m_layout(layout)
 {
-    std::vector<CPtr<ILayer> > layers;
+    std::vector<CPtr<IStackupLayer> > layers;
     layout->GetStackupLayers(layers);
 
     for(size_t i = 0; i < layers.size(); ++i) {

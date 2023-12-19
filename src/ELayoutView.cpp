@@ -154,12 +154,12 @@ ECAD_INLINE std::vector<ELayerId> ELayoutView::AppendLayers(std::vector<UPtr<ILa
     return GetLayerCollection()->AppendLayers(std::move(layers));
 }
 
-ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const
+ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const
 {
     return GetLayerCollection()->GetStackupLayers(layers);
 }
 
-ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const
+ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const
 {
     return GetLayerCollection()->GetStackupLayers(layers);
 }

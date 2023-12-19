@@ -26,6 +26,7 @@ utilities/ELayout2CtmUtility.cpp
 utilities/ELayoutConnectivity.cpp
 utilities/ELayoutMergeUtility.cpp
 utilities/ELayoutPolygonMerger.cpp
+utilities/ELayoutRetriever.cpp
 utilities/ELayoutViewRenderer.cpp
 utilities/EMetalFractionMapping.cpp
 ECell.cpp

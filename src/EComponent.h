@@ -30,6 +30,12 @@ public:
 
     EBox2D GetBoundingBox() const override;
 
+    void SetFlipped(bool flipped) override;
+    bool isFlipped() const override;
+
+    void SetHeight(FCoord height) override;
+    FCoord GetHeight() const override;
+
     const std::string & GetName() const override;
 protected:
     ///Copy
@@ -39,6 +45,8 @@ protected:
     CPtr<IComponentDef> m_compDef;
     ELayerId m_placement{ELayerId::noLayer};
     ESimVal m_lossPower{0};
+    bool m_flipped{false};
+    FCoord m_height{0};
 };
 
 ECAD_ALWAYS_INLINE const std::string & EComponent::GetName() const

@@ -131,9 +131,9 @@ namespace ecad {
         return std_container_to_py_list(res);
     }
 
-    std::vector<Ptr<ILayer> > ELayerCollectionGetStackupLayersWrap(const ELayerCollection & collection)
+    std::vector<Ptr<IStackupLayer> > ELayerCollectionGetStackupLayersWrap(const ELayerCollection & collection)
     {
-        std::vector<Ptr<ILayer> > layers;
+        std::vector<Ptr<IStackupLayer> > layers;
         collection.GetStackupLayers(layers);
         return layers;
     }
@@ -275,9 +275,9 @@ namespace ecad {
         return std_container_to_py_list(res);
     }
 
-    std::vector<Ptr<ILayer> > ELayoutViewGetStackupLayersWrap(const ELayoutView & layout)
+    std::vector<Ptr<IStackupLayer> > ELayoutViewGetStackupLayersWrap(const ELayoutView & layout)
     {
-        std::vector<Ptr<ILayer> > layers;
+        std::vector<Ptr<IStackupLayer> > layers;
         layout.GetStackupLayers(layers);
         return layers;
     }

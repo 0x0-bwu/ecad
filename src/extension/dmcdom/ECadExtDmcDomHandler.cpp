@@ -154,7 +154,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::stri
     boundary->shape = generic::geometry::toPolygon(bbox);
     layout->SetBoundary(UPtr<EPolygon>(boundary));
 
-    std::vector<CPtr<ILayer> > layers;
+    std::vector<CPtr<IStackupLayer> > layers;
     layout->GetStackupLayers(layers);
 
     int toId = 0;
