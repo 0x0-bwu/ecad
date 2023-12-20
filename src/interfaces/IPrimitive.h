@@ -9,6 +9,7 @@ class IText;
 class EShape;
 class IConnObj;
 class IBondwire;
+class IComponent;
 class IGeometry2D;
 class ECAD_API IPrimitive : public Clonable<IPrimitive>, public Printable
 {
@@ -49,6 +50,10 @@ public:
     virtual const EPoint2D & GetEndPt() const = 0;
     virtual void SetMaterial(const std::string & material) = 0;
     virtual const std::string & GetMaterial() const = 0;
+    virtual void SetHeight(FCoord height) = 0;
+    virtual FCoord GetHeight() const = 0;
+    virtual void SetConnectedComponent(CPtr<IComponent> comp) = 0;
+    virtual CPtr<IComponent> GetConnectedComponent() const = 0;
     virtual void Transform(const ETransform2D & transform) = 0;
 };
 

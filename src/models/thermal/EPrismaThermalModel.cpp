@@ -74,8 +74,8 @@ ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
 
         const auto & range = ranges.at(i);
         size_t sLayer = m_height2Index.at(range.first);
-        size_t eLayer = std::min(TotalLayers() - 1, m_height2Index.at(range.second));
-        for (size_t layer = sLayer; layer <= eLayer; ++layer) {
+        size_t eLayer = std::min(TotalLayers(), m_height2Index.at(range.second));
+        for (size_t layer = sLayer; layer < eLayer; ++layer) {
             auto iter = m_lyrPolygons.find(layer);
             if (iter == m_lyrPolygons.cend())
                 iter = m_lyrPolygons.emplace(layer, std::vector<size_t>{}).first;

@@ -87,6 +87,12 @@ public:
     void SetMaterial(const std::string & material) override;
     const std::string & GetMaterial() const override;
 
+    void SetHeight(FCoord height) override;
+    FCoord GetHeight() const override;
+
+    void SetConnectedComponent(CPtr<IComponent> comp) override;
+    CPtr<IComponent> GetConnectedComponent() const override;
+
     void Transform(const ETransform2D & transform) override;
 
 protected:
@@ -99,6 +105,8 @@ protected:
     EPoint2D m_start;
     EPoint2D m_end;
     FCoord m_radius{0};
+    FCoord m_height{0};
+    CPtr<IComponent> m_connectedComponent{nullptr};
 };
 
 class ECAD_API EText : public EPrimitive, public IText

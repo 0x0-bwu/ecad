@@ -3,6 +3,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPrimitive)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EGeometry2D)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EText)
 
+#include "interfaces/IComponent.h"
 #include "interfaces/ILayer.h"
 #include "interfaces/INet.h"
 #include "EShape.h"
@@ -212,6 +213,8 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     ar & boost::serialization::make_nvp("start", m_start);
     ar & boost::serialization::make_nvp("end", m_end);
     ar & boost::serialization::make_nvp("radius", m_radius);
+    ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("connected_component", m_connectedComponent);
 }
 
 template <typename Archive>
@@ -224,6 +227,8 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("start", m_start);
     ar & boost::serialization::make_nvp("end", m_end);
     ar & boost::serialization::make_nvp("radius", m_radius);
+    ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("connected_component", m_connectedComponent);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EBondwire)
@@ -252,6 +257,8 @@ ECAD_INLINE EBondwire & EBondwire::operator= (const EBondwire & other)
     m_start = other.m_start;
     m_end = other.m_end;
     m_radius = other.m_radius;
+    m_height = other.m_height;
+    m_connectedComponent = other.m_connectedComponent;
     return *this;
 }
 
@@ -285,6 +292,26 @@ ECAD_INLINE const std::string & EBondwire::GetMaterial() const
     return m_material;
 }
 
+ECAD_INLINE void EBondwire::SetHeight(FCoord height)
+{
+    m_height = height;
+}
+
+ECAD_INLINE FCoord EBondwire::GetHeight() const
+{
+    return m_height;
+}
+
+ECAD_INLINE void EBondwire::SetConnectedComponent(CPtr<IComponent> comp)
+{
+    m_connectedComponent = comp;
+}
+
+ECAD_INLINE CPtr<IComponent> EBondwire::GetConnectedComponent() const
+{
+    return m_connectedComponent;
+}
+
 ECAD_INLINE void EBondwire::Transform(const ETransform2D & transform)
 {
     auto trans = transform.GetTransform();
@@ -297,6 +324,7 @@ ECAD_INLINE void EBondwire::PrintImp(std::ostream & os) const
     os << "TYPE: " << "BONDWIRE" << ECAD_EOL;
     os << "START: " << m_start << ", END: " << m_end << ECAD_EOL;
     os << "RADIUS: " << m_radius << ECAD_EOL;
+    os << "HEIGHT: " << m_height << ECAD_EOL;
     os << "MATERIAL: " << m_material << ECAD_EOL;
     EPrimitive::PrintImp(os);
 }
