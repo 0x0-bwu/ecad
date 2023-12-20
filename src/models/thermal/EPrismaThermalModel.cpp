@@ -84,14 +84,10 @@ ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
     }
 
     for (size_t layer = 0; layer < TotalLayers(); ++layer) {
-        if (layer > 0 && not (m_lyrPolygons.at(layer) != m_lyrPolygons.at(layer - 1)))
-            m_rtrees.emplace(layer, m_rtrees.at(layer - 1));
-        else {
-            auto & rtree = m_rtrees.emplace(layer, std::make_shared<Rtree>()).first->second;
-            for (auto i : m_lyrPolygons.at(layer)) {
-                auto bbox = generic::geometry::Extent(polygons.at(i));
-                rtree->insert(std::make_pair(bbox, i));
-            }
+        auto & rtree = m_rtrees.emplace(layer, std::make_shared<Rtree>()).first->second;
+        for (auto i : m_lyrPolygons.at(layer)) {
+            auto bbox = generic::geometry::Extent(polygons.at(i));
+            rtree->insert(std::make_pair(bbox, i));
         }
     }
 }
