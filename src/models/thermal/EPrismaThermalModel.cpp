@@ -193,7 +193,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
         }
         const auto & [condMatId, dielMatId] = matIt->second;
         auto iter = layerElevationThicknessMap.find(lyrId);
-        if (iter == layerElevationThicknessMap.cend(lyrId)) {
+        if (iter == layerElevationThicknessMap.cend()) {
             check = retriever.GetLayerHeightThickness(lyrId, elevation, thickness);
             ECAD_ASSERT(check)
             iter = layerElevationThicknessMap.emplace(lyrId, std::make_pair(elevation, thickness)).first;
@@ -216,7 +216,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
             auto lyrId = static_cast<ELayerId>(i);
             auto shape = psInst->GetLayerShape(static_cast<ELayerId>(lyrId));
             auto iter = layerElevationThicknessMap.find(lyrId);
-            if (iter == layerElevationThicknessMap.cend(lyrId)) {
+            if (iter == layerElevationThicknessMap.cend()) {
                 check = retriever.GetLayerHeightThickness(lyrId, elevation, thickness);
                 ECAD_ASSERT(check)
                 iter = layerElevationThicknessMap.emplace(lyrId, std::make_pair(elevation, thickness)).first;
