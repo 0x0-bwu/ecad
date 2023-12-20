@@ -15,30 +15,47 @@ namespace emodel::etherm {
 
 struct ECAD_API ECompactLayout
 {
+    using Height = int;
+    using LayerRange = std::pair<Height, Height>;
+    struct PowerBlock
+    {
+        size_t polygon;
+        Height position;
+        LayerRange range;
+        ESimVal powerDensity;
+        PowerBlock(size_t polygon, Height position, LayerRange range, ESimVal powerDensity);
+    };
+
     std::vector<ENetId> nets;
-    std::vector<ELayerId> layers;
+    std::vector<LayerRange> ranges; 
     std::vector<EMaterialId> materials;
     std::vector<EPolygonData> polygons;
-    std::unordered_map<size_t, ESimVal> powerBlocks;
-    virtual ~ECompactLayout() = default;
+    std::unordered_map<size_t, PowerBlock> powerBlocks;
 
-    void AddShape(ENetId netId, ELayerId layerId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape);
-    size_t AddPolygon(ENetId netId, ELayerId layerId, EMaterialId matId, EPolygonData polygon, bool isHole);
-    void AddPowerBlock(ELayerId layerId, EMaterialId matId, EPolygonData polygon, ESimVal totalP);
+    explicit ECompactLayout(EValue vScale2Int);
+    virtual ~ECompactLayout() = default;
+    void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness);
+    size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, FCoord elevation, FCoord thickness);
+    void AddPowerBlock(EMaterialId matId, EPolygonData polygon, ESimVal totalP, FCoord elevation, FCoord thickness, EValue position = 0.9);
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
     void BuildLayerPolygonLUT();
-    bool hasPolygon(ELayerId layerId) const;
-    const std::vector<size_t> & GetLayerPolygons(ELayerId layerId) const;
-    size_t SearchPolygon(ELayerId layerId, const EPoint2D & pt) const;
+
+    size_t TotalLayers() const;
+    bool hasPolygon(size_t layer) const;
+    size_t SearchPolygon(size_t layer, const EPoint2D & pt) const;
+    bool GetLayerHeightThickness(size_t layer, FCoord & elevation, FCoord & thickness) const;
     const EPolygonData & GetLayoutBoundary() const;
 private:
-    
+    LayerRange GetLayerRange(FCoord elevation, FCoord thickness) const;
 private:
     using RtVal = std::pair<EBox2D, size_t>;
     using Rtree = boost::geometry::index::rtree<RtVal, boost::geometry::index::rstar<8>>;
-    std::unordered_map<ELayerId, std::shared_ptr<Rtree> > m_rtrees;
-    std::unordered_map<ELayerId, std::vector<size_t> > m_lyrPolygons;
+    std::unordered_map<size_t, std::shared_ptr<Rtree> > m_rtrees;
+    std::unordered_map<size_t, std::vector<size_t> > m_lyrPolygons;
+    std::unordered_map<Height, size_t> m_height2Index;
+    std::vector<Height> m_layerOrder;
+    EValue m_vScale2Int;
 };
 
 ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
@@ -61,11 +78,9 @@ public:
 
     struct PrismaLayer
     {
-        ELayerId layerId;
+        size_t id;
         FCoord elevation;
         FCoord thickness;
-        EMaterialId conductingMatId;
-        EMaterialId dielectricMatId;
         std::vector<PrismaElement> elements;
         
         PrismaElement & operator[] (size_t index) { return elements[index]; }

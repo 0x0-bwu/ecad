@@ -43,7 +43,7 @@ void test0()
     compDef->SetMaterial(matCu->GetName());
     compDef->SetHeight(365);
 
-    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(topLayout, "M1", compDef, iLyrTopCu, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , coordUnits.toCoord(0))));
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(topLayout, "M1", compDef, iLyrTopCu, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , coordUnits.toCoord(0))), 400, false);
     assert(comp1);
     comp1->SetLossPower(33.8);
 
@@ -136,8 +136,10 @@ void test1()
     compDef->SetMaterial(matSiC->GetName());
     compDef->SetHeight(365);
 
-    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(15000))));
-    [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(19000) , coordUnits.toCoord(15000))));
+    bool flipped{false};
+    FCoord compHeight = 400;
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(15000))), compHeight, flipped);
+    [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(19000) , coordUnits.toCoord(15000))), compHeight, flipped);
     assert(comp1);
     assert(comp2);
     comp1->SetLossPower(33.8);

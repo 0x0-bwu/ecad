@@ -75,7 +75,7 @@ public:
 
     ///Component
     Ptr<IComponent> CreateComponent(Ptr<ILayoutView> layout, const std::string & name, CPtr<IComponentDef> compDef,
-                                    ELayerId layer, const ETransform2D & transform);
+                                    ELayerId layer, const ETransform2D & transform, FCoord height, bool flipped);
                                     
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);

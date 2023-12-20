@@ -209,9 +209,9 @@ ECAD_INLINE Ptr<ICellInst> ELayoutView::CreateCellInst(const std::string & name,
     return GetCellInstCollection()->CreateCellInst(this, name, defLayout, transform);
 }
 
-ECAD_INLINE Ptr<IComponent> ELayoutView::CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform)
+ECAD_INLINE Ptr<IComponent> ELayoutView::CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, FCoord height, bool flipped)
 {
-    return GetComponentCollection()->CreateComponent(name, compDef, layer, transform);
+    return GetComponentCollection()->CreateComponent(name, compDef, layer, transform, height, flipped);
 }
 
 ECAD_INLINE Ptr<IPrimitive> ELayoutView::CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape)

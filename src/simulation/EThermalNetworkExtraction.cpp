@@ -5,7 +5,9 @@
 #include "models/thermal/EGridThermalModel.h"
 #include "utilities/EMetalFractionMapping.h"
 #include "solvers/EThermalNetworkSolver.h"
+#include "utilities/ELayoutRetriever.h"
 #include "generic/tools/FileSystem.hpp"
+
 
 #include "Mesher2D.h"
 #include "Interface.h"
@@ -208,18 +210,11 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
     //todo wrapper to mesh
 
-    std::vector<CPtr<IStackupLayer> > stackupLayers;
-    layout->GetStackupLayers(stackupLayers);
-    for (auto stackupLayer : stackupLayers) {
+    eutils::ELayoutRetriever retriever(layout);
+    for (size_t layer = 0; layer < compact->TotalLayers(); ++layer) {
         EPrismaThermalModel::PrismaLayer prismaLayer;
-        prismaLayer.layerId = stackupLayer->GetLayerId();
-        prismaLayer.elevation = stackupLayer->GetElevation();
-        prismaLayer.thickness = stackupLayer->GetThickness();
-        auto condMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetConductingMaterial());
-        auto dielMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetDielectricMaterial());
-        ECAD_ASSERT(condMat && dielMat);
-        prismaLayer.conductingMatId = condMat->GetMaterialId();
-        prismaLayer.dielectricMatId = dielMat->GetMaterialId();
+        prismaLayer.id = layer;
+        [[maybe_unused]] auto check = compact->GetLayerHeightThickness(layer, prismaLayer.elevation, prismaLayer.thickness); { ECAD_ASSERT(check) }
         model.AppendLayer(std::move(prismaLayer));
     }
 
@@ -230,41 +225,28 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
             fluidMaterials.emplace(material->GetMaterialId());
     }
 
-    std::unordered_map<ELayerId, std::unordered_map<size_t, size_t> > templateIdMap;//[ELayerId, [tempId, eleId]]
+    std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;//[layer, [tempId, eleId]]
 
     auto buildOnePrismaLayer = [&](size_t index) {
         auto & prismaLayer = model.layers.at(index);   
-        auto & idMap = templateIdMap.emplace(prismaLayer.layerId, std::unordered_map<size_t, size_t>{}).first->second;    
+        auto & idMap = templateIdMap.emplace(prismaLayer.id, std::unordered_map<size_t, size_t>{}).first->second;    
         for (size_t it = 0; it < triangulation.triangles.size(); ++it) {
-            if (compact->hasPolygon(prismaLayer.layerId)) {
-                auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
-                auto pid = compact->SearchPolygon(prismaLayer.layerId, ctPoint);
-                if (pid != invalidIndex) {
-                    if (not fluidMaterials.count(compact->materials.at(pid))) {
-                        auto & ele = prismaLayer.AddElement(it);
-                        idMap.emplace(it, ele.id);
-                        ele.matId = compact->materials.at(pid);
-                        ele.netId = compact->nets.at(pid);
-                        auto iter = compact->powerBlocks.find(pid);
-                        if (iter != compact->powerBlocks.cend()) {
-                            auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
-                            ele.avePower = area * iter->second;
-                        }
-                    }
-                }
-                else if (not fluidMaterials.count(prismaLayer.dielectricMatId)) {
+            ECAD_ASSERT(compact->hasPolygon(prismaLayer.id))
+            auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
+            auto pid = compact->SearchPolygon(prismaLayer.id, ctPoint);
+            if (pid != invalidIndex) {
+                if (not fluidMaterials.count(compact->materials.at(pid))) {
                     auto & ele = prismaLayer.AddElement(it);
                     idMap.emplace(it, ele.id);
-                    ele.matId = prismaLayer.dielectricMatId;
-                    ele.netId = ENetId::noNet;    
+                    ele.matId = compact->materials.at(pid);
+                    ele.netId = compact->nets.at(pid);
+                    auto iter = compact->powerBlocks.find(pid);
+                    if (iter != compact->powerBlocks.cend()) {
+                        auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
+                        ele.avePower = area * iter->second.powerDensity;
+                    }
                 }
             }
-            else if (not fluidMaterials.count(prismaLayer.dielectricMatId)) {
-                auto & ele = prismaLayer.AddElement(it);
-                idMap.emplace(it, ele.id);
-                ele.matId = prismaLayer.dielectricMatId;
-                ele.netId = ENetId::noNet;    
-            }  
         }
         std::cout << "layer " << index << " 's total elements: " << prismaLayer.elements.size() << std::endl; //wbtest
     };
@@ -276,7 +258,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     for (size_t index = 0; index < model.TotalLayers(); ++index) {
         auto & layer = model.layers.at(index);
         auto & elements = layer.elements;
-        const auto & currIdMap = templateIdMap.at(layer.layerId);
+        const auto & currIdMap = templateIdMap.at(layer.id);
         for (auto & ele : elements) {
             //layer neighbors
             const auto & triangle = triangulation.triangles.at(ele.templateId);
@@ -289,7 +271,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
         if (not model.isBotLayer(index)) {
             auto & lowerLayer = model.layers.at(index + 1);
             auto & lowerEles = lowerLayer.elements;
-            const auto & lowerIdMap = templateIdMap.at(lowerLayer.layerId);
+            const auto & lowerIdMap = templateIdMap.at(lowerLayer.id);
             for (auto & ele : elements) {
                 auto iter = lowerIdMap.find(ele.templateId);
                 if (iter != lowerIdMap.cend()) {

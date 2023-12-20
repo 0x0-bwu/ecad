@@ -7,6 +7,7 @@ namespace ecad {
 class ILayer;
 class IComponent;
 class ILayoutView;
+class IStackupLayer;
 namespace eutils {
 class ECAD_API ELayoutRetriever
 {
@@ -14,9 +15,12 @@ public:
     explicit ELayoutRetriever(CPtr<ILayoutView> layout);
     virtual ~ELayoutRetriever() = default;
 
-    bool GetLayerHeight(ELayerId layerId, FCoord & high, FCoord & low) const;
-    bool GetLayerHeight(CPtr<ILayer> layer, FCoord & high, FCoord & low) const;
-    bool GetComponentHeight(CPtr<IComponent> component, FCoord & high, FCoord & low) const;
+    bool GetLayerStackupHeightThickness(FCoord & elevation, FCoord & thickness) const;
+    bool GetLayerHeightThickness(ELayerId layerId, FCoord & elevation, FCoord & thickness) const;
+    bool GetLayerHeightThickness(CPtr<ILayer> layer, FCoord & elevation, FCoord & thickness) const;
+    bool GetComponentHeightThickness(CPtr<IComponent> component, FCoord & elevation, FCoord & thickness) const;
+
+    CPtr<IStackupLayer> SearchStackupLayer(FCoord height) const;
 
 private:
     void BuildLayerHeightsMap() const;

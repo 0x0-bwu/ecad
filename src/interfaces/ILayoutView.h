@@ -83,7 +83,7 @@ public:
     virtual Ptr<ICellInst> CreateCellInst(const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform) = 0;
 
     ///Component
-    virtual Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform) = 0;
+    virtual Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, FCoord height, bool flipped) = 0;
 
     ///Collection
     virtual Ptr<INetCollection> GetNetCollection() const = 0;
