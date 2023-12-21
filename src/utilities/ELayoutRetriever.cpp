@@ -56,18 +56,19 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireHeight(CPtr<IBondwire> bondwire, F
 {
     FCoord elevation, thickness;
     auto getHeight = [&](bool start, FCoord & height) {
-        auto layer = start ? bondwire->GetStartLayer() : bondwire->GetEndLayer();
-        if (ELayerId::ComponentLayer == layer) {
+        auto layerId = start ? bondwire->GetStartLayer() : bondwire->GetEndLayer();
+        if (ELayerId::ComponentLayer == layerId) {
             auto comp = start ? bondwire->GetStartComponent() : bondwire->GetEndComponent(); { ECAD_ASSERT(comp) }
             if (not GetComponentHeightThickness(comp, elevation, thickness)) return false;
             height = comp->isFlipped() ? elevation - thickness : elevation;
             return true;
         }
-        else if (ELayerId::noLayer != layer) {
-            if (not GetLayerHeightThickness(layer->GetLayerId(), elevation, thickness)) return false;
+        else if (ELayerId::noLayer != layerId) {
+            if (not GetLayerHeightThickness(layerId, elevation, thickness)) return false;
             height = elevation;
             return true;
         }
+        auto name = bondwire->GetName();//wbtest
         return false;
     };
     if (not getHeight(true, start)) return false;
@@ -85,10 +86,9 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire,
     pt2ds[0] = bondwire->GetStartPt();
     pt2ds[1] = pt2ds.front();
     pt2ds[3] = bondwire->GetEndPt();
-    auto vet = pt2ds.at(3) - pt2ds.at(0);
-    pt2ds[2] = pt2ds.at(0) + 0.125 * vec.Norm2();
+    pt2ds[2] = pt2ds.at(0) + (pt2ds.at(3) - pt2ds.at(0)) * 0.125;
 
-    if (not GetBondwireHeight(bondwire, heighs.front(), heighs.back())) return false;
+    if (not GetBondwireHeight(bondwire, heights.front(), heights.back())) return false;
     heights[2] = heights[1] = heights[0] + bondwire->GetHeight();
     return true;
 }

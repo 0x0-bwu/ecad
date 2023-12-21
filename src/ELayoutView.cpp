@@ -219,9 +219,9 @@ ECAD_INLINE Ptr<IPrimitive> ELayoutView::CreateGeometry2D(ELayerId layer, ENetId
     return GetPrimitiveCollection()->CreateGeometry2D(layer, net, std::move(shape));
 }
 
-ECAD_INLINE Ptr<IPrimitive> ELayoutView::CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ECAD_INLINE Ptr<IBondwire> ELayoutView::CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
 {
-    return GetPrimitiveCollection()->CreateBondwire(std::move(name), layer, net, std::move(start), std::move(end), radius);
+    return GetPrimitiveCollection()->CreateBondwire(std::move(name), net, std::move(start), std::move(end), radius);
 }
 
 ECAD_INLINE Ptr<IText> ELayoutView::CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text)

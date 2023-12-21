@@ -282,11 +282,12 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
             }
         }
     }
+
     const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
     auto scal2H2Unit = coordUnit.Scale2Unit();
     auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
     std::cout << "scale2Meter:" << scale2Meter << std::endl;
-    model.Build(scal2H2Unit, scale2Meter);
+    model.BuildPrismaModel(scal2H2Unit, scale2Meter);
 
     auto meshFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.vtk";
     io::GenerateVTKFile(meshFile, model);

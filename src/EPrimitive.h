@@ -71,12 +71,17 @@ class ECAD_API EBondwire : public EPrimitive, public IBondwire
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EBondwire();
 public:
-    EBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
+    EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
     virtual ~EBondwire() = default;
 
     ///Copy
     EBondwire(const EBondwire & other);
     EBondwire & operator= (const EBondwire & other);
+
+    const std::string & GetName() const override;
+
+    void SetNet(ENetId net) override;
+    ENetId GetNet() const override;
 
     void SetRadius(FCoord r) override;
     FCoord GetRadius() const override;

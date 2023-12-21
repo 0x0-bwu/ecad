@@ -49,7 +49,7 @@ ECAD_INLINE EPrimitiveCollection & EPrimitiveCollection::operator= (const EPrimi
 
 ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::GetPrimitive(size_t index) const
 {
-    if(index >= Size()) return nullptr;
+    if (index >= Size()) return nullptr;
     return m_collection[index].get();
 }
 
@@ -61,7 +61,7 @@ ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::AddPrimitive(UPtr<IPrimitive> 
 
 ECAD_INLINE bool EPrimitiveCollection::SetPrimitive(UPtr<IPrimitive> primitive, size_t index)
 {
-    if(index >= Size()) return false;
+    if (index >= Size()) return false;
     m_collection[index] = std::move(primitive);
     return true;
 }
@@ -72,10 +72,10 @@ ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::CreateGeometry2D(ELayerId laye
     return AddPrimitive(UPtr<IPrimitive>(primitive));
 }
 
-ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ECAD_INLINE Ptr<IBondwire> EPrimitiveCollection::CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
 {
-    auto primitve = new EBondwire(std::move(name), layer, net, std::move(start), std::move(end), radius);
-    return AddPrimitive(UPtr<IPrimitive>(primitve));
+    auto primitve = new EBondwire(std::move(name), net, std::move(start), std::move(end), radius);
+    return dynamic_cast<Ptr<IBondwire>>(AddPrimitive(UPtr<IPrimitive>(primitve)));
 }
 
 ECAD_INLINE Ptr<IText> EPrimitiveCollection::CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text)
@@ -87,7 +87,7 @@ ECAD_INLINE Ptr<IText> EPrimitiveCollection::CreateText(ELayerId layer, const ET
 ECAD_INLINE void EPrimitiveCollection::Map(CPtr<ILayerMap> lyrMap)
 {
     auto primIter = GetPrimitiveIter();
-    while(auto prim = primIter->Next()){
+    while (auto prim = primIter->Next()){
         prim->SetLayer(lyrMap->GetMappingForward(prim->GetLayer()));
     }
 }
@@ -99,7 +99,7 @@ ECAD_INLINE PrimitiveIter EPrimitiveCollection::GetPrimitiveIter() const
 
 ECAD_INLINE UPtr<IPrimitive> EPrimitiveCollection::PopBack()
 {
-    if(0 == Size()) return nullptr;
+    if (0 == Size()) return nullptr;
     UPtr<IPrimitive> tail = std::move(m_collection.back());
     m_collection.pop_back();
     return tail;

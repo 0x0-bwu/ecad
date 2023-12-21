@@ -144,8 +144,6 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
     eutils::ELayoutRetriever retriever(layout);
     [[maybe_unused]] bool check;
     FCoord elevation, thickness;
-    check = retriever.GetLayerStackupHeightThickness(elevation, thickness);
-    ECAD_ASSERT(check)
     std::vector<CPtr<IStackupLayer> > stackupLayers;
     layout->GetStackupLayers(stackupLayers);
     for (auto stackupLayer : stackupLayers) {
@@ -153,7 +151,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
         check = retriever.GetLayerHeightThickness(stackupLayer->GetLayerId(), elevation, thickness); { ECAD_ASSERT(check) } 
         compact.AddShape(ENetId::noNet, dielMat->GetMaterialId(), EMaterialId::noMaterial, layout->GetBoundary(), elevation, thickness);
     }
-
+    
     auto compIter = layout->GetComponentIter();
     while (auto * comp = compIter->Next()) {
         auto totalP = comp->GetLossPower();
@@ -170,32 +168,40 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
     auto primitives = layout->GetPrimitiveCollection();
     for (size_t i = 0; i < primitives->Size(); ++i) {
         auto prim = primitives->GetPrimitive(i);
-        auto geom = prim->GetGeometry2DFromPrimitive();
-        if (nullptr == geom) continue;
-
-        auto shape = geom->GetShape();
-        auto netId = prim->GetNet();
-        auto lyrId = prim->GetLayer();
-        auto matIt = layerMaterialMap.find(lyrId);
-        if (matIt == layerMaterialMap.cend()) {
-            auto layer = layout->GetLayerCollection()->FindLayerByLayerId(lyrId);
-            if (nullptr == layer) { ECAD_ASSERT(false); continue; }
-            auto stackupLayer = layer->GetStackupLayerFromLayer();
-            ECAD_ASSERT(nullptr != stackupLayer);
-            auto condMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetConductingMaterial());
-            auto dielMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetDielectricMaterial());
-            ECAD_ASSERT(condMat && dielMat);
-            matIt = layerMaterialMap.emplace(lyrId, std::make_pair(condMat->GetMaterialId(), dielMat->GetMaterialId())).first;
+        if (auto bondwire = prim->GetBondwireFromPrimitive(); bondwire) {
+            ECompactLayout::Bondwire bw;
+            [[maybe_unused]] auto check = retriever.GetBondwireSegments(bondwire, bw.pt2ds, bw.heights); { ECAD_ASSERT(check) }
+            auto material = layout->GetDatabase()->FindMaterialDefByName(bondwire->GetMaterial());
+            ECAD_ASSERT(material)
+            bw.matId = material->GetMaterialId();
+            bw.radius = bondwire->GetRadius();
+            bw.netId = bondwire->GetNet();
         }
-        const auto & [condMatId, dielMatId] = matIt->second;
-        auto iter = layerElevationThicknessMap.find(lyrId);
-        if (iter == layerElevationThicknessMap.cend()) {
-            check = retriever.GetLayerHeightThickness(lyrId, elevation, thickness);
-            ECAD_ASSERT(check)
-            iter = layerElevationThicknessMap.emplace(lyrId, std::make_pair(elevation, thickness)).first;
-        }
-        std::tie(elevation, thickness) = iter->second;
-        compact.AddShape(netId, condMatId, dielMatId, shape, elevation, thickness);
+        else if (auto geom = prim->GetGeometry2DFromPrimitive(); geom) {
+            auto shape = geom->GetShape();
+            auto netId = prim->GetNet();
+            auto lyrId = prim->GetLayer();
+            auto matIt = layerMaterialMap.find(lyrId);
+            if (matIt == layerMaterialMap.cend()) {
+                auto layer = layout->GetLayerCollection()->FindLayerByLayerId(lyrId);
+                if (nullptr == layer) { ECAD_ASSERT(false); continue; }
+                auto stackupLayer = layer->GetStackupLayerFromLayer();
+                ECAD_ASSERT(nullptr != stackupLayer);
+                auto condMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetConductingMaterial());
+                auto dielMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetDielectricMaterial());
+                ECAD_ASSERT(condMat && dielMat);
+                matIt = layerMaterialMap.emplace(lyrId, std::make_pair(condMat->GetMaterialId(), dielMat->GetMaterialId())).first;
+            }
+            const auto & [condMatId, dielMatId] = matIt->second;
+            auto iter = layerElevationThicknessMap.find(lyrId);
+            if (iter == layerElevationThicknessMap.cend()) {
+                check = retriever.GetLayerHeightThickness(lyrId, elevation, thickness);
+                ECAD_ASSERT(check)
+                iter = layerElevationThicknessMap.emplace(lyrId, std::make_pair(elevation, thickness)).first;
+            }
+            std::tie(elevation, thickness) = iter->second;
+            compact.AddShape(netId, condMatId, dielMatId, shape, elevation, thickness);
+        }        
     }
     auto psInstIter = layout->GetPadstackInstIter();
     while (auto psInst = psInstIter->Next()){
@@ -230,7 +236,21 @@ ECAD_INLINE EPrismaThermalModel::PrismaLayer & EPrismaThermalModel::AppendLayer(
     return layers.emplace_back(std::move(layer));
 }
 
-void EPrismaThermalModel::Build(EValue scaleH2Unit, EValue scale2Meter)
+ECAD_INLINE EPrismaThermalModel::LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EValue radius, EValue current)
+{
+    ECAD_ASSERT(TotalPrismaElements() > 0 && "should add after build prisma model")
+    LineElement & element = m_lines.emplace_back(LineElement{});
+    element.id = TotalPrismaElements() + m_lines.size() - 1;
+    element.endPoints.front() = AddPoint(std::move(start));
+    element.endPoints.back() = AddPoint(std::move(end));
+    element.current = current;
+    element.radius = radius;
+    element.matId = matId;
+    element.netId = netId;
+    return element;
+}
+
+ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EValue scaleH2Unit, EValue scale2Meter)
 {
     m_scaleH2Unit = scaleH2Unit;
     m_scale2Meter = scale2Meter;
@@ -247,7 +267,7 @@ void EPrismaThermalModel::Build(EValue scaleH2Unit, EValue scale2Meter)
         return iter->second;
     };
     
-    auto total = TotalElements();
+    auto total = TotalPrismaElements();
     m_prismas.resize(total);
     m_points.clear();
     for (size_t i = 0; i < total; ++i) {
@@ -262,14 +282,14 @@ void EPrismaThermalModel::Build(EValue scaleH2Unit, EValue scale2Meter)
         for (size_t v = 0; v < vertices.size(); ++v) {
             auto topVtxIter = topPtIdxMap.find(vertices.at(v));
             if (topVtxIter == topPtIdxMap.cend()) {
-                m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v));
-                topVtxIter = topPtIdxMap.emplace(vertices.at(v), m_points.size() - 1).first;
+                auto ptIdx = AddPoint(GetPoint(lyrIdx, eleIdx, v));
+                topVtxIter = topPtIdxMap.emplace(vertices.at(v), ptIdx).first;
             }
             instance.vertices[v] = topVtxIter->second;
             auto botVtxIter = botPtIdxMap.find(vertices.at(v));
             if (botVtxIter == botPtIdxMap.cend()) {
-                m_points.emplace_back(GetPoint(lyrIdx, eleIdx, v + 3));
-                botVtxIter = botPtIdxMap.emplace(vertices.at(v), m_points.size() - 1).first;
+                auto ptIdx = AddPoint(GetPoint(lyrIdx, eleIdx, v + 3));
+                botVtxIter = botPtIdxMap.emplace(vertices.at(v), ptIdx).first;
             }
             instance.vertices[v + 3] = botVtxIter->second;
         }
@@ -294,6 +314,40 @@ void EPrismaThermalModel::Build(EValue scaleH2Unit, EValue scale2Meter)
     }
 }
 
+ECAD_INLINE void EPrismaThermalModel::AddBondWire(const ECompactLayout::Bondwire & bondwire)
+{
+    const auto & pts = bondwire.pt2ds;
+    ECAD_ASSERT(pts.size() == bondwire.heights.size());
+    for (size_t curr = 0; curr < pts.size() - 1; ++curr) {
+        auto next = curr + 1;
+        auto p1 = FPoint3D(pts.at(curr)[0] * m_scaleH2Unit, pts.at(curr)[1] * m_scaleH2Unit, bondwire.heights.at(curr));
+        auto p2 = FPoint3D(pts.at(next)[0] * m_scaleH2Unit, pts.at(next)[1] * m_scaleH2Unit, bondwire.heights.at(next));
+        auto & line = AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current);
+        //connection
+        if (0 == curr) {
+            auto id = SearchPrismaInstance(bondwire.layer.front(), pts.at(curr));
+            ECAD_ASSERT(id != invalidIndex)
+            line.neighbors.front() = id;
+        }
+        else {
+            auto & prevLine = m_lines.at(m_lines.size() - 2);
+            line.neighbors.front() = prevLine.id;
+            prevLine.neighbors.back() = line.id;
+        }
+        if (next == pts.size() - 1) {
+            auto id = SearchPrismaInstance(bondwire.layer.back(), pts.at(next));
+            ECAD_ASSERT(id != invalidIndex)
+            line.neighbors.back() = id;
+        }
+    }
+}
+
+size_t EPrismaThermalModel::AddPoint(FPoint3D point)
+{
+    m_points.emplace_back(std::move(point));
+    return m_points.size() - 1;
+}
+
 FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const
 {
     const auto & points = prismaTemplate.points;
@@ -306,6 +360,19 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
     vtxIndex = vtxIndex % 3;
     const auto & pt2d = points.at(triangle.vertices.at(vtxIndex));
     return FPoint3D{pt2d[0] * m_scaleH2Unit, pt2d[1] * m_scaleH2Unit, height};
+}
+
+size_t EPrismaThermalModel::SearchPrismaInstance(size_t layer, const EPoint2D & pt) const//todo, eff
+{
+    using namespace generic::geometry;
+    for (size_t i = 0; i < m_prismas.size(); ++i) {
+        const auto & inst = m_prismas.at(i);
+        if (layer != inst.layer->id) continue;
+        auto it = inst.element->templateId;
+        auto loc = tri::TriangulationUtility<EPoint2D>::GetPointTriangleLocation(prismaTemplate, it, pt);
+        if (loc != PointTriangleLocation::Outside) return i;
+    }
+    return invalidIndex;
 }
 
 } //namespace ecad::emodel::etherm

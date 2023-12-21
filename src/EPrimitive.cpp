@@ -237,12 +237,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EBondwire)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EBondwire::EBondwire()
- : EBondwire(std::string{}, noLayer, noNet, EPoint2D{0, 0}, EPoint2D{0, 0}, 0)
+ : EBondwire(std::string{}, noNet, EPoint2D{0, 0}, EPoint2D{0, 0}, 0)
 {
 }
 
-ECAD_INLINE EBondwire::EBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
- : EPrimitive(std::move(name), layer, net), m_start(std::move(start)), m_end(std::move(end)), m_radius(radius)
+ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ : EPrimitive(std::move(name), ELayerId::noLayer, net), m_start(std::move(start)), m_end(std::move(end)), m_radius(radius)
 {
     m_type = EPrimitiveType::Bondwire;
 }
@@ -256,6 +256,7 @@ ECAD_INLINE EBondwire & EBondwire::operator= (const EBondwire & other)
 {
     EPrimitive::operator=(other);
     m_material = other.m_material;
+    m_endLayer = other.m_endLayer;
     m_start = other.m_start;
     m_end = other.m_end;
     m_radius = other.m_radius;
@@ -263,6 +264,21 @@ ECAD_INLINE EBondwire & EBondwire::operator= (const EBondwire & other)
     m_startComponent = other.m_startComponent;
     m_endComponent = other.m_endComponent;
     return *this;
+}
+
+ECAD_INLINE const std::string & EBondwire::GetName() const
+{
+    return EPrimitive::GetName();
+}
+
+ECAD_INLINE void EBondwire::SetNet(ENetId net)
+{
+    return EPrimitive::SetNet(net);
+}
+
+ECAD_INLINE ENetId EBondwire::GetNet() const
+{
+    return EPrimitive::GetNet();
 }
 
 ECAD_INLINE void EBondwire::SetRadius(FCoord r)
@@ -287,6 +303,7 @@ ECAD_INLINE const EPoint2D & EBondwire::GetEndPt() const
 
 ECAD_INLINE void EBondwire::SetStartLayer(ELayerId layerId)
 {
+    m_startComponent = nullptr;
     return EPrimitive::SetLayer(layerId);
 }
 
@@ -297,6 +314,7 @@ ECAD_INLINE ELayerId EBondwire::GetStartLayer() const
 
 ECAD_INLINE void EBondwire::SetEndLayer(ELayerId layerId)
 {
+    m_endComponent = nullptr;
     m_endLayer = layerId;
 }
 
@@ -327,6 +345,7 @@ ECAD_INLINE FCoord EBondwire::GetHeight() const
 
 ECAD_INLINE void EBondwire::SetStartComponent(CPtr<IComponent> comp)
 {
+    m_layer = ELayerId::ComponentLayer;
     m_startComponent = comp;
 }
 
@@ -337,6 +356,7 @@ ECAD_INLINE CPtr<IComponent> EBondwire::GetStartComponent() const
 
 ECAD_INLINE void EBondwire::SetEndComponent(CPtr<IComponent> comp)
 {
+    m_endLayer = ELayerId::ComponentLayer;
     m_endComponent = comp;
 }
 

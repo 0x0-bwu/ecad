@@ -26,8 +26,20 @@ struct ECAD_API ECompactLayout
         PowerBlock(size_t polygon, Height position, LayerRange range, ESimVal powerDensity);
     };
 
+    struct Bondwire
+    {
+        ENetId netId;
+        EValue radius{0};
+        EMaterialId matId;
+        EValue current{0};
+        std::array<size_t, 2> layer;
+        std::vector<FCoord> heights;
+        std::vector<EPoint2D> pt2ds;
+    };
+
     std::vector<ENetId> nets;
     std::vector<LayerRange> ranges; 
+    std::vector<Bondwire> bondwires;
     std::vector<EMaterialId> materials;
     std::vector<EPolygonData> polygons;
     std::unordered_map<size_t, PowerBlock> powerBlocks;
@@ -63,6 +75,17 @@ ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {
 public:
+    struct LineElement
+    {
+        ENetId netId;
+        EMaterialId matId;
+        EValue radius{0};
+        EValue current{0};
+        size_t id{invalidIndex};
+        std::array<size_t, 2> endPoints;
+        std::array<size_t, 2> neighbors;
+    };
+
     using PrismaTemplate = tri::Triangulation<EPoint2D>;
     struct PrismaElement
     {
@@ -110,11 +133,15 @@ public:
     PrismaTemplate prismaTemplate;
     std::vector<PrismaLayer> layers;
     PrismaLayer & AppendLayer(PrismaLayer layer);
+    LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EValue radius, EValue current);
 
-    void Build(EValue scaleH2Unit, EValue scale2Meter);  
+    void BuildPrismaModel(EValue scaleH2Unit, EValue scale2Meter);
+    void AddBondWire(const ECompactLayout::Bondwire & bondwire);
     EValue Scale2Meter() const;  
     size_t TotalLayers() const;
     size_t TotalElements() const;
+    size_t TotalLineElements() const;
+    size_t TotalPrismaElements() const;
     size_t GlobalIndex(size_t lyrIndex, size_t eleIndex) const;
     std::pair<size_t, size_t> LocalIndex(size_t index) const;//[lyrIndex, eleIndex]
 
@@ -124,12 +151,16 @@ public:
     bool NeedIteration() const { return false; } //wbtest,todo
     bool isTopLayer(size_t lyrIndex) const;
     bool isBotLayer(size_t lyrIndex) const;
+    size_t AddPoint(FPoint3D point);
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
+
+    size_t SearchPrismaInstance(size_t layer, const EPoint2D & pt) const;//todo, eff
 
 private:
     EValue m_scaleH2Unit;
     EValue m_scale2Meter;
     std::vector<FPoint3D> m_points;
+    std::vector<LineElement> m_lines;
     std::vector<PrismaInstance> m_prismas;
     std::vector<size_t> m_indexOffset;
 };
@@ -145,6 +176,16 @@ ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalLayers() const
 }
 
 ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalElements() const
+{
+    return TotalLineElements() + TotalPrismaElements();
+}
+
+ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalLineElements() const
+{
+    return m_lines.size();
+}
+
+ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalPrismaElements() const
 {
     return m_indexOffset.back();
 }

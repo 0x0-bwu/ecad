@@ -11,9 +11,10 @@ class IText;
 class EShape;
 class ILayer;
 class EPolygon;
+class IBondwire;
+class ICellInst;
 class IDatabase;
 class ILayerMap;
-class ICellInst;
 class IPrimitive;
 class ETransform2D;
 class IPadstackDef;
@@ -75,7 +76,7 @@ public:
                                                     const ETransform2D & transform) = 0;
     ///Primitive                                          
     virtual Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) = 0;
-    virtual Ptr<IPrimitive> CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius) = 0;
+    virtual Ptr<IBondwire> CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius) = 0;
     ///Text
     virtual Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) = 0;
 
