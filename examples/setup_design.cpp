@@ -223,20 +223,20 @@ void test1()
     drainBW4->SetEndLayer(iLyrWire);
 
     auto gateBW1 = eDataMgr.CreateBondwire(sicLayout, "GateBW1", gateNet->GetNetId(), {3250000, 24000000}, {2450000, 14000000}, bwRadius);
-    gateBW1->SetStartComponent(comp1);
-    gateBW1->SetEndLayer(iLyrWire);
+    gateBW1->SetStartLayer(iLyrWire);
+    gateBW1->SetEndComponent(comp1);
 
     auto gateBW2 = eDataMgr.CreateBondwire(sicLayout, "GateBW2", gateNet->GetNetId(), {5750000, 24000000}, {2450000, 16000000}, bwRadius);
-    gateBW2->SetStartComponent(comp1);
-    gateBW2->SetEndLayer(iLyrWire);
+    gateBW2->SetStartLayer(iLyrWire);
+    gateBW2->SetEndComponent(comp1);
 
     auto gateBW3 = eDataMgr.CreateBondwire(sicLayout, "GateBW3", gateNet->GetNetId(), {19750000, 24000000}, {20000000, 16000000}, bwRadius);
-    gateBW3->SetStartComponent(comp2);
-    gateBW3->SetEndLayer(iLyrWire);
+    gateBW3->SetStartLayer(iLyrWire);
+    gateBW3->SetEndComponent(comp2);
 
     auto gateBW4 = eDataMgr.CreateBondwire(sicLayout, "GateBW4", gateNet->GetNetId(), {22250000, 24000000}, {20000000, 14000000}, bwRadius);
-    gateBW4->SetStartComponent(comp2);
-    gateBW4->SetEndLayer(iLyrWire);
+    gateBW4->SetStartLayer(iLyrWire);
+    gateBW4->SetEndComponent(comp2);
     
     auto primIter = sicLayout->GetPrimitiveIter();
     while (auto * prim = primIter->Next()) {

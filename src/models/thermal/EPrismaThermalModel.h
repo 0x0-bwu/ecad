@@ -146,7 +146,9 @@ public:
     std::pair<size_t, size_t> LocalIndex(size_t index) const;//[lyrIndex, eleIndex]
 
     const std::vector<FPoint3D> GetPoints() const { return m_points; }
-    const PrismaInstance & operator[] (size_t index) const { return m_prismas[index]; }
+    const FPoint3D & GetPoint(size_t index) const { return m_points.at(index); }
+    const PrismaInstance & GetPrisma(size_t index) const { return m_prismas.at(index); }
+    const LineElement & GetLine(size_t index) const { return m_lines.at(index); }
 
     bool NeedIteration() const { return false; } //wbtest,todo
     bool isTopLayer(size_t lyrIndex) const;

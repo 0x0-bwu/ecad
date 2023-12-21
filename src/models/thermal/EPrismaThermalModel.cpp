@@ -83,6 +83,11 @@ ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
         }
     }
 
+    for (auto & bw : bondwires) {
+        bw.layer.front() = m_height2Index.at(bw.heights.front() * m_vScale2Int);
+        bw.layer.back() = m_height2Index.at(bw.heights.back() * m_vScale2Int);
+    }
+
     for (size_t layer = 0; layer < TotalLayers(); ++layer) {
         auto & rtree = m_rtrees.emplace(layer, std::make_shared<Rtree>()).first->second;
         for (auto i : m_lyrPolygons.at(layer)) {
@@ -176,6 +181,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
             bw.matId = material->GetMaterialId();
             bw.radius = bondwire->GetRadius();
             bw.netId = bondwire->GetNet();
+            compact.bondwires.emplace_back(std::move(bw));
         }
         else if (auto geom = prim->GetGeometry2DFromPrimitive(); geom) {
             auto shape = geom->GetShape();

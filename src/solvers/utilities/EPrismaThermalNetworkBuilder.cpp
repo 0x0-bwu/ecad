@@ -23,8 +23,8 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
     ESimVal uniformTopBC, uniformBotBC;
     m_model.GetUniformTopBotBCValue(uniformTopBC, uniformBotBC);
 
-    for (size_t i = 0; i < size; ++i) {
-        const auto & inst = m_model[i];
+    for (size_t i = 0; i < m_model.TotalPrismaElements(); ++i) {
+        const auto & inst = m_model.GetPrisma(i);
         if (auto p = inst.element->avePower; p > 0) {
             summary.iHeatFlow += p;
             network->AddHF(i, p);
@@ -56,8 +56,8 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
                     }
                 }
             }
-            else if (true/*i < nid*/) { //one way
-                const auto & nb = m_model[nid];
+            else if (i < nid) { //one way
+                const auto & nb = m_model.GetPrisma(nid);
                 auto ctNb = GetElementCenterPoint2D(nid);
                 auto vec = ctNb - ct;
                 auto dist = vec.Norm2() * m_model.Scale2Meter();
@@ -92,8 +92,8 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
                 }
             }
         }
-        else if (true/*i < nTop*/) {
-            const auto & nb = m_model[nTop];
+        else if (i < nTop) {
+            const auto & nb = m_model.GetPrisma(nTop);
             auto hNb = GetElementHeight(nTop);
             auto kNb = GetMaterialK(nb.element->matId, iniT.at(nTop));
             auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
@@ -116,7 +116,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
             }
         }
         else if (true/*i < nBot*/) {
-            const auto & nb = m_model[nBot];
+            const auto & nb = m_model.GetPrisma(nBot);
             auto hNb = GetElementHeight(nBot);
             auto kNb = GetMaterialK(nb.element->matId, iniT.at(nBot));
             auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
@@ -129,7 +129,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
 ECAD_INLINE const FPoint3D & EPrismaThermalNetworkBuilder::GetElementVertexPoint(size_t index, size_t iv) const
 {
     const auto & points = m_model.GetPoints();
-    return points.at(m_model[index].vertices.at(iv));
+    return points.at(m_model.GetPrisma(index).vertices.at(iv));
 }
 
 ECAD_INLINE FPoint2D EPrismaThermalNetworkBuilder::GetElementVertexPoint2D(size_t index, size_t iv) const
@@ -175,7 +175,7 @@ ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetElementSideArea(size_t index
 ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetElementTopBotArea(size_t index) const
 {
     const auto & points = m_model.GetPoints();
-    const auto & vs = m_model[index].vertices;
+    const auto & vs = m_model.GetPrisma(index).vertices;
     auto area = generic::geometry::Triangle3D<FCoord>(points.at(vs[0]), points.at(vs[1]), points.at(vs[2])).Area();
     return area * m_model.Scale2Meter() * m_model.Scale2Meter();
 }
@@ -187,7 +187,7 @@ ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetElementVolume(size_t index) 
 
 ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetElementHeight(size_t index) const
 {
-    return m_model[index].layer->thickness * m_model.Scale2Meter();
+    return m_model.GetPrisma(index).layer->thickness * m_model.Scale2Meter();
 }
     
 } // namespace ecad::esolver

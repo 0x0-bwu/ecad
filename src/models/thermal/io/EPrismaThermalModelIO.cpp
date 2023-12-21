@@ -10,7 +10,7 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermal
     }
 
     std::ofstream out(filename.data());
-    if(!out.is_open()){
+    if (not out.is_open()){
         if(err) *err = "Error: fail to open: " + std::string(filename);
         return false;
     }
@@ -28,20 +28,24 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermal
     }
 
     out << ECAD_EOL; 
-    out << "CELLS" << sp << model.TotalElements() << sp << model.TotalElements() * 7 << ECAD_EOL;
-    for (size_t i = 0; i < model.TotalElements(); ++i) {
-        const auto & prisma = model[i];
+    out << "CELLS" << sp << model.TotalElements() << sp << model.TotalPrismaElements() * 7 + model.TotalLineElements() * 3 << ECAD_EOL;
+    for (size_t i = 0; i < model.TotalPrismaElements(); ++i) {
+        const auto & prisma = model.GetPrisma(i);
         out << '6';
         for (auto vertex : prisma.vertices)
             out << sp << vertex;
         out << ECAD_EOL; 
     }
+    for (size_t i = 0; i < model.TotalLineElements(); ++i) {
+        const auto & line = model.GetLine(i);
+        const auto & endPts = line.endPoints;
+        out << '2' << sp << endPts.front() << sp << endPts.back() << ECAD_EOL;
+    }
     out << ECAD_EOL;
 
     out << "CELL_TYPES" << sp << model.TotalElements() << ECAD_EOL;
-    for (size_t i = 0; i < model.TotalElements(); ++i) {
-        out << "13" << ECAD_EOL;
-    }
+    for (size_t i = 0; i < model.TotalPrismaElements(); ++i) out << "13" << ECAD_EOL;
+    for (size_t i = 0; i < model.TotalLineElements(); ++i) out << "3" << ECAD_EOL;
 
     if (temperature && temperature->size() == model.TotalElements()) {
         out << "CELL_DATA" << sp << model.TotalElements() << ECAD_EOL;

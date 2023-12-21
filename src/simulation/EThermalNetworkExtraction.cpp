@@ -289,6 +289,10 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     std::cout << "scale2Meter:" << scale2Meter << std::endl;
     model.BuildPrismaModel(scal2H2Unit, scale2Meter);
 
+    for (const auto & bondwire : compact->bondwires)
+        model.AddBondWire(bondwire);
+    std::cout << "total line elements: " << model.TotalLineElements() << std::endl;
+
     auto meshFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.vtk";
     io::GenerateVTKFile(meshFile, model);
 
