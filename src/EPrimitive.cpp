@@ -214,7 +214,8 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     ar & boost::serialization::make_nvp("end", m_end);
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
-    ar & boost::serialization::make_nvp("connected_component", m_connectedComponent);
+    ar & boost::serialization::make_nvp("start_component", m_startComponent);
+    ar & boost::serialization::make_nvp("end_component", m_endComponent);
 }
 
 template <typename Archive>
@@ -228,7 +229,8 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("end", m_end);
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
-    ar & boost::serialization::make_nvp("connected_component", m_connectedComponent);
+    ar & boost::serialization::make_nvp("start_component", m_startComponent);
+    ar & boost::serialization::make_nvp("end_component", m_endComponent);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EBondwire)
@@ -258,7 +260,8 @@ ECAD_INLINE EBondwire & EBondwire::operator= (const EBondwire & other)
     m_end = other.m_end;
     m_radius = other.m_radius;
     m_height = other.m_height;
-    m_connectedComponent = other.m_connectedComponent;
+    m_startComponent = other.m_startComponent;
+    m_endComponent = other.m_endComponent;
     return *this;
 }
 
@@ -282,6 +285,26 @@ ECAD_INLINE const EPoint2D & EBondwire::GetEndPt() const
     return m_end;
 }
 
+ECAD_INLINE void EBondwire::SetStartLayer(ELayerId layerId)
+{
+    return EPrimitive::SetLayer(layerId);
+}
+
+ECAD_INLINE ELayerId EBondwire::GetStartLayer() const
+{
+    return EPrimitive::GetLayer();
+}
+
+ECAD_INLINE void EBondwire::SetEndLayer(ELayerId layerId)
+{
+    m_endLayer = layerId;
+}
+
+ECAD_INLINE ELayerId EBondwire::GetEndLayer() const
+{
+    return m_endLayer;
+}
+
 ECAD_INLINE void EBondwire::SetMaterial(const std::string & material)
 {
     m_material = material;
@@ -302,14 +325,24 @@ ECAD_INLINE FCoord EBondwire::GetHeight() const
     return m_height;
 }
 
-ECAD_INLINE void EBondwire::SetConnectedComponent(CPtr<IComponent> comp)
+ECAD_INLINE void EBondwire::SetStartComponent(CPtr<IComponent> comp)
 {
-    m_connectedComponent = comp;
+    m_startComponent = comp;
 }
 
-ECAD_INLINE CPtr<IComponent> EBondwire::GetConnectedComponent() const
+ECAD_INLINE CPtr<IComponent> EBondwire::GetStartComponent() const
 {
-    return m_connectedComponent;
+    return m_startComponent;
+}
+
+ECAD_INLINE void EBondwire::SetEndComponent(CPtr<IComponent> comp)
+{
+    m_endComponent = comp;
+}
+
+ECAD_INLINE CPtr<IComponent> EBondwire::GetEndComponent() const
+{
+    return m_endComponent;
 }
 
 ECAD_INLINE void EBondwire::Transform(const ETransform2D & transform)

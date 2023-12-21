@@ -48,12 +48,18 @@ public:
     virtual FCoord GetRadius() const = 0;
     virtual const EPoint2D & GetStartPt() const = 0;
     virtual const EPoint2D & GetEndPt() const = 0;
+    virtual void SetStartLayer(ELayerId layerId) = 0;
+    virtual ELayerId GetStartLayer() const = 0;
+    virtual void SetEndLayer(ELayerId layerId) = 0;
+    virtual ELayerId GetEndLayer() const = 0;
     virtual void SetMaterial(const std::string & material) = 0;
     virtual const std::string & GetMaterial() const = 0;
     virtual void SetHeight(FCoord height) = 0;
     virtual FCoord GetHeight() const = 0;
-    virtual void SetConnectedComponent(CPtr<IComponent> comp) = 0;
-    virtual CPtr<IComponent> GetConnectedComponent() const = 0;
+    virtual void SetStartComponent(CPtr<IComponent> comp) = 0;
+    virtual CPtr<IComponent> GetStartComponent() const = 0;
+    virtual void SetEndComponent(CPtr<IComponent> comp) = 0;
+    virtual CPtr<IComponent> GetEndComponent() const = 0;
     virtual void Transform(const ETransform2D & transform) = 0;
 };
 
