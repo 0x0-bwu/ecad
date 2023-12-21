@@ -37,7 +37,6 @@ protected:
     ECellType m_cellType;
     Ptr<IDatabase> m_database;
     UPtr<ILayoutView> m_layoutView;
-    UPtr<ILayoutView> m_flattenedLayoutView;
 };
 
 class ECAD_API ECircuitCell : public ECell

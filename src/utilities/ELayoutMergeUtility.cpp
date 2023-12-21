@@ -41,19 +41,20 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     //HierarchyObj/Cellinst
     auto cellInstIter = other->GetCellInstIter();
     while (auto * cellInst = cellInstIter->Next()){
-        auto clone = cellInst->Clone();
+        auto clone = cellInst->Clone();//todo, move directly
         clone->SetRefLayoutView(layout);
         clone->AddTransform(transform);
         layout->GetCellInstCollection()->AddCellInst(std::move(clone));
     }
     
     //HierarchyObj/Component
+    std::unordered_map<CPtr<IComponent>, CPtr<IComponent> > compMap;
     auto compIter = other->GetComponentIter();
     while (auto * comp = compIter->Next()) {
         auto clone = comp->Clone();
         clone->SetPlacementLayer(layermap->GetMappingForward(clone->GetPlacementLayer()));
         clone->AddTransform(transform);
-        layout->GetComponentCollection()->AddComponent(std::move(clone));
+        compMap.emplace(comp, layout->GetComponentCollection()->AddComponent(std::move(clone)));
     }
 
     //Connobj/Primitive
@@ -77,6 +78,13 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
             }
             case EPrimitiveType::Bondwire : {
                 clone->GetBondwireFromPrimitive()->Transform(transform);
+                auto bondwire = clone->GetBondwireFromPrimitive();
+                if (bondwire->GetEndLayer() != ELayerId::ComponentLayer)
+                    bondwire->SetEndLayer(layermap->GetMappingForward(bondwire->GetEndLayer()));
+                auto iter = compMap.find(bondwire->GetStartComponent());
+                if (iter != compMap.cend()) bondwire->SetStartComponent(iter->second);
+                iter = compMap.find(bondwire->GetEndComponent());
+                if (iter != compMap.cend()) bondwire->SetEndComponent(iter->second);
                 break;
             }
             case EPrimitiveType::Text : {

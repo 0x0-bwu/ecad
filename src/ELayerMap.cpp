@@ -39,7 +39,8 @@ ECAD_INLINE ELayerMap::ELayerMap(const std::string & name, Ptr<IDatabase> databa
  : EDefinition(name)
  , m_database(database)
 {
-    SetMapping(noLayer, noLayer);
+    SetMapping(ELayerId::noLayer, ELayerId::noLayer);
+    SetMapping(ELayerId::ComponentLayer, ELayerId::ComponentLayer);
 }
 
 ECAD_INLINE ELayerMap::~ELayerMap()

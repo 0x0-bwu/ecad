@@ -62,9 +62,6 @@ ECAD_INLINE ECell & ECell::operator= (const ECell & other)
     m_database = other.m_database;
     m_layoutView = CloneHelper(other.m_layoutView);
     m_layoutView->SetCell(this);
-    m_flattenedLayoutView = CloneHelper(other.m_flattenedLayoutView);
-    if(m_flattenedLayoutView)
-        m_flattenedLayoutView->SetCell(this);
     return *this;
 }
 
@@ -152,11 +149,8 @@ ECAD_INLINE Ptr<ILayoutView> ECircuitCell::GetLayoutView() const
 
 ECAD_INLINE Ptr<ILayoutView> ECircuitCell::GetFlattenedLayoutView()
 {
-    if(nullptr == m_flattenedLayoutView){
-        m_flattenedLayoutView = CloneHelper(m_layoutView);
-        m_flattenedLayoutView->Flatten(EFlattenOption{});
-    }
-    return m_flattenedLayoutView.get();
+    m_layoutView->Flatten(EFlattenOption{});
+    return m_layoutView.get();
 }
 
 }//namesapce ecad
