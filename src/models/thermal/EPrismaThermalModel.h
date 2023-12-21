@@ -83,7 +83,7 @@ public:
         EValue current{0};
         size_t id{invalidIndex};
         std::array<size_t, 2> endPoints;
-        std::array<size_t, 2> neighbors;
+        std::array<size_t, 2> neighbors;//global index
     };
 
     using PrismaTemplate = tri::Triangulation<EPoint2D>;
@@ -142,8 +142,11 @@ public:
     size_t TotalElements() const;
     size_t TotalLineElements() const;
     size_t TotalPrismaElements() const;
+    size_t GlobalIndex(size_t lineIdx) const;
     size_t GlobalIndex(size_t lyrIndex, size_t eleIndex) const;
-    std::pair<size_t, size_t> LocalIndex(size_t index) const;//[lyrIndex, eleIndex]
+    std::pair<size_t, size_t> PrismaLocalIndex(size_t index) const;//[lyrIndex, eleIndex]
+    size_t LineLocalIndex(size_t index) const;
+    bool isPrima(size_t index) const;
 
     const std::vector<FPoint3D> GetPoints() const { return m_points; }
     const FPoint3D & GetPoint(size_t index) const { return m_points.at(index); }
@@ -157,7 +160,6 @@ public:
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
 
     size_t SearchPrismaInstance(size_t layer, const EPoint2D & pt) const;//todo, eff
-
 private:
     EValue m_scaleH2Unit;
     EValue m_scale2Meter;
@@ -192,16 +194,32 @@ ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalPrismaElements() const
     return m_indexOffset.back();
 }
 
+ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::GlobalIndex(size_t lineIdx) const
+{
+    return m_indexOffset.back() + lineIdx;
+}
+
 ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::GlobalIndex(size_t lyrIndex, size_t eleIndex) const
 {
     return m_indexOffset[lyrIndex] + eleIndex;
 }
 
-ECAD_ALWAYS_INLINE std::pair<size_t, size_t> EPrismaThermalModel::LocalIndex(size_t index) const
+ECAD_ALWAYS_INLINE std::pair<size_t, size_t> EPrismaThermalModel::PrismaLocalIndex(size_t index) const
 {
     size_t lyrIdex = 0;
     while (not (m_indexOffset[lyrIdex] <= index && index < m_indexOffset[lyrIdex + 1])) lyrIdex++;
     return std::make_pair(lyrIdex, index - m_indexOffset[lyrIdex]);
+}
+
+ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::LineLocalIndex(size_t index) const
+{
+    ECAD_ASSERT(index >= m_indexOffset.back());
+    return index - m_indexOffset.back();
+}
+
+ECAD_ALWAYS_INLINE bool EPrismaThermalModel::isPrima(size_t index) const
+{
+    return index < m_indexOffset.back();
 }
 
 ECAD_ALWAYS_INLINE bool EPrismaThermalModel::isTopLayer(size_t lyrIndex) const

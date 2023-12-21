@@ -278,7 +278,7 @@ ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EValue scaleH2Unit, EValu
     m_points.clear();
     for (size_t i = 0; i < total; ++i) {
         auto & instance = m_prismas[i];
-        auto [lyrIdx, eleIdx] = LocalIndex(i);
+        auto [lyrIdx, eleIdx] = PrismaLocalIndex(i);
         instance.layer = &layers.at(lyrIdx);
         instance.element = &instance.layer->elements.at(eleIdx);    
         //points
