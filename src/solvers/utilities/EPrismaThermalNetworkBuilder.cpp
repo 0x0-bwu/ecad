@@ -1,5 +1,7 @@
 #include "EPrismaThermalNetworkBuilder.h"
-
+#include "interfaces/IMaterialDefCollection.h"
+#include "interfaces/IMaterialProp.h"
+#include "interfaces/IMaterialDef.h"
 namespace ecad::esolver {
 
 using namespace emodel;
@@ -239,6 +241,35 @@ ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetLineArea(size_t index) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     return generic::math::pi * std::pow(line.radius * m_model.Scale2Meter(), 2);
+}
+
+ECAD_INLINE std::array<ESimVal, 3> EPrismaThermalNetworkBuilder::GetMaterialK(EMaterialId matId, ESimVal refT) const
+{
+    std::array<ESimVal, 3> result;
+    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
+    for (size_t i = 0; i < result.size(); ++i) {
+        [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::ThermalConductivity)->GetAnsiotropicProperty(refT, i, result[i]);
+        ECAD_ASSERT(check)
+    }
+    return result;
+}
+
+ECAD_INLINE ESimVal EPrismaThermalNetworkBuilder::GetMaterialRho(EMaterialId matId, ESimVal refT) const
+{
+    EValue result{0};
+    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
+    [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::MassDensity)->GetSimpleProperty(refT, result);
+    ECAD_ASSERT(check)
+    return result;
+}
+
+ECAD_INLINE ESimVal EPrismaThermalNetworkBuilder::GetMaterialC(EMaterialId matId, ESimVal refT) const
+{
+    EValue result{0};
+    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
+    [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::SpecificHeat)->GetSimpleProperty(refT, result);
+    ECAD_ASSERT(check)
+    return result;
 }
 
 } // namespace ecad::esolver

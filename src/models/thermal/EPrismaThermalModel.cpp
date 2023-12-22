@@ -237,6 +237,16 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
     return std::make_unique<ECompactLayout>(compact);
 }
 
+ECAD_INLINE EPrismaThermalModel::EPrismaThermalModel(CPtr<ILayoutView> layout)
+ : m_layout(layout)
+{
+}
+
+CPtr<IMaterialDefCollection> EPrismaThermalModel::GetMaterialLibrary() const
+{
+    return m_layout->GetDatabase()->GetMaterialDefCollection();
+}
+
 ECAD_INLINE EPrismaThermalModel::PrismaLayer & EPrismaThermalModel::AppendLayer(PrismaLayer layer)
 {
     return layers.emplace_back(std::move(layer));

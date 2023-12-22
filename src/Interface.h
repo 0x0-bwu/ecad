@@ -24,6 +24,7 @@
 #include "interfaces/ILayoutView.h"
 #include "interfaces/IMaterialDef.h"
 #include "interfaces/IMaterialDefCollection.h"
+#include "interfaces/IMaterialProp.h"
 #include "interfaces/INet.h"
 #include "interfaces/INetCollection.h"
 #include "interfaces/IPadstackDef.h"

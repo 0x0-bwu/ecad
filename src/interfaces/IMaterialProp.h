@@ -14,6 +14,9 @@ public:
     virtual bool isPropTable() const = 0;
     virtual Ptr<IMaterialPropValue> GetPropValue() = 0;
     virtual Ptr<IMaterialPropTable> GetPropTable() = 0;
+    virtual bool GetSimpleProperty(EValue index, EValue & value) const = 0;
+    virtual bool GetAnsiotropicProperty(EValue index, size_t row, EValue & value) const = 0;
+    virtual bool GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const = 0;
 };
 
 class ECAD_API IMaterialPropValue

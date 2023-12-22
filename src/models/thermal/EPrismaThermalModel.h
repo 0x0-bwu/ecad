@@ -11,6 +11,7 @@ namespace ecad {
 using namespace generic::geometry::tri;
 class ILayoutView;
 class IMaterialDef;
+class IMaterialDefCollection;
 namespace emodel::etherm {
 
 struct ECAD_API ECompactLayout
@@ -132,6 +133,11 @@ public:
     BCType sideBCType{BCType::HTC};
     PrismaTemplate prismaTemplate;
     std::vector<PrismaLayer> layers;
+    explicit EPrismaThermalModel(CPtr<ILayoutView> layout);
+    virtual ~EPrismaThermalModel() = default;
+
+    CPtr<IMaterialDefCollection> GetMaterialLibrary() const;
+
     PrismaLayer & AppendLayer(PrismaLayer layer);
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EValue radius, EValue current);
 
@@ -163,6 +169,7 @@ public:
 private:
     EValue m_scaleH2Unit;
     EValue m_scale2Meter;
+    CPtr<ILayoutView> m_layout;
     std::vector<FPoint3D> m_points;
     std::vector<LineElement> m_lines;
     std::vector<PrismaInstance> m_prismas;

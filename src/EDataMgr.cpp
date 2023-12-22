@@ -144,23 +144,17 @@ ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(SPtr<IDatabase> da
 
 ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateSimpleMaterialProp(EValue value)
 {
-    auto prop = new EMaterialPropValue;
-    prop->SetSimpleProperty(value);
-    return UPtr<IMaterialProp>(new EMaterialPropValue);
+    return UPtr<IMaterialProp>(new EMaterialPropValue(value));
 }
 
 ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnsiotropicMaterialProp(const std::array<EValue, 3> & values)
 {
-    auto prop = new EMaterialPropValue;
-    prop->SetAnsiotropicProerty(values);
-    return UPtr<IMaterialProp>(prop);
+    return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
 ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::array<EValue, 9> & values)
 {
-    auto prop = new EMaterialPropValue;
-    prop->SetTensorProperty(values);
-    return UPtr<IMaterialProp>(prop);
+    return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
 ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(SPtr<IDatabase> database, const std::string & name)

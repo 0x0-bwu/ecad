@@ -189,7 +189,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
 ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout,  EValue minAlpha, EValue minLen, EValue maxLen, size_t iteration)
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
-    EPrismaThermalModel model;
+    EPrismaThermalModel model(layout);
     auto compact = makeCompactLayout(layout);
     auto compactModelFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "compact.png";
     compact->WriteImgView(compactModelFile, 1024);

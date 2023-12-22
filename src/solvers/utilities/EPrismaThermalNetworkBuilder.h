@@ -48,26 +48,5 @@ private:
 private:
     const EPrismaThermalModel & m_model;
 };
-
-ECAD_ALWAYS_INLINE std::array<ESimVal, 3> EPrismaThermalNetworkBuilder::GetMaterialK(EMaterialId matId, ESimVal refT) const
-{
-    ECAD_UNUSED(matId)
-    ECAD_UNUSED(refT)
-    return {400, 400, 400};//wbtest, todo
-}
-
-ECAD_ALWAYS_INLINE ESimVal EPrismaThermalNetworkBuilder::GetMaterialRho(EMaterialId matId, ESimVal refT) const
-{
-    ECAD_UNUSED(matId)
-    ECAD_UNUSED(refT)
-    return 8850;//wbtest, todo
-}
-
-ECAD_ALWAYS_INLINE ESimVal EPrismaThermalNetworkBuilder::GetMaterialC(EMaterialId matId, ESimVal refT) const
-{
-    ECAD_UNUSED(matId)
-    ECAD_UNUSED(refT)
-    return 380;//wbtest, todo
-}
 } // namespace ecad::esolver
 

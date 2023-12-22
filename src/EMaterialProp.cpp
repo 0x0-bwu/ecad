@@ -67,14 +67,24 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropTable)
 
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EMaterialPropValue::EMaterialPropValue()
+ECAD_INLINE EMaterialPropValue::EMaterialPropValue(const std::array<EValue, 9> & values)
 {
-    m_values.assign(1, 0);
+    m_values.assign(values.begin(), values.end());
+}
+
+ECAD_INLINE EMaterialPropValue::EMaterialPropValue(const std::array<EValue, 3> & values)
+{
+    m_values.assign(values.begin(), values.end());
 }
 
 ECAD_INLINE EMaterialPropValue::EMaterialPropValue(EValue value)
 {
     m_values.assign(1, value);
+}
+
+ECAD_INLINE EMaterialPropValue::EMaterialPropValue()
+{
+    ECAD_ASSERT(false)
 }
 
 ECAD_INLINE Ptr<IMaterialPropValue> EMaterialPropValue::GetPropValue()
@@ -135,12 +145,27 @@ ECAD_INLINE bool EMaterialPropValue::GetTensorProperty(size_t row, size_t col, E
     }
 }
 
+ECAD_INLINE bool EMaterialPropValue::GetSimpleProperty([[maybe_unused]] EValue index, EValue & value) const
+{
+    return GetSimpleProperty(value);
+}
+
+ECAD_INLINE bool EMaterialPropValue::GetAnsiotropicProperty([[maybe_unused]] EValue index, size_t row, EValue & value) const
+{
+    return GetAnsiotropicProperty(row, value);
+}
+
+ECAD_INLINE bool EMaterialPropValue::GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const
+{
+    return GetTensorProperty(index, row, col, value);
+}
+
 ECAD_INLINE void EMaterialPropValue::GetDimensions(size_t & row, size_t & col) const
 {
-    if(m_values.size() == 1) {
+    if (m_values.size() == 1) {
         row = 1; col = 1; return;
     }
-    else if(m_values.size() == 3) {
+    else if (m_values.size() == 3) {
         row = 3; col = 1; return;
     }
     else {

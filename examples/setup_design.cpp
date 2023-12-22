@@ -23,6 +23,9 @@ void test0()
     //database
     auto database = eDataMgr.CreateDatabase("Simple");
     auto matCu = database->CreateMaterialDef("Cu");
+    matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(398));
+    matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(380));
+    matCu->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(8850));
 
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Micrometer);
@@ -89,11 +92,32 @@ void test1()
     auto database = eDataMgr.CreateDatabase("RobGrant");
 
     auto matAl = database->CreateMaterialDef("Al");
+    matAl->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(238));
+    matAl->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(880));
+    matAl->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2700));
+
+
     auto matCu = database->CreateMaterialDef("Cu");
+    matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(398));
+    matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(380));
+    matCu->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(8850));
+
     auto matAir = database->CreateMaterialDef("Air");
     matAir->SetMaterialType(EMaterialType::Fluid);
+    matAir->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(0.026));
+    matAir->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(1.003));
+    matAir->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(1.225));
+
     auto matSiC = database->CreateMaterialDef("SiC");  
-    auto matSi3N4 = database->CreateMaterialDef("Si3N4");  
+    matSiC->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(370));
+    matSiC->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(750));
+    matSiC->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(3210));
+
+    auto matSi3N4 = database->CreateMaterialDef("Si3N4");
+    matSi3N4->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(70));
+    matSi3N4->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(691));
+    matSi3N4->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2400));
+
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Micrometer);
     database->SetCoordUnits(coordUnits);

@@ -10,17 +10,19 @@ class ECAD_API EMaterialProp : public IMaterialProp
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
-    EMaterialProp() = default;
     virtual ~EMaterialProp() = default;
-    virtual Ptr<IMaterialPropValue> GetPropValue() { return nullptr; }
-    virtual Ptr<IMaterialPropTable> GetPropTable() { return nullptr; }
+
+    virtual Ptr<IMaterialPropValue> GetPropValue() override { ECAD_ASSERT(false) return nullptr; }
+    virtual Ptr<IMaterialPropTable> GetPropTable() override { ECAD_ASSERT(false) return nullptr; }
 };
 
 class ECAD_API EMaterialPropValue : public EMaterialProp, public IMaterialPropValue
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-public:
     EMaterialPropValue();
+public:
+    explicit EMaterialPropValue(const std::array<EValue, 9> & values);
+    explicit EMaterialPropValue(const std::array<EValue, 3> & values);
     explicit EMaterialPropValue(EValue value);
     ~EMaterialPropValue() = default;
 
@@ -36,6 +38,10 @@ public:
     bool GetAnsiotropicProperty(size_t row, EValue & value) const override;
     bool GetTensorProperty(size_t row, size_t col, EValue & value) const override;
 
+    bool GetSimpleProperty(EValue index, EValue & value) const override;
+    bool GetAnsiotropicProperty(EValue index, size_t row, EValue & value) const override;
+    bool GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const override;
+
     //1x1-simple, 3x1-anisotropic, 3x3-tensor
     void GetDimensions(size_t & row, size_t & col) const override;
 
@@ -47,7 +53,7 @@ private:
     std::vector<EValue> m_values;
 };
 
-class ECAD_API EMaterialPropTable : public EMaterialProp, public IMaterialPropTable
+class ECAD_API EMaterialPropTable : public EMaterialProp, public IMaterialPropTable //todo refine
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EMaterialPropTable();
@@ -62,6 +68,10 @@ public:
     bool isPropValue() const override { return false; } 
     bool isPropTable() const override { return true;  }
     Ptr<IMaterialPropTable> GetPropTable() override;
+
+    bool GetSimpleProperty(EValue index, EValue & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
+    bool GetAnsiotropicProperty(EValue index, size_t row, EValue & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
+    bool GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
 
 protected:
     ///Copy
