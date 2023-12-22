@@ -25,7 +25,9 @@ public:
 
     CPtr<IStackupLayer> SearchStackupLayer(FCoord height) const;
 
-private:
+private:    
+    bool GetSimpleBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights) const;
+    bool GetJedec4BondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights) const;
     void BuildLayerHeightsMap() const;
 
 private:  

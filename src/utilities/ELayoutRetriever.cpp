@@ -78,11 +78,38 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireHeight(CPtr<IBondwire> bondwire, F
 
 ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights) const
 {
-    //todo, based on bondwire profile
-    
-    //JEDEC4
+    switch (bondwire->GetBondwireType())
+    {
+        case EBondwireType::Simple :
+            return GetSimpleBondwireSegments(bondwire, pt2ds, heights);
+        case EBondwireType::JEDEC4 :
+            return GetJedec4BondwireSegments(bondwire, pt2ds, heights);
+        default:
+            ECAD_ASSERT(false)
+            return false;
+    }
+}
+
+ECAD_INLINE bool ELayoutRetriever::GetSimpleBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights) const
+{
+   //simple
     pt2ds.resize(4);
-    heights.resize(4);
+    heights.resize(4);  
+    pt2ds[0] = bondwire->GetStartPt();
+    pt2ds[3] = bondwire->GetEndPt();
+    pt2ds[1] = pt2ds.at(0) + (pt2ds.at(3) - pt2ds.at(0)) * 0.125;
+    pt2ds[2] = pt2ds.at(0) + (pt2ds.at(3) - pt2ds.at(0)) * 0.875;
+    if (not GetBondwireHeight(bondwire, heights.front(), heights.back())) return false;
+    heights[1] = heights[0] + bondwire->GetHeight();
+    heights[2] = heights[3] + bondwire->GetHeight();
+    return true;  
+}
+
+ECAD_INLINE bool ELayoutRetriever::GetJedec4BondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights) const
+{
+   //JEDEC4
+    pt2ds.resize(4);
+    heights.resize(4);  
     pt2ds[0] = bondwire->GetStartPt();
     pt2ds[1] = pt2ds.front();
     pt2ds[3] = bondwire->GetEndPt();
@@ -90,7 +117,7 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire,
 
     if (not GetBondwireHeight(bondwire, heights.front(), heights.back())) return false;
     heights[2] = heights[1] = heights[0] + bondwire->GetHeight();
-    return true;
+    return true;  
 }
 
 ECAD_INLINE CPtr<IStackupLayer> ELayoutRetriever::SearchStackupLayer(FCoord height) const

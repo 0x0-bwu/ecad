@@ -13,10 +13,6 @@ public:
     explicit EHierarchyObj(std::string name);
     virtual ~EHierarchyObj();
 
-    ///Copy
-    EHierarchyObj(const EHierarchyObj & other);
-    EHierarchyObj & operator= (const EHierarchyObj & other);
-
 protected:
     ///Transform
     virtual ETransform2D & GetTransformImp() override { return m_transform; }

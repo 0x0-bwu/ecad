@@ -55,21 +55,6 @@ ECAD_INLINE EPadstackInst::~EPadstackInst()
 {
 }
 
-ECAD_INLINE EPadstackInst::EPadstackInst(const EPadstackInst & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EPadstackInst & EPadstackInst::operator= (const EPadstackInst & other)
-{
-    m_def = other.m_def;
-    m_layerMap = other.m_layerMap;
-    m_topLyr = other.m_topLyr;
-    m_botLyr = other.m_botLyr;
-    m_transform = other.m_transform;
-    return *this;
-}
-
 ECAD_INLINE void EPadstackInst::SetNet(ENetId net)
 {
     EConnObj::SetNet(net);

@@ -16,10 +16,6 @@ public:
     EComponentDef(const std::string & name);
     virtual ~EComponentDef();
 
-    ///Copy
-    EComponentDef(const EComponentDef & other);
-    EComponentDef & operator= (const EComponentDef & other);
-
     EDefinitionType GetDefinitionType() const override;
 
     const std::string & GetName() const override;

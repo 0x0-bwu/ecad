@@ -46,19 +46,6 @@ ECAD_INLINE ELayer::~ELayer()
 {
 }
 
-ECAD_INLINE ELayer::ELayer(const ELayer & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE ELayer & ELayer::operator= (const ELayer & other)
-{
-    EObject::operator=(other);
-    m_layerId = other.m_layerId;
-    m_layerType = other.m_layerType;
-    return *this;
-}
-
 ECAD_INLINE void ELayer::SetLayerId(ELayerId id)
 {
     m_layerId= id;
@@ -126,21 +113,6 @@ ECAD_INLINE EStackupLayer::EStackupLayer(const std::string & name, ELayerType ty
 
 ECAD_INLINE EStackupLayer::~EStackupLayer()
 {
-}
-
-ECAD_INLINE EStackupLayer::EStackupLayer(const EStackupLayer & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EStackupLayer & EStackupLayer::operator= (const EStackupLayer & other)
-{
-    ELayer::operator=(other);
-    m_elevation = other.m_elevation;
-    m_thickness = other.m_thickness;
-    m_conductingMat = other.m_conductingMat;
-    m_dielectricMat = other.m_dielectricMat;
-    return *this;
 }
 
 ECAD_INLINE std::string EStackupLayer::GetName() const
@@ -240,19 +212,6 @@ ECAD_INLINE EViaLayer::EViaLayer(const std::string & name)
 
 ECAD_INLINE EViaLayer::~EViaLayer()
 {
-}
-
-ECAD_INLINE EViaLayer::EViaLayer(const EViaLayer & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EViaLayer & EViaLayer::operator= (const EViaLayer & other)
-{
-    ELayer::operator=(other);
-    m_upperRefLyr = other.m_upperRefLyr;
-    m_lowerRefLyr = other.m_lowerRefLyr;
-    return *this;
 }
 
 }//namesapce ecad

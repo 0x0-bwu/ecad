@@ -46,17 +46,6 @@ ECAD_INLINE EComponentDefPin::EComponentDefPin(const std::string & name)
 ECAD_INLINE EComponentDefPin::~EComponentDefPin()
 {
 }
-    
-ECAD_INLINE EComponentDefPin::EComponentDefPin(const EComponentDefPin & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EComponentDefPin & EComponentDefPin::operator= (const EComponentDefPin & other)
-{
-    EObject::operator=(other);
-    return *this;
-}
 
 ECAD_INLINE void EComponentDefPin::SetIOType(EPinIOType type)
 {

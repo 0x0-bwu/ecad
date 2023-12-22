@@ -45,10 +45,6 @@ public:
     EPadstackDefData() = default;
     virtual ~EPadstackDefData() = default;
     
-    ///Copy
-    EPadstackDefData(const EPadstackDefData & other);
-    EPadstackDefData & operator= (const EPadstackDefData & other);
-
     std::string GetMaterial() const override;
     void SetMaterial(const std::string & material) override;
 

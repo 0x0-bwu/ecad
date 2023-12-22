@@ -52,21 +52,6 @@ ECAD_INLINE EComponentDef::EComponentDef(const std::string & name)
 ECAD_INLINE EComponentDef::~EComponentDef()
 {
 }
-    
-ECAD_INLINE EComponentDef::EComponentDef(const EComponentDef & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EComponentDef & EComponentDef::operator= (const EComponentDef & other)
-{
-    EDefinition::operator=(other);
-    m_type = other.m_type;
-    m_bondingBox = other.m_bondingBox;
-    m_height = other.m_height;
-    m_material = other.m_material;
-    return *this;
-}
 
 ECAD_INLINE EDefinitionType EComponentDef::GetDefinitionType() const
 {

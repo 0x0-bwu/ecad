@@ -51,22 +51,6 @@ ECAD_INLINE EComponent::~EComponent()
 {
 }
 
-ECAD_INLINE EComponent::EComponent(const EComponent & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EComponent & EComponent::operator= (const EComponent & other)
-{
-    EHierarchyObj::operator=(other);
-    m_compDef = other.m_compDef;
-    m_placement = other.m_placement;
-    m_lossPower = other.m_lossPower;
-    m_flipped = other.m_flipped;
-    m_height = other.m_height;
-    return *this;
-}
-
 ECAD_INLINE CPtr<IComponentDef> EComponent::GetComponentDef() const
 {
     return m_compDef;

@@ -65,6 +65,9 @@ public:
     virtual void SetMaterial(const std::string & material) = 0;
     virtual const std::string & GetMaterial() const = 0;
 
+    virtual void SetBondwireType(EBondwireType type) = 0;
+    virtual EBondwireType GetBondwireType() const = 0;
+
     virtual void SetHeight(FCoord height) = 0;
     virtual FCoord GetHeight() const = 0;
 

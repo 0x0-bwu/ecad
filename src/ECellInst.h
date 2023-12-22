@@ -14,10 +14,6 @@ public:
     ECellInst(std::string name, CPtr<ILayoutView> refLayout, CPtr<ILayoutView> defLayout);
     virtual ~ECellInst();
 
-    ///Copy
-    ECellInst(const ECellInst & other);
-    ECellInst & operator= (const ECellInst & other);
-
     void SetRefLayoutView(CPtr<ILayoutView> refLayout) override;
     CPtr<ILayoutView> GetRefLayoutView() const override;
 

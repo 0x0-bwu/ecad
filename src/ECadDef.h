@@ -140,6 +140,14 @@ enum class EPrimitiveType
     Text
 };
 
+enum class EBondwireType
+{
+    Invalid = -1,
+    Simple = 0,
+    JEDEC4,
+    // JEDEC5
+};
+
 ECAD_ALWAYS_INLINE std::string toString(EPrimitiveType type)
 {
     switch(type)

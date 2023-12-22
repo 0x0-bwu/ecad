@@ -216,6 +216,7 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     ar & boost::serialization::make_nvp("height", m_height);
     ar & boost::serialization::make_nvp("start_component", m_startComponent);
     ar & boost::serialization::make_nvp("end_component", m_endComponent);
+    ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
 
 template <typename Archive>
@@ -231,6 +232,7 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("height", m_height);
     ar & boost::serialization::make_nvp("start_component", m_startComponent);
     ar & boost::serialization::make_nvp("end_component", m_endComponent);
+    ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EBondwire)
@@ -245,25 +247,6 @@ ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, EPoint2D start, E
  : EPrimitive(std::move(name), ELayerId::noLayer, net), m_start(std::move(start)), m_end(std::move(end)), m_radius(radius)
 {
     m_type = EPrimitiveType::Bondwire;
-}
-
-ECAD_INLINE EBondwire::EBondwire(const EBondwire & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EBondwire & EBondwire::operator= (const EBondwire & other)
-{
-    EPrimitive::operator=(other);
-    m_material = other.m_material;
-    m_endLayer = other.m_endLayer;
-    m_start = other.m_start;
-    m_end = other.m_end;
-    m_radius = other.m_radius;
-    m_height = other.m_height;
-    m_startComponent = other.m_startComponent;
-    m_endComponent = other.m_endComponent;
-    return *this;
 }
 
 ECAD_INLINE const std::string & EBondwire::GetName() const
@@ -331,6 +314,16 @@ ECAD_INLINE void EBondwire::SetMaterial(const std::string & material)
 ECAD_INLINE const std::string & EBondwire::GetMaterial() const
 {
     return m_material;
+}
+
+ECAD_INLINE void EBondwire::SetBondwireType(EBondwireType type)
+{
+    m_bondwireType = type;
+}
+
+ECAD_INLINE EBondwireType EBondwire::GetBondwireType() const
+{
+    return m_bondwireType;
 }
 
 ECAD_INLINE void EBondwire::SetHeight(FCoord height)
@@ -426,19 +419,6 @@ ECAD_INLINE EText::EText(std::string text)
 
 ECAD_INLINE EText::~EText()
 {
-}
-
-ECAD_INLINE EText::EText(const EText & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EText & EText::operator= (const EText & other)
-{
-    EPrimitive::operator=(other);
-    m_text = other.m_text;
-    m_transform = other.m_transform;
-    return *this;
 }
 
 ECAD_INLINE const std::string & EText::GetText() const

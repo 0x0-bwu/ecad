@@ -14,10 +14,6 @@ public:
     explicit ELayer(std::string name, ELayerId id = noLayer);
     virtual ~ELayer();
 
-    ///Copy
-    ELayer(const ELayer & other);
-    ELayer & operator= (const ELayer & other);
-
     virtual std::string GetName() const;
     virtual void SetLayerId(ELayerId id);
     virtual ELayerId GetLayerId() const;
@@ -43,10 +39,6 @@ class ECAD_API EStackupLayer : public ELayer, public IStackupLayer
 public:
     EStackupLayer(const std::string & name, ELayerType type);
     virtual ~EStackupLayer();
-
-    ///Copy
-    EStackupLayer(const EStackupLayer & other);
-    EStackupLayer & operator= (const EStackupLayer & other);
 
     std::string GetName() const override;
     void SetLayerId(ELayerId id) override;
@@ -82,10 +74,7 @@ class ECAD_API EViaLayer : public ELayer, public IViaLayer
 public:
     explicit EViaLayer(const std::string & name);
     virtual ~EViaLayer();
-
-    ///Copy
-    EViaLayer(const EViaLayer & other);
-    EViaLayer & operator= (const EViaLayer & other);
+    
 protected:
     ///Copy
     virtual Ptr<ELayer> CloneImp() const override { return new EViaLayer(*this); }

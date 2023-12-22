@@ -96,7 +96,6 @@ void test1()
     matAl->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(880));
     matAl->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2700));
 
-
     auto matCu = database->CreateMaterialDef("Cu");
     matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(398));
     matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(380));
@@ -206,17 +205,20 @@ void test1()
     auto rec7 = eDataMgr.CreateShapeRectangle(EPoint2D(21500000, 20500000), EPoint2D(23000000, 26000000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec7));
 
-    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), {3000000, 7500000}, {4450000, 16000000}, bwRadius);
-    sourceBW1->SetStartLayer(iLyrWire);
-    sourceBW1->SetEndComponent(comp1);
+    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), {4450000, 16000000}, {3000000, 7500000}, bwRadius);
+    sourceBW1->SetBondwireType(EBondwireType::JEDEC4);
+    sourceBW1->SetStartComponent(comp1);
+    sourceBW1->SetEndLayer(iLyrWire);
     
-    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), {3000000, 5000000}, {4450000, 15000000}, bwRadius);
-    sourceBW2->SetStartLayer(iLyrWire);
-    sourceBW2->SetEndComponent(comp1);
+    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), {4450000, 15000000}, {3000000, 5000000}, bwRadius);
+    sourceBW2->SetBondwireType(EBondwireType::JEDEC4);
+    sourceBW2->SetStartComponent(comp1);
+    sourceBW2->SetEndLayer(iLyrWire);
     
-    auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), {3000000, 2500000}, {4450000, 14000000}, bwRadius);
-    sourceBW3->SetStartLayer(iLyrWire);
-    sourceBW3->SetEndComponent(comp1);
+    auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), {4450000, 14000000}, {3000000, 2500000}, bwRadius);
+    sourceBW3->SetBondwireType(EBondwireType::JEDEC4);
+    sourceBW3->SetStartComponent(comp1);
+    sourceBW3->SetEndLayer(iLyrWire);
 
     auto sourceBW4 = eDataMgr.CreateBondwire(sicLayout, "SourceBW4", sourceNet->GetNetId(), {4450000, 16000000}, {18000000, 16000000}, bwRadius);
     sourceBW4->SetStartComponent(comp1);
@@ -246,21 +248,25 @@ void test1()
     drainBW4->SetStartLayer(iLyrWire);
     drainBW4->SetEndLayer(iLyrWire);
 
-    auto gateBW1 = eDataMgr.CreateBondwire(sicLayout, "GateBW1", gateNet->GetNetId(), {3250000, 24000000}, {2450000, 14000000}, bwRadius);
-    gateBW1->SetStartLayer(iLyrWire);
-    gateBW1->SetEndComponent(comp1);
+    auto gateBW1 = eDataMgr.CreateBondwire(sicLayout, "GateBW1", gateNet->GetNetId(), {2450000, 14000000}, {3250000, 24000000}, bwRadius);
+    gateBW1->SetBondwireType(EBondwireType::JEDEC4); 
+    gateBW1->SetStartComponent(comp1);
+    gateBW1->SetEndLayer(iLyrWire);
 
-    auto gateBW2 = eDataMgr.CreateBondwire(sicLayout, "GateBW2", gateNet->GetNetId(), {5750000, 24000000}, {2450000, 16000000}, bwRadius);
-    gateBW2->SetStartLayer(iLyrWire);
-    gateBW2->SetEndComponent(comp1);
+    auto gateBW2 = eDataMgr.CreateBondwire(sicLayout, "GateBW2", gateNet->GetNetId(), {2450000, 16000000}, {5750000, 24000000}, bwRadius);
+    gateBW2->SetBondwireType(EBondwireType::JEDEC4);
+    gateBW2->SetStartComponent(comp1);
+    gateBW2->SetEndLayer(iLyrWire);
 
-    auto gateBW3 = eDataMgr.CreateBondwire(sicLayout, "GateBW3", gateNet->GetNetId(), {19750000, 24000000}, {20000000, 16000000}, bwRadius);
-    gateBW3->SetStartLayer(iLyrWire);
-    gateBW3->SetEndComponent(comp2);
+    auto gateBW3 = eDataMgr.CreateBondwire(sicLayout, "GateBW3", gateNet->GetNetId(), {20000000, 16000000}, {19750000, 24000000}, bwRadius);
+    gateBW3->SetBondwireType(EBondwireType::JEDEC4);
+    gateBW3->SetStartComponent(comp2);
+    gateBW3->SetEndLayer(iLyrWire);
 
-    auto gateBW4 = eDataMgr.CreateBondwire(sicLayout, "GateBW4", gateNet->GetNetId(), {22250000, 24000000}, {20000000, 14000000}, bwRadius);
-    gateBW4->SetStartLayer(iLyrWire);
-    gateBW4->SetEndComponent(comp2);
+    auto gateBW4 = eDataMgr.CreateBondwire(sicLayout, "GateBW4", gateNet->GetNetId(), {20000000, 14000000}, {22250000, 24000000}, bwRadius);
+    gateBW4->SetBondwireType(EBondwireType::JEDEC4);
+    gateBW4->SetStartComponent(comp2);
+    gateBW4->SetEndLayer(iLyrWire);
     
     auto primIter = sicLayout->GetPrimitiveIter();
     while (auto * prim = primIter->Next()) {

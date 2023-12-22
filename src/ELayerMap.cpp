@@ -46,19 +46,6 @@ ECAD_INLINE ELayerMap::ELayerMap(const std::string & name, Ptr<IDatabase> databa
 ECAD_INLINE ELayerMap::~ELayerMap()
 {
 }
-    
-ECAD_INLINE ELayerMap::ELayerMap(const ELayerMap & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE ELayerMap & ELayerMap::operator= (const ELayerMap & other)
-{
-    EDefinition::operator=(other);
-    m_layerIdMap = other.m_layerIdMap;
-    m_database = other.m_database;
-    return *this;
-}
 
 ECAD_INLINE Ptr<IDatabase> ELayerMap::GetDatabase() const
 {

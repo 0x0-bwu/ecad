@@ -50,20 +50,6 @@ ECAD_INLINE ECellInst::~ECellInst()
 
 }
 
-ECAD_INLINE ECellInst::ECellInst(const ECellInst & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE ECellInst & ECellInst::operator= (const ECellInst & other)
-{
-    EHierarchyObj::operator=(other);
-    m_refLayout = other.m_refLayout;
-    m_defLayout = other.m_defLayout;
-    m_layerMap = other.m_layerMap;
-    return *this;
-}
-
 ECAD_INLINE void ECellInst::SetRefLayoutView(CPtr<ILayoutView> refLayout)
 {
     m_refLayout = refLayout;

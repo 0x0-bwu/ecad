@@ -101,19 +101,6 @@ ECAD_INLINE EPad & EPad::operator= (const EPad & other)
     return *this;
 }
 
-ECAD_INLINE EPadstackDefData::EPadstackDefData(const EPadstackDefData & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EPadstackDefData & EPadstackDefData::operator= (const EPadstackDefData & other)
-{
-    m_material = other.m_material;
-    m_pads = other.m_pads;
-    m_via = other.m_via;
-    return *this;
-}
-
 ECAD_INLINE std::string EPadstackDefData::GetMaterial() const
 {
     return m_material;

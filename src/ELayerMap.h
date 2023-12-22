@@ -13,10 +13,6 @@ public:
     ELayerMap(const std::string & name, Ptr<IDatabase> database);
     virtual ~ELayerMap();
 
-    ///Copy
-    ELayerMap(const ELayerMap & other);
-    ELayerMap & operator= (const ELayerMap & other);
-
     Ptr<IDatabase> GetDatabase() const override;
 
     EDefinitionType GetDefinitionType() const override;

@@ -12,10 +12,6 @@ public:
     explicit EDefinition(std::string name);
     virtual ~EDefinition();
 
-    ///Copy
-    EDefinition(const EDefinition & other);
-    EDefinition & operator= (const EDefinition & other);
-
     virtual EDefinitionType GetDefinitionType() const override;
     void Print(std::ostream & os) const;
     const std::string & GetName() const override;

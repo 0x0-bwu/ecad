@@ -43,18 +43,6 @@ ECAD_INLINE EHierarchyObj::~EHierarchyObj()
 {
 }
 
-ECAD_INLINE EHierarchyObj::EHierarchyObj(const EHierarchyObj & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EHierarchyObj & EHierarchyObj::operator= (const EHierarchyObj & other)
-{
-    EObject::operator=(other);
-    m_transform = other.m_transform;
-    return *this;
-}
-
 ECAD_INLINE void EHierarchyObj::PrintImp(std::ostream & os) const
 {
     os << "TRANSFORM: " << m_transform.GetTransform() << ECAD_EOL;

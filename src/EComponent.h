@@ -12,10 +12,6 @@ public:
     EComponent(std::string name, CPtr<IComponentDef> compDef);
     virtual ~EComponent();
 
-    ///Copy
-    EComponent(const EComponent & other);
-    EComponent & operator= (const EComponent & other);
-
     CPtr<IComponentDef> GetComponentDef() const override;
 
     void SetPlacementLayer(ELayerId layer) override;

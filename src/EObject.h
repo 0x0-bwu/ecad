@@ -20,14 +20,6 @@ public:
     explicit EObject(std::string name);
     virtual ~EObject();
 
-    ///Copy
-    EObject(const EObject & other);
-    EObject & operator= (const EObject & other);
-
-    ///Move
-    EObject(EObject && other);
-    EObject & operator= (EObject && other);
-
     bool operator== (const EObject & other) const;
     bool operator!= (const EObject & other) const;
 

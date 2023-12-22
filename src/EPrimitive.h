@@ -74,10 +74,6 @@ public:
     EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
     virtual ~EBondwire() = default;
 
-    ///Copy
-    EBondwire(const EBondwire & other);
-    EBondwire & operator= (const EBondwire & other);
-
     const std::string & GetName() const override;
 
     void SetNet(ENetId net) override;
@@ -98,8 +94,11 @@ public:
     void SetMaterial(const std::string & material) override;
     const std::string & GetMaterial() const override;
 
-    void SetHeight(FCoord height) override; // todo, remove to bondwire profile
-    FCoord GetHeight() const override; // todo, remove to bondwire profile
+    void SetBondwireType(EBondwireType type) override;
+    EBondwireType GetBondwireType() const override;
+
+    void SetHeight(FCoord height) override;
+    FCoord GetHeight() const override;
 
     void SetStartComponent(CPtr<IComponent> comp) override;
     CPtr<IComponent> GetStartComponent() const override;
@@ -122,6 +121,7 @@ protected:
     FCoord m_height{0};
     CPtr<IComponent> m_startComponent{nullptr};
     CPtr<IComponent> m_endComponent{nullptr};
+    EBondwireType m_bondwireType{EBondwireType::Simple};
 };
 
 class ECAD_API EText : public EPrimitive, public IText
@@ -132,10 +132,6 @@ public:
     EText(std::string text, ELayerId layer, ENetId net = noNet);
     explicit EText(std::string text);
     virtual ~EText();
-
-    ///Copy
-    EText(const EText & other);
-    EText & operator= (const EText & other);
 
     const std::string & GetText() const override;
     EPoint2D GetPosition() const override;

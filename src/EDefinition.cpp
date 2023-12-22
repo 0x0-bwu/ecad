@@ -39,17 +39,6 @@ ECAD_INLINE EDefinition::~EDefinition()
 {
 }
 
-///Copy
-ECAD_INLINE EDefinition::EDefinition(const EDefinition & other)
-{
-    *this = other;
-}
-ECAD_INLINE EDefinition & EDefinition::operator= (const EDefinition & other)
-{
-    EObject::operator=(other);
-    return *this;
-}
-
 ECAD_INLINE EDefinitionType EDefinition::GetDefinitionType() const
 {
     ECAD_ASSERT(false)

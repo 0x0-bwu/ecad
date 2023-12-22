@@ -12,10 +12,6 @@ public:
     EComponentDefPin(const std::string & name);
     virtual ~EComponentDefPin();
 
-    ///Copy
-    EComponentDefPin(const EComponentDefPin & other);
-    EComponentDefPin & operator= (const EComponentDefPin & other);
-
     const std::string & GetName() const override;
 
     void SetIOType(EPinIOType type) override;
