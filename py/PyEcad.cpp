@@ -590,6 +590,10 @@ namespace {
             .def(vector_indexing_suite<std::vector<Ptr<ILayer> > >())
         ;
 
+        class_<std::vector<Ptr<IStackupLayer> > >("EStackupLayerContainer")
+            .def(vector_indexing_suite<std::vector<Ptr<IStackupLayer> > >())
+        ;
+
         //Layer Iterator
         class_<IIterator<ILayer>, boost::noncopyable>("ILayerIter", no_init)
         ;

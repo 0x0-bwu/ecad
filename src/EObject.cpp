@@ -44,6 +44,28 @@ ECAD_INLINE EObject::~EObject()
 {
 }
 
+ECAD_INLINE EObject::EObject(const EObject & other)
+{
+    *this = other;
+}
+
+ECAD_INLINE EObject & EObject::operator= (const EObject & other)
+{
+    m_name = other.m_name;
+    return *this;
+}
+
+ECAD_INLINE EObject::EObject(EObject && other)
+ : m_uuid(std::move(other.m_uuid))
+{
+}
+
+ECAD_INLINE EObject & EObject::operator= (EObject && other)
+{
+    m_uuid = std::move(other.m_uuid);
+    return *this;
+}
+
 ECAD_INLINE bool EObject::operator== (const EObject & other) const
 {
     return m_uuid == other.m_uuid;
