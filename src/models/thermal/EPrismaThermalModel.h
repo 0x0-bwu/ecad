@@ -9,15 +9,22 @@
 namespace ecad {
 
 using namespace generic::geometry::tri;
+class IComponent;
 class ILayoutView;
 class IMaterialDef;
 class IMaterialDefCollection;
+
+namespace eutils {
+class ELayoutRetriever;
+} // namespace eutils
+
 namespace emodel::etherm {
 
 struct ECAD_API ECompactLayout
 {
     using Height = int;
     using LayerRange = std::pair<Height, Height>;
+    static bool isValid(const LayerRange & range) { return range.first > range.second; }
     struct PowerBlock
     {
         size_t polygon;
@@ -45,11 +52,12 @@ struct ECAD_API ECompactLayout
     std::vector<EPolygonData> polygons;
     std::unordered_map<size_t, PowerBlock> powerBlocks;
 
-    explicit ECompactLayout(EValue vScale2Int);
+    explicit ECompactLayout(CPtr<ILayoutView> layout, EValue vScale2Int);
     virtual ~ECompactLayout() = default;
     void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness);
     size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, FCoord elevation, FCoord thickness);
-    void AddPowerBlock(EMaterialId matId, EPolygonData polygon, ESimVal totalP, FCoord elevation, FCoord thickness, EValue position = 0.9);
+    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, ESimVal totalP, FCoord elevation, FCoord thickness, EValue position = 0.9);
+    void AddComponent(CPtr<IComponent> component);    
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
     void BuildLayerPolygonLUT();
@@ -69,6 +77,9 @@ private:
     std::unordered_map<Height, size_t> m_height2Index;
     std::vector<Height> m_layerOrder;
     EValue m_vScale2Int;
+
+    CPtr<ILayoutView> m_layout;
+    std::unique_ptr<eutils::ELayoutRetriever> m_retriever;
 };
 
 ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);

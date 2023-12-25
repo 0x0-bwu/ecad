@@ -32,6 +32,12 @@ public:
     void SetHeight(FCoord height) override;
     FCoord GetHeight() const override;
 
+    void SetSolderBallBumpHeight(FCoord height) override;
+    FCoord GetSolderBallBumpHeight() const override;
+
+    void SetSolderFillingMaterial(const std::string & name) override;
+    const std::string & GetSolderFillingMaterial() const override;
+
     Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) override;
 
 protected:
@@ -43,7 +49,9 @@ protected:
     EComponentType m_type = EComponentType::Invalid;
     EBox2D m_bondingBox;
     FCoord m_height = 0;
+    FCoord m_solderHeight = 0;
     std::string m_material;
+    std::string m_solderFillingMaterial;
 };
 
 ECAD_ALWAYS_INLINE const std::string & EComponentDef::GetName() const

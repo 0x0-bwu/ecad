@@ -41,14 +41,22 @@ ECAD_INLINE bool ELayoutRetriever::GetComponentHeightThickness(CPtr<IComponent> 
     if (m_lyrHeightsMap.empty()) BuildLayerHeightsMap();
     auto iter = m_lyrHeightsMap.find(component->GetPlacementLayer());
     if (iter == m_lyrHeightsMap.cend()) return false;
-    if (component->isFlipped()) {
-        thickness = component->GetHeight();
+    thickness = component->GetComponentDef()->GetHeight();
+    if (component->isFlipped())
+        elevation = iter->second.first - iter->second.second - component->GetComponentDef()->GetSolderBallBumpHeight();
+    else elevation = iter->second.first + component->GetComponentDef()->GetSolderBallBumpHeight() + thickness;
+    return true;
+}
+
+ECAD_INLINE bool ELayoutRetriever::GetComponentBallBumpThickness(CPtr<IComponent> component, FCoord & elevation, FCoord & thickness) const
+{
+    if (m_lyrHeightsMap.empty()) BuildLayerHeightsMap();
+    auto iter = m_lyrHeightsMap.find(component->GetPlacementLayer());
+    if (iter == m_lyrHeightsMap.cend()) return false;
+    thickness = component->GetComponentDef()->GetSolderBallBumpHeight();
+    if (component->isFlipped())
         elevation = iter->second.first - iter->second.second;
-    }
-    else {
-        thickness = component->GetHeight();
-        elevation = iter->second.first + thickness;
-    }
+    else elevation = iter->second.first + component->GetComponentDef()->GetSolderBallBumpHeight();
     return true;
 }
 

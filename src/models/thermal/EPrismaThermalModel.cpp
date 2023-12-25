@@ -13,7 +13,11 @@ ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, Height positi
 {
 }
 
-ECAD_INLINE ECompactLayout::ECompactLayout(EValue vScale2Int) : m_vScale2Int(vScale2Int) {}
+ECAD_INLINE ECompactLayout::ECompactLayout(CPtr<ILayoutView> layout, EValue vScale2Int)
+ : m_vScale2Int(vScale2Int), m_layout(layout)
+{
+    m_retriever = std::make_unique<eutils::ELayoutRetriever>(m_layout);
+}
 
 ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness)
 {
@@ -28,20 +32,42 @@ ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EM
 
 ECAD_INLINE size_t ECompactLayout::AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, FCoord elevation, FCoord thickness)
 {
+    auto layerRange = GetLayerRange(elevation, thickness);
+    if (not isValid(layerRange)) return invalidIndex;
     if (isHole == polygon.isCCW()) polygon.Reverse();
-    ranges.emplace_back(GetLayerRange(elevation, thickness));
+    ranges.emplace_back(std::move(layerRange));
     polygons.emplace_back(std::move(polygon));
     materials.emplace_back(matId);
     nets.emplace_back(netId);
     return polygons.size() - 1;
 };
 
-ECAD_INLINE void ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, ESimVal totalP, FCoord elevation, FCoord thickness, EValue position)
+ECAD_INLINE void ECompactLayout::AddComponent(CPtr<IComponent> component)
+{
+    FCoord elevation, thickness;
+    auto totalP = component->GetLossPower();
+    auto boundary = toPolygon(component->GetBoundingBox());
+    auto material = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetMaterial()); { ECAD_ASSERT(material) }
+    auto check = m_retriever->GetComponentHeightThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
+
+    if (totalP > 0)
+        AddPowerBlock(material->GetMaterialId(), boundary, totalP, elevation, thickness);
+    else AddPolygon(ENetId::noNet, material->GetMaterialId(), boundary, false, elevation, thickness);
+
+    check = m_retriever->GetComponentBallBumpThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
+    auto solderMat = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetSolderFillingMaterial()); { ECAD_ASSERT(solderMat) }
+    AddPolygon(ENetId::noNet, solderMat->GetMaterialId(), boundary, false, elevation, thickness);
+    //todo solder ball/bump
+}
+
+ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, ESimVal totalP, FCoord elevation, FCoord thickness, EValue position)
 {
     auto area = polygon.Area();
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
+    if (invalidIndex == index) return false;
     Height height = (elevation - thickness * position) * m_vScale2Int;
     powerBlocks.emplace(index, PowerBlock(index, height, GetLayerRange(elevation, thickness), totalP / area));
+    return true;
 }
 
 ECAD_INLINE bool ECompactLayout::WriteImgView(std::string_view filename, size_t width) const
@@ -143,7 +169,7 @@ ECAD_INLINE ECompactLayout::LayerRange ECompactLayout::GetLayerRange(FCoord elev
 
 ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
 {
-    ECompactLayout compact(1e6);//todo, scale
+    auto compact = std::make_unique<ECompactLayout>(layout, 1e6);
     //todo, reserve size   
 
     eutils::ELayoutRetriever retriever(layout);
@@ -154,18 +180,12 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
     for (auto stackupLayer : stackupLayers) {
         auto dielMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetDielectricMaterial()); { ECAD_ASSERT(dielMat) }
         check = retriever.GetLayerHeightThickness(stackupLayer->GetLayerId(), elevation, thickness); { ECAD_ASSERT(check) } 
-        compact.AddShape(ENetId::noNet, dielMat->GetMaterialId(), EMaterialId::noMaterial, layout->GetBoundary(), elevation, thickness);
+        compact->AddShape(ENetId::noNet, dielMat->GetMaterialId(), EMaterialId::noMaterial, layout->GetBoundary(), elevation, thickness);
     }
     
     auto compIter = layout->GetComponentIter();
     while (auto * comp = compIter->Next()) {
-        auto totalP = comp->GetLossPower();
-        if (math::LE<ESimVal>(totalP, 0)) continue;
-        auto material = layout->GetDatabase()->FindMaterialDefByName(comp->GetComponentDef()->GetMaterial());
-        ECAD_ASSERT(material)
-        check = retriever.GetComponentHeightThickness(comp, elevation, thickness);
-        ECAD_ASSERT(check)
-        compact.AddPowerBlock(material->GetMaterialId(), toPolygon(comp->GetBoundingBox()), totalP, elevation, thickness);    
+        compact->AddComponent(comp);
     }
 
     std::unordered_map<ELayerId, std::pair<FCoord, FCoord> > layerElevationThicknessMap;
@@ -181,7 +201,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
             bw.matId = material->GetMaterialId();
             bw.radius = bondwire->GetRadius();
             bw.netId = bondwire->GetNet();
-            compact.bondwires.emplace_back(std::move(bw));
+            compact->bondwires.emplace_back(std::move(bw));
         }
         else if (auto geom = prim->GetGeometry2DFromPrimitive(); geom) {
             auto shape = geom->GetShape();
@@ -206,7 +226,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
                 iter = layerElevationThicknessMap.emplace(lyrId, std::make_pair(elevation, thickness)).first;
             }
             std::tie(elevation, thickness) = iter->second;
-            compact.AddShape(netId, condMatId, dielMatId, shape, elevation, thickness);
+            compact->AddShape(netId, condMatId, dielMatId, shape, elevation, thickness);
         }        
     }
     auto psInstIter = layout->GetPadstackInstIter();
@@ -230,11 +250,11 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
                 iter = layerElevationThicknessMap.emplace(lyrId, std::make_pair(elevation, thickness)).first;
             }
             std::tie(elevation, thickness) = iter->second;
-            compact.AddShape(netId, material->GetMaterialId(), material->GetMaterialId(), shape.get(), elevation, thickness);
+            compact->AddShape(netId, material->GetMaterialId(), material->GetMaterialId(), shape.get(), elevation, thickness);
         }
     }
-    compact.BuildLayerPolygonLUT();
-    return std::make_unique<ECompactLayout>(compact);
+    compact->BuildLayerPolygonLUT();
+    return compact;
 }
 
 ECAD_INLINE EPrismaThermalModel::EPrismaThermalModel(CPtr<ILayoutView> layout)

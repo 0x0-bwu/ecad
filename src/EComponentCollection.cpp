@@ -57,13 +57,11 @@ ECAD_INLINE Ptr<IComponent> EComponentCollection::AddComponent(UPtr<IComponent> 
     return nullptr;
 }
 
-
-ECAD_INLINE Ptr<IComponent> EComponentCollection::CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, FCoord height, bool flipped)
+ECAD_INLINE Ptr<IComponent> EComponentCollection::CreateComponent(const std::string & name, CPtr<ILayoutView> refLayout, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped)
 {
-    auto component = new EComponent(name, compDef);
+    auto component = new EComponent(name, refLayout, compDef);
     component->SetPlacementLayer(layer);
     component->SetTransform(transform);
-    component->SetHeight(height);
     component->SetFlipped(flipped);
     if (Insert(name, UPtr<IComponent>(component)))
         return At(name).get();

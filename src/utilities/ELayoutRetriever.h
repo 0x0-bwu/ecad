@@ -20,6 +20,7 @@ public:
     bool GetLayerHeightThickness(ELayerId layerId, FCoord & elevation, FCoord & thickness) const;
     bool GetLayerHeightThickness(CPtr<ILayer> layer, FCoord & elevation, FCoord & thickness) const;
     bool GetComponentHeightThickness(CPtr<IComponent> component, FCoord & elevation, FCoord & thickness) const;
+    bool GetComponentBallBumpThickness(CPtr<IComponent> component, FCoord & elevation, FCoord & thickness) const;
     bool GetBondwireHeight(CPtr<IBondwire> bondwire, FCoord & start, FCoord & end) const;
     bool GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights) const;
 

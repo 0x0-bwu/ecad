@@ -2,7 +2,7 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EHierarchyObj)
 
 #include "generic/math/MathIO.hpp"
-#include "interfaces/ILayer.h"
+#include "interfaces/ILayoutView.h"
 
 namespace ecad {
 
@@ -14,6 +14,7 @@ ECAD_INLINE void EHierarchyObj::save(Archive & ar, const unsigned int version) c
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EHierarchyObj, IHierarchyObj>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
+    ar & boost::serialization::make_nvp("ref_layout", m_refLayout);
     ar & boost::serialization::make_nvp("transform", m_transform);
 }
 
@@ -23,6 +24,7 @@ ECAD_INLINE void EHierarchyObj::load(Archive & ar, const unsigned int version)
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EHierarchyObj, IHierarchyObj>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
+    ar & boost::serialization::make_nvp("ref_layout", m_refLayout);
     ar & boost::serialization::make_nvp("transform", m_transform);
 }
 
@@ -30,17 +32,27 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EHierarchyObj)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EHierarchyObj::EHierarchyObj()
- : EHierarchyObj(std::string{})
+ : EHierarchyObj(std::string{}, nullptr)
 {
 }
 
-ECAD_INLINE EHierarchyObj::EHierarchyObj(std::string name)
- : EObject(name)
+ECAD_INLINE EHierarchyObj::EHierarchyObj(std::string name, CPtr<ILayoutView> refLayout)
+ : EObject(name), m_refLayout(refLayout)
 {
 }
 
 ECAD_INLINE EHierarchyObj::~EHierarchyObj()
 {
+}
+
+ECAD_INLINE void EHierarchyObj::SetRefLayoutView(CPtr<ILayoutView> refLayout)
+{
+    m_refLayout = refLayout;
+}
+
+ECAD_INLINE CPtr<ILayoutView> EHierarchyObj::GetRefLayoutView() const
+{
+    return m_refLayout;
 }
 
 ECAD_INLINE void EHierarchyObj::PrintImp(std::ostream & os) const

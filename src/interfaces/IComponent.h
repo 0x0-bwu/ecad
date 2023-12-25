@@ -4,6 +4,7 @@
 #include "ECadDef.h"
 #include <string>
 namespace ecad {
+class ILayoutView;
 class IComponentDef;
 class ECAD_API IComponent : public Clonable<IComponent>, public Printable
 {
@@ -13,6 +14,8 @@ public:
     virtual const std::string & GetName() const = 0;
 
     virtual CPtr<IComponentDef> GetComponentDef() const = 0;
+
+    virtual CPtr<ILayoutView> GetRefLayoutView() const = 0;
 
     virtual void SetPlacementLayer(ELayerId layer) = 0;
     virtual ELayerId GetPlacementLayer() const = 0;
@@ -29,7 +32,6 @@ public:
     virtual void SetFlipped(bool flipped) = 0;
     virtual bool isFlipped() const = 0;
 
-    virtual void SetHeight(FCoord height) = 0;
     virtual FCoord GetHeight() const = 0;
 
 };

@@ -5,13 +5,17 @@
 #include "ECadDef.h"
 namespace ecad {
 
+class ILayoutView;
 class ECAD_API EHierarchyObj : public EObject, public IHierarchyObj
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-public:
     EHierarchyObj();
-    explicit EHierarchyObj(std::string name);
+public:
+    explicit EHierarchyObj(std::string name, CPtr<ILayoutView> refLayout);
     virtual ~EHierarchyObj();
+
+    void SetRefLayoutView(CPtr<ILayoutView> refLayout);
+    CPtr<ILayoutView> GetRefLayoutView() const;
 
 protected:
     ///Transform
@@ -20,6 +24,7 @@ protected:
     virtual void PrintImp(std::ostream & os) const override;
 
 protected:
+    CPtr<ILayoutView> m_refLayout;
     ETransform2D m_transform;
 };
 

@@ -45,8 +45,9 @@ void test0()
     compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
     compDef->SetMaterial(matCu->GetName());
     compDef->SetHeight(365);
+    compDef->SetSolderFillingMaterial(matCu->GetName());
 
-    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(topLayout, "M1", compDef, iLyrTopCu, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , coordUnits.toCoord(0))), 400, false);
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(topLayout, "M1", compDef, iLyrTopCu, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , coordUnits.toCoord(0))), false);
     assert(comp1);
     comp1->SetLossPower(33.8);
 
@@ -117,6 +118,11 @@ void test1()
     matSi3N4->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(691));
     matSi3N4->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2400));
 
+    auto matSolder = database->CreateMaterialDef("Sn-3.5Ag");
+    matSolder->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(33));
+    matSolder->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(200));
+    matSolder->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(7360));
+
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Micrometer);
     database->SetCoordUnits(coordUnits);
@@ -155,14 +161,15 @@ void test1()
     //component
     auto compDef = eDataMgr.CreateComponentDef(database, "CPMF-1200-S080B Z-FET");
     assert(compDef);
+    compDef->SetSolderBallBumpHeight(100);
+    compDef->SetSolderFillingMaterial(matSolder->GetName());
     compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
     compDef->SetMaterial(matSiC->GetName());
     compDef->SetHeight(365);
 
     bool flipped{false};
-    FCoord compHeight = 400;
-    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(15000))), compHeight, flipped);
-    [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(19000) , coordUnits.toCoord(15000))), compHeight, flipped);
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(15000))), flipped);
+    [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(19000) , coordUnits.toCoord(15000))), flipped);
     assert(comp1);
     assert(comp2);
     comp1->SetLossPower(33.8);

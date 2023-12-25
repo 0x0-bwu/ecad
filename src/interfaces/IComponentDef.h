@@ -26,6 +26,12 @@ public:
     virtual void SetHeight(FCoord height) = 0;
     virtual FCoord GetHeight() const = 0;
 
+    virtual void SetSolderBallBumpHeight(FCoord height) = 0;
+    virtual FCoord GetSolderBallBumpHeight() const = 0;
+
+    virtual void SetSolderFillingMaterial(const std::string & name) = 0;
+    virtual const std::string & GetSolderFillingMaterial() const = 0;
+
     virtual Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) = 0;
 
 };

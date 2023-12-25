@@ -18,7 +18,6 @@ ECAD_INLINE void EComponent::save(Archive & ar, const unsigned int version) cons
     ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("loss_power", m_lossPower);
     ar & boost::serialization::make_nvp("flipped", m_flipped);
-    ar & boost::serialization::make_nvp("height", m_height);
 }
 
 template <typename Archive>
@@ -31,19 +30,18 @@ ECAD_INLINE void EComponent::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("loss_power", m_lossPower);
     ar & boost::serialization::make_nvp("flipped", m_flipped);
-    ar & boost::serialization::make_nvp("height", m_height);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponent)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EComponent::EComponent()
- : EComponent(std::string{}, nullptr)
+ : EComponent(std::string{}, nullptr, nullptr)
 {
 }
 
-ECAD_INLINE EComponent::EComponent(std::string name, CPtr<IComponentDef> compDef)
- : EHierarchyObj(std::move(name)), m_compDef(compDef)
+ECAD_INLINE EComponent::EComponent(std::string name, CPtr<ILayoutView> refLayout, CPtr<IComponentDef> compDef)
+ : EHierarchyObj(std::move(name), refLayout), m_compDef(compDef)
 {
 }
 
@@ -54,6 +52,11 @@ ECAD_INLINE EComponent::~EComponent()
 ECAD_INLINE CPtr<IComponentDef> EComponent::GetComponentDef() const
 {
     return m_compDef;
+}
+
+ECAD_INLINE CPtr<ILayoutView> EComponent::GetRefLayoutView() const
+{
+    return EHierarchyObj::GetRefLayoutView();
 }
 
 ECAD_INLINE void EComponent::SetPlacementLayer(ELayerId layer)
@@ -108,14 +111,9 @@ ECAD_INLINE bool EComponent::isFlipped() const
     return m_flipped;
 }
 
-ECAD_INLINE void EComponent::SetHeight(FCoord height)
-{
-    m_height = height;
-}
-
 ECAD_INLINE FCoord EComponent::GetHeight() const
 {
-    return m_height;
+    return m_compDef->GetHeight();
 }
 
 ECAD_INLINE void EComponent::PrintImp(std::ostream & os) const
@@ -124,7 +122,6 @@ ECAD_INLINE void EComponent::PrintImp(std::ostream & os) const
     os << "PLACEMENT: " << m_placement << ECAD_EOL;
     os << "LOSS POWER: " << m_lossPower << 'W' << ECAD_EOL;
     os << "FLIPPED: " << std::boolalpha << m_flipped << ECAD_EOL;
-    os << "HEIGHT: " << m_height << ECAD_EOL;
     EHierarchyObj::PrintImp(os);
 }
 

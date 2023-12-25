@@ -14,7 +14,6 @@ ECAD_INLINE void ECellInst::save(Archive & ar, const unsigned int version) const
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ECellInst, ICellInst>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EHierarchyObj);
-    ar & boost::serialization::make_nvp("ref_layout", m_refLayout);
     ar & boost::serialization::make_nvp("def_layout", m_defLayout);
     ar & boost::serialization::make_nvp("layer_map", m_layerMap);
 }
@@ -25,7 +24,6 @@ ECAD_INLINE void ECellInst::load(Archive & ar, const unsigned int version)
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ECellInst, ICellInst>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EHierarchyObj);
-    ar & boost::serialization::make_nvp("ref_layout", m_refLayout);
     ar & boost::serialization::make_nvp("def_layout", m_defLayout);
     ar & boost::serialization::make_nvp("layer_map", m_layerMap);
 }
@@ -39,8 +37,7 @@ ECAD_INLINE ECellInst::ECellInst()
 }
 
 ECAD_INLINE ECellInst::ECellInst(std::string name, CPtr<ILayoutView> refLayout, CPtr<ILayoutView> defLayout)
- : EHierarchyObj(std::move(name))
- , m_refLayout(refLayout)
+ : EHierarchyObj(std::move(name), refLayout)
  , m_defLayout(defLayout)
 {
 }
@@ -52,12 +49,12 @@ ECAD_INLINE ECellInst::~ECellInst()
 
 ECAD_INLINE void ECellInst::SetRefLayoutView(CPtr<ILayoutView> refLayout)
 {
-    m_refLayout = refLayout;
+    EHierarchyObj::SetRefLayoutView(refLayout);
 }
 
 ECAD_INLINE CPtr<ILayoutView> ECellInst::GetRefLayoutView() const
 {
-    return m_refLayout;
+    return EHierarchyObj::GetRefLayoutView();
 }
 
 ECAD_INLINE void ECellInst::SetDefLayoutView(CPtr<ILayoutView> defLayout)

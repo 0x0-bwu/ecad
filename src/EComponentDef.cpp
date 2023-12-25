@@ -18,7 +18,9 @@ ECAD_INLINE void EComponentDef::save(Archive & ar, const unsigned int version) c
     ar & boost::serialization::make_nvp("type", m_type);
     ar & boost::serialization::make_nvp("bounding_box", m_bondingBox);
     ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("solder_height", m_solderHeight);
     ar & boost::serialization::make_nvp("material", m_material);
+    ar & boost::serialization::make_nvp("solder_filling_material", m_solderFillingMaterial);
 }
 
 template <typename Archive>
@@ -31,7 +33,9 @@ ECAD_INLINE void EComponentDef::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("type", m_type);
     ar & boost::serialization::make_nvp("bounding_box", m_bondingBox);
     ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("solder_height", m_solderHeight);
     ar & boost::serialization::make_nvp("material", m_material);
+    ar & boost::serialization::make_nvp("solder_filling_material", m_solderFillingMaterial);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDef)
@@ -96,6 +100,26 @@ ECAD_INLINE void EComponentDef::SetHeight(FCoord height)
 ECAD_INLINE FCoord EComponentDef::GetHeight() const
 {
     return m_height;
+}
+
+ECAD_INLINE void EComponentDef::SetSolderBallBumpHeight(FCoord height)
+{
+    m_solderHeight = height;
+}
+
+ECAD_INLINE FCoord EComponentDef::GetSolderBallBumpHeight() const
+{
+    return m_solderHeight;
+}
+
+ECAD_INLINE void EComponentDef::SetSolderFillingMaterial(const std::string & name)
+{
+    m_solderFillingMaterial = name;
+}
+
+ECAD_INLINE const std::string & EComponentDef::GetSolderFillingMaterial() const
+{
+    return m_solderFillingMaterial;
 }
 
 ECAD_INLINE Ptr<IComponentDefPin> EComponentDef::CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)

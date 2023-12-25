@@ -3,16 +3,17 @@
 #include "EHierarchyObj.h"
 namespace ecad {
 
-class IComponentDef;
 class ECAD_API EComponent : public EHierarchyObj, public IComponent
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EComponent();
 public:
-    EComponent(std::string name, CPtr<IComponentDef> compDef);
+    EComponent(std::string name, CPtr<ILayoutView> refLayout, CPtr<IComponentDef> compDef);
     virtual ~EComponent();
 
     CPtr<IComponentDef> GetComponentDef() const override;
+    
+    CPtr<ILayoutView> GetRefLayoutView() const override;
 
     void SetPlacementLayer(ELayerId layer) override;
     ELayerId GetPlacementLayer() const override;
@@ -29,7 +30,6 @@ public:
     void SetFlipped(bool flipped) override;
     bool isFlipped() const override;
 
-    void SetHeight(FCoord height) override;
     FCoord GetHeight() const override;
 
     const std::string & GetName() const override;
@@ -42,7 +42,6 @@ protected:
     ELayerId m_placement{ELayerId::noLayer};
     ESimVal m_lossPower{0};
     bool m_flipped{false};
-    FCoord m_height{0};
 };
 
 ECAD_ALWAYS_INLINE const std::string & EComponent::GetName() const

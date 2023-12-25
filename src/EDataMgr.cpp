@@ -203,10 +203,10 @@ ECAD_INLINE Ptr<ICellInst> EDataMgr::CreateCellInst(Ptr<ILayoutView> layout, con
 }
 
 ECAD_INLINE Ptr<IComponent> EDataMgr::CreateComponent(Ptr<ILayoutView> layout, const std::string & name,
-                                                     CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, FCoord height, bool flipped)
+                                                     CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped)
 {
     if (nullptr == layout) return nullptr;
-    return layout->CreateComponent(name, compDef, layer, transform, height, flipped);
+    return layout->CreateComponent(name, compDef, layer, transform, flipped);
 }
 
 ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape)
