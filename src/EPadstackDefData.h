@@ -38,6 +38,23 @@ public:
     UPtr<EShape> shape = nullptr;
 };
 
+class ECAD_API EBump
+{
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+public:
+    EBump()= default;
+    virtual ~EBump() = default;
+
+    ///Copy
+    EBump(const EBump & other);
+    EBump & operator= (const EBump & other);
+
+    FCoord height = 0;
+    UPtr<EShape> shape = nullptr;  
+    std::string material;
+};
+
+using EBall = EBump;
 class ECAD_API EPadstackDefData : public IPadstackDefData
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
@@ -56,6 +73,12 @@ public:
     void SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) override;
     void GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const override;
     
+    // void SetTopSolderBumpParameters(UPtr<EShape> shape, FCoord height, const std::string & material) override;
+    // bool GetTopSolderBumpParameters(CPtr<EShape> & shape, FCoord & height, std::string & material) const override;
+
+    // void SetBotSolderBallParameters(UPtr<EShape> shape, FCoord height, const std::string & material) override;
+    // bool GetBotSolderBallParameters(CPtr<EShape> & shape, FCoord & height, std::string & material) const override;
+    
 protected:
     ELayerId GetPadLayerId(const std::string & layer) const;
 
@@ -65,11 +88,13 @@ protected:
 
 protected:
     std::string m_material = sDefaultConductingMat;
+    std::pair<EBump, EBall> m_solderBumpBall;
     std::vector<EPad> m_pads;
     EVia m_via;
 };
 
 }//namespace ecad
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPadstackDefData)
+ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EBump)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EPad)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EVia)

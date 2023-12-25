@@ -52,11 +52,32 @@ ECAD_INLINE void EPad::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPad)
 
 template <typename Archive>
+ECAD_INLINE void EBump::save(Archive & ar, const unsigned int version) const
+{
+    ECAD_UNUSED(version)
+    ar & boost::serialization::make_nvp("height", height);
+    ar & boost::serialization::make_nvp("shape", shape);
+    ar & boost::serialization::make_nvp("material", material);
+}
+
+template <typename Archive>
+ECAD_INLINE void EBump::load(Archive & ar, const unsigned int version)
+{
+    ECAD_UNUSED(version)
+    ar & boost::serialization::make_nvp("height", height);
+    ar & boost::serialization::make_nvp("shape", shape);
+    ar & boost::serialization::make_nvp("material", material);
+}
+
+ECAD_SERIALIZATION_FUNCTIONS_IMP(EBump)
+
+template <typename Archive>
 ECAD_INLINE void EPadstackDefData::save(Archive & ar, const unsigned int version) const
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPadstackDefData, IPadstackDefData>();
     ar & boost::serialization::make_nvp("material", m_material);
+    ar & boost::serialization::make_nvp("bump_ball", m_solderBumpBall);
     ar & boost::serialization::make_nvp("pads", m_pads);
     ar & boost::serialization::make_nvp("via", m_via);
 }
@@ -67,6 +88,7 @@ ECAD_INLINE void EPadstackDefData::load(Archive & ar, const unsigned int version
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPadstackDefData, IPadstackDefData>();
     ar & boost::serialization::make_nvp("material", m_material);
+    ar & boost::serialization::make_nvp("bump_ball", m_solderBumpBall);
     ar & boost::serialization::make_nvp("pads", m_pads);
     ar & boost::serialization::make_nvp("via", m_via);
 }
@@ -98,6 +120,19 @@ ECAD_INLINE EPad & EPad::operator= (const EPad & other)
     rotation = other.rotation;
     offset = other.offset;
     shape = CloneHelper(other.shape);
+    return *this;
+}
+
+ECAD_INLINE EBump::EBump(const EBump & other)
+{
+    *this = other;
+}
+
+ECAD_INLINE EBump & EBump::operator= (const EBump & other)
+{
+    height = other.height;
+    shape = CloneHelper(other.shape);
+    material = other.material;
     return *this;
 }
 
@@ -164,6 +199,7 @@ ECAD_INLINE void EPadstackDefData::GetViaParameters(CPtr<EShape> & shape, EPoint
     offset = m_via.offset;
     rotation = m_via.rotation;
 }
+
 
 ECAD_INLINE ELayerId EPadstackDefData::GetPadLayerId(const std::string & layer) const
 {
