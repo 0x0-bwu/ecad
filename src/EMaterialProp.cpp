@@ -155,9 +155,9 @@ ECAD_INLINE bool EMaterialPropValue::GetAnsiotropicProperty([[maybe_unused]] EVa
     return GetAnsiotropicProperty(row, value);
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const
+ECAD_INLINE bool EMaterialPropValue::GetTensorProperty([[maybe_unused]] EValue index, size_t row, size_t col, EValue & value) const
 {
-    return GetTensorProperty(index, row, col, value);
+    return GetTensorProperty(row, col, value);
 }
 
 ECAD_INLINE void EMaterialPropValue::GetDimensions(size_t & row, size_t & col) const
