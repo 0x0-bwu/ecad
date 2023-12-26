@@ -83,6 +83,7 @@ public:
 
     ///Shape
     UPtr<EShape> CreateShapeRectangle(EPoint2D ll, EPoint2D ur);
+    UPtr<EShape> CreateShapeCircle(EPoint2D loc, ECoord radius);
     UPtr<EShape> CreateShapePath(std::vector<EPoint2D> points, ECoord width);
     UPtr<EShape> CreateShapePolygon(std::vector<EPoint2D> points);
     UPtr<EShape> CreateShapePolygon(Polygon2D<ECoord> polygon);
@@ -98,6 +99,8 @@ public:
     ///Settings
     size_t DefaultThreads() const;
     void SetDefaultThreads(size_t threads);
+
+    size_t DefaultCircleDiv() const;
 
     static EDataMgr & Instance();
 

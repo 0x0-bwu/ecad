@@ -85,11 +85,11 @@ public:
     const EPoint2D & GetStartPt() const override;
     const EPoint2D & GetEndPt() const override;
 
-    void SetStartLayer(ELayerId layerId) override;
-    ELayerId GetStartLayer() const override;
+    void SetStartLayer(ELayerId layerId, bool flipped) override;
+    ELayerId GetStartLayer(Ptr<bool> flipped) const override;
 
-    void SetEndLayer(ELayerId layerId) override;
-    ELayerId GetEndLayer() const override;
+    void SetEndLayer(ELayerId layerId, bool flipped) override;
+    ELayerId GetEndLayer(Ptr<bool> flipped) const override;
 
     void SetMaterial(const std::string & material) override;
     const std::string & GetMaterial() const override;
@@ -106,6 +106,9 @@ public:
     void SetEndComponent(CPtr<IComponent> comp) override;
     CPtr<IComponent> GetEndComponent() const override;
 
+    void SetSolderJoints(CPtr<IPadstackDef> s) override;
+    CPtr<IPadstackDef> GetSolderJoints() const override;
+
     void Transform(const ETransform2D & transform) override;
 
 protected:
@@ -115,12 +118,12 @@ protected:
 protected:
     std::string m_material;
     ELayerId m_endLayer{ELayerId::noLayer};
-    EPoint2D m_start;
-    EPoint2D m_end;
+    std::array<CPtr<IComponent>, 2> m_mountComp{nullptr, nullptr};
+    std::array<EPoint2D, 2> m_location;
+    std::array<bool, 2> m_flipped{false, false};
     FCoord m_radius{0};
     FCoord m_height{0};
-    CPtr<IComponent> m_startComponent{nullptr};
-    CPtr<IComponent> m_endComponent{nullptr};
+    CPtr<IPadstackDef> m_solderJoints{nullptr};
     EBondwireType m_bondwireType{EBondwireType::Simple};
 };
 

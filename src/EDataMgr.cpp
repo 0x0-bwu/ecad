@@ -227,6 +227,12 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur
     return UPtr<EShape>(shape);
 }
 
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeCircle(EPoint2D loc, ECoord radius)
+{
+    auto shape = new ECircle(std::move(loc), radius, DefaultCircleDiv());
+    return UPtr<EShape>(shape);
+}
+
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(std::vector<EPoint2D> points, ECoord width)
 {
     auto shape = new EPath;
@@ -290,6 +296,11 @@ size_t EDataMgr::DefaultThreads() const
 void EDataMgr::SetDefaultThreads(size_t threads)
 {
     m_settings.threads = threads;
+}
+
+size_t EDataMgr::DefaultCircleDiv() const
+{
+    return 16;
 }
 
 }//namespace ecad

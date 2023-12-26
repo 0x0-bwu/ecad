@@ -22,6 +22,19 @@ public:
     virtual bool GetPadParameters(const std::string & layer, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const = 0;
     virtual void SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) = 0;
     virtual void GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const = 0;
+
+    virtual void SetTopSolderBumpParameters(UPtr<EShape> shape, FCoord thickness) = 0;
+    virtual bool GetTopSolderBumpParameters(CPtr<EShape> & shape, FCoord & thickness) const = 0;
+    virtual void SetBotSolderBallParameters(UPtr<EShape> shape, FCoord thickness) = 0;
+    virtual bool GetBotSolderBallParameters(CPtr<EShape> & shape, FCoord & thickness) const = 0;
+    
+    virtual void SetTopSolderBumpMaterial(const std::string & material) = 0;
+    virtual const std::string & GetTopSolderBumpMaterial() const = 0;
+    virtual void SetBotSolderBallMaterial(const std::string & material) = 0;
+    virtual const std::string & GetBotSolderBallMaterial() const = 0;
+    
+    virtual bool hasTopSolderBump() const = 0;
+    virtual bool hasBotSolderBall() const = 0;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IPadstackDefData)

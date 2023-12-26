@@ -202,6 +202,20 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
             bw.radius = bondwire->GetRadius();
             bw.netId = bondwire->GetNet();
             compact->bondwires.emplace_back(std::move(bw));
+
+            if (bondwire->GetSolderJoints() && bondwire->GetSolderJoints()->GetPadstackDefData()->hasTopSolderBump()) {
+                std::string sjMatName;
+                auto shape = retriever.GetBondwireStartSolderJointParameters(bondwire, elevation, thickness, sjMatName);
+                auto sjMat = layout->GetDatabase()->FindMaterialDefByName(sjMatName); { ECAD_ASSERT(sjMat) }
+                compact->AddShape(bw.netId, sjMat->GetMaterialId(), EMaterialId::noMaterial, shape.get(), elevation, thickness);
+            }
+
+            if (bondwire->GetSolderJoints() && bondwire->GetSolderJoints()->GetPadstackDefData()->hasBotSolderBall()) {
+                std::string sjMatName;
+                auto shape = retriever.GetBondwireEndSolderJointParameters(bondwire, elevation, thickness, sjMatName);
+                auto sjMat = layout->GetDatabase()->FindMaterialDefByName(sjMatName); { ECAD_ASSERT(sjMat) }
+                compact->AddShape(bw.netId, sjMat->GetMaterialId(), EMaterialId::noMaterial, shape.get(), elevation, thickness);
+            }
         }
         else if (auto geom = prim->GetGeometry2DFromPrimitive(); geom) {
             auto shape = geom->GetShape();

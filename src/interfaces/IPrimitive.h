@@ -11,6 +11,7 @@ class IConnObj;
 class IBondwire;
 class IComponent;
 class IGeometry2D;
+class IPadstackDef;
 class ECAD_API IPrimitive : public Clonable<IPrimitive>, public Printable
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
@@ -56,11 +57,11 @@ public:
     virtual const EPoint2D & GetStartPt() const = 0;
     virtual const EPoint2D & GetEndPt() const = 0;
 
-    virtual void SetStartLayer(ELayerId layerId) = 0;
-    virtual ELayerId GetStartLayer() const = 0;
+    virtual void SetStartLayer(ELayerId layerId, bool flipped) = 0;
+    virtual ELayerId GetStartLayer(Ptr<bool> flipped = nullptr) const = 0;
 
-    virtual void SetEndLayer(ELayerId layerId) = 0;
-    virtual ELayerId GetEndLayer() const = 0;
+    virtual void SetEndLayer(ELayerId layerId, bool flipped) = 0;
+    virtual ELayerId GetEndLayer(Ptr<bool> flipped = nullptr) const = 0;
 
     virtual void SetMaterial(const std::string & material) = 0;
     virtual const std::string & GetMaterial() const = 0;
@@ -77,6 +78,9 @@ public:
     virtual void SetEndComponent(CPtr<IComponent> comp) = 0;
     virtual CPtr<IComponent> GetEndComponent() const = 0;
     
+    virtual void SetSolderJoints(CPtr<IPadstackDef> s) = 0;
+    virtual CPtr<IPadstackDef> GetSolderJoints() const = 0;
+
     virtual void Transform(const ETransform2D & transform) = 0;
 };
 

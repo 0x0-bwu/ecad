@@ -3,6 +3,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPrimitive)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EGeometry2D)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EText)
 
+#include "interfaces/IPadstackDef.h"
 #include "interfaces/IComponent.h"
 #include "interfaces/ILayer.h"
 #include "interfaces/INet.h"
@@ -210,12 +211,13 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     boost::serialization::void_cast_register<EBondwire, IBondwire>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrimitive);
     ar & boost::serialization::make_nvp("material", m_material);
-    ar & boost::serialization::make_nvp("start", m_start);
-    ar & boost::serialization::make_nvp("end", m_end);
+    ar & boost::serialization::make_nvp("end_layer", m_endLayer);
+    ar & boost::serialization::make_nvp("mount_component", m_mountComp);
+    ar & boost::serialization::make_nvp("location", m_location);
+    ar & boost::serialization::make_nvp("flipped", m_flipped);
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
-    ar & boost::serialization::make_nvp("start_component", m_startComponent);
-    ar & boost::serialization::make_nvp("end_component", m_endComponent);
+    ar & boost::serialization::make_nvp("solder_joints", m_solderJoints);
     ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
 
@@ -226,12 +228,13 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     boost::serialization::void_cast_register<EBondwire, IBondwire>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrimitive);
     ar & boost::serialization::make_nvp("material", m_material);
-    ar & boost::serialization::make_nvp("start", m_start);
-    ar & boost::serialization::make_nvp("end", m_end);
+    ar & boost::serialization::make_nvp("end_layer", m_endLayer);
+    ar & boost::serialization::make_nvp("mount_component", m_mountComp);
+    ar & boost::serialization::make_nvp("location", m_location);
+    ar & boost::serialization::make_nvp("flipped", m_flipped);
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
-    ar & boost::serialization::make_nvp("start_component", m_startComponent);
-    ar & boost::serialization::make_nvp("end_component", m_endComponent);
+    ar & boost::serialization::make_nvp("solder_joints", m_solderJoints);
     ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
 
@@ -244,7 +247,7 @@ ECAD_INLINE EBondwire::EBondwire()
 }
 
 ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
- : EPrimitive(std::move(name), ELayerId::noLayer, net), m_start(std::move(start)), m_end(std::move(end)), m_radius(radius)
+ : EPrimitive(std::move(name), ELayerId::noLayer, net), m_location({std::move(start), std::move(end)}), m_radius(radius)
 {
     m_type = EPrimitiveType::Bondwire;
 }
@@ -276,33 +279,37 @@ ECAD_INLINE FCoord EBondwire::GetRadius() const
 
 ECAD_INLINE const EPoint2D & EBondwire::GetStartPt() const
 {
-    return m_start;
+    return m_location.front();
 }
 
 ECAD_INLINE const EPoint2D & EBondwire::GetEndPt() const
 {
-    return m_end;
+    return m_location.back();
 }
 
-ECAD_INLINE void EBondwire::SetStartLayer(ELayerId layerId)
+ECAD_INLINE void EBondwire::SetStartLayer(ELayerId layerId, bool flipped)
 {
-    m_startComponent = nullptr;
+    m_mountComp.front() = nullptr;
+    m_flipped.front() = flipped;
     return EPrimitive::SetLayer(layerId);
 }
 
-ECAD_INLINE ELayerId EBondwire::GetStartLayer() const
+ECAD_INLINE ELayerId EBondwire::GetStartLayer(Ptr<bool> flipped) const
 {
+    if(flipped) *flipped = ELayerId::ComponentLayer == m_layer ? m_mountComp.front()->isFlipped() : m_flipped.front();
     return EPrimitive::GetLayer();
 }
 
-ECAD_INLINE void EBondwire::SetEndLayer(ELayerId layerId)
+ECAD_INLINE void EBondwire::SetEndLayer(ELayerId layerId, bool flipped)
 {
-    m_endComponent = nullptr;
+    m_mountComp.back() = nullptr;
+    m_flipped.back() = flipped;
     m_endLayer = layerId;
 }
 
-ECAD_INLINE ELayerId EBondwire::GetEndLayer() const
+ECAD_INLINE ELayerId EBondwire::GetEndLayer(Ptr<bool> flipped) const
 {
+    if(flipped) *flipped = ELayerId::ComponentLayer == m_endLayer ? m_mountComp.back()->isFlipped() : m_flipped.back();
     return m_endLayer;
 }
 
@@ -339,36 +346,46 @@ ECAD_INLINE FCoord EBondwire::GetHeight() const
 ECAD_INLINE void EBondwire::SetStartComponent(CPtr<IComponent> comp)
 {
     m_layer = ELayerId::ComponentLayer;
-    m_startComponent = comp;
+    m_mountComp.front() = comp;
 }
 
 ECAD_INLINE CPtr<IComponent> EBondwire::GetStartComponent() const
 {
-    return m_startComponent;
+    return m_mountComp.front();
 }
 
 ECAD_INLINE void EBondwire::SetEndComponent(CPtr<IComponent> comp)
 {
     m_endLayer = ELayerId::ComponentLayer;
-    m_endComponent = comp;
+    m_mountComp.back() = comp;
 }
 
 ECAD_INLINE CPtr<IComponent> EBondwire::GetEndComponent() const
 {
-    return m_endComponent;
+    return m_mountComp.back();
+}
+
+ECAD_INLINE void EBondwire::SetSolderJoints(CPtr<IPadstackDef> s)
+{
+    m_solderJoints = s;
+}
+
+ECAD_INLINE CPtr<IPadstackDef> EBondwire::GetSolderJoints() const
+{
+    return m_solderJoints;
 }
 
 ECAD_INLINE void EBondwire::Transform(const ETransform2D & transform)
 {
     auto trans = transform.GetTransform();
-    generic::geometry::Transform(m_start, trans);
-    generic::geometry::Transform(m_end, trans);
+    generic::geometry::Transform(m_location.front(), trans);
+    generic::geometry::Transform(m_location.back(), trans);
 }
 
 ECAD_INLINE void EBondwire::PrintImp(std::ostream & os) const
 {
     os << "TYPE: " << "BONDWIRE" << ECAD_EOL;
-    os << "START: " << m_start << ", END: " << m_end << ECAD_EOL;
+    os << "START: " << m_location.front() << ", END: " << m_location.back() << ECAD_EOL;
     os << "RADIUS: " << m_radius << ECAD_EOL;
     os << "HEIGHT: " << m_height << ECAD_EOL;
     os << "MATERIAL: " << m_material << ECAD_EOL;

@@ -55,7 +55,7 @@ template <typename Archive>
 ECAD_INLINE void EBump::save(Archive & ar, const unsigned int version) const
 {
     ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("height", height);
+    ar & boost::serialization::make_nvp("thickness", thickness);
     ar & boost::serialization::make_nvp("shape", shape);
     ar & boost::serialization::make_nvp("material", material);
 }
@@ -64,7 +64,7 @@ template <typename Archive>
 ECAD_INLINE void EBump::load(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("height", height);
+    ar & boost::serialization::make_nvp("thickness", thickness);
     ar & boost::serialization::make_nvp("shape", shape);
     ar & boost::serialization::make_nvp("material", material);
 }
@@ -130,7 +130,7 @@ ECAD_INLINE EBump::EBump(const EBump & other)
 
 ECAD_INLINE EBump & EBump::operator= (const EBump & other)
 {
-    height = other.height;
+    thickness = other.thickness;
     shape = CloneHelper(other.shape);
     material = other.material;
     return *this;
@@ -200,6 +200,71 @@ ECAD_INLINE void EPadstackDefData::GetViaParameters(CPtr<EShape> & shape, EPoint
     rotation = m_via.rotation;
 }
 
+ECAD_INLINE void EPadstackDefData::SetTopSolderBumpParameters(UPtr<EShape> shape, FCoord thickness)
+{
+    auto & topBump = m_solderBumpBall.first;
+    topBump.shape = std::move(shape);
+    topBump.thickness = thickness;
+}
+
+ECAD_INLINE bool EPadstackDefData::GetTopSolderBumpParameters(CPtr<EShape> & shape, FCoord & thickness) const
+{
+    if (not hasTopSolderBump()) return false;
+    const auto & topBump = m_solderBumpBall.first;
+    shape = topBump.shape.get();
+    thickness = topBump.thickness;
+    return true;
+}
+
+ECAD_INLINE void EPadstackDefData::SetBotSolderBallParameters(UPtr<EShape> shape, FCoord thickness)
+{
+    auto & botBall = m_solderBumpBall.second;
+    botBall.shape = std::move(shape);
+    botBall.thickness = thickness;
+}
+
+ECAD_INLINE bool EPadstackDefData::GetBotSolderBallParameters(CPtr<EShape> & shape, FCoord & thickness) const
+{
+    if (not hasBotSolderBall()) return false;
+    const auto & botBall = m_solderBumpBall.second;
+    shape = botBall.shape.get();
+    thickness = botBall.thickness;
+    return true;  
+}
+
+ECAD_INLINE void EPadstackDefData::SetTopSolderBumpMaterial(const std::string & material)
+{
+    m_solderBumpBall.first.material = material;
+}
+
+ECAD_INLINE const std::string & EPadstackDefData::GetTopSolderBumpMaterial() const
+{
+    return m_solderBumpBall.first.material;
+}
+
+ECAD_INLINE void EPadstackDefData::SetBotSolderBallMaterial(const std::string & material)
+{
+    m_solderBumpBall.second.material = material;
+}
+
+ECAD_INLINE const std::string & EPadstackDefData::GetBotSolderBallMaterial() const
+{
+    return m_solderBumpBall.second.material;
+}
+
+ECAD_INLINE bool EPadstackDefData::hasTopSolderBump() const
+{
+    const auto & topBump = m_solderBumpBall.first;
+    if (nullptr == topBump.shape) return false;
+    return true;
+}
+
+ECAD_INLINE bool EPadstackDefData::hasBotSolderBall() const
+{
+    const auto & botBall = m_solderBumpBall.second;
+    if (nullptr == botBall.shape) return false;
+    return true;
+}
 
 ECAD_INLINE ELayerId EPadstackDefData::GetPadLayerId(const std::string & layer) const
 {

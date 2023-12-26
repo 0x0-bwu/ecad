@@ -79,8 +79,9 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
             case EPrimitiveType::Bondwire : {
                 clone->GetBondwireFromPrimitive()->Transform(transform);
                 auto bondwire = clone->GetBondwireFromPrimitive();
-                if (bondwire->GetEndLayer() != ELayerId::ComponentLayer)
-                    bondwire->SetEndLayer(layermap->GetMappingForward(bondwire->GetEndLayer()));
+                bool flipped;
+                if (bondwire->GetEndLayer(&flipped) != ELayerId::ComponentLayer)
+                    bondwire->SetEndLayer(layermap->GetMappingForward(bondwire->GetEndLayer()), flipped);
                 auto iter = compMap.find(bondwire->GetStartComponent());
                 if (iter != compMap.cend()) bondwire->SetStartComponent(iter->second);
                 iter = compMap.find(bondwire->GetEndComponent());
