@@ -48,7 +48,7 @@ ECAD_INLINE void ECompactLayout::AddComponent(CPtr<IComponent> component)
     auto totalP = component->GetLossPower();
     auto boundary = toPolygon(component->GetBoundingBox());
     auto material = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetMaterial()); { ECAD_ASSERT(material) }
-    auto check = m_retriever->GetComponentHeightThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
+    [[maybe_unused]] auto check = m_retriever->GetComponentHeightThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
 
     if (totalP > 0)
         AddPowerBlock(material->GetMaterialId(), boundary, totalP, elevation, thickness);
