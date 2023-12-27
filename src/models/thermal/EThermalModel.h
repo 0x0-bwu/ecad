@@ -22,19 +22,19 @@ public:
     enum class BCType { HTC, HeatFlow, Temperature/*not work currently*/ };
     virtual ~EThermalModel() = default;
 
-    virtual void SetUniformTopBotBCValue(ESimVal top, ESimVal bot);
-    virtual void GetUniformTopBotBCValue(ESimVal & t, ESimVal & b) const;
+    virtual void SetUniformTopBotBCValue(EFloat top, EFloat bot);
+    virtual void GetUniformTopBotBCValue(EFloat & t, EFloat & b) const;
 
     virtual void SetTopBotBCType(BCType top, BCType bot);
     virtual void GetTopBotBCType(BCType & top, BCType & bot) const;
 
 protected:
     std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
-    std::array<ESimVal, 2> m_uniformBcTopBot{invalidSimVal, invalidSimVal};
+    std::array<EFloat, 2> m_uniformBcTopBot{invalidFloat, invalidFloat};
 };
 
-using EGridData = OccupancyGridMap<ESimVal>;
-using Interpolator = boost::math::interpolators::pchip<std::vector<ESimVal> >;
+using EGridData = OccupancyGridMap<EFloat>;
+using Interpolator = boost::math::interpolators::pchip<std::vector<EFloat> >;
 using EGridInterpolator = OccupancyGridMap<SPtr<Interpolator> >;
 
 class ECAD_API EGridDataTable
@@ -46,12 +46,12 @@ public:
     size_t GetSampleSize() const;
     const ESize2D & GetTableSize() const;
 
-    bool AddSample(ESimVal key, EGridData data);
-    ESimVal Query(ESimVal key, size_t x, size_t y, bool * success = nullptr) const;
+    bool AddSample(EFloat key, EGridData data);
+    EFloat Query(EFloat key, size_t x, size_t y, bool * success = nullptr) const;
 
-    std::list<ESimVal> GetAllKeys() const;
-    CPtr<EGridData> GetTable(ESimVal key) const;
-    std::pair<ESimVal, ESimVal> GetRange() const;
+    std::list<EFloat> GetAllKeys() const;
+    CPtr<EGridData> GetTable(EFloat key) const;
+    std::pair<EFloat, EFloat> GetRange() const;
 
     bool NeedInterpolation() const;
 
@@ -61,7 +61,7 @@ private:
 
 private:
     ESize2D m_size;
-    std::map<ESimVal, EGridData> m_dataTable;//<key, table>
+    std::map<EFloat, EGridData> m_dataTable;//<key, table>
     mutable UPtr<EGridInterpolator> m_interpolator = nullptr;
 };
 
@@ -69,8 +69,8 @@ class ECAD_API EThermalPowerModel
 {
 public:
     virtual ~EThermalPowerModel() = default;
-    virtual ESimVal Query(ESimVal key, size_t x, size_t y, bool * success = nullptr) const = 0;
-    virtual std::pair<ESimVal, ESimVal> GetRange() const = 0;
+    virtual EFloat Query(EFloat key, size_t x, size_t y, bool * success = nullptr) const = 0;
+    virtual std::pair<EFloat, EFloat> GetRange() const = 0;
     virtual bool NeedInterpolation() const = 0;
 };
 
@@ -81,8 +81,8 @@ public:
     explicit EGridPowerModel(UPtr<EGridDataTable> table);
     virtual ~EGridPowerModel() = default;
 
-    ESimVal Query(ESimVal key, size_t x, size_t y, bool * success = nullptr) const override;
-    std::pair<ESimVal, ESimVal> GetRange() const override;
+    EFloat Query(EFloat key, size_t x, size_t y, bool * success = nullptr) const override;
+    std::pair<EFloat, EFloat> GetRange() const override;
     bool NeedInterpolation() const override;
 
     EGridDataTable & GetTable() { return *m_table;}
@@ -96,12 +96,12 @@ class ECAD_API EBlockPowerModel : public EThermalPowerModel
 {
 public:
     ESize2D ll, ur;
-    ESimVal totalPower;
-    EBlockPowerModel(ESize2D ll, ESize2D ur, ESimVal totalP);
+    EFloat totalPower;
+    EBlockPowerModel(ESize2D ll, ESize2D ur, EFloat totalP);
     virtual ~EBlockPowerModel() = default;
 
-    ESimVal Query(ESimVal key, size_t x, size_t y, bool * success = nullptr) const override;
-    std::pair<ESimVal, ESimVal> GetRange() const override;
+    EFloat Query(EFloat key, size_t x, size_t y, bool * success = nullptr) const override;
+    std::pair<EFloat, EFloat> GetRange() const override;
     bool NeedInterpolation() const override;
     size_t Size() const;
 };

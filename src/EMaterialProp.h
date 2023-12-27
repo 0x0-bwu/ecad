@@ -21,26 +21,26 @@ class ECAD_API EMaterialPropValue : public EMaterialProp, public IMaterialPropVa
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EMaterialPropValue();
 public:
-    explicit EMaterialPropValue(const std::array<EValue, 9> & values);
-    explicit EMaterialPropValue(const std::array<EValue, 3> & values);
-    explicit EMaterialPropValue(EValue value);
+    explicit EMaterialPropValue(const std::array<EFloat, 9> & values);
+    explicit EMaterialPropValue(const std::array<EFloat, 3> & values);
+    explicit EMaterialPropValue(EFloat value);
     ~EMaterialPropValue() = default;
 
     bool isPropValue() const override { return true;  } 
     bool isPropTable() const override { return false; }
     Ptr<IMaterialPropValue> GetPropValue() override;
 
-    void SetSimpleProperty(const EValue & value) override;
-    void SetAnsiotropicProerty(const std::array<EValue, 3> & values) override;
-    void SetTensorProperty(const std::array<EValue, 9> & values) override;
+    void SetSimpleProperty(const EFloat & value) override;
+    void SetAnsiotropicProerty(const std::array<EFloat, 3> & values) override;
+    void SetTensorProperty(const std::array<EFloat, 9> & values) override;
 
-    bool GetSimpleProperty(EValue & value) const override;
-    bool GetAnsiotropicProperty(size_t row, EValue & value) const override;
-    bool GetTensorProperty(size_t row, size_t col, EValue & value) const override;
+    bool GetSimpleProperty(EFloat & value) const override;
+    bool GetAnsiotropicProperty(size_t row, EFloat & value) const override;
+    bool GetTensorProperty(size_t row, size_t col, EFloat & value) const override;
 
-    bool GetSimpleProperty(EValue index, EValue & value) const override;
-    bool GetAnsiotropicProperty(EValue index, size_t row, EValue & value) const override;
-    bool GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const override;
+    bool GetSimpleProperty(EFloat index, EFloat & value) const override;
+    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override;
+    bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override;
 
     //1x1-simple, 3x1-anisotropic, 3x3-tensor
     void GetDimensions(size_t & row, size_t & col) const override;
@@ -50,7 +50,7 @@ protected:
     virtual Ptr<EMaterialPropValue> CloneImp() const override { return new EMaterialPropValue(*this); }
 
 private:
-    std::vector<EValue> m_values;
+    std::vector<EFloat> m_values;
 };
 
 class ECAD_API EMaterialPropTable : public EMaterialProp, public IMaterialPropTable //todo refine
@@ -69,9 +69,9 @@ public:
     bool isPropTable() const override { return true;  }
     Ptr<IMaterialPropTable> GetPropTable() override;
 
-    bool GetSimpleProperty(EValue index, EValue & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
-    bool GetAnsiotropicProperty(EValue index, size_t row, EValue & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
-    bool GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
+    bool GetSimpleProperty(EFloat index, EFloat & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
+    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
+    bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
 
 protected:
     ///Copy
@@ -79,7 +79,7 @@ protected:
 
 private:
     EMatDependency m_dependency;
-    std::map<EValue, UPtr<IMaterialProp> > m_values;
+    std::map<EFloat, UPtr<IMaterialProp> > m_values;
 };
 
 }//namespace ecad

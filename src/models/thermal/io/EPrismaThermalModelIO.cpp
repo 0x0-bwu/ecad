@@ -2,7 +2,7 @@
 #include "generic/tools/Color.hpp"
 namespace ecad::emodel::etherm::io {
 
-ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermalModel & model, const std::vector<ESimVal> * temperature, std::string * err)
+ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermalModel & model, const std::vector<EFloat> * temperature, std::string * err)
 {
     if (not fs::CreateDir(fs::DirName(filename))) {
         if (err) *err = "Error: fail to create folder " + fs::DirName(filename).string();

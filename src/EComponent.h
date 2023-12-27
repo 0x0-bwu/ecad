@@ -22,8 +22,8 @@ public:
     void SetTransform(const ETransform2D & trans) override;
     const ETransform2D & GetTransform() const override;
 
-    void SetLossPower(ESimVal power) override;
-    ESimVal GetLossPower() const override;
+    void SetLossPower(EFloat power) override;
+    EFloat GetLossPower() const override;
 
     EBox2D GetBoundingBox() const override;
 
@@ -40,7 +40,7 @@ protected:
 protected:
     CPtr<IComponentDef> m_compDef;
     ELayerId m_placement{ELayerId::noLayer};
-    ESimVal m_lossPower{0};
+    EFloat m_lossPower{0};
     bool m_flipped{false};
 };
 

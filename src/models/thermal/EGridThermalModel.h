@@ -46,7 +46,7 @@ public:
 
     bool SetMetalFraction(SPtr<ELayerMetalFraction> mf);
     SPtr<ELayerMetalFraction> GetMetalFraction() const;
-    ESimVal GetMetalFraction(size_t x, size_t y) const;
+    EFloat GetMetalFraction(size_t x, size_t y) const;
 
     ESize2D GetSize() const;
 

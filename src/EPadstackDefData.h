@@ -16,7 +16,7 @@ public:
     EVia(const EVia & other);
     EVia & operator= (const EVia & other);
 
-    EValue rotation = 0;
+    EFloat rotation = 0;
     EPoint2D offset = EPoint2D(0, 0);
     UPtr<EShape> shape = nullptr;
 };
@@ -33,7 +33,7 @@ public:
     EPad & operator= (const EPad & other);
 
     std::string lyr;
-    EValue rotation = 0;
+    EFloat rotation = 0;
     EPoint2D offset = EPoint2D(0, 0);
     UPtr<EShape> shape = nullptr;
 };
@@ -66,12 +66,12 @@ public:
     void SetMaterial(const std::string & material) override;
 
     void SetLayers(const std::vector<std::string> & layers) override;
-    bool SetPadParameters(ELayerId layerId, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) override;
-    bool GetPadParameters(ELayerId layerId, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const override;
-    bool SetPadParameters(const std::string & layer, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) override;
-    bool GetPadParameters(const std::string & layer, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const override;
-    void SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EValue rotation) override;
-    void GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const override;
+    bool SetPadParameters(ELayerId layerId, UPtr<EShape> shape, const EPoint2D & offset, EFloat rotation) override;
+    bool GetPadParameters(ELayerId layerId, CPtr<EShape> & shape, EPoint2D & offset, EFloat & rotation) const override;
+    bool SetPadParameters(const std::string & layer, UPtr<EShape> shape, const EPoint2D & offset, EFloat rotation) override;
+    bool GetPadParameters(const std::string & layer, CPtr<EShape> & shape, EPoint2D & offset, EFloat & rotation) const override;
+    void SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EFloat rotation) override;
+    void GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EFloat & rotation) const override;
     
     void SetTopSolderBumpParameters(UPtr<EShape> shape, FCoord thickness) override;
     bool GetTopSolderBumpParameters(CPtr<EShape> & shape, FCoord & thickness) const override;

@@ -20,10 +20,9 @@ using SPtr = std::shared_ptr<T>;
 template <typename T, typename Deleter = std::default_delete<T> >
 using UPtr = std::unique_ptr<T, Deleter>;
 
-using ECoord = int64_t;
+using EFloat = double;
 using FCoord = double;
-using EValue = double;
-using ESimVal = double;
+using ECoord = int64_t;
 
 using EPoint2D = generic::geometry::Point2D<ECoord>;
 using FPoint2D = generic::geometry::Point2D<FCoord>;
@@ -50,7 +49,7 @@ ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
 
 ECAD_ALWAYS_INLINE static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
-ECAD_ALWAYS_INLINE static constexpr ESimVal invalidSimVal = std::numeric_limits<ESimVal>::max();//std::nan(quiet_Nan) has issue with AppleClang with -ffast-math
+ECAD_ALWAYS_INLINE static constexpr EFloat invalidFloat = std::numeric_limits<EFloat>::max();//std::nan(quiet_Nan) has issue with AppleClang with -ffast-math
 
 template <typename NumType>
 ECAD_ALWAYS_INLINE  bool isValid(NumType value) { return value != std::numeric_limits<NumType>::max(); }

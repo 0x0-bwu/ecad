@@ -53,7 +53,7 @@ int main(int argc, char * argv[])
     extSettings.dumpTemperatureFile = true;
 
     size_t xGrid = 50;
-    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
+    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
     esim::EThermalNetworkExtraction ne;

@@ -76,7 +76,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const ECh
 
     model->SetScaleH(pCtm->header.scale);
 
-    EValue resolution = pCtm->header.resolution * 1e-6;//um to m
+    EFloat resolution = pCtm->header.resolution * 1e-6;//um to m
     model->SetResolution(resolution, resolution);
 
     return model;

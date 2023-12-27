@@ -73,7 +73,7 @@ void test0()
 
     size_t xGrid = 3;
     auto bbox = layout->GetBoundary()->GetBBox();
-    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
+    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
     esim::EThermalNetworkExtraction ne;
@@ -96,6 +96,7 @@ void test1()
     matAl->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(238));
     matAl->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(880));
     matAl->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2700));
+    matAl->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(2.82e-8));
 
     auto matCu = database->CreateMaterialDef("Cu");
     matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(398));
@@ -217,28 +218,34 @@ void test1()
     sourceBW1->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW1->SetStartComponent(comp1);
     sourceBW1->SetEndLayer(iLyrWire, false);
+    sourceBW1->SetCurrent(20);
     
     auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), {4450000, 15000000}, {3000000, 5000000}, bwRadius);
     sourceBW2->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW2->SetStartComponent(comp1);
     sourceBW2->SetEndLayer(iLyrWire, false);
+    sourceBW2->SetCurrent(20);
     
     auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), {4450000, 14000000}, {3000000, 2500000}, bwRadius);
     sourceBW3->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW3->SetStartComponent(comp1);
     sourceBW3->SetEndLayer(iLyrWire, false);
+    sourceBW3->SetCurrent(20);
 
     auto sourceBW4 = eDataMgr.CreateBondwire(sicLayout, "SourceBW4", sourceNet->GetNetId(), {4450000, 16000000}, {18000000, 16000000}, bwRadius);
     sourceBW4->SetStartComponent(comp1);
     sourceBW4->SetEndComponent(comp2);
+    sourceBW4->SetCurrent(10);
 
     auto sourceBW5 = eDataMgr.CreateBondwire(sicLayout, "SourceBW5", sourceNet->GetNetId(), {4450000, 15000000}, {18000000, 15000000}, bwRadius);
     sourceBW5->SetStartComponent(comp1);
     sourceBW5->SetEndComponent(comp2);
+    sourceBW5->SetCurrent(10);
 
     auto sourceBW6 = eDataMgr.CreateBondwire(sicLayout, "SourceBW6", sourceNet->GetNetId(), {4450000, 14000000}, {18000000, 14000000}, bwRadius);
     sourceBW6->SetStartComponent(comp1);
     sourceBW6->SetEndComponent(comp2);
+    sourceBW6->SetCurrent(10);
 
     auto drainBW1 = eDataMgr.CreateBondwire(sicLayout, "DrainBW1", drainNet->GetNetId(), {10800000, 12200000}, {19350000, 7500000}, bwRadius);
     drainBW1->SetStartLayer(iLyrWire, false);
@@ -336,13 +343,13 @@ void test1()
 
     size_t xGrid = 150;
     auto bbox = layout->GetBoundary()->GetBBox();
-    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EValue(bbox.Width()) / bbox.Length())};
+    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
     // auto model = ne.GenerateGridThermalModel(layout);
-    auto model = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(20), 10, 250, 10000);
+    auto model = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(20), 100, 1e6, 1e4);
 
     EDataMgr::Instance().ShutDown();
 }

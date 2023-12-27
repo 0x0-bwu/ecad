@@ -9,15 +9,15 @@ enum class EMirror2D { No = -1, X = 0, Y = 1 };
 
 struct ECAD_API ETransformData2D
 {
-    using Transform = ::generic::geometry::Transform2D<EValue>;
+    using Transform = ::generic::geometry::Transform2D<EFloat>;
     //Transform done in following order.
-    EValue scale = 1.0;
-    EValue rotation = 0;//Rotation (in radians) about point (0,0) in CCW direction
+    EFloat scale = 1.0;
+    EFloat rotation = 0;//Rotation (in radians) about point (0,0) in CCW direction
     EMirror2D mirror = EMirror2D::No;//Mirror about X or Y axis
     EPoint2D offset = EPoint2D(0, 0);
 
-    bool isScaled() const { return math::NE<EValue>(scale, 1); }
-    bool isRotated() const { return math::NE<EValue>(rotation, 0); }
+    bool isScaled() const { return math::NE<EFloat>(scale, 1); }
+    bool isRotated() const { return math::NE<EFloat>(rotation, 0); }
     bool isMirrored() const { return mirror != EMirror2D::No; }
     bool isOffseted() const { return offset != EPoint2D(0, 0); }
     bool isTransformed() const { return isScaled() || isRotated() || isMirrored() || isOffseted(); }
@@ -26,10 +26,10 @@ struct ECAD_API ETransformData2D
     {
         using namespace ::generic::geometry;
         Transform transfrom;
-        if(isScaled()) transfrom = makeScaleTransform2D<EValue>(scale) * transfrom;
-        if(isRotated()) transfrom = makeRotateTransform2D<EValue>(rotation) * transfrom;
-        if(isMirrored()) transfrom = makeMirroredTransform2D<EValue>(static_cast<Axis>(mirror)) * transfrom;
-        if(isOffseted()) transfrom = makeShiftTransform2D<EValue>(offset) * transfrom;
+        if(isScaled()) transfrom = makeScaleTransform2D<EFloat>(scale) * transfrom;
+        if(isRotated()) transfrom = makeRotateTransform2D<EFloat>(rotation) * transfrom;
+        if(isMirrored()) transfrom = makeMirroredTransform2D<EFloat>(static_cast<Axis>(mirror)) * transfrom;
+        if(isOffseted()) transfrom = makeShiftTransform2D<EFloat>(offset) * transfrom;
         return transfrom;
     }
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -85,11 +85,11 @@ public:
         return *this;
     }
 
-    EValue & Scale() { m_transform.reset(); return m_sequence.back().scale; }
-    const EValue & Scale() const { return m_sequence.back().scale; }
+    EFloat & Scale() { m_transform.reset(); return m_sequence.back().scale; }
+    const EFloat & Scale() const { return m_sequence.back().scale; }
 
-    EValue & Rotation() { m_transform.reset(); return m_sequence.back().rotation; }
-    const EValue & Rotation() const { return m_sequence.back().rotation; }
+    EFloat & Rotation() { m_transform.reset(); return m_sequence.back().rotation; }
+    const EFloat & Rotation() const { return m_sequence.back().rotation; }
 
     EMirror2D & Mirror() { m_transform.reset(); return m_sequence.back().mirror; }
     const EMirror2D & Mirror() const { return m_sequence.back().mirror; }
@@ -124,7 +124,7 @@ private:
     std::list<ETransformData2D> m_sequence;//FIFO
 };
 
-ECAD_ALWAYS_INLINE ETransform2D makeETransform2D(EValue scale, EValue rotation, const EVector2D & offset, EMirror2D mirror = EMirror2D::No)
+ECAD_ALWAYS_INLINE ETransform2D makeETransform2D(EFloat scale, EFloat rotation, const EVector2D & offset, EMirror2D mirror = EMirror2D::No)
 {
     ETransform2D transform;
     transform.Scale() = scale;

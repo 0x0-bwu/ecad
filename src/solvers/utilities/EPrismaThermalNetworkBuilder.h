@@ -22,28 +22,33 @@ public:
     explicit EPrismaThermalNetworkBuilder(const EPrismaThermalModel & model);
     virtual ~EPrismaThermalNetworkBuilder() = default;
 
-    UPtr<ThermalNetwork<ESimVal> > Build(const std::vector<ESimVal> & iniT) const;
+    UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT, size_t threads = 1) const;
 
 private:
-    std::array<ESimVal, 3> GetMaterialK(EMaterialId matId, ESimVal refT) const;
-    ESimVal GetMaterialRho(EMaterialId matId, ESimVal refT) const;
-    ESimVal GetMaterialC(EMaterialId matId, ESimVal refT) const;
+    void BuildPrismaElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const;
+    void BuildLineElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network) const;
+    std::array<EFloat, 3> GetMatThermalConductivity(EMaterialId matId, EFloat refT) const;
+    EFloat GetMatMassDensity(EMaterialId matId, EFloat refT) const;
+    EFloat GetMatSpecificHeat(EMaterialId matId, EFloat refT) const;
+    EFloat GetMatResistivity(EMaterialId matId, EFloat refT) const;
 
     /// global index
     const FPoint3D & GetPrismaVertexPoint(size_t index, size_t iv) const;
     FPoint2D GetPrismaVertexPoint2D(size_t index, size_t iv) const;
     FPoint2D GetPrismaCenterPoint2D(size_t index) const;
 
-    /// unit: m
-    EValue GetPrismaCenterDist2Side(size_t index, size_t ie) const;
-    EValue GetPrismaEdgeLength(size_t index, size_t ie) const;
-    EValue GetPrismaSideArea(size_t index, size_t ie) const;
-    EValue GetPrismaTopBotArea(size_t index) const;
-    EValue GetPrismaVolume(size_t index) const;
-    EValue GetPrismaHeight(size_t index) const;
-    EValue GetLineVolume(size_t index) const;
-    EValue GetLineLength(size_t index) const;
-    EValue GetLineArea(size_t index) const;
+    /// unit: SI
+    EFloat GetPrismaCenterDist2Side(size_t index, size_t ie) const;
+    EFloat GetPrismaEdgeLength(size_t index, size_t ie) const;
+    EFloat GetPrismaSideArea(size_t index, size_t ie) const;
+    EFloat GetPrismaTopBotArea(size_t index) const;
+    EFloat GetPrismaVolume(size_t index) const;
+    EFloat GetPrismaHeight(size_t index) const;
+
+    EFloat GetLineJouleHeat(size_t index, EFloat refT) const;
+    EFloat GetLineVolume(size_t index) const;
+    EFloat GetLineLength(size_t index) const;
+    EFloat GetLineArea(size_t index) const;
 
 private:
     const EPrismaThermalModel & m_model;

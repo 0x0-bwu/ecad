@@ -78,8 +78,8 @@ struct EGdsText : public EGdsShape
     int presentation;
     std::string text;
     EPoint2D position;
-    EValue rotation = 0;
-    EValue scale = 1;
+    EFloat rotation = 0;
+    EFloat scale = 1;
     ~EGdsText() = default;
 };
 
@@ -87,8 +87,8 @@ struct EGdsCellReference : public EGdsObject
 {
     std::string refCell;
     EPoint2D position;
-    EValue rotation = 0;
-    EValue scale = 1;
+    EFloat rotation = 0;
+    EFloat scale = 1;
     int strans;
 };
 
@@ -96,8 +96,8 @@ struct EGdsCellRefArray : public EGdsObject
 {
     std::string refCell;
     std::vector<EPoint2D> positions;
-    EValue rotation = 0;
-    EValue scale = 1;
+    EFloat rotation = 0;
+    EFloat scale = 1;
     size_t cols, rows;
     int spacing[2];
     int strans;

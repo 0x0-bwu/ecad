@@ -51,9 +51,9 @@ public:
     ///Material
     Ptr<IMaterialDef> CreateMaterialDef(SPtr<IDatabase> database, const std::string & name);
     Ptr<IMaterialDef> FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name);
-    UPtr<IMaterialProp> CreateSimpleMaterialProp(EValue value);
-    UPtr<IMaterialProp> CreateAnsiotropicMaterialProp(const std::array<EValue, 3> & values);
-    UPtr<IMaterialProp> CreateTensorMateriaProp(const std::array<EValue, 9> & values);
+    UPtr<IMaterialProp> CreateSimpleMaterialProp(EFloat value);
+    UPtr<IMaterialProp> CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values);
+    UPtr<IMaterialProp> CreateTensorMateriaProp(const std::array<EFloat, 9> & values);
 
     ///LayerMap
     Ptr<ILayerMap> CreateLayerMap(SPtr<IDatabase> database, const std::string & name);

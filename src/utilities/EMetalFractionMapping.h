@@ -11,7 +11,7 @@ namespace eutils {
 using namespace generic::geometry;
 
 using IntPolygon = Polygon2D<ECoord>;
-using ELayerMetalFraction = OccupancyGridMap<ESimVal>;
+using ELayerMetalFraction = OccupancyGridMap<EFloat>;
 using ELayoutMetalFraction = std::vector<SPtr<ELayerMetalFraction> >;
 using ELayoutMetalFractionMapCtrl = typename OccupancyGridMappingFactory::GridCtrl<ECoord>;
 class ECAD_API ELayerMetalFractionMapper

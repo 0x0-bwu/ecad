@@ -14,9 +14,9 @@ public:
     virtual bool isPropTable() const = 0;
     virtual Ptr<IMaterialPropValue> GetPropValue() = 0;
     virtual Ptr<IMaterialPropTable> GetPropTable() = 0;
-    virtual bool GetSimpleProperty(EValue index, EValue & value) const = 0;
-    virtual bool GetAnsiotropicProperty(EValue index, size_t row, EValue & value) const = 0;
-    virtual bool GetTensorProperty(EValue index, size_t row, size_t col, EValue & value) const = 0;
+    virtual bool GetSimpleProperty(EFloat index, EFloat & value) const = 0;
+    virtual bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const = 0;
+    virtual bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const = 0;
 };
 
 class ECAD_API IMaterialPropValue
@@ -25,13 +25,13 @@ class ECAD_API IMaterialPropValue
 public:
     virtual ~IMaterialPropValue() = default;
 
-    virtual void SetSimpleProperty(const EValue & value) = 0;
-    virtual void SetAnsiotropicProerty(const std::array<EValue, 3> & values) = 0;
-    virtual void SetTensorProperty(const std::array<EValue, 9> & values) = 0;
+    virtual void SetSimpleProperty(const EFloat & value) = 0;
+    virtual void SetAnsiotropicProerty(const std::array<EFloat, 3> & values) = 0;
+    virtual void SetTensorProperty(const std::array<EFloat, 9> & values) = 0;
 
-    virtual bool GetSimpleProperty(EValue & value) const = 0;
-    virtual bool GetAnsiotropicProperty(size_t row, EValue & value) const = 0;
-    virtual bool GetTensorProperty(size_t row, size_t col, EValue & value) const = 0;
+    virtual bool GetSimpleProperty(EFloat & value) const = 0;
+    virtual bool GetAnsiotropicProperty(size_t row, EFloat & value) const = 0;
+    virtual bool GetTensorProperty(size_t row, size_t col, EFloat & value) const = 0;
 
     //1x1-simple, 3x1-anisotropic, 3x3-tensor
     virtual void GetDimensions(size_t & row, size_t & col) const = 0;

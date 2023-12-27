@@ -24,8 +24,8 @@ public:
     virtual void SetTransform(const ETransform2D & trans) = 0;
     virtual const ETransform2D & GetTransform() const = 0;
 
-    virtual void SetLossPower(ESimVal power) = 0;
-    virtual ESimVal GetLossPower() const = 0;
+    virtual void SetLossPower(EFloat power) = 0;
+    virtual EFloat GetLossPower() const = 0;
 
     virtual EBox2D GetBoundingBox() const = 0;
 

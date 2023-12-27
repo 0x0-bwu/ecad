@@ -118,7 +118,7 @@ ECAD_INLINE UPtr<EShape> EPadstackInst::GetLayerShape(ELayerId lyr) const
     auto toLyr = layerMap->GetMappingForward(lyr);
 
     CPtr<EShape> shape = nullptr;
-    EValue rotation(0);
+    EFloat rotation(0);
     EPoint2D offset(0, 0);
 
     bool res = padstackDefData->GetPadParameters(toLyr, shape, offset, rotation);

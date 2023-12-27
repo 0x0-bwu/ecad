@@ -81,6 +81,9 @@ public:
     virtual void SetSolderJoints(CPtr<IPadstackDef> s) = 0;
     virtual CPtr<IPadstackDef> GetSolderJoints() const = 0;
 
+    virtual void SetCurrent(EFloat current) = 0;
+    virtual EFloat GetCurrent() const = 0;
+
     virtual void Transform(const ETransform2D & transform) = 0;
 };
 

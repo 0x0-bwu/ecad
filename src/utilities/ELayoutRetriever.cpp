@@ -104,6 +104,74 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire,
     }
 }
 
+ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, size_t minSeg) const
+{
+    if (pt2ds.empty()) {
+        auto res =  GetBondwireSegments(bondwire, pt2ds, heights);
+        if (not res) return false;
+    }
+
+    if (pt2ds.size() >= minSeg) return true;
+    auto midPoint = [&](const EPoint2D & p1, FCoord h1, const EPoint2D & p2, FCoord h2) {
+        return std::make_pair((p1 + p2) / 2, (h1 + h2) / 2);
+    };
+
+    std::vector<FCoord> newHts{heights.front()};
+    std::vector<EPoint2D> newPts{pt2ds.front()};
+    for (size_t i = 1; i < pt2ds.size(); ++i) {
+        auto [mPt, mHt] = midPoint(newPts.back(), newHts.back(), pt2ds.at(i), heights.at(i));
+        newPts.emplace_back(std::move(mPt));
+        newPts.emplace_back(pt2ds.at(i));
+        newHts.emplace_back(mHt);
+        newHts.emplace_back(heights.at(i));
+    }
+    std::swap(newHts, heights);
+    std::swap(newPts, pt2ds);
+    return GetBondwireSegments(bondwire, pt2ds, heights, minSeg);
+}
+
+ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, ECoord maxLen) const
+{
+    if (not GetBondwireSegments(bondwire, pt2ds, heights)) return false;
+    auto maxLenSq = maxLen * maxLen;
+    auto scale2Int = m_layout->GetDatabase()->GetCoordUnits().Scale2Coord();
+    auto distanceSq = [&](const EPoint2D & p1, FCoord h1, const EPoint2D & p2, FCoord h2) {
+        return generic::geometry::DistanceSq(EPoint3D(p1[0], p1[1], h1 * scale2Int), EPoint3D(p2[0], p2[1], h2 * scale2Int));
+    };
+    auto midPoint = [&](const EPoint2D & p1, FCoord h1, const EPoint2D & p2, FCoord h2) {
+        return std::make_pair((p1 + p2) / 2, (h1 + h2) / 2);
+    };
+    auto equal = [&](const EPoint2D & p1, FCoord h1, const EPoint2D & p2, FCoord h2) {
+        return p1 == p2 && ECoord(h1 * scale2Int) == ECoord(h2 * scale2Int);
+    };
+    size_t i = 1;
+    auto currentPt = pt2ds.at(i);
+    auto currentHt = heights.at(i);
+    std::vector<FCoord> newHts{heights.front()};
+    std::vector<EPoint2D> newPts{pt2ds.front()};
+    while (i < pt2ds.size()) {
+        auto distSq = distanceSq(newPts.back(), newHts.back(), currentPt, currentHt);
+        if (distSq > maxLenSq) {
+            std::tie(currentPt, currentHt) = midPoint(newPts.back(), newHts.back(), currentPt, currentHt);
+        }
+        else {
+            newHts.emplace_back(currentHt);
+            newPts.emplace_back(currentPt);
+            if (equal(currentPt, currentHt, pt2ds.at(i), heights.at(i))) ++i;
+            if (i == pt2ds.size()) {
+                newHts.emplace_back(heights.back());
+                newPts.emplace_back(pt2ds.back());
+                break;
+            }
+            currentHt = heights.at(i);
+            currentPt = pt2ds.at(i);
+        }
+    }
+    std::swap(newHts, heights);
+    std::swap(newPts, pt2ds);
+    return true;
+}
+
 ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireStartSolderJointParameters(CPtr<IBondwire> bondwire, FCoord & elevation, FCoord & thickness, std::string & material) const
 {
     auto shape = GetBondwireStartSolderJointShape(bondwire, thickness);

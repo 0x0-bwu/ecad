@@ -25,28 +25,28 @@ public:
     explicit EGridThermalNetworkBuilder(const EGridThermalModel & model);
     virtual ~EGridThermalNetworkBuilder() = default;
 
-    UPtr<ThermalNetwork<ESimVal> > Build(const std::vector<ESimVal> & iniT) const;
+    UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT) const;
 
 private:
-    void ApplyBoundaryConditionForLayer(const std::vector<ESimVal> & iniT, const EGridDataTable & dataTable, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const;
-    void ApplyUniformBoundaryConditionForLayer(ESimVal value, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<ESimVal> & network) const;
+    void ApplyBoundaryConditionForLayer(const std::vector<EFloat> & iniT, const EGridDataTable & dataTable, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<EFloat> & network) const;
+    void ApplyUniformBoundaryConditionForLayer(EFloat value, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<EFloat> & network) const;
 
 public:
-    ESimVal GetMetalComposite(const ESize3D & index) const;
-    ESimVal GetCap(ESimVal c, ESimVal rho, FCoord z, FCoord area) const;
-    ESimVal GetRes(ESimVal k1, FCoord z1, ESimVal k2, FCoord z2, FCoord area) const;
-    std::array<ESimVal, 3> GetCompositeMatK(const ESize3D & index, ESimVal refT) const;
-    std::array<ESimVal, 3> GetConductingMatK(const ESize3D & index, ESimVal refT) const;
-    std::array<ESimVal, 3> GetDielectricMatK(const ESize3D & index, ESimVal refT) const;
-    std::array<ESimVal, 3> GetConductingMatK(size_t layer, ESimVal refT) const;
-    std::array<ESimVal, 3> GetDielectircMatK(size_t layer, ESimVal refT) const;
-    std::array<ESimVal, 3> GetDefaultAirK() const;
+    EFloat GetMetalComposite(const ESize3D & index) const;
+    EFloat GetCap(EFloat c, EFloat rho, FCoord z, FCoord area) const;
+    EFloat GetRes(EFloat k1, FCoord z1, EFloat k2, FCoord z2, FCoord area) const;
+    std::array<EFloat, 3> GetCompositeMatK(const ESize3D & index, EFloat refT) const;
+    std::array<EFloat, 3> GetConductingMatK(const ESize3D & index, EFloat refT) const;
+    std::array<EFloat, 3> GetDielectricMatK(const ESize3D & index, EFloat refT) const;
+    std::array<EFloat, 3> GetConductingMatK(size_t layer, EFloat refT) const;
+    std::array<EFloat, 3> GetDielectircMatK(size_t layer, EFloat refT) const;
+    std::array<EFloat, 3> GetDefaultAirK() const;
 
-    ESimVal GetCompositeMatC(const ESize3D & index, FCoord z, FCoord area, ESimVal refT) const;
-    ESimVal GetConductingMatC(const ESize3D & index, ESimVal refT) const;
-    ESimVal GetDielectricMatC(const ESize3D & index, ESimVal refT) const;
-    ESimVal GetConductingMatRho(const ESize3D & index, ESimVal refT) const;
-    ESimVal GetDielectricMatRho(const ESize3D & index, ESimVal refT) const;
+    EFloat GetCompositeMatC(const ESize3D & index, FCoord z, FCoord area, EFloat refT) const;
+    EFloat GetConductingMatC(const ESize3D & index, EFloat refT) const;
+    EFloat GetDielectricMatC(const ESize3D & index, EFloat refT) const;
+    EFloat GetConductingMatRho(const ESize3D & index, EFloat refT) const;
+    EFloat GetDielectricMatRho(const ESize3D & index, EFloat refT) const;
 
 public:
     FCoord GetXGridLength() const;
@@ -120,7 +120,7 @@ ECAD_ALWAYS_INLINE bool EGridThermalNetworkBuilder::isValid(const ESize3D & inde
 //     explicit EGridSubThermalNetworkBuilder(const EGridThermalModel & model);
 //     virtual ~EGridSubThermalNetworkBuilder();
 
-//     UPtr<ThermalNetwork<ESimVal> > Build(size_t layer, const ESize2D & index, const std::vector<ESimVal> & iniT) const;
+//     UPtr<ThermalNetwork<EFloat> > Build(size_t layer, const ESize2D & index, const std::vector<EFloat> & iniT) const;
 // private:
 //     const EGridThermalModel & m_model;
 //     const ESize3D m_size;

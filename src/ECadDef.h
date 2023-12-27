@@ -71,19 +71,20 @@ enum EMaterialId { noMaterial = -1 };
 
 enum EMaterialType { Rigid, Fluid };
 
-enum EMaterialPropId
+enum EMaterialPropId                   // unit in SI
 {
-    Permittivity = 3,
-    Permeability = 4,
-    Conductivity = 5,
+    Permittivity = 3,                  //F/m
+    Permeability = 4,                  //H/m
+    Conductivity = 5,                  //S/m
     DielectricLossTangent = 6,
     MagneticLossTangent = 7,
-    ThermalConductivity = 14,
-    MassDensity = 34,
-    SpecificHeat = 38,
-    YoungsModulus = 39,
+    Resistivity = 8,                   //ohm·m
+    ThermalConductivity = 14,          //W/(m·K)
+    MassDensity = 34,                  //kg/m^3
+    SpecificHeat = 38,                 //J/(kg·K)
+    YoungsModulus = 39,                //Pa
     PoissonsRatio = 40,
-    ThermalExpansionCoefficient = 42,
+    ThermalExpansionCoefficient = 42,  //1/K
 };
 
 enum class EComponentType

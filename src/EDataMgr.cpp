@@ -142,17 +142,17 @@ ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(SPtr<IDatabase> da
     return database->FindMaterialDefByName(name);
 }
 
-ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateSimpleMaterialProp(EValue value)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateSimpleMaterialProp(EFloat value)
 {
     return UPtr<IMaterialProp>(new EMaterialPropValue(value));
 }
 
-ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnsiotropicMaterialProp(const std::array<EValue, 3> & values)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values)
 {
     return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
-ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::array<EValue, 9> & values)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::array<EFloat, 9> & values)
 {
     return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }

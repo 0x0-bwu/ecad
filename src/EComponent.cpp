@@ -84,12 +84,12 @@ ECAD_INLINE const ETransform2D & EComponent::GetTransform() const
     return EHierarchyObj::GetTransform();
 }
 
-ECAD_INLINE void EComponent::SetLossPower(ESimVal power)
+ECAD_INLINE void EComponent::SetLossPower(EFloat power)
 {
     m_lossPower = power;
 }
 
-ECAD_INLINE ESimVal EComponent::GetLossPower() const
+ECAD_INLINE EFloat EComponent::GetLossPower() const
 {
     return m_lossPower;
 }

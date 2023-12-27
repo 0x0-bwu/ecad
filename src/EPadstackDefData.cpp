@@ -152,7 +152,7 @@ ECAD_INLINE void EPadstackDefData::SetLayers(const std::vector<std::string> & la
         m_pads[i].lyr = layers[i];
 }
 
-ECAD_INLINE bool EPadstackDefData::SetPadParameters(ELayerId layerId, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation)
+ECAD_INLINE bool EPadstackDefData::SetPadParameters(ELayerId layerId, UPtr<EShape> shape, const EPoint2D & offset, EFloat rotation)
 {
     if(layerId == noLayer) return false;
     int size = static_cast<int>(m_pads.size());
@@ -164,7 +164,7 @@ ECAD_INLINE bool EPadstackDefData::SetPadParameters(ELayerId layerId, UPtr<EShap
     return true;
 }
 
-ECAD_INLINE bool EPadstackDefData::GetPadParameters(ELayerId layerId, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const
+ECAD_INLINE bool EPadstackDefData::GetPadParameters(ELayerId layerId, CPtr<EShape> & shape, EPoint2D & offset, EFloat & rotation) const
 {
     if(layerId == noLayer) return false;
     int size = static_cast<int>(m_pads.size());
@@ -176,24 +176,24 @@ ECAD_INLINE bool EPadstackDefData::GetPadParameters(ELayerId layerId, CPtr<EShap
     return true;
 }
 
-ECAD_INLINE bool EPadstackDefData::SetPadParameters(const std::string & layer, UPtr<EShape> shape, const EPoint2D & offset, EValue rotation)
+ECAD_INLINE bool EPadstackDefData::SetPadParameters(const std::string & layer, UPtr<EShape> shape, const EPoint2D & offset, EFloat rotation)
 {
     return SetPadParameters(GetPadLayerId(layer), std::move(shape), offset, rotation);
 }
 
-ECAD_INLINE bool EPadstackDefData::GetPadParameters(const std::string & layer, CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const
+ECAD_INLINE bool EPadstackDefData::GetPadParameters(const std::string & layer, CPtr<EShape> & shape, EPoint2D & offset, EFloat & rotation) const
 {
     return GetPadParameters(GetPadLayerId(layer), shape, offset, rotation);
 }
 
-ECAD_INLINE void EPadstackDefData::SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EValue rotation)
+ECAD_INLINE void EPadstackDefData::SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EFloat rotation)
 {
     m_via.shape = std::move(shape);
     m_via.offset = offset;
     m_via.rotation = rotation;
 }
 
-ECAD_INLINE void EPadstackDefData::GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EValue & rotation) const
+ECAD_INLINE void EPadstackDefData::GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EFloat & rotation) const
 {
     shape = m_via.shape.get();
     offset = m_via.offset;

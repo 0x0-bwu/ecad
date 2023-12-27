@@ -21,9 +21,7 @@ public:
         num_type c = 0;
         num_type hf = 0;//unit: W
         num_type htc = 0;//unit: W/k
-        std::vector<size_t> ns;
-        std::vector<num_type> rs;
-
+        std::unordered_map<size_t, num_type> ns;
         std::string msg(size_t index) const
         {
             using namespace generic::fmt;
@@ -31,8 +29,8 @@ public:
             ss << Fmt2Str("ID: %1%, T:%2%, C:%3%, HF:%4%, HTC:%5%", index, t, c, hf, htc);
             if (not ns.empty()) {
                 ss << ", N:[";
-                for (size_t i = 0; i < ns.size(); ++i)
-                    ss << Fmt2Str("%1%(%2%) ", ns.at(i), rs.at(i));
+                for (const auto & [id, r] : ns)
+                    ss << Fmt2Str("%1%(%2%) ", id, r);
                 ss << ']';
             }
             return ss.str();
@@ -85,11 +83,6 @@ public:
         return index;
     }
 
-    const std::vector<size_t> & NS(size_t node) const
-    {
-        return m_nodes[node].ns;
-    }
-
     void SetT(size_t node, num_type t)
     {
         m_nodes[node].t = t;
@@ -137,23 +130,14 @@ public:
 
     void SetR(size_t node1, size_t node2, num_type r)
     {
-        //todo eff
-        for (size_t i = 0; i < m_nodes[node1].ns.size(); ++i) {
-            if (m_nodes[node1].ns[i] == node2) {
-                r = 1 / (1 / r + 1 / m_nodes[node1].rs[i]);
-                m_nodes[node1].rs[i] = r;
-                for (size_t j = 0; j < m_nodes[node2].ns.size(); ++j) {
-                    if (m_nodes[node2].ns[j] == node1)
-                        m_nodes[node2].rs[j] = r;
-                }
-                return;
-            }
+        if (node1 > node2) std::swap(node1, node2);
+        auto & n1 = m_nodes[node1];
+        auto iter = n1.ns.find(node2);
+        if (iter != n1.ns.cend()) {
+            iter->second = 1 / (1 / r + 1 / iter->second);
+            return;
         }
-        m_nodes[node1].ns.push_back(node2);
-        m_nodes[node1].rs.push_back(r);
-
-        m_nodes[node2].ns.push_back(node1);//wbtest remove
-        m_nodes[node2].rs.push_back(r);//wbtest remove
+        n1.ns.emplace(node2, r);
     }
 
     std::vector<Node> & GetNodes()
@@ -277,12 +261,8 @@ inline std::pair<SparseMatrix<num_type>, SparseMatrix<num_type>> makeInvCandNegG
     Triplets tG, tC;
     for (size_t i = 0; i < nodes; ++i) {
         const auto & node = network[i];
-        for (size_t j = 0; j < node.ns.size(); ++j) {
-            if (auto n = node.ns.at(j); n > i) { //todo, remove ">"" check after modify to single edage 
-                if (auto r = node.rs.at(j); r > 0)
-                    mna::Stamp(tG, i, n, -num_type{1} / r);
-            }
-        }
+        for (const auto & [n, r] : node.ns)
+            mna::Stamp(tG, i, n, - 1 / r);
         if (node.htc != 0) mna::Stamp(tG, i, -node.htc);
         if (node.c > 0) mna::Stamp(tC, i, 1 / node.c);
     }
@@ -306,12 +286,8 @@ inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & net
     m.B = Matrix(nodes, source);
     for (size_t i = 0, s = 0; i < nodes; ++i) {
         const auto & node = network[i];
-        for (size_t j = 0; j < node.ns.size(); ++j) {
-            if (auto n = node.ns.at(j); n > i) { //todo, remove ">"" check after modify to single edage 
-                if (auto r = node.rs.at(j); r > 0)
-                    mna::Stamp(tG, i, n, num_type{1} / r);
-            }
-        }
+        for (const auto & [n, r] : node.ns)
+            mna::Stamp(tG, i, n, 1 / r);
         if (node.htc != 0) mna::Stamp(tG, i, node.htc);
         if (node.c > 0) mna::Stamp(tC, i, node.c);
         if (node.hf != 0 || (includeBonds && node.htc != 0))

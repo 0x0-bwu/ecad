@@ -30,16 +30,16 @@ struct ECAD_API ECompactLayout
         size_t polygon;
         Height position;
         LayerRange range;
-        ESimVal powerDensity;
-        PowerBlock(size_t polygon, Height position, LayerRange range, ESimVal powerDensity);
+        EFloat powerDensity;
+        PowerBlock(size_t polygon, Height position, LayerRange range, EFloat powerDensity);
     };
 
     struct Bondwire
     {
         ENetId netId;
-        EValue radius{0};
+        EFloat radius{0};
         EMaterialId matId;
-        EValue current{0};
+        EFloat current{0};
         std::array<size_t, 2> layer;
         std::vector<FCoord> heights;
         std::vector<EPoint2D> pt2ds;
@@ -50,13 +50,15 @@ struct ECAD_API ECompactLayout
     std::vector<Bondwire> bondwires;
     std::vector<EMaterialId> materials;
     std::vector<EPolygonData> polygons;
+    std::vector<EPoint2D> steinerPoints;
+    bool addCircleCenterAsSteinerPoints{false};
     std::unordered_map<size_t, PowerBlock> powerBlocks;
 
-    explicit ECompactLayout(CPtr<ILayoutView> layout, EValue vScale2Int);
+    explicit ECompactLayout(CPtr<ILayoutView> layout, EFloat vScale2Int);
     virtual ~ECompactLayout() = default;
     void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness);
     size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, FCoord elevation, FCoord thickness);
-    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, ESimVal totalP, FCoord elevation, FCoord thickness, EValue position = 0.9);
+    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, FCoord elevation, FCoord thickness, EFloat position = 0.9);
     void AddComponent(CPtr<IComponent> component);    
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
@@ -76,13 +78,13 @@ private:
     std::unordered_map<size_t, std::vector<size_t> > m_lyrPolygons;
     std::unordered_map<Height, size_t> m_height2Index;
     std::vector<Height> m_layerOrder;
-    EValue m_vScale2Int;
+    EFloat m_vScale2Int;
 
     CPtr<ILayoutView> m_layout;
     std::unique_ptr<eutils::ELayoutRetriever> m_retriever;
 };
 
-ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
+ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout, ECoord maxLen);
 
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {
@@ -91,11 +93,11 @@ public:
     {
         ENetId netId;
         EMaterialId matId;
-        EValue radius{0};
-        EValue current{0};
+        EFloat radius{0};
+        EFloat current{0};
         size_t id{invalidIndex};
         std::array<size_t, 2> endPoints;
-        std::array<size_t, 2> neighbors;//global index
+        std::array<std::vector<size_t>, 2> neighbors;//global index
     };
 
     using PrismaTemplate = tri::Triangulation<EPoint2D>;
@@ -103,7 +105,7 @@ public:
     {
         ENetId netId;
         EMaterialId matId;
-        ESimVal avePower{0};
+        EFloat avePower{0};
         size_t id{invalidIndex};
         size_t templateId{invalidIndex};
         inline static constexpr size_t TOP_NEIGHBOR_INDEX = 3;
@@ -140,7 +142,7 @@ public:
         std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
     };
     
-    ESimVal uniformBcSide{0};
+    EFloat uniformBcSide{0};
     BCType sideBCType{BCType::HTC};
     PrismaTemplate prismaTemplate;
     std::vector<PrismaLayer> layers;
@@ -150,11 +152,11 @@ public:
     CPtr<IMaterialDefCollection> GetMaterialLibrary() const;
 
     PrismaLayer & AppendLayer(PrismaLayer layer);
-    LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EValue radius, EValue current);
+    LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
 
-    void BuildPrismaModel(EValue scaleH2Unit, EValue scale2Meter);
+    void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
     void AddBondWire(const ECompactLayout::Bondwire & bondwire);
-    EValue Scale2Meter() const;  
+    EFloat Scale2Meter() const;  
     size_t TotalLayers() const;
     size_t TotalElements() const;
     size_t TotalLineElements() const;
@@ -165,7 +167,7 @@ public:
     size_t LineLocalIndex(size_t index) const;
     bool isPrima(size_t index) const;
 
-    const std::vector<FPoint3D> GetPoints() const { return m_points; }
+    const std::vector<FPoint3D> & GetPoints() const { return m_points; }
     const FPoint3D & GetPoint(size_t index) const { return m_points.at(index); }
     const PrismaInstance & GetPrisma(size_t index) const { return m_prismas.at(index); }
     const LineElement & GetLine(size_t index) const { return m_lines.at(index); }
@@ -176,10 +178,10 @@ public:
     size_t AddPoint(FPoint3D point);
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
 
-    size_t SearchPrismaInstance(size_t layer, const EPoint2D & pt) const;//todo, eff
+    std::vector<size_t> SearchPrismaInstances(size_t layer, const EPoint2D & pt) const;//todo, eff
 private:
-    EValue m_scaleH2Unit;
-    EValue m_scale2Meter;
+    EFloat m_scaleH2Unit;
+    EFloat m_scale2Meter;
     CPtr<ILayoutView> m_layout;
     std::vector<FPoint3D> m_points;
     std::vector<LineElement> m_lines;
@@ -187,7 +189,7 @@ private:
     std::vector<size_t> m_indexOffset;
 };
 
-ECAD_ALWAYS_INLINE EValue EPrismaThermalModel::Scale2Meter() const
+ECAD_ALWAYS_INLINE EFloat EPrismaThermalModel::Scale2Meter() const
 {
     return m_scale2Meter;
 }

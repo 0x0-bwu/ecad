@@ -156,13 +156,13 @@ namespace ecad {
         pad.shape = shape->Clone();
     }
 
-    bool EPadstackDefDataSetPadParametersWrapWithLayerId(EPadstackDefData & data, ELayerId layer, Ptr<EShape> shape, const EPoint2D & offset, EValue rotation)
+    bool EPadstackDefDataSetPadParametersWrapWithLayerId(EPadstackDefData & data, ELayerId layer, Ptr<EShape> shape, const EPoint2D & offset, EFloat rotation)
     {
         //todo, enhance, copy issue here
         return data.SetPadParameters(layer, shape->Clone(), offset, rotation);
     }
 
-    bool EPadstackDefDataSetPadParametersWrapWithLayerName(EPadstackDefData & data, const std::string & layer, Ptr<EShape> shape, const EPoint2D & offset, EValue rotation)
+    bool EPadstackDefDataSetPadParametersWrapWithLayerName(EPadstackDefData & data, const std::string & layer, Ptr<EShape> shape, const EPoint2D & offset, EFloat rotation)
     {
         //todo, enhance, copy issue here
         return data.SetPadParameters(layer, shape->Clone(), offset, rotation);
@@ -170,7 +170,7 @@ namespace ecad {
 
     object EPadstackDefDataGetPadParametersWrapWithLayerId(const EPadstackDefData & data, ELayerId layer)
     {
-        EValue rotation = 0;
+        EFloat rotation = 0;
         EPoint2D offset{0, 0};
         CPtr<EShape> shape{nullptr};
         if(!data.GetPadParameters(layer, shape, offset, rotation)) return boost::python::object();
@@ -179,7 +179,7 @@ namespace ecad {
 
     CPtr<EShape> EPadstackDefDataGetPadShapeWrapWithLayerId(const EPadstackDefData & data, ELayerId layer)
     {
-        EValue rotation = 0;
+        EFloat rotation = 0;
         EPoint2D offset{0, 0};
         CPtr<EShape> shape{nullptr};
         if(!data.GetPadParameters(layer, shape, offset, rotation)) return nullptr;
@@ -188,7 +188,7 @@ namespace ecad {
 
     object EPadstackDefDataGetPadParametersWrapWithLayerName(const EPadstackDefData & data, const std::string & layer)
     {
-        EValue rotation = 0;
+        EFloat rotation = 0;
         EPoint2D offset{0, 0};
         CPtr<EShape> shape{nullptr};
         if(!data.GetPadParameters(layer, shape, offset, rotation)) return boost::python::object();
@@ -197,14 +197,14 @@ namespace ecad {
 
     CPtr<EShape> EPadstackDefDataGetPadShapeWrapWithLayerName(const EPadstackDefData & data, const std::string & layer)
     {
-        EValue rotation = 0;
+        EFloat rotation = 0;
         EPoint2D offset{0, 0};
         CPtr<EShape> shape{nullptr};
         if(!data.GetPadParameters(layer, shape, offset, rotation)) return nullptr;
         return shape;
     }
 
-    void EPadstackDefDataSetViaParametersWrap(EPadstackDefData & data, Ptr<EShape> shape, const EPoint2D & offset, EValue rotation)
+    void EPadstackDefDataSetViaParametersWrap(EPadstackDefData & data, Ptr<EShape> shape, const EPoint2D & offset, EFloat rotation)
     {
         //todo, enhance, copy issue here
         data.SetViaParameters(shape->Clone(), offset, rotation);
@@ -212,7 +212,7 @@ namespace ecad {
 
     boost::python::tuple EPadstackDefDataGetViaParametersWrap(const EPadstackDefData & data)
     {
-        EValue rotation = 0;
+        EFloat rotation = 0;
         EPoint2D offset{0, 0};
         CPtr<EShape> shape{nullptr};
         data.GetViaParameters(shape, offset, rotation);
@@ -223,7 +223,7 @@ namespace ecad {
     {
         CPtr<EShape> shape{nullptr};
         EPoint2D offset{0, 0};
-        EValue rotation = 0;
+        EFloat rotation = 0;
         data.GetViaParameters(shape, offset, rotation);
         return shape; 
     }

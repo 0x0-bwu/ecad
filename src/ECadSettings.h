@@ -21,10 +21,10 @@ struct ELayoutPolygonMergeSettings
 struct EMetalFractionMappingSettings
 {
     std::string outFile;
-    EValue regionExtTop = 0;
-    EValue regionExtBot = 0;
-    EValue regionExtLeft = 0;
-    EValue regionExtRight = 0;
+    EFloat regionExtTop = 0;
+    EFloat regionExtBot = 0;
+    EFloat regionExtLeft = 0;
+    EFloat regionExtRight = 0;
     bool mergeGeomBeforeMapping = true;
     std::array<size_t, 2> grid = {1, 1};
     std::unordered_set<ENetId> selectNets;
@@ -37,10 +37,10 @@ struct EThermalNetworkExtractionSettings
     bool dumpSpiceFile = false;
     bool dumpDensityFile = false;
     bool dumpTemperatureFile = false;
-    EValue regionExtTop = 0;
-    EValue regionExtBot = 0;
-    EValue regionExtLeft = 0;
-    EValue regionExtRight = 0;
+    EFloat regionExtTop = 0;
+    EFloat regionExtBot = 0;
+    EFloat regionExtLeft = 0;
+    EFloat regionExtRight = 0;
     std::array<size_t, 2> grid = {1, 1};
     bool mergeGeomBeforeMetalMapping = true;
 };
@@ -48,7 +48,7 @@ struct EThermalNetworkExtractionSettings
 struct EThermalNetworkSolveSettings
 {
     size_t iteration = 10;
-    EValue residual = 0.5;
+    EFloat residual = 0.5;
     std::string spiceFile;
 };
 
@@ -56,11 +56,11 @@ struct ELayout2CtmSettings
 {
     std::string dirName;
     std::string filename;
-    EValue resolution = 10;//unit: um
-    EValue regionExtTop = 0;
-    EValue regionExtBot = 0;
-    EValue regionExtLeft = 0;
-    EValue regionExtRight = 0;
+    EFloat resolution = 10;//unit: um
+    EFloat regionExtTop = 0;
+    EFloat regionExtBot = 0;
+    EFloat regionExtLeft = 0;
+    EFloat regionExtRight = 0;
     std::unordered_set<ENetId> selectNets;
 };
 

@@ -2,6 +2,8 @@
 #include "interfaces/IMaterialDefCollection.h"
 #include "interfaces/IMaterialProp.h"
 #include "interfaces/IMaterialDef.h"
+
+#include "generic/thread/ThreadPool.hpp"
 namespace ecad::esolver {
 
 using namespace emodel;
@@ -10,34 +12,58 @@ ECAD_INLINE EPrismaThermalNetworkBuilder::EPrismaThermalNetworkBuilder(const EPr
 {
 }
 
-ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(const std::vector<ESimVal> & iniT) const
+ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EPrismaThermalNetworkBuilder::Build(const std::vector<EFloat> & iniT, size_t threads) const
 {
     const size_t size = m_model.TotalElements();
     if(iniT.size() != size) return nullptr;
 
     summary.Reset();
     summary.totalNodes = size;
-    auto network = std::make_unique<ThermalNetwork<ESimVal> >(size);
+    auto network = std::make_unique<ThermalNetwork<EFloat> >(size);
 
+    if (threads > 1) {
+        generic::thread::ThreadPool pool(threads);
+        size_t size = m_model.TotalPrismaElements();
+        size_t blocks = pool.Threads();
+        size_t blockSize = size / blocks;
+
+        size_t begin = 0;
+        for(size_t i = 0; i < blocks && blockSize > 0; ++i){
+            size_t end = begin + blockSize;
+            pool.Submit(std::bind(&EPrismaThermalNetworkBuilder::BuildPrismaElement, this, std::ref(iniT), network.get(), begin, end));
+            begin = end;
+        }
+        size_t end = size;
+        if(begin != end)
+            pool.Submit(std::bind(&EPrismaThermalNetworkBuilder::BuildPrismaElement, this, std::ref(iniT), network.get(), begin, end));        
+    }
+    else BuildPrismaElement(iniT, network.get(), 0, m_model.TotalPrismaElements());
+
+    BuildLineElement(iniT, network.get());
+    return network;
+}
+
+ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const
+{
     EThermalModel::BCType topType, botType;
     m_model.GetTopBotBCType(topType, botType);
 
-    ESimVal uniformTopBC, uniformBotBC;
+    EFloat uniformTopBC, uniformBotBC;
     m_model.GetUniformTopBotBCValue(uniformTopBC, uniformBotBC);
 
-    for (size_t i = 0; i < m_model.TotalPrismaElements(); ++i) {
+    for (size_t i = start; i < end; ++i) {
         const auto & inst = m_model.GetPrisma(i);
         if (auto p = inst.element->avePower; p > 0) {
             summary.iHeatFlow += p;
             network->AddHF(i, p);
         }
 
-        auto c = GetMaterialC(inst.element->matId, iniT.at(i));
-        auto rho = GetMaterialRho(inst.element->matId, iniT.at(i));
+        auto c = GetMatSpecificHeat(inst.element->matId, iniT.at(i));
+        auto rho = GetMatMassDensity(inst.element->matId, iniT.at(i));
         auto vol = GetPrismaVolume(i);
         network->SetC(i, c * rho * vol);
 
-        auto k = GetMaterialK(inst.element->matId, iniT.at(i));
+        auto k = GetMatThermalConductivity(inst.element->matId, iniT.at(i));
         auto ct = GetPrismaCenterPoint2D(i);
 
         const auto & neighbors = inst.neighbors;
@@ -45,7 +71,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
         for (size_t ie = 0; ie < 3; ++ie) {
             auto vArea = GetPrismaSideArea(i, ie);
             if (auto nid = neighbors.at(ie); tri::noNeighbor == nid) {
-                if (m_model.uniformBcSide != invalidSimVal) {
+                if (m_model.uniformBcSide != invalidFloat) {
                     if (EThermalModel::BCType::HTC == m_model.sideBCType) {
                         network->AddHTC(i, m_model.uniformBcSide * vArea);
                         summary.boundaryNodes += 1;
@@ -63,15 +89,12 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
                 auto ctNb = GetPrismaCenterPoint2D(nid);
                 auto vec = ctNb - ct;
                 auto dist = vec.Norm2() * m_model.Scale2Meter();
-                // auto cos2 = std::pow(vec[0] / dist, 2);
-                // auto sin2 = std::pow(vec[1] / dist, 2);
-                auto kxy = 0.5 * (k[0] + k[1]);//todo
+                auto kxy = 0.5 * (k[0] + k[1]);
                 auto dist2edge = GetPrismaCenterDist2Side(i, ie);
                 auto r1 = dist2edge / kxy / vArea;
 
-                auto kNb = GetMaterialK(nb.element->matId, iniT.at(nid));
-                // auto kNbxy = cos2 * kNb[0] + sin2 * kNb[1];
-                auto kNbxy = 0.5 * (kNb[0] + kNb[1]);//todo
+                auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nid));
+                auto kNbxy = 0.5 * (kNb[0] + kNb[1]);
                 auto r2 = (dist - dist2edge) / kNbxy / vArea;
                 network->SetR(i, nid, r1 + r2);
             }
@@ -81,7 +104,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
         //top
         auto nTop = neighbors.at(EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nTop) {
-            if (uniformTopBC != invalidSimVal) {
+            if (uniformTopBC != invalidFloat) {
                 if (EThermalModel::BCType::HTC == topType) {
                     network->AddHTC(i, uniformTopBC * hArea);
                     summary.boundaryNodes += 1;
@@ -97,14 +120,14 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
         else if (i < nTop) {
             const auto & nb = m_model.GetPrisma(nTop);
             auto hNb = GetPrismaHeight(nTop);
-            auto kNb = GetMaterialK(nb.element->matId, iniT.at(nTop));
+            auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nTop));
             auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
             network->SetR(i, nTop, r);
         }
         //bot
         auto nBot = neighbors.at(EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nBot) {
-            if (uniformBotBC != invalidSimVal) {
+            if (uniformBotBC != invalidFloat) {
                 if (EThermalModel::BCType::HTC == botType) {
                     network->AddHTC(i, uniformBotBC * hArea);
                     summary.boundaryNodes += 1;
@@ -120,20 +143,27 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
         else if (i < nBot) {
             const auto & nb = m_model.GetPrisma(nBot);
             auto hNb = GetPrismaHeight(nBot);
-            auto kNb = GetMaterialK(nb.element->matId, iniT.at(nBot));
+            auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nBot));
             auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
             network->SetR(i, nBot, r);
         }
     }
+}
+
+ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildLineElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network) const
+{
     for (size_t i = 0; i < m_model.TotalLineElements(); ++i) {
         const auto & line = m_model.GetLine(i);
         auto index = m_model.GlobalIndex(i);
-        auto rho = GetMaterialRho(line.matId, iniT.at(index));
-        auto c = GetMaterialC(line.matId, iniT.at(index));
+        auto rho = GetMatMassDensity(line.matId, iniT.at(index));
+        auto c = GetMatSpecificHeat(line.matId, iniT.at(index));
         auto v = GetLineVolume(index);
         network->SetC(index, c * rho * v);
+
+        auto jh = GetLineJouleHeat(index, iniT.at(index));
+        network->AddHF(index, jh);
     
-        auto k = GetMaterialK(line.matId, iniT.at(index));
+        auto k = GetMatThermalConductivity(line.matId, iniT.at(index));
         auto aveK = (k[0] + k[1] + k[2]) / 3;
         auto area = GetLineArea(index);
         auto l = GetLineLength(index);
@@ -145,7 +175,7 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
             }
             else if (i < nbIndex) {
                 const auto & lineNb = m_model.GetLine(m_model.LineLocalIndex(nbIndex));
-                auto kNb = GetMaterialK(lineNb.matId, iniT.at(index));
+                auto kNb = GetMatThermalConductivity(lineNb.matId, iniT.at(index));
                 auto avekNb = (kNb[0] + kNb[1] + kNb[2]) / 3;
                 auto areaNb = GetLineArea(nbIndex);
                 auto lNb = GetLineLength(nbIndex);
@@ -153,17 +183,14 @@ ECAD_INLINE UPtr<ThermalNetwork<ESimVal> > EPrismaThermalNetworkBuilder::Build(c
                 network->SetR(i, nbIndex, r);
             }
         };
-        setR(line.neighbors.front());
-        setR(line.neighbors.back());
-        //todo, joule heating
+        for (auto nb : line.neighbors.front()) setR(nb);
+        for (auto nb : line.neighbors.back()) setR(nb);
     }
-    return network;
 }
 
 ECAD_INLINE const FPoint3D & EPrismaThermalNetworkBuilder::GetPrismaVertexPoint(size_t index, size_t iv) const
 {
-    const auto & points = m_model.GetPoints();
-    return points.at(m_model.GetPrisma(index).vertices.at(iv));
+    return m_model.GetPoint(m_model.GetPrisma(index).vertices.at(iv));
 }
 
 ECAD_INLINE FPoint2D EPrismaThermalNetworkBuilder::GetPrismaVertexPoint2D(size_t index, size_t iv) const
@@ -180,7 +207,7 @@ ECAD_INLINE FPoint2D EPrismaThermalNetworkBuilder::GetPrismaCenterPoint2D(size_t
     return generic::geometry::Triangle2D<FCoord>(p0, p1, p2).Center();
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaCenterDist2Side(size_t index, size_t ie) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaCenterDist2Side(size_t index, size_t ie) const
 {
     ie %= 3;
     auto ct = GetPrismaCenterPoint2D(index);
@@ -190,7 +217,7 @@ ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaCenterDist2Side(size_t
     return std::sqrt(distSq) * m_model.Scale2Meter();
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaEdgeLength(size_t index, size_t ie) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaEdgeLength(size_t index, size_t ie) const
 {
     ie %= 3;
     auto p1 = GetPrismaVertexPoint2D(index, ie);
@@ -199,14 +226,14 @@ ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaEdgeLength(size_t inde
     return dist * m_model.Scale2Meter();
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaSideArea(size_t index, size_t ie) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaSideArea(size_t index, size_t ie) const
 {
     auto h = GetPrismaHeight(index);
     auto w = GetPrismaEdgeLength(index, ie);
     return h * w;
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaTopBotArea(size_t index) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaTopBotArea(size_t index) const
 {
     const auto & points = m_model.GetPoints();
     const auto & vs = m_model.GetPrisma(index).vertices;
@@ -214,22 +241,29 @@ ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaTopBotArea(size_t inde
     return area * m_model.Scale2Meter() * m_model.Scale2Meter();
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaVolume(size_t index) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaVolume(size_t index) const
 {
     return GetPrismaTopBotArea(index) * GetPrismaHeight(index);
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetPrismaHeight(size_t index) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaHeight(size_t index) const
 {
     return m_model.GetPrisma(index).layer->thickness * m_model.Scale2Meter();
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetLineVolume(size_t index) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineJouleHeat(size_t index, EFloat refT) const
+{
+    const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
+    auto rho = GetMatResistivity(line.matId, refT);
+    return rho * GetLineLength(index) / GetLineArea(index) * line.current * line.current;
+}
+
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineVolume(size_t index) const
 {
     return GetLineArea(index) * GetLineLength(index);
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetLineLength(size_t index) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineLength(size_t index) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     const auto & p1 = m_model.GetPoint(line.endPoints.front());
@@ -237,15 +271,15 @@ ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetLineLength(size_t index) con
     return generic::geometry::Distance(p1, p2) * m_model.Scale2Meter();
 }
 
-ECAD_INLINE EValue EPrismaThermalNetworkBuilder::GetLineArea(size_t index) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineArea(size_t index) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     return generic::math::pi * std::pow(line.radius * m_model.Scale2Meter(), 2);
 }
 
-ECAD_INLINE std::array<ESimVal, 3> EPrismaThermalNetworkBuilder::GetMaterialK(EMaterialId matId, ESimVal refT) const
+ECAD_INLINE std::array<EFloat, 3> EPrismaThermalNetworkBuilder::GetMatThermalConductivity(EMaterialId matId, EFloat refT) const
 {
-    std::array<ESimVal, 3> result;
+    std::array<EFloat, 3> result;
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
     for (size_t i = 0; i < result.size(); ++i) {
         [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::ThermalConductivity)->GetAnsiotropicProperty(refT, i, result[i]);
@@ -254,22 +288,31 @@ ECAD_INLINE std::array<ESimVal, 3> EPrismaThermalNetworkBuilder::GetMaterialK(EM
     return result;
 }
 
-ECAD_INLINE ESimVal EPrismaThermalNetworkBuilder::GetMaterialRho(EMaterialId matId, ESimVal refT) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetMatMassDensity(EMaterialId matId, EFloat refT) const
 {
-    EValue result{0};
+    EFloat result{0};
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
     [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::MassDensity)->GetSimpleProperty(refT, result);
     ECAD_ASSERT(check)
     return result;
 }
 
-ECAD_INLINE ESimVal EPrismaThermalNetworkBuilder::GetMaterialC(EMaterialId matId, ESimVal refT) const
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetMatSpecificHeat(EMaterialId matId, EFloat refT) const
 {
-    EValue result{0};
+    EFloat result{0};
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
     [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::SpecificHeat)->GetSimpleProperty(refT, result);
     ECAD_ASSERT(check)
     return result;
+}
+
+ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetMatResistivity(EMaterialId matId, EFloat refT) const
+{
+    EFloat result{0};
+    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
+    [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(refT, result);
+    ECAD_ASSERT(check)
+    return result; 
 }
 
 } // namespace ecad::esolver

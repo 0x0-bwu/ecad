@@ -8,12 +8,12 @@
 #include <queue>
 namespace ecad::emodel::etherm {
 
-ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, Height position, LayerRange range, ESimVal powerDensity)
+ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, Height position, LayerRange range, EFloat powerDensity)
  : polygon(polygon), position(position), range(std::move(range)), powerDensity(powerDensity)
 {
 }
 
-ECAD_INLINE ECompactLayout::ECompactLayout(CPtr<ILayoutView> layout, EValue vScale2Int)
+ECAD_INLINE ECompactLayout::ECompactLayout(CPtr<ILayoutView> layout, EFloat vScale2Int)
  : m_vScale2Int(vScale2Int), m_layout(layout)
 {
     m_retriever = std::make_unique<eutils::ELayoutRetriever>(m_layout);
@@ -21,6 +21,12 @@ ECAD_INLINE ECompactLayout::ECompactLayout(CPtr<ILayoutView> layout, EValue vSca
 
 ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness)
 {
+    if (addCircleCenterAsSteinerPoints) {
+        if (EShapeType::Circle == shape->GetShapeType()) {
+            auto circle = dynamic_cast<CPtr<ECircle>>(shape);
+            steinerPoints.emplace_back(circle->o);
+        }
+    }
     if (shape->hasHole()) {
         auto pwh = shape->GetPolygonWithHoles();
         AddPolygon(netId, solidMat, std::move(pwh.outline), false, elevation, thickness);
@@ -60,7 +66,7 @@ ECAD_INLINE void ECompactLayout::AddComponent(CPtr<IComponent> component)
     //todo solder ball/bump
 }
 
-ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, ESimVal totalP, FCoord elevation, FCoord thickness, EValue position)
+ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, FCoord elevation, FCoord thickness, EFloat position)
 {
     auto area = polygon.Area();
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
@@ -167,7 +173,7 @@ ECAD_INLINE ECompactLayout::LayerRange ECompactLayout::GetLayerRange(FCoord elev
     return LayerRange{elevation * m_vScale2Int, (elevation - thickness) * m_vScale2Int};
 }
 
-ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
+ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout, ECoord maxLen)
 {
     auto compact = std::make_unique<ECompactLayout>(layout, 1e6);
     //todo, reserve size   
@@ -201,6 +207,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
             bw.matId = material->GetMaterialId();
             bw.radius = bondwire->GetRadius();
             bw.netId = bondwire->GetNet();
+            bw.current = bondwire->GetCurrent();
             compact->bondwires.emplace_back(std::move(bw));
 
             if (bondwire->GetSolderJoints() && bondwire->GetSolderJoints()->GetPadstackDefData()->hasTopSolderBump()) {
@@ -286,9 +293,9 @@ ECAD_INLINE EPrismaThermalModel::PrismaLayer & EPrismaThermalModel::AppendLayer(
     return layers.emplace_back(std::move(layer));
 }
 
-ECAD_INLINE EPrismaThermalModel::LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EValue radius, EValue current)
+ECAD_INLINE EPrismaThermalModel::LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current)
 {
-    ECAD_ASSERT(TotalPrismaElements() > 0 && "should add after build prisma model")
+    ECAD_ASSERT(TotalPrismaElements() > 0/*should add after build prisma model*/)
     LineElement & element = m_lines.emplace_back(LineElement{});
     element.id = TotalPrismaElements() + m_lines.size() - 1;
     element.endPoints.front() = AddPoint(std::move(start));
@@ -300,7 +307,7 @@ ECAD_INLINE EPrismaThermalModel::LineElement & EPrismaThermalModel::AddLineEleme
     return element;
 }
 
-ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EValue scaleH2Unit, EValue scale2Meter)
+ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter)
 {
     m_scaleH2Unit = scaleH2Unit;
     m_scale2Meter = scale2Meter;
@@ -375,19 +382,19 @@ ECAD_INLINE void EPrismaThermalModel::AddBondWire(const ECompactLayout::Bondwire
         auto & line = AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current);
         //connection
         if (0 == curr) {
-            auto id = SearchPrismaInstance(bondwire.layer.front(), pts.at(curr));
-            ECAD_ASSERT(id != invalidIndex)
-            line.neighbors.front() = id;
+            auto ids = SearchPrismaInstances(bondwire.layer.front(), pts.at(curr));
+            ECAD_ASSERT(not ids.empty())
+            std::swap(line.neighbors.front(), ids);
         }
         else {
             auto & prevLine = m_lines.at(m_lines.size() - 2);
-            line.neighbors.front() = prevLine.id;
-            prevLine.neighbors.back() = line.id;
+            line.neighbors.front().emplace_back(prevLine.id);
+            prevLine.neighbors.back().emplace_back(line.id);
         }
         if (next == pts.size() - 1) {
-            auto id = SearchPrismaInstance(bondwire.layer.back(), pts.at(next));
-            ECAD_ASSERT(id != invalidIndex)
-            line.neighbors.back() = id;
+            auto ids = SearchPrismaInstances(bondwire.layer.back(), pts.at(next));
+            ECAD_ASSERT(not ids.empty())
+            std::swap(line.neighbors.back(), ids);
         }
     }
 }
@@ -412,17 +419,20 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
     return FPoint3D{pt2d[0] * m_scaleH2Unit, pt2d[1] * m_scaleH2Unit, height};
 }
 
-size_t EPrismaThermalModel::SearchPrismaInstance(size_t layer, const EPoint2D & pt) const//todo, eff
+std::vector<size_t> EPrismaThermalModel::SearchPrismaInstances(size_t layer, const EPoint2D & pt) const//todo, eff
 {
+    //todo, refactor
     using namespace generic::geometry;
+    std::vector<size_t> results;
     for (size_t i = 0; i < m_prismas.size(); ++i) {
-        const auto & inst = m_prismas.at(i);
-        if (layer != inst.layer->id) continue;
-        auto it = inst.element->templateId;
-        auto loc = tri::TriangulationUtility<EPoint2D>::GetPointTriangleLocation(prismaTemplate, it, pt);
-        if (loc != PointTriangleLocation::Outside) return i;
+        auto [lyrIdx, eleIdx] = PrismaLocalIndex(i);
+        if (lyrIdx != layer) continue;
+        auto it = m_prismas.at(i).element->templateId;
+        auto triangle = tri::TriangulationUtility<EPoint2D>::GetTriangle(prismaTemplate, it);
+        if (Contains(triangle, pt, true)) results.emplace_back(i);
+        if (not results.empty()) return results;
     }
-    return invalidIndex;
+    return results;
 }
 
 } //namespace ecad::emodel::etherm

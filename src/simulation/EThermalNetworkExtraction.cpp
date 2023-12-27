@@ -93,7 +93,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
         }
     }
 
-    ESimVal iniT = 25;
+    EFloat iniT = 25;
     constexpr bool useGridPower = true;
     auto compIter = layout->GetComponentIter();
     std::unordered_map<size_t, EGridData> gridMap;
@@ -140,7 +140,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
     // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
     // model.SetTopBotBCModel(nullptr, bcModel);
 
-    std::vector<ESimVal> results;
+    std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(model);
     // EGridThermalNetworkTransientSolver solver(model);
     EThermalNetworkSolveSettings solverSettings;
@@ -186,11 +186,11 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
     return std::make_unique<EThermalModel>(std::move(model));
 }
 
-ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout,  EValue minAlpha, EValue minLen, EValue maxLen, size_t iteration)
+ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout,  EFloat minAlpha, ECoord minLen, ECoord maxLen, size_t iteration)
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
     EPrismaThermalModel model(layout);
-    auto compact = makeCompactLayout(layout);
+    auto compact = makeCompactLayout(layout, maxLen);
     auto compactModelFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "compact.png";
     compact->WriteImgView(compactModelFile, 1024);
 
@@ -203,10 +203,11 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     auto & triangulation = model.prismaTemplate;
     MeshFlow2D::ExtractIntersections(compact->polygons, segments);
     MeshFlow2D::ExtractTopology(segments, points, edges);
+    points.insert(points.end(), compact->steinerPoints.begin(), compact->steinerPoints.end());
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
     MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, iteration);
     auto meshTemplateFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.png";
-    GeometryIO::WritePNG(meshTemplateFile, triangulation, 2048);
+    GeometryIO::WritePNG(meshTemplateFile, triangulation, 4096);
     std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
     //todo wrapper to mesh
 
@@ -298,14 +299,14 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
 
     //htc
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model.SetUniformTopBotBCValue(invalidSimVal, 2750);
-    model.uniformBcSide = invalidSimVal;
+    model.SetUniformTopBotBCValue(invalidFloat, 2750);
+    model.uniformBcSide = invalidFloat;
     // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
     // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
     // model.SetTopBotBCModel(nullptr, bcModel);
 
-    ESimVal iniT = 25;
-    std::vector<ESimVal> results;
+    EFloat iniT = 25;
+    std::vector<EFloat> results;
     EPrismaThermalNetworkStaticSolver solver(model);
     EThermalNetworkSolveSettings solverSettings;
     solver.SetSolveSettings(solverSettings);

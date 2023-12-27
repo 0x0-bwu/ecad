@@ -67,7 +67,7 @@ ECAD_INLINE std::string EChipThermalModelV1::GetLastMatelLayerInStackup() const
     return std::string{};
 }
 
-ECAD_INLINE bool EChipThermalModelV1::GetLayerHeightThickness(const std::string & name, EValue & height, EValue & thickness) const
+ECAD_INLINE bool EChipThermalModelV1::GetLayerHeightThickness(const std::string & name, EFloat & height, EFloat & thickness) const
 {
     //if metal
     for(const auto & layer : header.metalLayers) {
@@ -80,7 +80,7 @@ ECAD_INLINE bool EChipThermalModelV1::GetLayerHeightThickness(const std::string 
     //if via
     for(const auto & layer : header.viaLayers) {
         if(name == layer.name) {
-            EValue topH, topT, botH, botT;
+            EFloat topH, topT, botH, botT;
             if(GetLayerHeightThickness(layer.topLayer, topH, topT) &&
                 GetLayerHeightThickness(layer.botLayer, botH, botT)) {
                 height = topH - topT;
@@ -113,7 +113,7 @@ ECAD_INLINE void EChipThermalModelV1::BuildLayerStackup(std::string * info) cons
     m_layerStackup.reset(new ECTMv1LayerStackup);
     std::list<ECTMv1Layer> allLayers;
     for(const auto & name : header.techLayers) {
-        EValue height, thickness;
+        EFloat height, thickness;
         if(!GetLayerHeightThickness(name, height, thickness)) {
             if(info) *info += Fmt2Str("Warning: failed to get height and thickness of layer: %1%, ignored!\n", name);
         }
@@ -128,7 +128,7 @@ ECAD_INLINE void EChipThermalModelV1::BuildLayerStackup(std::string * info) cons
     allLayers.sort([](const ECTMv1Layer & l1, const ECTMv1Layer & l2){ return l1.elevation > l2.elevation; });
 
     ECTMv1Layer currLayer;
-    EValue tolerance = 1e-6;
+    EFloat tolerance = 1e-6;
     auto & names = m_layerStackup->names;
     std::vector<std::pair<double, std::list<double> > > stackups;
     while(!allLayers.empty()) {
@@ -136,9 +136,9 @@ ECAD_INLINE void EChipThermalModelV1::BuildLayerStackup(std::string * info) cons
         allLayers.pop_front();
 
         std::unordered_set<std::string> layers { currLayer.name };
-        auto stackup = std::make_pair(currLayer.elevation, std::list<EValue>());
+        auto stackup = std::make_pair(currLayer.elevation, std::list<EFloat>());
         stackup.second.push_back(currLayer.thickness);
-        while(!allLayers.empty() && math::EQ<EValue>(currLayer.elevation, allLayers.front().elevation, tolerance)) {
+        while(!allLayers.empty() && math::EQ<EFloat>(currLayer.elevation, allLayers.front().elevation, tolerance)) {
             if(info) *info += Fmt2Str("Warning: find layers in same height: %1% and %2%, merged!\n", currLayer.name, allLayers.front().name);
             currLayer = allLayers.front();
             allLayers.pop_front();

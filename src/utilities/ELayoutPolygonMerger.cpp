@@ -288,7 +288,7 @@ ECAD_INLINE void ELayoutPolygonMerger::WriteDomDmcForOneLayer(std::fstream & dom
 {
     using PolygonData = typename LayerMerger::PolygonData;
     int lyrId = static_cast<int>(layerId);
-    EValue scale = m_layout->GetCoordUnits().Scale2Unit();
+    EFloat scale = m_layout->GetCoordUnits().Scale2Unit();
     auto writeOnePolygon = [&dom, &dmc, &scale, &lyrId](const std::string & lyrName, int netId, const std::string & netName, const Polygon2D<ECoord> & p, bool isHole)
     {
         char s(32);

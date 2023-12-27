@@ -13,7 +13,7 @@ namespace ecad::ext::dmcdom {
 
 using namespace generic;
 namespace fmt = generic::fmt;
-ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EValue scale)
+ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EFloat scale)
 {
     double x{0}, y{0};
     std::stringstream(line) >> x >> y;
@@ -21,7 +21,7 @@ ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> &
     return true;
 }
 
-ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & record, EValue scale)
+ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & record, EFloat scale)
 {
     EDmcData data;
 

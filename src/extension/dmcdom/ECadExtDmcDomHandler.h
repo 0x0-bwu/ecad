@@ -22,8 +22,8 @@ struct ECAD_API EDmcData
     std::string lyrName;
 };
 
-ECAD_API bool ParseDomLine(const std::string & line, std::vector<EPoint2D> & points, EValue scale);
-ECAD_API bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & record, EValue scale);
+ECAD_API bool ParseDomLine(const std::string & line, std::vector<EPoint2D> & points, EFloat scale);
+ECAD_API bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & record, EFloat scale);
 
 class ECAD_API ECadExtDmcDomHandler
 {

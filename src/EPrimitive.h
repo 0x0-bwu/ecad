@@ -109,6 +109,9 @@ public:
     void SetSolderJoints(CPtr<IPadstackDef> s) override;
     CPtr<IPadstackDef> GetSolderJoints() const override;
 
+    void SetCurrent(EFloat current) override;
+    EFloat GetCurrent() const override;
+
     void Transform(const ETransform2D & transform) override;
 
 protected:
@@ -123,6 +126,7 @@ protected:
     std::array<bool, 2> m_flipped{false, false};
     FCoord m_radius{0};
     FCoord m_height{0};
+    EFloat m_current{0};
     CPtr<IPadstackDef> m_solderJoints{nullptr};
     EBondwireType m_bondwireType{EBondwireType::Simple};
 };

@@ -217,6 +217,7 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     ar & boost::serialization::make_nvp("flipped", m_flipped);
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("current", m_current);
     ar & boost::serialization::make_nvp("solder_joints", m_solderJoints);
     ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
@@ -234,6 +235,7 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("flipped", m_flipped);
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
+    ar & boost::serialization::make_nvp("current", m_current);
     ar & boost::serialization::make_nvp("solder_joints", m_solderJoints);
     ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
@@ -373,6 +375,16 @@ ECAD_INLINE void EBondwire::SetSolderJoints(CPtr<IPadstackDef> s)
 ECAD_INLINE CPtr<IPadstackDef> EBondwire::GetSolderJoints() const
 {
     return m_solderJoints;
+}
+
+ECAD_INLINE void EBondwire::SetCurrent(EFloat current)
+{
+    m_current = current;
+}
+
+ECAD_INLINE EFloat EBondwire::GetCurrent() const
+{
+    return m_current;
 }
 
 ECAD_INLINE void EBondwire::Transform(const ETransform2D & transform)

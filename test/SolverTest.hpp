@@ -28,14 +28,14 @@ void t_grid_thermal_model_solver_test()
     std::cout << "total nodes: " << model->TotalGrids() << std::endl;
 
     //htc
-    ESimVal iniT = 25.0;
+    EFloat iniT = 25.0;
     auto bcModel = std::make_shared<EGridBCModel>(ESize2D(size.x, size.y));
     bcModel->AddSample(iniT, EGridData(size.x, size.y, 200000));
 
     model->SetTopBotBCModel(bcModel, bcModel);
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
-    std::vector<ESimVal> results;
+    std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);
     BOOST_CHECK(solver.Solve(iniT, results));
 
