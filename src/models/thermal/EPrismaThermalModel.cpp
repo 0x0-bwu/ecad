@@ -173,7 +173,7 @@ ECAD_INLINE ECompactLayout::LayerRange ECompactLayout::GetLayerRange(FCoord elev
     return LayerRange{elevation * m_vScale2Int, (elevation - thickness) * m_vScale2Int};
 }
 
-ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout, ECoord maxLen)
+ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
 {
     auto compact = std::make_unique<ECompactLayout>(layout, 1e6);
     //todo, reserve size   
@@ -193,7 +193,10 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout, ECo
     while (auto * comp = compIter->Next()) {
         compact->AddComponent(comp);
     }
-
+    
+    const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
+    auto scale2Unit = coordUnit.Scale2Unit();
+    auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
     std::unordered_map<ELayerId, std::pair<FCoord, FCoord> > layerElevationThicknessMap;
     std::unordered_map<ELayerId, std::pair<EMaterialId, EMaterialId> > layerMaterialMap;
     auto primitives = layout->GetPrimitiveCollection();
@@ -201,7 +204,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout, ECo
         auto prim = primitives->GetPrimitive(i);
         if (auto bondwire = prim->GetBondwireFromPrimitive(); bondwire) {
             ECompactLayout::Bondwire bw;
-            [[maybe_unused]] auto check = retriever.GetBondwireSegments(bondwire, bw.pt2ds, bw.heights); { ECAD_ASSERT(check) }
+            check = retriever.GetBondwireSegmentsWithMinSeg(bondwire, bw.pt2ds, bw.heights, 20); { ECAD_ASSERT(check) }
             auto material = layout->GetDatabase()->FindMaterialDefByName(bondwire->GetMaterial());
             ECAD_ASSERT(material)
             bw.matId = material->GetMaterialId();
@@ -214,13 +217,25 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout, ECo
                 std::string sjMatName;
                 auto shape = retriever.GetBondwireStartSolderJointParameters(bondwire, elevation, thickness, sjMatName);
                 auto sjMat = layout->GetDatabase()->FindMaterialDefByName(sjMatName); { ECAD_ASSERT(sjMat) }
-                compact->AddShape(bw.netId, sjMat->GetMaterialId(), EMaterialId::noMaterial, shape.get(), elevation, thickness);
+                if (auto current = bondwire->GetCurrent(); current > 0) {
+                    EFloat resistivity;
+                    check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }
+                    auto r = resistivity * thickness / (shape->GetContour().Area() * scale2Unit * scale2Unit * scale2Meter);
+                    compact->AddPowerBlock(sjMat->GetMaterialId(), shape->GetContour(), current * r * r, elevation, thickness, 0.5);
+                }
+                else compact->AddShape(bw.netId, sjMat->GetMaterialId(), EMaterialId::noMaterial, shape.get(), elevation, thickness);
             }
 
             if (bondwire->GetSolderJoints() && bondwire->GetSolderJoints()->GetPadstackDefData()->hasBotSolderBall()) {
                 std::string sjMatName;
                 auto shape = retriever.GetBondwireEndSolderJointParameters(bondwire, elevation, thickness, sjMatName);
                 auto sjMat = layout->GetDatabase()->FindMaterialDefByName(sjMatName); { ECAD_ASSERT(sjMat) }
+                if (auto current = bondwire->GetCurrent(); current > 0) {
+                    EFloat resistivity;
+                    check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }
+                    auto r = resistivity * thickness / (shape->GetContour().Area() * scale2Unit * scale2Unit * scale2Meter);
+                    compact->AddPowerBlock(sjMat->GetMaterialId(), shape->GetContour(), current * r * r, elevation, thickness, 0.5);
+                }
                 compact->AddShape(bw.netId, sjMat->GetMaterialId(), EMaterialId::noMaterial, shape.get(), elevation, thickness);
             }
         }
@@ -430,7 +445,7 @@ std::vector<size_t> EPrismaThermalModel::SearchPrismaInstances(size_t layer, con
         auto it = m_prismas.at(i).element->templateId;
         auto triangle = tri::TriangulationUtility<EPoint2D>::GetTriangle(prismaTemplate, it);
         if (Contains(triangle, pt, true)) results.emplace_back(i);
-        if (not results.empty()) return results;
+        // if (not results.empty()) return results;
     }
     return results;
 }

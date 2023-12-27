@@ -190,7 +190,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
     EPrismaThermalModel model(layout);
-    auto compact = makeCompactLayout(layout, maxLen);
+    auto compact = makeCompactLayout(layout);
     auto compactModelFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "compact.png";
     compact->WriteImgView(compactModelFile, 1024);
 
@@ -285,10 +285,10 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     }
 
     const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
-    auto scal2H2Unit = coordUnit.Scale2Unit();
+    auto scaleH2Unit = coordUnit.Scale2Unit();
     auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
     std::cout << "scale2Meter:" << scale2Meter << std::endl;
-    model.BuildPrismaModel(scal2H2Unit, scale2Meter);
+    model.BuildPrismaModel(scaleH2Unit, scale2Meter);
 
     for (const auto & bondwire : compact->bondwires)
         model.AddBondWire(bondwire);
@@ -299,8 +299,8 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
 
     //htc
     model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model.SetUniformTopBotBCValue(invalidFloat, 2750);
-    model.uniformBcSide = invalidFloat;
+    model.SetUniformTopBotBCValue(0, 2750);
+    model.uniformBcSide = 0;
     // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
     // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
     // model.SetTopBotBCModel(nullptr, bcModel);

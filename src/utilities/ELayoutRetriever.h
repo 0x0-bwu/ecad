@@ -23,8 +23,8 @@ public:
     bool GetComponentBallBumpThickness(CPtr<IComponent> component, FCoord & elevation, FCoord & thickness) const;
     bool GetBondwireHeight(CPtr<IBondwire> bondwire, FCoord & start, FCoord & end, bool & startFlipped, bool & endFlipped) const;
     bool GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights) const;
-    bool GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, size_t minSeg) const;
-    bool GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, ECoord maxLen) const;
+    bool GetBondwireSegmentsWithMinSeg(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, size_t minSeg) const;
+    bool GetBondwireSegmentsWithMaxLen(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, ECoord maxLen) const;
     UPtr<EShape> GetBondwireStartSolderJointParameters(CPtr<IBondwire> bondwire, FCoord & elevation, FCoord & thickness, std::string & material) const;
     UPtr<EShape> GetBondwireEndSolderJointParameters(CPtr<IBondwire> bondwire, FCoord & elevation, FCoord & thickness, std::string & material) const;
     CPtr<IStackupLayer> SearchStackupLayer(FCoord height) const;

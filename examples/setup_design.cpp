@@ -123,6 +123,7 @@ void test1()
     matSolder->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(33));
     matSolder->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(200));
     matSolder->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(7360));
+    matSolder->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(11.4e-8));
 
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Micrometer);
@@ -182,7 +183,7 @@ void test1()
     auto sourceNet = eDataMgr.CreateNet(sicLayout, "Source");
 
     //wire
-    FCoord bwRadius = 2000;//um
+    FCoord bwRadius = 250;//um
     std::vector<EPoint2D> ps1 {{0, 0}, {14200000, 0}, {14200000, 3500000}, {5750000, 3500000}, {5750000, 9150000}, {0, 9150000}};
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps1)));
 
@@ -289,7 +290,7 @@ void test1()
     bondwireSolderDefData->SetTopSolderBumpMaterial(matSolder->GetName());
     bondwireSolderDefData->SetBotSolderBallMaterial(matSolder->GetName());
     
-    auto bumpR = 250000;
+    auto bumpR = bwRadius * 1.2 * 1e3;
     auto topBump = eDataMgr.CreateShapeCircle({0, 0}, bumpR);
     bondwireSolderDefData->SetTopSolderBumpParameters(std::move(topBump), 100);
     
@@ -349,7 +350,7 @@ void test1()
     esim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
     // auto model = ne.GenerateGridThermalModel(layout);
-    auto model = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(20), 100, 1e6, 1e4);
+    auto model = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(20), 10, 1e5, 1e5);
 
     EDataMgr::Instance().ShutDown();
 }

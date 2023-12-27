@@ -58,7 +58,7 @@ struct ECAD_API ECompactLayout
     virtual ~ECompactLayout() = default;
     void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness);
     size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, FCoord elevation, FCoord thickness);
-    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, FCoord elevation, FCoord thickness, EFloat position = 0.9);
+    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, FCoord elevation, FCoord thickness, EFloat position = 0.1);
     void AddComponent(CPtr<IComponent> component);    
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
@@ -84,7 +84,7 @@ private:
     std::unique_ptr<eutils::ELayoutRetriever> m_retriever;
 };
 
-ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout, ECoord maxLen);
+ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
 
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {

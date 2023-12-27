@@ -104,7 +104,7 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire,
     }
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, size_t minSeg) const
+ECAD_INLINE bool ELayoutRetriever::GetBondwireSegmentsWithMinSeg(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, size_t minSeg) const
 {
     if (pt2ds.empty()) {
         auto res =  GetBondwireSegments(bondwire, pt2ds, heights);
@@ -127,10 +127,10 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire,
     }
     std::swap(newHts, heights);
     std::swap(newPts, pt2ds);
-    return GetBondwireSegments(bondwire, pt2ds, heights, minSeg);
+    return GetBondwireSegmentsWithMinSeg(bondwire, pt2ds, heights, minSeg);
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, ECoord maxLen) const
+ECAD_INLINE bool ELayoutRetriever::GetBondwireSegmentsWithMaxLen(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<FCoord> & heights, ECoord maxLen) const
 {
     if (not GetBondwireSegments(bondwire, pt2ds, heights)) return false;
     auto maxLenSq = maxLen * maxLen;
