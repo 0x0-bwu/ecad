@@ -27,10 +27,10 @@ jobs:
         run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && cmake -Bbuild.release -G Ninja && cmake --build build.release
 
       - name: Run unit test
-        run: build/bin/EcadTest.exe
+        run: build.release/bin/EcadTest.exe
         
       - name: Run examples
-        run: build/bin/setup_design.exe
+        run: build.release/bin/setup_design.exe
 
       - name: Run PyEcad Test
         run: python py/PyEcadTest.py
