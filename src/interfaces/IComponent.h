@@ -34,6 +34,8 @@ public:
 
     virtual EFloat GetHeight() const = 0;
 
+    virtual bool GetPinLocation(const std::string & name, EPoint2D & loc) const = 0;
+
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IComponent)

@@ -1,6 +1,7 @@
 #include "EComponent.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponent)
 
+#include "interfaces/IComponentDefPin.h"
 #include "interfaces/IComponentDef.h"
 #include "EShape.h"
 
@@ -114,6 +115,14 @@ ECAD_INLINE bool EComponent::isFlipped() const
 ECAD_INLINE EFloat EComponent::GetHeight() const
 {
     return m_compDef->GetHeight();
+}
+
+ECAD_INLINE bool EComponent::GetPinLocation(const std::string & name, EPoint2D & loc) const
+{
+    auto pin = m_compDef->FindPinByName(name);
+    if (nullptr == pin) return false;
+    loc = m_transform.GetTransform() * pin->GetLocation();
+    return true; 
 }
 
 ECAD_INLINE void EComponent::PrintImp(std::ostream & os) const

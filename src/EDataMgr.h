@@ -77,6 +77,9 @@ public:
     Ptr<IComponent> CreateComponent(Ptr<ILayoutView> layout, const std::string & name, CPtr<IComponentDef> compDef,
                                     ELayerId layer, const ETransform2D & transform, bool flipped);
                                     
+    bool GetComponentPinLocation(CPtr<IComponent> component, const std::string & name, FPoint2D & location) const;
+
+
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
     Ptr<IBondwire> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, const FPoint2D & start, const FPoint2D & end, EFloat radius);

@@ -5,6 +5,7 @@
 #include <string>
 namespace ecad {
 class ICell;
+class IDatabase;
 class IPadstackDef;
 class IComponentDefPin;
 class ECAD_API IComponentDef : public Clonable<IComponentDef>, public Printable
@@ -13,6 +14,8 @@ class ECAD_API IComponentDef : public Clonable<IComponentDef>, public Printable
 public:
     virtual ~IComponentDef() = default;
     virtual const std::string & GetName() const = 0;
+
+    virtual CPtr<IDatabase> GetDatabase() const = 0;
 
     virtual void SetComponentType(EComponentType type) = 0;
     virtual EComponentType GetComponentType() const = 0;

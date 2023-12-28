@@ -17,6 +17,8 @@ public:
     EComponentDef(std::string name, CPtr<IDatabase> database);
     virtual ~EComponentDef();
 
+    CPtr<IDatabase> GetDatabase() const override;
+
     EDefinitionType GetDefinitionType() const override;
 
     const std::string & GetName() const override;

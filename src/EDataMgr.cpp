@@ -209,6 +209,14 @@ ECAD_INLINE Ptr<IComponent> EDataMgr::CreateComponent(Ptr<ILayoutView> layout, c
     return layout->CreateComponent(name, compDef, layer, transform, flipped);
 }
 
+ECAD_INLINE bool EDataMgr::GetComponentPinLocation(CPtr<IComponent> component, const std::string & name, FPoint2D & location) const
+{
+    if (nullptr == component) return false;
+    if (EPoint2D p; not component->GetPinLocation(name, p)) return false;
+    else location = component->GetComponentDef()->GetDatabase()->GetCoordUnits().toUnit(p);
+    return true;
+}
+
 ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape)
 {
     if (nullptr == layout) return nullptr;
@@ -316,8 +324,7 @@ ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId la
 ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
 {
     if(nullptr == compDef) return nullptr;
-    const auto & coordUnits = dynamic_cast<Ptr<IDefinition> >(compDef)->GetDatabase()->GetCoordUnits();
-    return compDef->CreatePin(pinName, coordUnits.toCoord(loc), type, psDef, lyr);
+    return compDef->CreatePin(pinName, compDef->GetDatabase()->GetCoordUnits().toCoord(loc), type, psDef, lyr);
 }
 
 ECAD_INLINE EDataMgr & EDataMgr::Instance()

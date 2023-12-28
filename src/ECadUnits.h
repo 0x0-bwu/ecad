@@ -224,6 +224,11 @@ public:
         std::transform(fpoints.cbegin(), fpoints.cend(), std::back_inserter(points), [&](const FPoint2D & fp){ return toCoord(fp); });
         return points;
     }
+
+    FPoint2D toUnit(const EPoint2D & p) const
+    {
+        return FPoint2D(toUnit(p[0]), toUnit(p[1]));
+    }
 };
 
 }//namespace ecad

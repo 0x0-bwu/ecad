@@ -57,6 +57,11 @@ ECAD_INLINE EComponentDef::~EComponentDef()
 {
 }
 
+ECAD_INLINE CPtr<IDatabase> EComponentDef::GetDatabase() const
+{
+    return EDefinition::GetDatabase();
+}
+
 ECAD_INLINE EDefinitionType EComponentDef::GetDefinitionType() const
 {
     return EDefinitionType::ComponentDef;

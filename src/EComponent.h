@@ -32,6 +32,8 @@ public:
 
     EFloat GetHeight() const override;
 
+    bool GetPinLocation(const std::string & name, EPoint2D & loc) const override;
+
     const std::string & GetName() const override;
 protected:
     ///Copy

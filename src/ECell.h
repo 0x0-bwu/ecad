@@ -18,21 +18,21 @@ public:
     ECell(const ECell & other);
     ECell & operator= (const ECell & other);
 
-    virtual const ECoordUnits & GetCoordUnits() const;
+    virtual const ECoordUnits & GetCoordUnits() const override;
 
     void SetDatabase(CPtr<IDatabase> database) override;
     CPtr<IDatabase> GetDatabase() const override;
     
-    virtual bool SetLayoutView(UPtr<ILayoutView> layout) { return false; }
+    virtual bool SetLayoutView(UPtr<ILayoutView> layout) override { return false; }
 
-    virtual ECellType GetCellType() const;
-    virtual Ptr<ILayoutView> GetLayoutView() const { return nullptr; }
-    virtual Ptr<ILayoutView> GetFlattenedLayoutView() { return nullptr; }
+    virtual ECellType GetCellType() const override;
+    virtual Ptr<ILayoutView> GetLayoutView() const override { return nullptr; }
+    virtual Ptr<ILayoutView> GetFlattenedLayoutView() override { return nullptr; }
 
-    EDefinitionType GetDefinitionType() const;
-    void Print(std::ostream & os) const;
-    const std::string & GetName() const;
-    std::string sUuid() const;
+    EDefinitionType GetDefinitionType() const override;
+    void Print(std::ostream & os) const override;
+    const std::string & GetName() const override;
+    std::string sUuid() const override;
     
 protected:
     ECellType m_cellType;
