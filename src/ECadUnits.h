@@ -212,6 +212,18 @@ public:
     {
         return coord * precision / generic::unit::Scale2Meter(unit);
     }
+
+    EPoint2D toCoord(const FPoint2D & fp) const
+    {
+        return EPoint2D(toCoord(fp[0]), toCoord(fp[1]));
+    }
+
+    std::vector<EPoint2D> toCoord(const std::vector<FPoint2D> & fpoints) const
+    {
+        std::vector<EPoint2D> points; points.reserve(fpoints.size());
+        std::transform(fpoints.cbegin(), fpoints.cend(), std::back_inserter(points), [&](const FPoint2D & fp){ return toCoord(fp); });
+        return points;
+    }
 };
 
 }//namespace ecad

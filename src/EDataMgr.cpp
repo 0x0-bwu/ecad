@@ -215,10 +215,31 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 
-ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius)
+ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, const FPoint2D & start, const FPoint2D & end, EFloat radius)
 {
     if (nullptr == layout) return nullptr;
-    return layout->CreateBondwire(std::move(name), net, start, end, radius);
+    const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
+    return layout->CreateBondwire(std::move(name), net, coordUnits.toCoord(start), coordUnits.toCoord(end), radius);
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
+{
+    return CreateShapeRectangle(coordUnits.toCoord(ll), coordUnits.toCoord(ur));
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeCircle(const ECoordUnits & coordUnits, const FPoint2D & loc, EFloat radius)
+{
+    return CreateShapeCircle(coordUnits.toCoord(loc), coordUnits.toCoord(radius));
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat width)
+{
+    return CreateShapePath(coordUnits.toCoord(points), coordUnits.toCoord(width));
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points)
+{
+    return CreateShapePolygon(coordUnits.toCoord(points));
 }
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur)
@@ -268,6 +289,23 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeFromTemplate(ETemplateShape ts, ET
     return UPtr<EShape>(shape);
 }
 
+ECAD_INLINE EPolygon EDataMgr::CreatePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points)
+{
+    EPolygon polygon;
+    polygon.shape.Set(coordUnits.toCoord(points));
+    return polygon;
+}
+    
+ECAD_INLINE EBox2D EDataMgr::CreateBox(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
+{
+    return EBox2D(coordUnits.toCoord(ll), coordUnits.toCoord(ur));
+}
+
+ECAD_INLINE ETransform2D EDataMgr::CreateTransform2D(const ECoordUnits & coordUnits, EFloat scale, EFloat rotation, const FVector2D & offset, EMirror2D mirror)
+{
+    return makeETransform2D(scale, rotation, coordUnits.toCoord(offset), mirror);
+}
+
 ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text)
 {
     if(nullptr == layout) return nullptr;
@@ -278,8 +316,8 @@ ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId la
 ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
 {
     if(nullptr == compDef) return nullptr;
-    const auto & coordUnit = dynamic_cast<Ptr<IDefinition> >(compDef)->GetDatabase()->GetCoordUnits();
-    return compDef->CreatePin(pinName, EPoint2D{coordUnit.toCoord(loc[0]), coordUnit.toCoord(loc[1])}, type, psDef, lyr);
+    const auto & coordUnits = dynamic_cast<Ptr<IDefinition> >(compDef)->GetDatabase()->GetCoordUnits();
+    return compDef->CreatePin(pinName, coordUnits.toCoord(loc), type, psDef, lyr);
 }
 
 ECAD_INLINE EDataMgr & EDataMgr::Instance()
@@ -301,7 +339,7 @@ void EDataMgr::SetDefaultThreads(size_t threads)
 
 size_t EDataMgr::DefaultCircleDiv() const
 {
-    return 16;
+    return m_settings.circleDiv;
 }
 
 }//namespace ecad

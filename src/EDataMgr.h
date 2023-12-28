@@ -79,16 +79,27 @@ public:
                                     
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
-    Ptr<IBondwire> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius);
+    Ptr<IBondwire> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, const FPoint2D & start, const FPoint2D & end, EFloat radius);
 
     ///Shape
+    UPtr<EShape> CreateShapeRectangle(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur);
+    UPtr<EShape> CreateShapeCircle(const ECoordUnits & coordUnits, const FPoint2D & loc, EFloat radius);
+    UPtr<EShape> CreateShapePath(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat width);
+    UPtr<EShape> CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points);
+    
     UPtr<EShape> CreateShapeRectangle(EPoint2D ll, EPoint2D ur);
     UPtr<EShape> CreateShapeCircle(EPoint2D loc, ECoord radius);
     UPtr<EShape> CreateShapePath(std::vector<EPoint2D> points, ECoord width);
     UPtr<EShape> CreateShapePolygon(std::vector<EPoint2D> points);
-    UPtr<EShape> CreateShapePolygon(Polygon2D<ECoord> polygon);
-    UPtr<EShape> CreateShapePolygonWithHoles(PolygonWithHoles2D<ECoord> pwh);
+    UPtr<EShape> CreateShapePolygon(EPolygonData polygon);
+    UPtr<EShape> CreateShapePolygonWithHoles(EPolygonWithHolesData pwh);
     UPtr<EShape> CreateShapeFromTemplate(ETemplateShape ts, ETransform2D trans = ETransform2D{});
+
+    EPolygon CreatePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points);
+    EBox2D CreateBox(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur);
+
+    ///Transform
+    ETransform2D CreateTransform2D(const ECoordUnits & coordUnits, EFloat scale, EFloat rotation, const FVector2D & offset, EMirror2D mirror = EMirror2D::No);
 
     ///Text
     Ptr<IText> CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text);

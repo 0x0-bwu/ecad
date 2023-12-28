@@ -40,7 +40,7 @@ public:
     const std::string & GetSolderFillingMaterial() const override;
 
     Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) override;
-
+    Ptr<IComponentDefPin> FindPinByName(const std::string & name) const override;
 protected:
     ///Copy
     virtual Ptr<EComponentDef> CloneImp() const override { return new EComponentDef(*this); }

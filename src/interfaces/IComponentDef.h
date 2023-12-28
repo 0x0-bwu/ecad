@@ -33,7 +33,7 @@ public:
     virtual const std::string & GetSolderFillingMaterial() const = 0;
 
     virtual Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) = 0;
-
+    virtual Ptr<IComponentDefPin> FindPinByName(const std::string & name) const = 0;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::IComponentDef)

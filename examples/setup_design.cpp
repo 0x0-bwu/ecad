@@ -34,7 +34,7 @@ void test0()
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
     auto topLayout = topCell->GetLayoutView();
-    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {5000000, -5000000}, {5000000, 5000000}, {-5000000, 5000000}});
+    auto topBouds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
     topLayout->SetBoundary(std::move(topBouds));
 
     [[maybe_unused]] auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 400, matCu->GetName(), matCu->GetName()));
@@ -42,7 +42,7 @@ void test0()
     //component
     auto compDef = eDataMgr.CreateComponentDef(database, "CPMF-1200-S080B Z-FET");
     assert(compDef);
-    compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
+    compDef->SetBondingBox(eDataMgr.CreateBox(coordUnits, FPoint2D(-2000, -2000), FPoint2D(2000, 2000)));
     compDef->SetMaterial(matCu->GetName());
     compDef->SetHeight(365);
     compDef->SetSolderFillingMaterial(matCu->GetName());
@@ -132,7 +132,7 @@ void test1()
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
     auto topLayout = topCell->GetLayoutView();
-    auto topBouds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{-5000000, -5000000}, {86000000, -5000000}, {86000000, 31000000}, {-5000000, 31000000}});
+    auto topBouds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
     topLayout->SetBoundary(std::move(topBouds));
 
     eDataMgr.CreateNet(topLayout, "Gate");
@@ -154,7 +154,7 @@ void test1()
     assert(sicLayout);
 
     //boundary
-    auto sicBonds = std::make_unique<EPolygon>(std::vector<EPoint2D>{{0, 0}, {23000000, 0}, {23000000, 26000000}, {0, 26000000}});
+    auto sicBonds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{0, 0}, {23000, 0}, {23000, 26000}, {0, 26000}}));
     sicLayout->SetBoundary(std::move(sicBonds));
 
     auto iLyrWire = sicLayout->AppendLayer(eDataMgr.CreateStackupLayer("Wire", ELayerType::ConductingLayer, 0, 400, matCu->GetName(), matAir->GetName()));
@@ -165,13 +165,16 @@ void test1()
     assert(compDef);
     compDef->SetSolderBallBumpHeight(100);
     compDef->SetSolderFillingMaterial(matSolder->GetName());
-    compDef->SetBondingBox(EBox2D{-2000000, -2000000, 2000000, 2000000});
+    compDef->SetBondingBox(eDataMgr.CreateBox(coordUnits, FPoint2D(-2000, -2000), FPoint2D(2000, 2000)));
     compDef->SetMaterial(matSiC->GetName());
     compDef->SetHeight(365);
 
+    eDataMgr.CreateComponentDefPin(compDef, "Gate1", {-1000, -1000}, EPinIOType::Receiver);
+    eDataMgr.CreateComponentDefPin(compDef, "Gate2", {-1000,  1000}, EPinIOType::Receiver);
+    
     bool flipped{false};
-    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(3450) , coordUnits.toCoord(15000))), flipped);
-    [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(19000) , coordUnits.toCoord(15000))), flipped);
+    [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3450, 15000}), flipped);
+    [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {19000, 15000}), flipped);
     assert(comp1);
     assert(comp2);
     comp1->SetLossPower(33.8);
@@ -184,102 +187,102 @@ void test1()
 
     //wire
     EFloat bwRadius = 250;//um
-    std::vector<EPoint2D> ps1 {{0, 0}, {14200000, 0}, {14200000, 3500000}, {5750000, 3500000}, {5750000, 9150000}, {0, 9150000}};
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps1)));
+    std::vector<FPoint2D> ps1 {{0, 0}, {14200, 0}, {14200, 3500}, {5750, 3500}, {5750, 9150}, {0, 9150}};
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(coordUnits, std::move(ps1)));
 
-    std::vector<EPoint2D> ps2 {{0, 10650000}, {7300000, 10650000}, {7300000, 5000000}, {14300000, 5000000}, {14300000, 19000000}, {1450000, 19000000}, {1450000, 26000000}, {0, 26000000}};
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, drainNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps2)));
+    std::vector<FPoint2D> ps2 {{0, 10650}, {7300, 10650}, {7300, 5000}, {14300, 5000}, {14300, 19000}, {1450, 19000}, {1450, 26000}, {0, 26000}};
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, drainNet->GetNetId(), eDataMgr.CreateShapePolygon(coordUnits, std::move(ps2)));
 
-    std::vector<EPoint2D> ps3 {{15750000, 0}, {23000000, 0}, {23000000, 18850000}, {18000000, 18850000}, {18000000, 26000000}, {14500000, 26000000}, {14500000, 20500000}, {15750000, 20500000}};
-    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, drainNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps3)));
+    std::vector<FPoint2D> ps3 {{15750, 0}, {23000, 0}, {23000, 18850}, {18000, 18850}, {18000, 26000}, {14500, 26000}, {14500, 20500}, {15750, 20500}};
+    eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, drainNet->GetNetId(), eDataMgr.CreateShapePolygon(coordUnits, std::move(ps3)));
 
-    auto rec1 = eDataMgr.CreateShapeRectangle(EPoint2D(2500000, 20500000), EPoint2D(4000000, 26000000));
+    auto rec1 = eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(2500, 20500), FPoint2D(4000, 26000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec1));
 
-    auto rec2 = eDataMgr.CreateShapeRectangle(EPoint2D(5000000, 20500000), EPoint2D(6500000, 26000000));
+    auto rec2 = eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(5000, 20500), FPoint2D(6500, 26000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec2));
 
-    auto rec3 = eDataMgr.CreateShapeRectangle(EPoint2D(7500000, 20500000), EPoint2D(13500000, 23000000));
+    auto rec3 = eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(7500, 20500), FPoint2D(13500, 23000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec3));
 
-    auto rec4 = eDataMgr.CreateShapeRectangle(EPoint2D(7500000, 24000000), EPoint2D(10000000, 26000000));
+    auto rec4 = eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(7500, 24000), FPoint2D(10000, 26000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec4));
 
-    auto rec5 = eDataMgr.CreateShapeRectangle(EPoint2D(11000000, 24000000), EPoint2D(13500000, 26000000));
+    auto rec5 = eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(11000, 24000), FPoint2D(13500, 26000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, ENetId::noNet, std::move(rec5));
 
-    auto rec6 = eDataMgr.CreateShapeRectangle(EPoint2D(19000000, 20500000), EPoint2D(20500000, 26000000));
+    auto rec6 = eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(19000, 20500), FPoint2D(20500, 26000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec6));
 
-    auto rec7 = eDataMgr.CreateShapeRectangle(EPoint2D(21500000, 20500000), EPoint2D(23000000, 26000000));
+    auto rec7 = eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(21500, 20500), FPoint2D(23000, 26000));
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec7));
 
     //bondwire
-    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), {4450000, 16000000}, {3000000, 7500000}, bwRadius);
+    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), {4450, 16000}, {3000, 7500}, bwRadius);
     sourceBW1->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW1->SetStartComponent(comp1);
     sourceBW1->SetEndLayer(iLyrWire, false);
     sourceBW1->SetCurrent(20);
     
-    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), {4450000, 15000000}, {3000000, 5000000}, bwRadius);
+    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), {4450, 15000}, {3000, 5000}, bwRadius);
     sourceBW2->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW2->SetStartComponent(comp1);
     sourceBW2->SetEndLayer(iLyrWire, false);
     sourceBW2->SetCurrent(20);
     
-    auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), {4450000, 14000000}, {3000000, 2500000}, bwRadius);
+    auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), {4450, 14000}, {3000, 2500}, bwRadius);
     sourceBW3->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW3->SetStartComponent(comp1);
     sourceBW3->SetEndLayer(iLyrWire, false);
     sourceBW3->SetCurrent(20);
 
-    auto sourceBW4 = eDataMgr.CreateBondwire(sicLayout, "SourceBW4", sourceNet->GetNetId(), {4450000, 16000000}, {18000000, 16000000}, bwRadius);
+    auto sourceBW4 = eDataMgr.CreateBondwire(sicLayout, "SourceBW4", sourceNet->GetNetId(), {4450, 16000}, {18000, 16000}, bwRadius);
     sourceBW4->SetStartComponent(comp1);
     sourceBW4->SetEndComponent(comp2);
     sourceBW4->SetCurrent(10);
 
-    auto sourceBW5 = eDataMgr.CreateBondwire(sicLayout, "SourceBW5", sourceNet->GetNetId(), {4450000, 15000000}, {18000000, 15000000}, bwRadius);
+    auto sourceBW5 = eDataMgr.CreateBondwire(sicLayout, "SourceBW5", sourceNet->GetNetId(), {4450, 15000}, {18000, 15000}, bwRadius);
     sourceBW5->SetStartComponent(comp1);
     sourceBW5->SetEndComponent(comp2);
     sourceBW5->SetCurrent(10);
 
-    auto sourceBW6 = eDataMgr.CreateBondwire(sicLayout, "SourceBW6", sourceNet->GetNetId(), {4450000, 14000000}, {18000000, 14000000}, bwRadius);
+    auto sourceBW6 = eDataMgr.CreateBondwire(sicLayout, "SourceBW6", sourceNet->GetNetId(), {4450, 14000}, {18000, 14000}, bwRadius);
     sourceBW6->SetStartComponent(comp1);
     sourceBW6->SetEndComponent(comp2);
     sourceBW6->SetCurrent(10);
 
-    auto drainBW1 = eDataMgr.CreateBondwire(sicLayout, "DrainBW1", drainNet->GetNetId(), {10800000, 12200000}, {19350000, 7500000}, bwRadius);
+    auto drainBW1 = eDataMgr.CreateBondwire(sicLayout, "DrainBW1", drainNet->GetNetId(), {10800, 12200}, {19350, 7500}, bwRadius);
     drainBW1->SetStartLayer(iLyrWire, false);
     drainBW1->SetEndLayer(iLyrWire, false);
 
-    auto drainBW2 = eDataMgr.CreateBondwire(sicLayout, "DrainBW2", drainNet->GetNetId(), {10800000, 10200000}, {19350000, 5500000}, bwRadius);
+    auto drainBW2 = eDataMgr.CreateBondwire(sicLayout, "DrainBW2", drainNet->GetNetId(), {10800, 10200}, {19350, 5500}, bwRadius);
     drainBW2->SetStartLayer(iLyrWire, false);
     drainBW2->SetEndLayer(iLyrWire, false);
 
-    auto drainBW3 = eDataMgr.CreateBondwire(sicLayout, "DrainBW3", drainNet->GetNetId(), {10800000,  8200000}, {19350000, 3500000}, bwRadius);
+    auto drainBW3 = eDataMgr.CreateBondwire(sicLayout, "DrainBW3", drainNet->GetNetId(), {10800,  8200}, {19350, 3500}, bwRadius);
     drainBW3->SetStartLayer(iLyrWire, false);
     drainBW3->SetEndLayer(iLyrWire, false);
 
-    auto drainBW4 = eDataMgr.CreateBondwire(sicLayout, "DrainBW4", drainNet->GetNetId(), {10800000,  6200000}, {19350000, 1500000}, bwRadius);
+    auto drainBW4 = eDataMgr.CreateBondwire(sicLayout, "DrainBW4", drainNet->GetNetId(), {10800,  6200}, {19350, 1500}, bwRadius);
     drainBW4->SetStartLayer(iLyrWire, false);
     drainBW4->SetEndLayer(iLyrWire, false);
 
-    auto gateBW1 = eDataMgr.CreateBondwire(sicLayout, "GateBW1", gateNet->GetNetId(), {2450000, 14000000}, {3250000, 24000000}, bwRadius);
+    auto gateBW1 = eDataMgr.CreateBondwire(sicLayout, "GateBW1", gateNet->GetNetId(), {2450, 14000}, {3250, 24000}, bwRadius);
     gateBW1->SetBondwireType(EBondwireType::JEDEC4); 
     gateBW1->SetStartComponent(comp1);
     gateBW1->SetEndLayer(iLyrWire, false);
 
-    auto gateBW2 = eDataMgr.CreateBondwire(sicLayout, "GateBW2", gateNet->GetNetId(), {2450000, 16000000}, {5750000, 24000000}, bwRadius);
+    auto gateBW2 = eDataMgr.CreateBondwire(sicLayout, "GateBW2", gateNet->GetNetId(), {2450, 16000}, {5750, 24000}, bwRadius);
     gateBW2->SetBondwireType(EBondwireType::JEDEC4);
     gateBW2->SetStartComponent(comp1);
     gateBW2->SetEndLayer(iLyrWire, false);
 
-    auto gateBW3 = eDataMgr.CreateBondwire(sicLayout, "GateBW3", gateNet->GetNetId(), {20000000, 16000000}, {19750000, 24000000}, bwRadius);
+    auto gateBW3 = eDataMgr.CreateBondwire(sicLayout, "GateBW3", gateNet->GetNetId(), {20000, 16000}, {19750, 24000}, bwRadius);
     gateBW3->SetBondwireType(EBondwireType::JEDEC4);
     gateBW3->SetStartComponent(comp2);
     gateBW3->SetEndLayer(iLyrWire, false);
 
-    auto gateBW4 = eDataMgr.CreateBondwire(sicLayout, "GateBW4", gateNet->GetNetId(), {20000000, 14000000}, {22250000, 24000000}, bwRadius);
+    auto gateBW4 = eDataMgr.CreateBondwire(sicLayout, "GateBW4", gateNet->GetNetId(), {20000, 14000}, {22250, 24000}, bwRadius);
     gateBW4->SetBondwireType(EBondwireType::JEDEC4);
     gateBW4->SetStartComponent(comp2);
     gateBW4->SetEndLayer(iLyrWire, false);
@@ -313,13 +316,13 @@ void test1()
     layerMap->SetMapping(iLyrWire, iLyrTopCu);
 
     //instance
-    auto inst1 = eDataMgr.CreateCellInst(topLayout, "Inst1", sicLayout, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , 0)));
+    auto inst1 = eDataMgr.CreateCellInst(topLayout, "Inst1", sicLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {0, 0}));
     inst1->SetLayerMap(layerMap);
 
-    auto inst2 = eDataMgr.CreateCellInst(topLayout, "Inst2", sicLayout, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(29, ECoordUnits::Unit::Millimeter), 0)));
+    auto inst2 = eDataMgr.CreateCellInst(topLayout, "Inst2", sicLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {29000, 0}));
     inst2->SetLayerMap(layerMap);
 
-    auto inst3 = eDataMgr.CreateCellInst(topLayout, "Inst3", sicLayout, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(58, ECoordUnits::Unit::Millimeter), 0)));
+    auto inst3 = eDataMgr.CreateCellInst(topLayout, "Inst3", sicLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {58000, 0}));
     inst3->SetLayerMap(layerMap);
 
     //flatten

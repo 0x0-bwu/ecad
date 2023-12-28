@@ -127,6 +127,11 @@ ECAD_INLINE Ptr<IComponentDefPin> EComponentDef::CreatePin(const std::string & n
     return ComponentDefPinCollection()->CreatePin(name, loc, type, psDef, lyr);
 }
 
+ECAD_INLINE Ptr<IComponentDefPin> EComponentDef::FindPinByName(const std::string & name) const
+{
+    return ComponentDefPinCollection()->FindPinByName(name);
+}
+
 ECAD_INLINE void EComponentDef::PrintImp(std::ostream & os) const
 {
     os << "COMPONENT DEFINE: " << m_name << ECAD_EOL;
