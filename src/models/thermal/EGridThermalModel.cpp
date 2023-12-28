@@ -146,12 +146,12 @@ ECAD_INLINE bool EGridThermalLayer::isMetalLayer() const
     return m_isMetal;
 }
 
-ECAD_INLINE void EGridThermalLayer::SetThickness(FCoord thickness)
+ECAD_INLINE void EGridThermalLayer::SetThickness(EFloat thickness)
 {
     m_thickness = thickness;
 }
 
-ECAD_INLINE FCoord EGridThermalLayer::GetThickness() const
+ECAD_INLINE EFloat EGridThermalLayer::GetThickness() const
 {
     return m_thickness;
 }
@@ -232,7 +232,7 @@ ECAD_INLINE ESize2D EGridThermalLayer::GetSize() const
     return ESize2D(m_metalFraction->Width(), m_metalFraction->Height());
 }
 
-ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPoint2D & ref, FCoord elevation)
+ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPoint2D & ref, EFloat elevation)
  : m_size(size), m_ref(ref), m_elevation(elevation)
 {
 
@@ -242,9 +242,9 @@ ECAD_INLINE EGridThermalModel::~EGridThermalModel()
 {
 }
 
-ECAD_INLINE FCoord EGridThermalModel::TotalThickness() const
+ECAD_INLINE EFloat EGridThermalModel::TotalThickness() const
 {
-    FCoord thickness = 0.0;
+    EFloat thickness = 0.0;
     for(const auto & layer : m_stackupLayers)
         thickness += layer.GetThickness();
     return thickness;
@@ -278,14 +278,14 @@ ECAD_INLINE const ESize2D & EGridThermalModel::GridSize() const
     return m_size;
 }
 
-ECAD_INLINE bool EGridThermalModel::SetScaleH(FCoord scaleH)
+ECAD_INLINE bool EGridThermalModel::SetScaleH(EFloat scaleH)
 {
-    if(math::LT<FCoord>(scaleH, 0)) return false;
+    if(math::LT<EFloat>(scaleH, 0)) return false;
     m_scaleH = scaleH;
     return true;
 }
 
-ECAD_INLINE FCoord EGridThermalModel::GetScaleH() const
+ECAD_INLINE EFloat EGridThermalModel::GetScaleH() const
 {
     return m_scaleH;
 }
@@ -315,7 +315,7 @@ ECAD_INLINE std::array<FCoord, 2> EGridThermalModel::GetResolution(bool scaled) 
 
 ECAD_INLINE size_t EGridThermalModel::AppendLayer(EGridThermalLayer layer)
 {
-    if (math::LT<FCoord>(layer.GetThickness(), 0)) return invalidIndex;
+    if (math::LT<EFloat>(layer.GetThickness(), 0)) return invalidIndex;
     if (layer.GetSize() != m_size) return invalidIndex;
     if (not m_stackupLayers.empty()) {
         auto & botLayer = m_stackupLayers.back();
@@ -326,12 +326,12 @@ ECAD_INLINE size_t EGridThermalModel::AppendLayer(EGridThermalLayer layer)
     return m_stackupLayers.size() - 1;
 }
 
-ECAD_INLINE void EGridThermalModel::AppendJumpConnection(ESize3D start, ESize3D end, FCoord alpha)
+ECAD_INLINE void EGridThermalModel::AppendJumpConnection(ESize3D start, ESize3D end, EFloat alpha)
 {
     m_jumpConnects.emplace_back(std::move(start), std::move(end), alpha);
 }
 
-ECAD_INLINE const std::vector<std::tuple<ESize3D, ESize3D, FCoord> > & EGridThermalModel::GetJumpConnections() const
+ECAD_INLINE const std::vector<std::tuple<ESize3D, ESize3D, EFloat> > & EGridThermalModel::GetJumpConnections() const
 {
     return m_jumpConnects;
 }

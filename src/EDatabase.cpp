@@ -206,7 +206,7 @@ ECAD_INLINE Ptr<IMaterialDef> EDatabase::CreateMaterialDef(const std::string & n
     if (EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef)) return nullptr;
 
     EMaterialId id = static_cast<EMaterialId>(GetDefinitionCollection(EDefinitionType::MaterialDef)->Size());
-    return dynamic_cast<Ptr<IMaterialDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(new EMaterialDef(name, id))));
+    return dynamic_cast<Ptr<IMaterialDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(new EMaterialDef(name, this, id))));
 }
 
 ECAD_INLINE Ptr<IMaterialDef> EDatabase::FindMaterialDefByName(const std::string & name) const
@@ -231,7 +231,7 @@ ECAD_INLINE Ptr<IComponentDef> EDatabase::CreateComponentDef(const std::string &
 {
     if(EDefinitionCollection::GetDefinition(name, EDefinitionType::ComponentDef)) return nullptr;
 
-    auto compDef = new EComponentDef(name);
+    auto compDef = new EComponentDef(name, this);
     return dynamic_cast<Ptr<IComponentDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(compDef)));
 }
 
@@ -279,7 +279,7 @@ ECAD_INLINE Ptr<IPadstackDef> EDatabase::CreatePadstackDef(const std::string & n
 {
     if(EDefinitionCollection::GetDefinition(name, EDefinitionType::PadstackDef)) return nullptr;
 
-    auto padstackDef = new EPadstackDef(name);
+    auto padstackDef = new EPadstackDef(name, this);
     return dynamic_cast<Ptr<IPadstackDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(padstackDef)));
 }
 

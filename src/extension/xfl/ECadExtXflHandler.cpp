@@ -183,7 +183,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
     int id = -1;
     int xflLayerId = 1;
     int xflMetalId = 1;
-    FCoord elevation = 0.0;
+    EFloat elevation = 0.0;
     std::vector<UPtr<ILayer> > layers;
     for(const auto & xflLyr : m_xflDB->layers){
         id++;

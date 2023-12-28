@@ -27,7 +27,7 @@ public:
     bool SetPrimitive(UPtr<IPrimitive> primitive, size_t index) override;
 
     Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) override;
-    Ptr<IBondwire> CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius) override;
+    Ptr<IBondwire> CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius) override;
     Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) override;
 
     void Map(CPtr<ILayerMap> lyrMap) override;

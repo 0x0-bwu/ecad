@@ -4,6 +4,7 @@
 #include "EDefinition.h"
 namespace ecad {
 
+class IDatabase;
 class IPadstackDef;
 class IComponentDefPin;
 class ECAD_API EComponentDef : public EDefinition, public ECollectionCollection, public IComponentDef
@@ -13,7 +14,7 @@ class ECAD_API EComponentDef : public EDefinition, public ECollectionCollection,
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EComponentDef();
 public:
-    EComponentDef(const std::string & name);
+    EComponentDef(std::string name, CPtr<IDatabase> database);
     virtual ~EComponentDef();
 
     EDefinitionType GetDefinitionType() const override;
@@ -29,11 +30,11 @@ public:
     void SetMaterial(const std::string & name) override;
     const std::string & GetMaterial() const override;
 
-    void SetHeight(FCoord height) override;
-    FCoord GetHeight() const override;
+    void SetHeight(EFloat height) override;
+    EFloat GetHeight() const override;
 
-    void SetSolderBallBumpHeight(FCoord height) override;
-    FCoord GetSolderBallBumpHeight() const override;
+    void SetSolderBallBumpHeight(EFloat height) override;
+    EFloat GetSolderBallBumpHeight() const override;
 
     void SetSolderFillingMaterial(const std::string & name) override;
     const std::string & GetSolderFillingMaterial() const override;
@@ -48,8 +49,8 @@ protected:
 protected:
     EComponentType m_type = EComponentType::Invalid;
     EBox2D m_bondingBox;
-    FCoord m_height = 0;
-    FCoord m_solderHeight = 0;
+    EFloat m_height = 0;
+    EFloat m_solderHeight = 0;
     std::string m_material;
     std::string m_solderFillingMaterial;
 };

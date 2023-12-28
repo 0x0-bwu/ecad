@@ -41,7 +41,7 @@ struct ECAD_API ECompactLayout
         EMaterialId matId;
         EFloat current{0};
         std::array<size_t, 2> layer;
-        std::vector<FCoord> heights;
+        std::vector<EFloat> heights;
         std::vector<EPoint2D> pt2ds;
     };
 
@@ -56,9 +56,9 @@ struct ECAD_API ECompactLayout
 
     explicit ECompactLayout(CPtr<ILayoutView> layout, EFloat vScale2Int);
     virtual ~ECompactLayout() = default;
-    void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness);
-    size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, FCoord elevation, FCoord thickness);
-    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, FCoord elevation, FCoord thickness, EFloat position = 0.1);
+    void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness);
+    size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness);
+    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat position = 0.1);
     void AddComponent(CPtr<IComponent> component);    
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
@@ -67,10 +67,10 @@ struct ECAD_API ECompactLayout
     size_t TotalLayers() const;
     bool hasPolygon(size_t layer) const;
     size_t SearchPolygon(size_t layer, const EPoint2D & pt) const;
-    bool GetLayerHeightThickness(size_t layer, FCoord & elevation, FCoord & thickness) const;
+    bool GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const;
     const EPolygonData & GetLayoutBoundary() const;
 private:
-    LayerRange GetLayerRange(FCoord elevation, FCoord thickness) const;
+    LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
 private:
     using RtVal = std::pair<EBox2D, size_t>;
     using Rtree = boost::geometry::index::rtree<RtVal, boost::geometry::index::rstar<8>>;
@@ -116,8 +116,8 @@ public:
     struct PrismaLayer
     {
         size_t id;
-        FCoord elevation;
-        FCoord thickness;
+        EFloat elevation;
+        EFloat thickness;
         std::vector<PrismaElement> elements;
         
         PrismaElement & operator[] (size_t index) { return elements[index]; }

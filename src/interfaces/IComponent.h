@@ -32,7 +32,7 @@ public:
     virtual void SetFlipped(bool flipped) = 0;
     virtual bool isFlipped() const = 0;
 
-    virtual FCoord GetHeight() const = 0;
+    virtual EFloat GetHeight() const = 0;
 
 };
 }//namespace ecad

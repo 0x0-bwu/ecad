@@ -33,8 +33,8 @@ private:
 
 public:
     EFloat GetMetalComposite(const ESize3D & index) const;
-    EFloat GetCap(EFloat c, EFloat rho, FCoord z, FCoord area) const;
-    EFloat GetRes(EFloat k1, FCoord z1, EFloat k2, FCoord z2, FCoord area) const;
+    EFloat GetCap(EFloat c, EFloat rho, EFloat z, EFloat area) const;
+    EFloat GetRes(EFloat k1, EFloat z1, EFloat k2, EFloat z2, EFloat area) const;
     std::array<EFloat, 3> GetCompositeMatK(const ESize3D & index, EFloat refT) const;
     std::array<EFloat, 3> GetConductingMatK(const ESize3D & index, EFloat refT) const;
     std::array<EFloat, 3> GetDielectricMatK(const ESize3D & index, EFloat refT) const;
@@ -42,19 +42,19 @@ public:
     std::array<EFloat, 3> GetDielectircMatK(size_t layer, EFloat refT) const;
     std::array<EFloat, 3> GetDefaultAirK() const;
 
-    EFloat GetCompositeMatC(const ESize3D & index, FCoord z, FCoord area, EFloat refT) const;
+    EFloat GetCompositeMatC(const ESize3D & index, EFloat z, EFloat area, EFloat refT) const;
     EFloat GetConductingMatC(const ESize3D & index, EFloat refT) const;
     EFloat GetDielectricMatC(const ESize3D & index, EFloat refT) const;
     EFloat GetConductingMatRho(const ESize3D & index, EFloat refT) const;
     EFloat GetDielectricMatRho(const ESize3D & index, EFloat refT) const;
 
 public:
-    FCoord GetXGridLength() const;
-    FCoord GetYGridLength() const;
-    FCoord GetZGridLength(size_t layer) const;
-    FCoord GetXGridArea(size_t layer) const;
-    FCoord GetYGridArea(size_t layer) const;
-    FCoord GetZGridArea() const;
+    EFloat GetXGridLength() const;
+    EFloat GetYGridLength() const;
+    EFloat GetZGridLength(size_t layer) const;
+    EFloat GetXGridArea(size_t layer) const;
+    EFloat GetYGridArea(size_t layer) const;
+    EFloat GetZGridArea() const;
     size_t GetFlattenIndex(const ESize3D & index) const;
     size_t GetFlattenNeighbor(size_t index, Orientation o) const;
     size_t GetFlattenNeighbor(ESize3D index, Orientation o) const;
@@ -68,32 +68,32 @@ private:
     const ESize3D m_size;
 };
 
-ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetXGridLength() const
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetXGridLength() const
 {
     return m_model.GetResolution().at(0) * m_model.GetScaleH();
 }
 
-ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetYGridLength() const
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetYGridLength() const
 {
     return m_model.GetResolution().at(1) * m_model.GetScaleH();
 }
 
-ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetZGridLength(size_t layer) const
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetZGridLength(size_t layer) const
 {
     return m_model.GetLayers().at(layer).GetThickness();
 }
 
-ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetXGridArea(size_t layer) const
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetXGridArea(size_t layer) const
 {
     return GetZGridLength(layer) * GetYGridLength();
 }
 
-ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetYGridArea(size_t layer) const
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetYGridArea(size_t layer) const
 {
     return GetZGridLength(layer) * GetXGridLength();
 }
 
-ECAD_ALWAYS_INLINE FCoord EGridThermalNetworkBuilder::GetZGridArea() const
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetZGridArea() const
 {
     return GetXGridLength() * GetYGridLength();
 }

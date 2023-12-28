@@ -17,11 +17,11 @@ public:
 
     virtual const ECoordUnits & GetCoordUnits() const = 0;
 
-    virtual void SetDatabase(Ptr<IDatabase> database) = 0;
+    virtual void SetDatabase(CPtr<IDatabase> database) = 0;
     virtual bool SetLayoutView(UPtr<ILayoutView> layout) = 0;
 
     virtual ECellType GetCellType() const = 0;
-    virtual Ptr<IDatabase> GetDatabase() const = 0;
+    virtual CPtr<IDatabase> GetDatabase() const = 0;
     virtual Ptr<ILayoutView> GetLayoutView() const = 0;
     virtual Ptr<ILayoutView> GetFlattenedLayoutView() = 0;
 };

@@ -248,7 +248,7 @@ ECAD_INLINE EBondwire::EBondwire()
 {
 }
 
-ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius)
  : EPrimitive(std::move(name), ELayerId::noLayer, net), m_location({std::move(start), std::move(end)}), m_radius(radius)
 {
     m_type = EPrimitiveType::Bondwire;
@@ -269,12 +269,12 @@ ECAD_INLINE ENetId EBondwire::GetNet() const
     return EPrimitive::GetNet();
 }
 
-ECAD_INLINE void EBondwire::SetRadius(FCoord r)
+ECAD_INLINE void EBondwire::SetRadius(EFloat r)
 {
     m_radius = r;
 }
 
-ECAD_INLINE FCoord EBondwire::GetRadius() const
+ECAD_INLINE EFloat EBondwire::GetRadius() const
 {
     return m_radius;
 }
@@ -335,12 +335,12 @@ ECAD_INLINE EBondwireType EBondwire::GetBondwireType() const
     return m_bondwireType;
 }
 
-ECAD_INLINE void EBondwire::SetHeight(FCoord height)
+ECAD_INLINE void EBondwire::SetHeight(EFloat height)
 {
     m_height = height;
 }
 
-ECAD_INLINE FCoord EBondwire::GetHeight() const
+ECAD_INLINE EFloat EBondwire::GetHeight() const
 {
     return m_height;
 }

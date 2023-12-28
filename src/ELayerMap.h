@@ -10,10 +10,10 @@ class ECAD_API ELayerMap : public EDefinition, public ILayerMap
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ELayerMap();
-    ELayerMap(const std::string & name, Ptr<IDatabase> database);
+    ELayerMap(std::string name, CPtr<IDatabase> database);
     virtual ~ELayerMap();
 
-    Ptr<IDatabase> GetDatabase() const override;
+    CPtr<IDatabase> GetDatabase() const override;
 
     EDefinitionType GetDefinitionType() const override;
 
@@ -33,7 +33,6 @@ protected:
 
 protected:
     LayerIdMap m_layerIdMap;
-    Ptr<IDatabase> m_database;
 };
 
 ECAD_ALWAYS_INLINE void ELayerMap::SetName(std::string name)

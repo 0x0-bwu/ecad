@@ -200,14 +200,14 @@ ECAD_INLINE void EPadstackDefData::GetViaParameters(CPtr<EShape> & shape, EPoint
     rotation = m_via.rotation;
 }
 
-ECAD_INLINE void EPadstackDefData::SetTopSolderBumpParameters(UPtr<EShape> shape, FCoord thickness)
+ECAD_INLINE void EPadstackDefData::SetTopSolderBumpParameters(UPtr<EShape> shape, EFloat thickness)
 {
     auto & topBump = m_solderBumpBall.first;
     topBump.shape = std::move(shape);
     topBump.thickness = thickness;
 }
 
-ECAD_INLINE bool EPadstackDefData::GetTopSolderBumpParameters(CPtr<EShape> & shape, FCoord & thickness) const
+ECAD_INLINE bool EPadstackDefData::GetTopSolderBumpParameters(CPtr<EShape> & shape, EFloat & thickness) const
 {
     if (not hasTopSolderBump()) return false;
     const auto & topBump = m_solderBumpBall.first;
@@ -216,14 +216,14 @@ ECAD_INLINE bool EPadstackDefData::GetTopSolderBumpParameters(CPtr<EShape> & sha
     return true;
 }
 
-ECAD_INLINE void EPadstackDefData::SetBotSolderBallParameters(UPtr<EShape> shape, FCoord thickness)
+ECAD_INLINE void EPadstackDefData::SetBotSolderBallParameters(UPtr<EShape> shape, EFloat thickness)
 {
     auto & botBall = m_solderBumpBall.second;
     botBall.shape = std::move(shape);
     botBall.thickness = thickness;
 }
 
-ECAD_INLINE bool EPadstackDefData::GetBotSolderBallParameters(CPtr<EShape> & shape, FCoord & thickness) const
+ECAD_INLINE bool EPadstackDefData::GetBotSolderBallParameters(CPtr<EShape> & shape, EFloat & thickness) const
 {
     if (not hasBotSolderBall()) return false;
     const auto & botBall = m_solderBumpBall.second;

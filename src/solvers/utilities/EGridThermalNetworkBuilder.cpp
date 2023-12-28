@@ -188,12 +188,12 @@ ECAD_INLINE EFloat EGridThermalNetworkBuilder::GetMetalComposite(const ESize3D &
     return m_model.GetLayers().at(index.z).GetMetalFraction(index.x, index.y);
 }
 
-ECAD_INLINE EFloat EGridThermalNetworkBuilder::GetCap(EFloat c, EFloat rho, FCoord z, FCoord area) const
+ECAD_INLINE EFloat EGridThermalNetworkBuilder::GetCap(EFloat c, EFloat rho, EFloat z, EFloat area) const
 {
     return c * rho * z * area;
 }
 
-ECAD_INLINE EFloat EGridThermalNetworkBuilder::GetRes(EFloat k1, FCoord z1, EFloat k2, FCoord z2, FCoord area) const
+ECAD_INLINE EFloat EGridThermalNetworkBuilder::GetRes(EFloat k1, EFloat z1, EFloat k2, EFloat z2, EFloat area) const
 {
     return (z1 / k1 + z2 / k2) / area;
 }
@@ -242,7 +242,7 @@ ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder::GetDefaultAirK() c
     return std::array<EFloat, 3>{0.026, 0.026, 0.026};
 }
 
-ECAD_INLINE EFloat EGridThermalNetworkBuilder::GetCompositeMatC(const ESize3D & index, FCoord z, FCoord area, EFloat refT) const
+ECAD_INLINE EFloat EGridThermalNetworkBuilder::GetCompositeMatC(const ESize3D & index, EFloat z, EFloat area, EFloat refT) const
 {
     auto mCap = GetCap(GetConductingMatC(index, refT), GetConductingMatRho(index, refT), z, area);
     auto dCap = GetCap(GetDielectricMatC(index, refT), GetConductingMatRho(index, refT), z, area);

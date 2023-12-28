@@ -49,7 +49,7 @@ public:
     EBump(const EBump & other);
     EBump & operator= (const EBump & other);
 
-    FCoord thickness = 0;
+    EFloat thickness = 0;
     UPtr<EShape> shape = nullptr;  
     std::string material;
 };
@@ -73,10 +73,10 @@ public:
     void SetViaParameters(UPtr<EShape> shape, const EPoint2D & offset, EFloat rotation) override;
     void GetViaParameters(CPtr<EShape> & shape, EPoint2D & offset, EFloat & rotation) const override;
     
-    void SetTopSolderBumpParameters(UPtr<EShape> shape, FCoord thickness) override;
-    bool GetTopSolderBumpParameters(CPtr<EShape> & shape, FCoord & thickness) const override;
-    void SetBotSolderBallParameters(UPtr<EShape> shape, FCoord thickness) override;
-    bool GetBotSolderBallParameters(CPtr<EShape> & shape, FCoord & thickness) const override;
+    void SetTopSolderBumpParameters(UPtr<EShape> shape, EFloat thickness) override;
+    bool GetTopSolderBumpParameters(CPtr<EShape> & shape, EFloat & thickness) const override;
+    void SetBotSolderBallParameters(UPtr<EShape> shape, EFloat thickness) override;
+    bool GetBotSolderBallParameters(CPtr<EShape> & shape, EFloat & thickness) const override;
 
     void SetTopSolderBumpMaterial(const std::string & material) override;
     const std::string & GetTopSolderBumpMaterial() const override;

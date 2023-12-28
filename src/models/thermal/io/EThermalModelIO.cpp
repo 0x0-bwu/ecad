@@ -116,7 +116,7 @@ ECAD_INLINE UPtr<EChipThermalModelV1> makeChipThermalModelV1FromGridThermalModel
     header.tiles = tiles;
     header.temperatures = { 25.0, 50.0, 75.0, 100.0, 125.0 };
 
-    FCoord elevation = pModel->TotalThickness() * 1e6;//m to um
+    EFloat elevation = pModel->TotalThickness() * 1e6;//m to um
     for(const auto & layer : pModel->GetLayers()) {
         ECTMv1Layer ctmLayer;
         ctmLayer.name = layer.GetName();

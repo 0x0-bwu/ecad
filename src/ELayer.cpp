@@ -134,22 +134,22 @@ ECAD_INLINE ELayerType EStackupLayer::GetLayerType() const
     return ELayer::GetLayerType();
 }
 
-ECAD_INLINE void EStackupLayer::SetElevation(FCoord elevation)
+ECAD_INLINE void EStackupLayer::SetElevation(EFloat elevation)
 {
     m_elevation = elevation;
 }
 
-ECAD_INLINE FCoord EStackupLayer::GetElevation() const
+ECAD_INLINE EFloat EStackupLayer::GetElevation() const
 {
     return m_elevation;
 }
 
-ECAD_INLINE void EStackupLayer::SetThickness(FCoord thickness)
+ECAD_INLINE void EStackupLayer::SetThickness(EFloat thickness)
 {
     m_thickness = thickness;
 }
 
-ECAD_INLINE FCoord EStackupLayer::GetThickness() const
+ECAD_INLINE EFloat EStackupLayer::GetThickness() const
 {
     return m_thickness;
 }

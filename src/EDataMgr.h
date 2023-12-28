@@ -40,7 +40,7 @@ public:
     Ptr<INet> FindNetByName(Ptr<ILayoutView> layout, const std::string & name);
 
     ///Layer
-    UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness,
+    UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, EFloat elevation, EFloat thickness,
                                     const std::string & conductingMat = sDefaultConductingMat,
                                     const std::string & dirlectricMat = sDefaultDielectricMat);
     
@@ -79,7 +79,7 @@ public:
                                     
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
-    Ptr<IBondwire> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
+    Ptr<IBondwire> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius);
 
     ///Shape
     UPtr<EShape> CreateShapeRectangle(EPoint2D ll, EPoint2D ur);
@@ -94,7 +94,7 @@ public:
     Ptr<IText> CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text);
 
     ///ComponentDefPin
-    Ptr<IComponentDefPin> CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
+    Ptr<IComponentDefPin> CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
     
     ///Settings
     size_t DefaultThreads() const;

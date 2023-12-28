@@ -19,7 +19,7 @@ ECAD_INLINE ECompactLayout::ECompactLayout(CPtr<ILayoutView> layout, EFloat vSca
     m_retriever = std::make_unique<eutils::ELayoutRetriever>(m_layout);
 }
 
-ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, FCoord elevation, FCoord thickness)
+ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness)
 {
     if (addCircleCenterAsSteinerPoints) {
         if (EShapeType::Circle == shape->GetShapeType()) {
@@ -36,7 +36,7 @@ ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EM
     else AddPolygon(netId, solidMat, shape->GetContour(), false, elevation, thickness);
 }
 
-ECAD_INLINE size_t ECompactLayout::AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, FCoord elevation, FCoord thickness)
+ECAD_INLINE size_t ECompactLayout::AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness)
 {
     auto layerRange = GetLayerRange(elevation, thickness);
     if (not isValid(layerRange)) return invalidIndex;
@@ -50,7 +50,7 @@ ECAD_INLINE size_t ECompactLayout::AddPolygon(ENetId netId, EMaterialId matId, E
 
 ECAD_INLINE void ECompactLayout::AddComponent(CPtr<IComponent> component)
 {
-    FCoord elevation, thickness;
+    EFloat elevation, thickness;
     auto totalP = component->GetLossPower();
     auto boundary = toPolygon(component->GetBoundingBox());
     auto material = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetMaterial()); { ECAD_ASSERT(material) }
@@ -66,7 +66,7 @@ ECAD_INLINE void ECompactLayout::AddComponent(CPtr<IComponent> component)
     //todo solder ball/bump
 }
 
-ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, FCoord elevation, FCoord thickness, EFloat position)
+ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat position)
 {
     auto area = polygon.Area();
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
@@ -155,11 +155,11 @@ ECAD_INLINE size_t ECompactLayout::SearchPolygon(size_t layer, const EPoint2D & 
     return invalidIndex;
 }
 
-ECAD_INLINE bool ECompactLayout::GetLayerHeightThickness(size_t layer, FCoord & elevation, FCoord & thickness) const
+ECAD_INLINE bool ECompactLayout::GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const
 {
     if (layer >= TotalLayers()) return false;
-    elevation = FCoord(m_layerOrder.at(layer)) / m_vScale2Int;
-    thickness = elevation - FCoord(m_layerOrder.at(layer + 1)) / m_vScale2Int;
+    elevation = EFloat(m_layerOrder.at(layer)) / m_vScale2Int;
+    thickness = elevation - EFloat(m_layerOrder.at(layer + 1)) / m_vScale2Int;
     return true;
 }
 
@@ -168,7 +168,7 @@ ECAD_INLINE const EPolygonData & ECompactLayout::GetLayoutBoundary() const
     return polygons.front();
 }
 
-ECAD_INLINE ECompactLayout::LayerRange ECompactLayout::GetLayerRange(FCoord elevation, FCoord thickness) const
+ECAD_INLINE ECompactLayout::LayerRange ECompactLayout::GetLayerRange(EFloat elevation, EFloat thickness) const
 {
     return LayerRange{elevation * m_vScale2Int, (elevation - thickness) * m_vScale2Int};
 }
@@ -180,7 +180,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
 
     eutils::ELayoutRetriever retriever(layout);
     [[maybe_unused]] bool check;
-    FCoord elevation, thickness;
+    EFloat elevation, thickness;
     std::vector<CPtr<IStackupLayer> > stackupLayers;
     layout->GetStackupLayers(stackupLayers);
     for (auto stackupLayer : stackupLayers) {
@@ -197,7 +197,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
     const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
     auto scale2Unit = coordUnit.Scale2Unit();
     auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
-    std::unordered_map<ELayerId, std::pair<FCoord, FCoord> > layerElevationThicknessMap;
+    std::unordered_map<ELayerId, std::pair<EFloat, EFloat> > layerElevationThicknessMap;
     std::unordered_map<ELayerId, std::pair<EMaterialId, EMaterialId> > layerMaterialMap;
     auto primitives = layout->GetPrimitiveCollection();
     for (size_t i = 0; i < primitives->Size(); ++i) {
@@ -426,7 +426,7 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
     const auto & triangles = prismaTemplate.triangles;
     const auto & element = layers.at(lyrIndex).elements.at(eleIndex);
     const auto & triangle = triangles.at(element.templateId);
-    FCoord height = vtxIndex < 3 ? layers.at(lyrIndex).elevation :
+    EFloat height = vtxIndex < 3 ? layers.at(lyrIndex).elevation :
             isBotLayer(lyrIndex) ? layers.at(lyrIndex).elevation - layers.at(lyrIndex).thickness :
                                    layers.at(lyrIndex + 1).elevation;
     vtxIndex = vtxIndex % 3;

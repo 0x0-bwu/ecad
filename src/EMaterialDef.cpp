@@ -31,12 +31,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialDef)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EMaterialDef::EMaterialDef()
- : EMaterialDef(std::string{}, EMaterialId::noMaterial)
+ : EMaterialDef(std::string{}, nullptr, EMaterialId::noMaterial)
 {
 }
 
-ECAD_INLINE EMaterialDef::EMaterialDef(std::string name, EMaterialId id)
- : EDefinition(std::move(name)), m_id(id)
+ECAD_INLINE EMaterialDef::EMaterialDef(std::string name, CPtr<IDatabase> database, EMaterialId id)
+ : EDefinition(std::move(name), database), m_id(id)
 {
 }
 

@@ -8,9 +8,9 @@ class IPadstackDefData;
 class ECAD_API EPadstackDef : public EDefinition, public IPadstackDef
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-public:
     EPadstackDef();
-    EPadstackDef(std::string name);
+public:
+    EPadstackDef(std::string name, CPtr<IDatabase> database);
     virtual ~EPadstackDef();
 
     ///Copy

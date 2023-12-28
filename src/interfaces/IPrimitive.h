@@ -51,8 +51,8 @@ public:
     virtual void SetNet(ENetId net) = 0;
     virtual ENetId GetNet() const = 0;
     
-    virtual void SetRadius(FCoord r) = 0;
-    virtual FCoord GetRadius() const = 0;
+    virtual void SetRadius(EFloat r) = 0;
+    virtual EFloat GetRadius() const = 0;
 
     virtual const EPoint2D & GetStartPt() const = 0;
     virtual const EPoint2D & GetEndPt() const = 0;
@@ -69,8 +69,8 @@ public:
     virtual void SetBondwireType(EBondwireType type) = 0;
     virtual EBondwireType GetBondwireType() const = 0;
 
-    virtual void SetHeight(FCoord height) = 0;
-    virtual FCoord GetHeight() const = 0;
+    virtual void SetHeight(EFloat height) = 0;
+    virtual EFloat GetHeight() const = 0;
 
     virtual void SetStartComponent(CPtr<IComponent> comp) = 0;
     virtual CPtr<IComponent> GetStartComponent() const = 0;

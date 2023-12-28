@@ -30,7 +30,7 @@ public:
     void SetFlipped(bool flipped) override;
     bool isFlipped() const override;
 
-    FCoord GetHeight() const override;
+    EFloat GetHeight() const override;
 
     const std::string & GetName() const override;
 protected:

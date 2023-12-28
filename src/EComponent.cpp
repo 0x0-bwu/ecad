@@ -111,7 +111,7 @@ ECAD_INLINE bool EComponent::isFlipped() const
     return m_flipped;
 }
 
-ECAD_INLINE FCoord EComponent::GetHeight() const
+ECAD_INLINE EFloat EComponent::GetHeight() const
 {
     return m_compDef->GetHeight();
 }

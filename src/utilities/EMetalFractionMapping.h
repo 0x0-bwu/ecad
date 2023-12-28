@@ -41,8 +41,8 @@ private:
 struct EStackupLayerInfo
 {
     bool isMetal;
-    FCoord elevation;
-    FCoord thickness;
+    EFloat elevation;
+    EFloat thickness;
     std::string name;
 };
 

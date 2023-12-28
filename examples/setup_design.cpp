@@ -183,7 +183,7 @@ void test1()
     auto sourceNet = eDataMgr.CreateNet(sicLayout, "Source");
 
     //wire
-    FCoord bwRadius = 250;//um
+    EFloat bwRadius = 250;//um
     std::vector<EPoint2D> ps1 {{0, 0}, {14200000, 0}, {14200000, 3500000}, {5750000, 3500000}, {5750000, 9150000}, {0, 9150000}};
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(std::move(ps1)));
 

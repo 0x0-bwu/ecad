@@ -23,11 +23,11 @@ public:
     virtual void SetMaterial(const std::string & name) = 0;
     virtual const std::string & GetMaterial() const = 0;
 
-    virtual void SetHeight(FCoord height) = 0;
-    virtual FCoord GetHeight() const = 0;
+    virtual void SetHeight(EFloat height) = 0;
+    virtual EFloat GetHeight() const = 0;
 
-    virtual void SetSolderBallBumpHeight(FCoord height) = 0;
-    virtual FCoord GetSolderBallBumpHeight() const = 0;
+    virtual void SetSolderBallBumpHeight(EFloat height) = 0;
+    virtual EFloat GetSolderBallBumpHeight() const = 0;
 
     virtual void SetSolderFillingMaterial(const std::string & name) = 0;
     virtual const std::string & GetSolderFillingMaterial() const = 0;

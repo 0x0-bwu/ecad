@@ -11,7 +11,7 @@ class ECAD_API ECell : public EDefinition, public ICell
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ECell();
-    explicit ECell(std::string name, Ptr<IDatabase> database);
+    explicit ECell(std::string name, CPtr<IDatabase> database);
     virtual ~ECell();
     
     ///Copy
@@ -20,11 +20,12 @@ public:
 
     virtual const ECoordUnits & GetCoordUnits() const;
 
-    virtual void SetDatabase(Ptr<IDatabase> database);
+    void SetDatabase(CPtr<IDatabase> database) override;
+    CPtr<IDatabase> GetDatabase() const override;
+    
     virtual bool SetLayoutView(UPtr<ILayoutView> layout) { return false; }
 
     virtual ECellType GetCellType() const;
-    virtual Ptr<IDatabase> GetDatabase() const;
     virtual Ptr<ILayoutView> GetLayoutView() const { return nullptr; }
     virtual Ptr<ILayoutView> GetFlattenedLayoutView() { return nullptr; }
 
@@ -35,7 +36,6 @@ public:
     
 protected:
     ECellType m_cellType;
-    Ptr<IDatabase> m_database;
     UPtr<ILayoutView> m_layoutView;
 };
 
@@ -44,7 +44,7 @@ class ECAD_API ECircuitCell : public ECell
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ECircuitCell();
-    explicit ECircuitCell(std::string name, Ptr<IDatabase> database);
+    explicit ECircuitCell(std::string name, CPtr<IDatabase> database);
     virtual ~ECircuitCell();
 
     ///Copy

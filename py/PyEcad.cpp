@@ -323,7 +323,7 @@ namespace ecad {
         return database.AddLayerMap(layerMap->Clone());
     }
 
-    UPtr<ILayer> EDataMgrCreateStackupLayerWrap(EDataMgr & mgr, const std::string & name, ELayerType type, FCoord elevation, ECoord thickness)
+    UPtr<ILayer> EDataMgrCreateStackupLayerWrap(EDataMgr & mgr, const std::string & name, ELayerType type, EFloat elevation, ECoord thickness)
     {
         return mgr.CreateStackupLayer(name, type, elevation, thickness);
     }
@@ -633,7 +633,7 @@ namespace {
         class_<ILayerMap, boost::noncopyable>("ILayerMap", no_init)
         ;
 
-        class_<ELayerMap, bases<EDefinition, ILayerMap> >("ELayerMap", init<std::string, Ptr<IDatabase> >())
+        class_<ELayerMap, bases<EDefinition, ILayerMap> >("ELayerMap", init<std::string, CPtr<IDatabase> >())
             .def("clone", adapt_unique(&ECloneWrap<ELayerMap, ILayerMap>))
             .def("get_database", &ELayerMap::GetDatabase, return_internal_reference<>())
             .def("set_mapping", &ELayerMap::SetMapping)
@@ -696,7 +696,7 @@ namespace {
         class_<IPadstackDef, boost::noncopyable>("IPadstackDef", no_init)
         ;
 
-        class_<EPadstackDef, bases<EDefinition, IPadstackDef> >("EPadstackDef", init<std::string>())
+        class_<EPadstackDef, bases<EDefinition, IPadstackDef> >("EPadstackDef", init<std::string, CPtr<IDatabase> >())
             .def("clone", adapt_unique(&ECloneWrap<EPadstackDef, IPadstackDef>))
             .def("set_padstack_def_data", &EPadstackDefSetPadstackDefDataWrap)
             .def("get_padstack_def_data", &EPadstackDef::GetPadstackDefData, return_internal_reference<>())
@@ -981,7 +981,7 @@ namespace {
             .def("get_flattened_layout_view", &ECell::GetFlattenedLayoutView, return_internal_reference<>())
         ;
 
-        class_<ECircuitCell, bases<ECell> >("ECircuitCell", init<std::string, Ptr<IDatabase> >())
+        class_<ECircuitCell, bases<ECell> >("ECircuitCell", init<std::string, CPtr<IDatabase> >())
         ;
 
         class_<std::vector<Ptr<ICell> > >("ECellContainer")

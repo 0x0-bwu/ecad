@@ -6,21 +6,26 @@ namespace ecad {
 
 class ECAD_API EDefinition : public EObject, public IDefinition
 {
+protected:
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-public:
     EDefinition();
-    explicit EDefinition(std::string name);
+public:
+    explicit EDefinition(std::string name, CPtr<IDatabase> database);
     virtual ~EDefinition();
 
     virtual EDefinitionType GetDefinitionType() const override;
-    void Print(std::ostream & os) const;
+    CPtr<IDatabase> GetDatabase() const override;
     const std::string & GetName() const override;
     const EUuid & Uuid() const;
     std::string sUuid() const;
-
+    
+    void Print(std::ostream & os) const;
 protected:
     ///Copy
     virtual Ptr<EDefinition> CloneImp() const override { return new EDefinition(*this); }
+
+protected:
+    CPtr<IDatabase> m_database;
 };
 
 ECAD_ALWAYS_INLINE void EDefinition::Print(std::ostream & os) const

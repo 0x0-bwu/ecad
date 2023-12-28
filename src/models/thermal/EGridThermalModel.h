@@ -26,8 +26,8 @@ public:
     void SetIsMetal(bool isMetal);
     bool isMetalLayer() const;
 
-    void SetThickness(FCoord thickness);
-    FCoord GetThickness() const;
+    void SetThickness(EFloat thickness);
+    EFloat GetThickness() const;
 
     void SetTopLayer(const std::string & name);
     const std::string & GetTopLayer() const;
@@ -52,7 +52,7 @@ public:
 
 private:
     bool m_isMetal = false;
-    FCoord m_thickness = 0;//unit: m
+    EFloat m_thickness = 0;//unit: m
     std::string m_name;
     std::string m_topLayer;
     std::string m_botLayer;
@@ -66,10 +66,10 @@ class ECAD_API EGridThermalModel : public EThermalModel
 {
     friend class utils::EGridThermalModelReduction;
 public:
-    explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), FCoord elevation = 0);
+    explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), EFloat elevation = 0);
     virtual ~EGridThermalModel();
 
-    FCoord TotalThickness() const;
+    EFloat TotalThickness() const;
     FBox2D GetRegion(bool scaled = false) const;
     
     size_t TotalLayers() const;
@@ -77,8 +77,8 @@ public:
     ESize3D ModelSize() const;
     const ESize2D & GridSize() const;
 
-    bool SetScaleH(FCoord scaleH);
-    FCoord GetScaleH() const;
+    bool SetScaleH(EFloat scaleH);
+    EFloat GetScaleH() const;
 
     bool SetResolution(FCoord x, FCoord y);
     void GetResolution(FCoord & x, FCoord & y, bool scaled = false) const;
@@ -86,8 +86,8 @@ public:
 
     size_t AppendLayer(EGridThermalLayer layer);
 
-    void AppendJumpConnection(ESize3D start, ESize3D end, FCoord alpha); //alpha = pi * r * r / L
-    const std::vector<std::tuple<ESize3D, ESize3D, FCoord> > & GetJumpConnections() const;
+    void AppendJumpConnection(ESize3D start, ESize3D end, EFloat alpha); //alpha = pi * r * r / L
+    const std::vector<std::tuple<ESize3D, ESize3D, EFloat> > & GetJumpConnections() const;
 
     std::vector<EGridThermalLayer> & GetLayers();
     const std::vector<EGridThermalLayer> & GetLayers() const; 
@@ -108,12 +108,12 @@ public:
 private:
     ESize2D m_size;
     FPoint2D m_ref;
-    FCoord m_elevation;
-    FCoord m_scaleH = 1.0;//only apply for horizontal
+    EFloat m_elevation;
+    EFloat m_scaleH = 1.0;//only apply for horizontal
     std::array<FCoord, 2> m_resolution = {0, 0};//unit: m
     std::vector<EGridThermalLayer> m_stackupLayers;
     std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
-    std::vector<std::tuple<ESize3D, ESize3D, FCoord> > m_jumpConnects;
+    std::vector<std::tuple<ESize3D, ESize3D, EFloat> > m_jumpConnects;
 };
 
 ECAD_ALWAYS_INLINE size_t EGridThermalModel::GetFlattenIndex(const ESize3D & index) const

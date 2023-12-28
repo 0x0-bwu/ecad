@@ -107,7 +107,7 @@ ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std
     return layout->FindNetByName(name);
 }
 
-ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness,
+ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, ELayerType type, EFloat elevation, EFloat thickness,
                                                       const std::string & conductingMat, const std::string & dielectricMat)
 {
     auto stackupLayer = new EStackupLayer(name, type);
@@ -215,7 +215,7 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 
-ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius)
 {
     if (nullptr == layout) return nullptr;
     return layout->CreateBondwire(std::move(name), net, start, end, radius);
@@ -275,10 +275,11 @@ ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId la
 }
 
 
-ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
+ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
 {
     if(nullptr == compDef) return nullptr;
-    return compDef->CreatePin(pinName, loc, type, psDef, lyr);
+    const auto & coordUnit = dynamic_cast<Ptr<IDefinition> >(compDef)->GetDatabase()->GetCoordUnits();
+    return compDef->CreatePin(pinName, EPoint2D{coordUnit.toCoord(loc[0]), coordUnit.toCoord(loc[1])}, type, psDef, lyr);
 }
 
 ECAD_INLINE EDataMgr & EDataMgr::Instance()

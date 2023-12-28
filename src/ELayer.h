@@ -45,11 +45,11 @@ public:
     ELayerId GetLayerId() const override;
     ELayerType GetLayerType() const override;
 
-    void SetElevation(FCoord elevation) override;
-    FCoord GetElevation() const override;
+    void SetElevation(EFloat elevation) override;
+    EFloat GetElevation() const override;
 
-    void SetThickness(FCoord thickness) override;
-    FCoord GetThickness() const override;
+    void SetThickness(EFloat thickness) override;
+    EFloat GetThickness() const override;
 
     void SetConductingMaterial(const std::string & material) override;
     const std::string & GetConductingMaterial() const override;
@@ -61,8 +61,8 @@ protected:
     ///Copy
     virtual Ptr<ELayer> CloneImp() const override { return new EStackupLayer(*this);}
 protected:
-    FCoord m_elevation = 0;
-    FCoord m_thickness = 0;
+    EFloat m_elevation = 0;
+    EFloat m_thickness = 0;
     std::string m_conductingMat;
     std::string m_dielectricMat;
 };

@@ -42,12 +42,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDef)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EComponentDef::EComponentDef()
- : EComponentDef(std::string{})
+ : EComponentDef(std::string{}, nullptr)
 {
 }
 
-ECAD_INLINE EComponentDef::EComponentDef(const std::string & name)
- : EDefinition(name)
+ECAD_INLINE EComponentDef::EComponentDef(std::string name, CPtr<IDatabase> database)
+ : EDefinition(std::move(name), database)
 {
     for(auto type : m_collectionTypes) 
         AddCollection(type);
@@ -92,22 +92,22 @@ ECAD_INLINE const std::string & EComponentDef::GetMaterial() const
     return m_material;
 }
 
-ECAD_INLINE void EComponentDef::SetHeight(FCoord height)
+ECAD_INLINE void EComponentDef::SetHeight(EFloat height)
 {
     m_height = height;
 }
 
-ECAD_INLINE FCoord EComponentDef::GetHeight() const
+ECAD_INLINE EFloat EComponentDef::GetHeight() const
 {
     return m_height;
 }
 
-ECAD_INLINE void EComponentDef::SetSolderBallBumpHeight(FCoord height)
+ECAD_INLINE void EComponentDef::SetSolderBallBumpHeight(EFloat height)
 {
     m_solderHeight = height;
 }
 
-ECAD_INLINE FCoord EComponentDef::GetSolderBallBumpHeight() const
+ECAD_INLINE EFloat EComponentDef::GetSolderBallBumpHeight() const
 {
     return m_solderHeight;
 }

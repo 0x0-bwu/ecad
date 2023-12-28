@@ -71,7 +71,7 @@ class ECAD_API EBondwire : public EPrimitive, public IBondwire
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EBondwire();
 public:
-    EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
+    EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius);
     virtual ~EBondwire() = default;
 
     const std::string & GetName() const override;
@@ -79,8 +79,8 @@ public:
     void SetNet(ENetId net) override;
     ENetId GetNet() const override;
 
-    void SetRadius(FCoord r) override;
-    FCoord GetRadius() const override;
+    void SetRadius(EFloat r) override;
+    EFloat GetRadius() const override;
 
     const EPoint2D & GetStartPt() const override;
     const EPoint2D & GetEndPt() const override;
@@ -97,8 +97,8 @@ public:
     void SetBondwireType(EBondwireType type) override;
     EBondwireType GetBondwireType() const override;
 
-    void SetHeight(FCoord height) override;
-    FCoord GetHeight() const override;
+    void SetHeight(EFloat height) override;
+    EFloat GetHeight() const override;
 
     void SetStartComponent(CPtr<IComponent> comp) override;
     CPtr<IComponent> GetStartComponent() const override;
@@ -124,8 +124,8 @@ protected:
     std::array<CPtr<IComponent>, 2> m_mountComp{nullptr, nullptr};
     std::array<EPoint2D, 2> m_location;
     std::array<bool, 2> m_flipped{false, false};
-    FCoord m_radius{0};
-    FCoord m_height{0};
+    EFloat m_radius{0};
+    EFloat m_height{0};
     EFloat m_current{0};
     CPtr<IPadstackDef> m_solderJoints{nullptr};
     EBondwireType m_bondwireType{EBondwireType::Simple};
