@@ -99,10 +99,12 @@ public:
 
     void Append(const ETransform2D & transform)
     {
-        if(m_transform) *m_transform = (*m_transform) * transform.GetTransform();
-        for(const auto & sequence : transform.m_sequence){
+        if (m_transform) *m_transform = transform.GetTransform() * (*m_transform);
+        else {
+            for(const auto & sequence : transform.m_sequence){
             if(sequence.isTransformed())
                 m_sequence.push_back(sequence);
+            }
         }
     }
 
