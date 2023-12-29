@@ -208,7 +208,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, iteration);
     auto meshTemplateFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.png";
     GeometryIO::WritePNG(meshTemplateFile, triangulation, 4096);
-    std::cout << "total elements: " << triangulation.triangles.size() << std::endl;
+    generic::log::Trace("total elements: %1%", triangulation.triangles.size());
     //todo wrapper to mesh
 
     eutils::ELayoutRetriever retriever(layout);
@@ -249,7 +249,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
                 }
             }
         }
-        std::cout << "layer " << index << " 's total elements: " << prismaLayer.elements.size() << std::endl; //wbtest
+        generic::log::Trace("layer %1%'s total elements: %2%", index, prismaLayer.elements.size());
     };
 
     for (size_t index = 0; index < model.TotalLayers(); ++index)
@@ -287,12 +287,11 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
     auto scaleH2Unit = coordUnit.Scale2Unit();
     auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
-    std::cout << "scale2Meter:" << scale2Meter << std::endl;
     model.BuildPrismaModel(scaleH2Unit, scale2Meter);
 
     for (const auto & bondwire : compact->bondwires)
         model.AddBondWire(bondwire);
-    std::cout << "total line elements: " << model.TotalLineElements() << std::endl;
+    generic::log::Trace("total line elements: %1%", model.TotalLineElements());
 
     auto meshFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.vtk";
     io::GenerateVTKFile(meshFile, model);

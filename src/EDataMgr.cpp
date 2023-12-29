@@ -14,6 +14,7 @@ namespace ecad {
 
 ECAD_INLINE EDataMgr::EDataMgr()
 {
+    Init();
 }
 
 ECAD_INLINE EDataMgr::~EDataMgr()
@@ -45,16 +46,16 @@ ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
 {
     //todo
     m_databases.clear();
+
+    log::ShutDown();
 }
 
 ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
 {
-    if(m_databases.count(name)) return nullptr;
+    if (m_databases.count(name)) return nullptr;
 
     auto database = ext::CreateDatabaseFromGds(name, gds, lyrMap);
-    if(database) {
-        m_databases.insert(std::make_pair(name, database));
-    }
+    if (database) m_databases.insert(std::make_pair(name, database));
     return database;
 }
 
@@ -330,7 +331,6 @@ ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponent
 ECAD_INLINE EDataMgr & EDataMgr::Instance()
 {
     static EDataMgr mgr;
-    mgr.m_settings.threads = std::thread::hardware_concurrency();
     return mgr;
 }
 
@@ -349,4 +349,19 @@ size_t EDataMgr::DefaultCircleDiv() const
     return m_settings.circleDiv;
 }
 
+void EDataMgr::Init()
+{   
+    //threads
+    m_settings.threads = std::thread::hardware_concurrency();
+
+    //log
+    std::string logFile = generic::fs::CurrentPath() + ECAD_SEPS + "ecad.log";
+    auto traceSink = std::make_shared<log::StreamSinkMT>(std::cout);
+    auto infoSink  = std::make_shared<log::FileSinkMT>(logFile);
+    traceSink->SetLevel(log::Level::Trace);
+    infoSink->SetLevel(log::Level::Info);
+    auto logger = log::MultiSinksLogger("ecad", {traceSink, infoSink});
+    logger->SetLevel(log::Level::Trace);
+    log::SetDefaultLogger(logger);
+}
 }//namespace ecad

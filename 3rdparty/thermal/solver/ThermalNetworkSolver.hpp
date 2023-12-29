@@ -4,6 +4,7 @@
 #include "generic/tools/Tools.hpp"
 #include "generic/circuit/MNA.hpp"
 #include "generic/circuit/MOR.hpp"
+#include "generic/tools/Log.hpp"
 
 #include <boost/numeric/odeint.hpp>
 #include <memory>
@@ -50,8 +51,9 @@ namespace thermal
                     Eigen::ConjugateGradient<Eigen::SparseMatrix<num_type>, Eigen::Lower | Eigen::Upper> solver;
                     solver.compute(m.G);
                     x = m.L * solver.solve(m.B * rhs);
-                    std::cout << "#iterations:     " << solver.iterations() << std::endl;
-                    std::cout << "estimated error: " << solver.error() << std::endl;
+
+                    generic::log::Trace("#iterations: %1%", solver.iterations());
+                    generic::log::Trace("estimated error: %1%", solver.error());
                 }
                 auto & nodes = m_network.GetNodes();
                 for (size_t i = 0; i < nodes.size(); ++i)

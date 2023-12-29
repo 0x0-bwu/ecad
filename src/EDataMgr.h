@@ -122,6 +122,7 @@ private:
     EDataMgr();
     ~EDataMgr();
 
+    void Init();
     EDataMgrSettings m_settings;
     std::unordered_map<std::string, SPtr<IDatabase> > m_databases;
 };

@@ -222,8 +222,8 @@ void test1()
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec7));
 
     //bondwire
-    bool check;
     FPoint2D ploc1, ploc2;
+    [[maybe_unused]] bool check;
     check = eDataMgr.GetComponentPinLocation(comp1, "Source1", ploc1); { ECAD_ASSERT(check) }
     auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), ploc1, {3000, 7500}, bwRadius);
     sourceBW1->SetBondwireType(EBondwireType::JEDEC4);

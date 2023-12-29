@@ -279,30 +279,25 @@ ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(EFloat refT, std::vect
             std::vector<EFloat> lastRes(results);
             UPtr<ThermalNetwork<EFloat> > network{nullptr};
             {
-                ECAD_EFFICIENCY_TRACK("build network")
                 network = builder.Build(lastRes);
                 if (nullptr == network) return false;
             }
-
-            std::cout << "total nodes: " << network->Size() << std::endl;
-            std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
-            std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
+            
+            generic::log::Trace("intake  heat flow: %1%w", builder.summary.iHeatFlow);
+            generic::log::Trace("outtake heat flow: %1%w", builder.summary.oHeatFlow);
             
             size_t threads = EDataMgr::Instance().DefaultThreads();
             ThermalNetworkSolver<EFloat> solver(*network, threads);
             solver.SetVerbose(true);
-
-            { 
-                ECAD_EFFICIENCY_TRACK("solve matrix")
-                solver.Solve(refT);
-            }
+            solver.Solve(refT);
 
             const auto & nodes = network->GetNodes();
             for (size_t n = 0; n < results.size(); ++n)
                 results[n] = nodes[n].t;
 
-            size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
-            std::cout << "hotspot: " << maxId << ", maxT: " << results.at(maxId) << ", minT: " << *std::min_element(results.begin(), results.end()) << std::endl;
+            auto maxIter = std::max_element(results.begin(), results.end());
+            auto minIter = std::min_element(results.begin(), results.end());
+            generic::log::Trace("hotspot: %1%, maxT: %2%, minT: %3%", std::distance(results.begin(), maxIter), *maxIter, *minIter);
 
             iteration -= 1;
             if(!needIteration || iteration == 0) break;

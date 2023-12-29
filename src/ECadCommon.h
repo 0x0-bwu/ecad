@@ -3,6 +3,8 @@
 #include "ECadSerialization.h"
 #include "ECadVersion.h"
 #include "ECadUnits.h"
+
+#include "generic/tools/Log.hpp"
 #include <cassert>
 
 #ifdef ECAD_DEBUG_MODE
