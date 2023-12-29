@@ -15,6 +15,7 @@ class ECAD_API EDataMgr
 public:
     EDataMgr(const EDataMgr &) = delete;
     EDataMgr & operator= (const EDataMgr &) = delete;
+    void Init();
 
     ///Database
     SPtr<IDatabase> CreateDatabase(const std::string & name);
@@ -122,7 +123,6 @@ private:
     EDataMgr();
     ~EDataMgr();
 
-    void Init();
     EDataMgrSettings m_settings;
     std::unordered_map<std::string, SPtr<IDatabase> > m_databases;
 };

@@ -178,7 +178,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
                 generic::color::RGBFromScalar((d - min) / range, r, g, b);
                 return std::make_tuple(r, g, b, a);
             };
-            std::cout << "layer: " << index + 1 << ", min: " << min << ", max: " << max << std::endl;   
+            generic::log::Trace("layer: %1%, maxT: %2%, minT: %3%", index + 1, max, min);
             std::string filepng = m_settings.outDir + GENERIC_FOLDER_SEPS + std::to_string(index) + ".png";
             lyr->WriteImgProfile(filepng, rgbaFunc);
         }

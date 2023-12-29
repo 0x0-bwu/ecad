@@ -16,6 +16,7 @@ using namespace ecad::emodel::etherm;
 void t_grid_thermal_model_solver_test()
 {
     std::string err;
+    EDataMgr::Instance().Init();
     std::string ctm = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5.tar.gz";
     std::string ctmFolder = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5";
     auto model = io::makeGridThermalModelFromCTMv1File(ctm, 0, &err);
@@ -24,8 +25,8 @@ void t_grid_thermal_model_solver_test()
     BOOST_CHECK(model);
     
     auto size = model->ModelSize();
-    std::cout << "size: (" << size.x << ", " << size.y << ", " << size.z << ")" << std::endl;
-    std::cout << "total nodes: " << model->TotalGrids() << std::endl;
+    generic::log::Trace("size: (%1%, %2%)", size.x, size.y);
+    generic::log::Trace("total nodes: %1%", model->TotalGrids());
 
     //htc
     EFloat iniT = 25.0;
@@ -65,8 +66,8 @@ void t_grid_thermal_model_solver_test()
         max = std::max(max, htMap->MaxOccupancy(std::greater<ValueType>()));
     }
     auto range = max - min;
-    std::cout << "min: " << min << ", max: " << max << std::endl;
-    //min: 175.204, max: 520.823
+    generic::log::Trace("maxT: %1%, minT: %2%", max, min);
+    //max: 99.4709, min: 81.9183
 
     size_t i = 0;
     for(const auto & layer :  resModel->GetLayers()) {
@@ -80,7 +81,6 @@ void t_grid_thermal_model_solver_test()
             generic::color::RGBFromScalar((d - min) / range, r, g, b);
             return std::make_tuple(r, g, b, a);
         };
-        std::cout << generic::fmt::Fmt2Str("%1%: [%2%, %3%]", layer.GetName(), min, max) << std::endl;   
         std::string filepng = outDir + GENERIC_FOLDER_SEPS + "layer_" + std::to_string(++i) + ".png";
         htMap->WriteImgProfile(filepng, rgbaFunc);
     }

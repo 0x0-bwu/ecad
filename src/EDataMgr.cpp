@@ -14,7 +14,6 @@ namespace ecad {
 
 ECAD_INLINE EDataMgr::EDataMgr()
 {
-    Init();
 }
 
 ECAD_INLINE EDataMgr::~EDataMgr()

@@ -61,9 +61,9 @@ ECAD_INLINE bool EGridThermalNetworkStaticSolver::Solve(EFloat refT, std::vector
                 auto res = spiceWriter.WriteSpiceNetlist(m_settings.spiceFile);
                 if (res) std::cout << "write out spice file " << m_settings.spiceFile << " successfully!" << std::endl;
             }
-            std::cout << "total nodes: " << network->Size() << std::endl;
-            std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
-            std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
+            generic::log::Trace("total nodes: %1%", network->Size());
+            generic::log::Trace("intake  heat flow: %1%w", builder.summary.iHeatFlow);
+            generic::log::Trace("outtake heat flow: %1%w", builder.summary.oHeatFlow);
             
             size_t threads = EDataMgr::Instance().DefaultThreads();
             ThermalNetworkSolver<EFloat> solver(*network, threads);
@@ -102,9 +102,9 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
     EGridThermalNetworkBuilder builder(m_model);
     auto network = builder.Build(results);
     if (nullptr == network) return false;
-    std::cout << "total nodes: " << network->Size() << std::endl;
-    std::cout << "intake  heat flow: " << builder.summary.iHeatFlow << "w" << std::endl;
-    std::cout << "outtake heat flow: " << builder.summary.oHeatFlow << "w" << std::endl;
+    generic::log::Trace("total nodes: %1%", network->Size());
+    generic::log::Trace("intake  heat flow: %1%w", builder.summary.iHeatFlow);
+    generic::log::Trace("outtake heat flow: %1%w", builder.summary.oHeatFlow);
             
     size_t threads = EDataMgr::Instance().DefaultThreads();
     ThermalNetworkSolver<EFloat> solver(*network, threads);
@@ -277,12 +277,10 @@ ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(EFloat refT, std::vect
         EPrismaThermalNetworkBuilder builder(m_model);
         do {
             std::vector<EFloat> lastRes(results);
-            UPtr<ThermalNetwork<EFloat> > network{nullptr};
-            {
-                network = builder.Build(lastRes);
-                if (nullptr == network) return false;
-            }
-            
+            auto network = builder.Build(lastRes);
+            if (nullptr == network) return false;
+
+            generic::log::Trace("total nodes: %1%", network->Size());
             generic::log::Trace("intake  heat flow: %1%w", builder.summary.iHeatFlow);
             generic::log::Trace("outtake heat flow: %1%w", builder.summary.oHeatFlow);
             
