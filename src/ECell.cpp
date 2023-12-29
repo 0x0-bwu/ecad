@@ -36,10 +36,9 @@ ECAD_INLINE ECell::ECell()
 
 }
 
-ECAD_INLINE ECell::ECell(std::string name, Ptr<IDatabase> database)
- : EDefinition(std::move(name))
+ECAD_INLINE ECell::ECell(std::string name, CPtr<IDatabase> database)
+ : EDefinition(std::move(name), database)
  , m_cellType(ECellType::Invalid)
- , m_database(database)
  , m_layoutView(nullptr)
 {  
   
@@ -59,12 +58,8 @@ ECAD_INLINE ECell & ECell::operator= (const ECell & other)
 {
     EDefinition::operator=(other);
     m_cellType = other.m_cellType;
-    m_database = other.m_database;
     m_layoutView = CloneHelper(other.m_layoutView);
     m_layoutView->SetCell(this);
-    m_flattenedLayoutView = CloneHelper(other.m_flattenedLayoutView);
-    if(m_flattenedLayoutView)
-        m_flattenedLayoutView->SetCell(this);
     return *this;
 }
 
@@ -73,17 +68,17 @@ ECAD_INLINE ECellType ECell::GetCellType() const
     return m_cellType;
 }
 
-ECAD_INLINE void ECell::SetDatabase(Ptr<IDatabase> database)
-{
-    m_database = database; 
-}
-
 ECAD_INLINE const ECoordUnits & ECell::GetCoordUnits() const
 {
     return GetDatabase()->GetCoordUnits();
 }
 
-ECAD_INLINE Ptr<IDatabase> ECell::GetDatabase() const
+ECAD_INLINE void ECell::SetDatabase(CPtr<IDatabase> database)
+{
+    m_database = database; 
+}
+
+ECAD_INLINE CPtr<IDatabase> ECell::GetDatabase() const
 {
     return m_database;
 }
@@ -116,7 +111,7 @@ ECAD_INLINE ECircuitCell::ECircuitCell()
 {
 }
 
-ECAD_INLINE ECircuitCell::ECircuitCell(std::string name, Ptr<IDatabase> database)
+ECAD_INLINE ECircuitCell::ECircuitCell(std::string name, CPtr<IDatabase> database)
  : ECell(name, database)
 {    
     m_cellType = ECellType::CircuitCell;
@@ -152,11 +147,8 @@ ECAD_INLINE Ptr<ILayoutView> ECircuitCell::GetLayoutView() const
 
 ECAD_INLINE Ptr<ILayoutView> ECircuitCell::GetFlattenedLayoutView()
 {
-    if(nullptr == m_flattenedLayoutView){
-        m_flattenedLayoutView = CloneHelper(m_layoutView);
-        m_flattenedLayoutView->Flatten(EFlattenOption{});
-    }
-    return m_flattenedLayoutView.get();
+    m_layoutView->Flatten(EFlattenOption{});
+    return m_layoutView.get();
 }
 
 }//namesapce ecad

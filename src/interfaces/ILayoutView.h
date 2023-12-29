@@ -11,12 +11,14 @@ class IText;
 class EShape;
 class ILayer;
 class EPolygon;
+class IBondwire;
+class ICellInst;
 class IDatabase;
 class ILayerMap;
-class ICellInst;
 class IPrimitive;
 class ETransform2D;
 class IPadstackDef;
+class IStackupLayer;
 class IPadstackInst;
 class INetCollection;
 class ILayerCollection;
@@ -57,8 +59,8 @@ public:
     ///Layer
     virtual ELayerId AppendLayer(UPtr<ILayer> layer) const = 0;
     virtual std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers) const = 0;
-    virtual void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const = 0;
-    virtual void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const = 0;
+    virtual void GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const = 0;
+    virtual void GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const = 0;
     virtual UPtr<ILayerMap> AddDefaultDielectricLayers() const = 0;
     virtual Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const = 0;
     virtual Ptr<ILayer> FindLayerByName(const std::string & name) const = 0;
@@ -74,7 +76,7 @@ public:
                                                     const ETransform2D & transform) = 0;
     ///Primitive                                          
     virtual Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) = 0;
-    virtual Ptr<IPrimitive> CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius) = 0;
+    virtual Ptr<IBondwire> CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius) = 0;
     ///Text
     virtual Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) = 0;
 
@@ -82,7 +84,7 @@ public:
     virtual Ptr<ICellInst> CreateCellInst(const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform) = 0;
 
     ///Component
-    virtual Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform) = 0;
+    virtual Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped) = 0;
 
     ///Collection
     virtual Ptr<INetCollection> GetNetCollection() const = 0;

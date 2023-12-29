@@ -2,7 +2,7 @@ import os
 import sys
 
 cwd = os.path.dirname(__file__)
-ecad_lib = os.path.abspath(cwd + "/../build/lib")
+ecad_lib = os.path.abspath(cwd + "/../build.release/lib")
 sys.path.append(ecad_lib)
 import PyEcad as ecad
 from PyEcad import EPoint2D
@@ -379,7 +379,7 @@ def test_layout_view() :
 
     #create padstack inst
     padstack_name = "padstack"
-    padstack_def = ecad.EPadstackDef("padstackdef")
+    padstack_def = database.create_padstack_def("padstackdef")
     padstack_inst = layout.create_padstack_inst(padstack_name, padstack_def, ecad.ENetId.NONET, ecad.ELayerId(0), ecad.ELayerId(1), database.create_layer_map("layer_map"), ecad.ETransform2D())
     padstack_inst_iter = layout.get_padstack_inst_iter()
     assert(padstack_inst.suuid == padstack_inst_iter.next().suuid)
@@ -753,7 +753,7 @@ def test_padstack_def_collection() :
 @print_test_info
 def test_padstack_def() :
     #create padstack def
-    padstack_def = ecad.EPadstackDef("padstack_def")
+    padstack_def = ecad.EPadstackDef("padstack_def", None)
 
     #set padstack def data
     def_data = ecad.EPadstackDefData()

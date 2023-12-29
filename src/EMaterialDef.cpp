@@ -31,12 +31,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialDef)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EMaterialDef::EMaterialDef()
- : EMaterialDef(std::string{}, EMaterialId::noMaterial)
+ : EMaterialDef(std::string{}, nullptr, EMaterialId::noMaterial)
 {
 }
 
-ECAD_INLINE EMaterialDef::EMaterialDef(std::string name, EMaterialId id)
- : EDefinition(std::move(name)), m_id(id)
+ECAD_INLINE EMaterialDef::EMaterialDef(std::string name, CPtr<IDatabase> database, EMaterialId id)
+ : EDefinition(std::move(name), database), m_id(id)
 {
 }
 
@@ -73,13 +73,13 @@ ECAD_INLINE bool EMaterialDef::hasProperty(EMaterialPropId id) const
 
 ECAD_INLINE void EMaterialDef::SetProperty(EMaterialPropId id, UPtr<IMaterialProp> prop)
 {
-    m_properties.insert(std::make_pair(id, std::move(prop)));
+    m_properties.emplace(std::make_pair(id, std::move(prop)));
 }
 
 ECAD_INLINE CPtr<IMaterialProp> EMaterialDef::GetProperty(EMaterialPropId id) const
 {
     auto iter = m_properties.find(id);
-    if(iter == m_properties.end()) return nullptr;
+    if (iter == m_properties.cend()) return nullptr;
     else return iter->second.get();
 }
 

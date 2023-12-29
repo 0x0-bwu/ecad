@@ -126,8 +126,8 @@ struct ESize3D
 
 class ECoordUnits
 {
-    EValue unit = 1e-3;
-    EValue precision = 1e-9;
+    EFloat unit = 1e-3;
+    EFloat precision = 1e-9;
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
     template <typename Archive>
@@ -161,56 +161,73 @@ public:
         unit = precision / generic::unit::Scale2Meter(user);
     }
     
-    void SetPrecision(EValue value)
+    void SetPrecision(EFloat value)
     {
         precision = value;
     }
 
-    void SetUnit(EValue value)
+    void SetUnit(EFloat value)
     {
         unit = value;
     }
     
-    EValue Scale2Unit() const
+    EFloat Scale2Unit() const
     {
         return unit;
     }
 
-    EValue Scale2Coord() const
+    EFloat Scale2Coord() const
     {
-        return EValue(1) / unit;
+        return EFloat(1) / unit;
     }
 
-    ECoord toCoord(const EValue value) const
+    ECoord toCoord(const EFloat value) const
     {
         return value * Scale2Coord();
     }
 
-    ECoord toCoord(const EValue value, Unit unit) const
+    ECoord toCoord(const EFloat value, Unit unit) const
     {
         return value * generic::unit::Scale2Meter(unit) / precision;
     }
 
-    FCoord toCoordF(const EValue value) const
+    FCoord toCoordF(const EFloat value) const
     {
         return value * Scale2Coord();
     }
 
-    FCoord toCoordF(const EValue value, Unit unit) const
+    FCoord toCoordF(const EFloat value, Unit unit) const
     {
         return value * generic::unit::Scale2Meter(unit) / precision;
     }
     
     template <typename Coord>
-    EValue toUnit(const Coord coord) const
+    EFloat toUnit(const Coord coord) const
     {
         return coord * Scale2Unit();
     }
 
     template <typename Coord>
-    EValue toUnit(const Coord coord, Unit unit) const
+    EFloat toUnit(const Coord coord, Unit unit) const
     {
         return coord * precision / generic::unit::Scale2Meter(unit);
+    }
+
+    EPoint2D toCoord(const FPoint2D & fp) const
+    {
+        return EPoint2D(toCoord(fp[0]), toCoord(fp[1]));
+    }
+
+    std::vector<EPoint2D> toCoord(const std::vector<FPoint2D> & fpoints) const
+    {
+        std::vector<EPoint2D> points; points.reserve(fpoints.size());
+        std::transform(fpoints.cbegin(), fpoints.cend(), std::back_inserter(points), [&](const FPoint2D & fp){ return toCoord(fp); });
+        return points;
+    }
+
+    FPoint2D toUnit(const EPoint2D & p) const
+    {
+        return FPoint2D(toUnit(p[0]), toUnit(p[1]));
     }
 };
 

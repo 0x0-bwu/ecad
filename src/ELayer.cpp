@@ -46,19 +46,6 @@ ECAD_INLINE ELayer::~ELayer()
 {
 }
 
-ECAD_INLINE ELayer::ELayer(const ELayer & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE ELayer & ELayer::operator= (const ELayer & other)
-{
-    EObject::operator=(other);
-    m_layerId = other.m_layerId;
-    m_layerType = other.m_layerType;
-    return *this;
-}
-
 ECAD_INLINE void ELayer::SetLayerId(ELayerId id)
 {
     m_layerId= id;
@@ -128,37 +115,41 @@ ECAD_INLINE EStackupLayer::~EStackupLayer()
 {
 }
 
-ECAD_INLINE EStackupLayer::EStackupLayer(const EStackupLayer & other)
+ECAD_INLINE std::string EStackupLayer::GetName() const
 {
-    *this = other;
+    return ELayer::GetName();
+}
+ECAD_INLINE void EStackupLayer::SetLayerId(ELayerId id)
+{
+    return ELayer::SetLayerId(id);
 }
 
-ECAD_INLINE EStackupLayer & EStackupLayer::operator= (const EStackupLayer & other)
+ECAD_INLINE ELayerId EStackupLayer::GetLayerId() const
 {
-    ELayer::operator=(other);
-    m_elevation = other.m_elevation;
-    m_thickness = other.m_thickness;
-    m_conductingMat = other.m_conductingMat;
-    m_dielectricMat = other.m_dielectricMat;
-    return *this;
+    return ELayer::GetLayerId();
 }
 
-ECAD_INLINE void EStackupLayer::SetElevation(FCoord elevation)
+ECAD_INLINE ELayerType EStackupLayer::GetLayerType() const
+{
+    return ELayer::GetLayerType();
+}
+
+ECAD_INLINE void EStackupLayer::SetElevation(EFloat elevation)
 {
     m_elevation = elevation;
 }
 
-ECAD_INLINE FCoord EStackupLayer::GetElevation() const
+ECAD_INLINE EFloat EStackupLayer::GetElevation() const
 {
     return m_elevation;
 }
 
-ECAD_INLINE void EStackupLayer::SetThickness(FCoord thickness)
+ECAD_INLINE void EStackupLayer::SetThickness(EFloat thickness)
 {
     m_thickness = thickness;
 }
 
-ECAD_INLINE FCoord EStackupLayer::GetThickness() const
+ECAD_INLINE EFloat EStackupLayer::GetThickness() const
 {
     return m_thickness;
 }
@@ -221,19 +212,6 @@ ECAD_INLINE EViaLayer::EViaLayer(const std::string & name)
 
 ECAD_INLINE EViaLayer::~EViaLayer()
 {
-}
-
-ECAD_INLINE EViaLayer::EViaLayer(const EViaLayer & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EViaLayer & EViaLayer::operator= (const EViaLayer & other)
-{
-    ELayer::operator=(other);
-    m_upperRefLyr = other.m_upperRefLyr;
-    m_lowerRefLyr = other.m_lowerRefLyr;
-    return *this;
 }
 
 }//namesapce ecad

@@ -61,6 +61,15 @@ ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::CreatePin(const st
     return AddPin(UPtr<IComponentDefPin>(pin));
 }
 
+ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::FindPinByName(const std::string & name) const
+{
+    auto pinIter = GetComponentDefPinIter();
+    while (auto * pin = pinIter->Next()) {
+        if (name == pin->GetName()) return pin;
+    }
+    return nullptr;
+}
+
 ECAD_INLINE ComponentDefPinIter EComponentDefPinCollection::GetComponentDefPinIter() const
 {
     return ComponentDefPinIter(new EComponentDefPinIterator(*this));

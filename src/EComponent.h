@@ -3,18 +3,17 @@
 #include "EHierarchyObj.h"
 namespace ecad {
 
-class IComponentDef;
 class ECAD_API EComponent : public EHierarchyObj, public IComponent
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EComponent();
 public:
-    EComponent(std::string name, CPtr<IComponentDef> compDef);
+    EComponent(std::string name, CPtr<ILayoutView> refLayout, CPtr<IComponentDef> compDef);
     virtual ~EComponent();
 
-    ///Copy
-    EComponent(const EComponent & other);
-    EComponent & operator= (const EComponent & other);
+    CPtr<IComponentDef> GetComponentDef() const override;
+    
+    CPtr<ILayoutView> GetRefLayoutView() const override;
 
     void SetPlacementLayer(ELayerId layer) override;
     ELayerId GetPlacementLayer() const override;
@@ -23,10 +22,17 @@ public:
     void SetTransform(const ETransform2D & trans) override;
     const ETransform2D & GetTransform() const override;
 
-    void SetLossPower(ESimVal power) override;
-    ESimVal GetLossPower() const override;
+    void SetLossPower(EFloat power) override;
+    EFloat GetLossPower() const override;
 
     EBox2D GetBoundingBox() const override;
+
+    void SetFlipped(bool flipped) override;
+    bool isFlipped() const override;
+
+    EFloat GetHeight() const override;
+
+    bool GetPinLocation(const std::string & name, EPoint2D & loc) const override;
 
     const std::string & GetName() const override;
 protected:
@@ -36,7 +42,8 @@ protected:
 protected:
     CPtr<IComponentDef> m_compDef;
     ELayerId m_placement{ELayerId::noLayer};
-    ESimVal m_lossPower{0};
+    EFloat m_lossPower{0};
+    bool m_flipped{false};
 };
 
 ECAD_ALWAYS_INLINE const std::string & EComponent::GetName() const

@@ -43,16 +43,4 @@ ECAD_INLINE EConnObj::~EConnObj()
 {
 }
 
-ECAD_INLINE EConnObj::EConnObj(const EConnObj & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE EConnObj & EConnObj::operator= (const EConnObj & other)
-{
-    EObject::operator=(other);
-    m_net = other.m_net;
-    return *this;
-}
-
 }//namespace ecad

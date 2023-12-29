@@ -1,6 +1,7 @@
 #include "EDefinition.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDefinition)
 
+#include "interfaces/IDatabase.h"
 #include "ECadDef.h"
 namespace ecad {
 
@@ -12,6 +13,7 @@ ECAD_INLINE void EDefinition::save(Archive & ar, const unsigned int version) con
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EDefinition, IDefinition>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
+    ar & boost::serialization::make_nvp("database", m_database);
 }
 
 template <typename Archive>
@@ -20,18 +22,19 @@ ECAD_INLINE void EDefinition::load(Archive & ar, const unsigned int version)
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EDefinition, IDefinition>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
+    ar & boost::serialization::make_nvp("database", m_database);
 }
     
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EDefinition)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EDefinition::EDefinition()
- : EDefinition(std::string{})
+ : EDefinition(std::string{}, nullptr)
 {
 }
 
-ECAD_INLINE EDefinition::EDefinition(std::string name)
- : EObject(std::move(name))
+ECAD_INLINE EDefinition::EDefinition(std::string name, CPtr<IDatabase> database)
+ : EObject(std::move(name)), m_database(database)
 {
 }
 
@@ -39,15 +42,9 @@ ECAD_INLINE EDefinition::~EDefinition()
 {
 }
 
-///Copy
-ECAD_INLINE EDefinition::EDefinition(const EDefinition & other)
+ECAD_INLINE CPtr<IDatabase> EDefinition::GetDatabase() const
 {
-    *this = other;
-}
-ECAD_INLINE EDefinition & EDefinition::operator= (const EDefinition & other)
-{
-    EObject::operator=(other);
-    return *this;
+    return m_database;
 }
 
 ECAD_INLINE EDefinitionType EDefinition::GetDefinitionType() const

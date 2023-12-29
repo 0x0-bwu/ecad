@@ -17,7 +17,8 @@ models/thermal/EGridThermalModel.cpp
 models/thermal/EPrismaThermalModel.cpp
 models/thermal/EThermalModel.cpp
 simulation/EThermalNetworkExtraction.cpp
-solvers/utilities/EThermalNetworkBuilder.cpp
+solvers/utilities/EGridThermalNetworkBuilder.cpp
+solvers/utilities/EPrismaThermalNetworkBuilder.cpp
 solvers/EThermalNetworkSolver.cpp
 utilities/EBoundaryCalculator.cpp
 utilities/EFlattenUtility.cpp
@@ -25,6 +26,7 @@ utilities/ELayout2CtmUtility.cpp
 utilities/ELayoutConnectivity.cpp
 utilities/ELayoutMergeUtility.cpp
 utilities/ELayoutPolygonMerger.cpp
+utilities/ELayoutRetriever.cpp
 utilities/ELayoutViewRenderer.cpp
 utilities/EMetalFractionMapping.cpp
 ECell.cpp

@@ -22,6 +22,15 @@ else()
 endif()
 
 # Compile options
+option(ENABLE_PROFILING "Enable profiling" OFF)
+if (ENABLE_PROFILING)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+	message("-- Enable GNU Profiling")
+endif()
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ffast-math -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -ffast-math -Wno-deprecated-declarations")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")

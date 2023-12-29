@@ -71,21 +71,46 @@ class ECAD_API EBondwire : public EPrimitive, public IBondwire
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EBondwire();
 public:
-    EBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius);
+    EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius);
     virtual ~EBondwire() = default;
 
-    ///Copy
-    EBondwire(const EBondwire & other);
-    EBondwire & operator= (const EBondwire & other);
+    const std::string & GetName() const override;
 
-    void SetRadius(FCoord r) override;
-    FCoord GetRadius() const override;
+    void SetNet(ENetId net) override;
+    ENetId GetNet() const override;
+
+    void SetRadius(EFloat r) override;
+    EFloat GetRadius() const override;
 
     const EPoint2D & GetStartPt() const override;
     const EPoint2D & GetEndPt() const override;
 
+    void SetStartLayer(ELayerId layerId, bool flipped) override;
+    ELayerId GetStartLayer(Ptr<bool> flipped) const override;
+
+    void SetEndLayer(ELayerId layerId, bool flipped) override;
+    ELayerId GetEndLayer(Ptr<bool> flipped) const override;
+
     void SetMaterial(const std::string & material) override;
     const std::string & GetMaterial() const override;
+
+    void SetBondwireType(EBondwireType type) override;
+    EBondwireType GetBondwireType() const override;
+
+    void SetHeight(EFloat height) override;
+    EFloat GetHeight() const override;
+
+    void SetStartComponent(CPtr<IComponent> comp) override;
+    CPtr<IComponent> GetStartComponent() const override;
+
+    void SetEndComponent(CPtr<IComponent> comp) override;
+    CPtr<IComponent> GetEndComponent() const override;
+
+    void SetSolderJoints(CPtr<IPadstackDef> s) override;
+    CPtr<IPadstackDef> GetSolderJoints() const override;
+
+    void SetCurrent(EFloat current) override;
+    EFloat GetCurrent() const override;
 
     void Transform(const ETransform2D & transform) override;
 
@@ -95,10 +120,15 @@ protected:
 
 protected:
     std::string m_material;
-    ELayerId m_endLayer;
-    EPoint2D m_start;
-    EPoint2D m_end;
-    FCoord m_radius{0};
+    ELayerId m_endLayer{ELayerId::noLayer};
+    std::array<CPtr<IComponent>, 2> m_mountComp{nullptr, nullptr};
+    std::array<EPoint2D, 2> m_location;
+    std::array<bool, 2> m_flipped{false, false};
+    EFloat m_radius{0};
+    EFloat m_height{0};
+    EFloat m_current{0};
+    CPtr<IPadstackDef> m_solderJoints{nullptr};
+    EBondwireType m_bondwireType{EBondwireType::Simple};
 };
 
 class ECAD_API EText : public EPrimitive, public IText
@@ -109,10 +139,6 @@ public:
     EText(std::string text, ELayerId layer, ENetId net = noNet);
     explicit EText(std::string text);
     virtual ~EText();
-
-    ///Copy
-    EText(const EText & other);
-    EText & operator= (const EText & other);
 
     const std::string & GetText() const override;
     EPoint2D GetPosition() const override;

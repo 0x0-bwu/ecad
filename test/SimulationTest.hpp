@@ -13,11 +13,9 @@ using namespace ecad;
 void t_thermal_network_extraction()
 {
     using namespace generic::fs;
-
-    std::string err;
+    EDataMgr::Instance().Init();
     std::string qcomXfl = ecad_test::GetTestDataPath() + "/xfl/qcom.xfl";
-    auto qcom = ext::CreateDatabaseFromXfl("qcom", qcomXfl, &err);
-    BOOST_CHECK(err.empty());
+    auto qcom = EDataMgr::Instance().CreateDatabaseFromXfl("qcom", qcomXfl);
     BOOST_CHECK(qcom != nullptr);
 
     std::vector<Ptr<ICell> > cells;

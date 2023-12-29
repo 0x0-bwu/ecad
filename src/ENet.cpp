@@ -40,17 +40,6 @@ ECAD_INLINE ENet::~ENet()
 {
 }
 
-ECAD_INLINE ENet::ENet(const ENet & other)
-{
-    *this = other;
-}
-
-ECAD_INLINE ENet & ENet::operator= (const ENet & other)
-{
-    EObject::operator=(other);
-    return *this;
-}
-
 ECAD_INLINE ENetId ENet::GetNetId() const
 {
     return m_netId;

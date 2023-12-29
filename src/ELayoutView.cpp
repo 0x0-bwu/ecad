@@ -154,12 +154,12 @@ ECAD_INLINE std::vector<ELayerId> ELayoutView::AppendLayers(std::vector<UPtr<ILa
     return GetLayerCollection()->AppendLayers(std::move(layers));
 }
 
-ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const
+ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const
 {
     return GetLayerCollection()->GetStackupLayers(layers);
 }
 
-ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const
+ECAD_INLINE void ELayoutView::GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const
 {
     return GetLayerCollection()->GetStackupLayers(layers);
 }
@@ -209,9 +209,9 @@ ECAD_INLINE Ptr<ICellInst> ELayoutView::CreateCellInst(const std::string & name,
     return GetCellInstCollection()->CreateCellInst(this, name, defLayout, transform);
 }
 
-ECAD_INLINE Ptr<IComponent> ELayoutView::CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform)
+ECAD_INLINE Ptr<IComponent> ELayoutView::CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped)
 {
-    return GetComponentCollection()->CreateComponent(name, compDef, layer, transform);
+    return GetComponentCollection()->CreateComponent(name, this, compDef, layer, transform, flipped);
 }
 
 ECAD_INLINE Ptr<IPrimitive> ELayoutView::CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape)
@@ -219,9 +219,9 @@ ECAD_INLINE Ptr<IPrimitive> ELayoutView::CreateGeometry2D(ELayerId layer, ENetId
     return GetPrimitiveCollection()->CreateGeometry2D(layer, net, std::move(shape));
 }
 
-ECAD_INLINE Ptr<IPrimitive> ELayoutView::CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ECAD_INLINE Ptr<IBondwire> ELayoutView::CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius)
 {
-    return GetPrimitiveCollection()->CreateBondwire(std::move(name), layer, net, std::move(start), std::move(end), radius);
+    return GetPrimitiveCollection()->CreateBondwire(std::move(name), net, std::move(start), std::move(end), radius);
 }
 
 ECAD_INLINE Ptr<IText> ELayoutView::CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text)

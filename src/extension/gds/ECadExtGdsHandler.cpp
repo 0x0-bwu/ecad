@@ -46,7 +46,7 @@ ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string 
             if(err) *err = fmt::Fmt2Str("Error: failed to parse layer map file %1%.", m_lyrMapFile);
             return nullptr;
         }
-        FCoord elevation = 0.0;
+        EFloat elevation = 0.0;
         auto gdsLayers = layerMap.GetAllLayers();
         for(const auto & gdsLayer  : gdsLayers){
             auto layer = eMgr.CreateStackupLayer(gdsLayer.name, gdsLayer.type, elevation, gdsLayer.thickness);

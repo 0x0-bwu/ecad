@@ -29,12 +29,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackDef)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EPadstackDef::EPadstackDef()
- : EPadstackDef(std::string{})
+ : EPadstackDef(std::string{}, nullptr)
 {
 }
 
-ECAD_INLINE EPadstackDef::EPadstackDef(std::string name)
- : EDefinition(std::move(name))
+ECAD_INLINE EPadstackDef::EPadstackDef(std::string name, CPtr<IDatabase> database)
+ : EDefinition(std::move(name), database)
  , m_data(nullptr)
 {
 }

@@ -45,16 +45,16 @@ ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
 {
     //todo
     m_databases.clear();
+
+    log::ShutDown();
 }
 
 ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
 {
-    if(m_databases.count(name)) return nullptr;
+    if (m_databases.count(name)) return nullptr;
 
     auto database = ext::CreateDatabaseFromGds(name, gds, lyrMap);
-    if(database) {
-        m_databases.insert(std::make_pair(name, database));
-    }
+    if (database) m_databases.insert(std::make_pair(name, database));
     return database;
 }
 
@@ -107,7 +107,7 @@ ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std
     return layout->FindNetByName(name);
 }
 
-ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, ELayerType type, FCoord elevation, FCoord thickness,
+ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, ELayerType type, EFloat elevation, EFloat thickness,
                                                       const std::string & conductingMat, const std::string & dielectricMat)
 {
     auto stackupLayer = new EStackupLayer(name, type);
@@ -142,25 +142,19 @@ ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(SPtr<IDatabase> da
     return database->FindMaterialDefByName(name);
 }
 
-ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateSimpleMaterialProp(EValue value)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateSimpleMaterialProp(EFloat value)
 {
-    auto prop = new EMaterialPropValue;
-    prop->SetSimpleProperty(value);
-    return UPtr<IMaterialProp>(new EMaterialPropValue);
+    return UPtr<IMaterialProp>(new EMaterialPropValue(value));
 }
 
-ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnsiotropicMaterialProp(const std::array<EValue, 3> & values)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values)
 {
-    auto prop = new EMaterialPropValue;
-    prop->SetAnsiotropicProerty(values);
-    return UPtr<IMaterialProp>(prop);
+    return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
-ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::array<EValue, 9> & values)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::array<EFloat, 9> & values)
 {
-    auto prop = new EMaterialPropValue;
-    prop->SetTensorProperty(values);
-    return UPtr<IMaterialProp>(prop);
+    return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
 ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(SPtr<IDatabase> database, const std::string & name)
@@ -209,10 +203,18 @@ ECAD_INLINE Ptr<ICellInst> EDataMgr::CreateCellInst(Ptr<ILayoutView> layout, con
 }
 
 ECAD_INLINE Ptr<IComponent> EDataMgr::CreateComponent(Ptr<ILayoutView> layout, const std::string & name,
-                                                        CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform)
+                                                     CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped)
 {
     if (nullptr == layout) return nullptr;
-    return layout->CreateComponent(name, compDef, layer, transform);
+    return layout->CreateComponent(name, compDef, layer, transform, flipped);
+}
+
+ECAD_INLINE bool EDataMgr::GetComponentPinLocation(CPtr<IComponent> component, const std::string & name, FPoint2D & location) const
+{
+    if (nullptr == component) return false;
+    if (EPoint2D p; not component->GetPinLocation(name, p)) return false;
+    else location = component->GetComponentDef()->GetDatabase()->GetCoordUnits().toUnit(p);
+    return true;
 }
 
 ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape)
@@ -221,15 +223,42 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 
-ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius)
+ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, const FPoint2D & start, const FPoint2D & end, EFloat radius)
 {
     if (nullptr == layout) return nullptr;
-    return layout->CreateBondwire(std::move(name), layer, net, start, end, radius);
+    const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
+    return layout->CreateBondwire(std::move(name), net, coordUnits.toCoord(start), coordUnits.toCoord(end), radius);
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
+{
+    return CreateShapeRectangle(coordUnits.toCoord(ll), coordUnits.toCoord(ur));
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeCircle(const ECoordUnits & coordUnits, const FPoint2D & loc, EFloat radius)
+{
+    return CreateShapeCircle(coordUnits.toCoord(loc), coordUnits.toCoord(radius));
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat width)
+{
+    return CreateShapePath(coordUnits.toCoord(points), coordUnits.toCoord(width));
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points)
+{
+    return CreateShapePolygon(coordUnits.toCoord(points));
 }
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur)
 {
     auto shape = new ERectangle(std::move(ll), std::move(ur));
+    return UPtr<EShape>(shape);
+}
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeCircle(EPoint2D loc, ECoord radius)
+{
+    auto shape = new ECircle(std::move(loc), radius, DefaultCircleDiv());
     return UPtr<EShape>(shape);
 }
 
@@ -268,6 +297,23 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeFromTemplate(ETemplateShape ts, ET
     return UPtr<EShape>(shape);
 }
 
+ECAD_INLINE EPolygon EDataMgr::CreatePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points)
+{
+    EPolygon polygon;
+    polygon.shape.Set(coordUnits.toCoord(points));
+    return polygon;
+}
+    
+ECAD_INLINE EBox2D EDataMgr::CreateBox(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
+{
+    return EBox2D(coordUnits.toCoord(ll), coordUnits.toCoord(ur));
+}
+
+ECAD_INLINE ETransform2D EDataMgr::CreateTransform2D(const ECoordUnits & coordUnits, EFloat scale, EFloat rotation, const FVector2D & offset, EMirror2D mirror)
+{
+    return makeETransform2D(scale, rotation, coordUnits.toCoord(offset), mirror);
+}
+
 ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId layer, const ETransform2D & transform, const std::string & text)
 {
     if(nullptr == layout) return nullptr;
@@ -275,16 +321,15 @@ ECAD_INLINE Ptr<IText> EDataMgr::CreateText(Ptr<ILayoutView> layout, ELayerId la
 }
 
 
-ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
+ECAD_INLINE Ptr<IComponentDefPin> EDataMgr::CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
 {
     if(nullptr == compDef) return nullptr;
-    return compDef->CreatePin(pinName, loc, type, psDef, lyr);
+    return compDef->CreatePin(pinName, compDef->GetDatabase()->GetCoordUnits().toCoord(loc), type, psDef, lyr);
 }
 
 ECAD_INLINE EDataMgr & EDataMgr::Instance()
 {
     static EDataMgr mgr;
-    mgr.m_settings.threads = std::thread::hardware_concurrency();
     return mgr;
 }
 
@@ -298,4 +343,24 @@ void EDataMgr::SetDefaultThreads(size_t threads)
     m_settings.threads = threads;
 }
 
+size_t EDataMgr::DefaultCircleDiv() const
+{
+    return m_settings.circleDiv;
+}
+
+void EDataMgr::Init()
+{   
+    //threads
+    m_settings.threads = std::thread::hardware_concurrency();
+
+    //log
+    std::string logFile = generic::fs::CurrentPath() + ECAD_SEPS + "ecad.log";
+    auto traceSink = std::make_shared<log::StreamSinkMT>(std::cout);
+    auto infoSink  = std::make_shared<log::FileSinkMT>(logFile);
+    traceSink->SetLevel(log::Level::Trace);
+    infoSink->SetLevel(log::Level::Info);
+    auto logger = log::MultiSinksLogger("ecad", {traceSink, infoSink});
+    logger->SetLevel(log::Level::Trace);
+    log::SetDefaultLogger(logger);
+}
 }//namespace ecad

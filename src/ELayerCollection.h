@@ -24,8 +24,8 @@ public:
     UPtr<ILayerMap> AddDefaultDielectricLayers() override;
     UPtr<ILayerMap> GetDefaultLayerMap() const override;
 
-    void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const override;
-    void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const override;
+    void GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const override;
+    void GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const override;
 
     LayerIter GetLayerIter() const override;
     size_t Size() const override;

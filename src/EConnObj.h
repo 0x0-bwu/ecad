@@ -12,10 +12,6 @@ public:
     explicit EConnObj(std::string name, ENetId net = noNet);
     virtual ~EConnObj();
 
-    ///Copy
-    EConnObj(const EConnObj & other);
-    EConnObj & operator= (const EConnObj & other);
-
     void SetNet(ENetId net) override;
     ENetId GetNet() const override;
 

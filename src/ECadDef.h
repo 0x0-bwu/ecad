@@ -63,7 +63,7 @@ enum class ECellType
     CircuitCell = 0
 };
 
-enum ELayerId { noLayer = -1 };
+enum ELayerId { ComponentLayer = -10, noLayer = -1 };
 
 enum ENetId { noNet = -1 };
 
@@ -71,19 +71,20 @@ enum EMaterialId { noMaterial = -1 };
 
 enum EMaterialType { Rigid, Fluid };
 
-enum EMaterialPropId
+enum EMaterialPropId                   // unit in SI
 {
-    Permittivity = 3,
-    Permeability = 4,
-    Conductivity = 5,
+    Permittivity = 3,                  //F/m
+    Permeability = 4,                  //H/m
+    Conductivity = 5,                  //S/m
     DielectricLossTangent = 6,
     MagneticLossTangent = 7,
-    ThermalConductivity = 14,
-    MassDensity = 34,
-    SpecificHeat = 38,
-    YoungsModulus = 39,
+    Resistivity = 8,                   //ohm·m
+    ThermalConductivity = 14,          //W/(m·K)
+    MassDensity = 34,                  //kg/m^3
+    SpecificHeat = 38,                 //J/(kg·K)
+    YoungsModulus = 39,                //Pa
     PoissonsRatio = 40,
-    ThermalExpansionCoefficient = 42,
+    ThermalExpansionCoefficient = 42,  //1/K
 };
 
 enum class EComponentType
@@ -138,6 +139,14 @@ enum class EPrimitiveType
     Geometry2D,
     Bondwire,
     Text
+};
+
+enum class EBondwireType
+{
+    Invalid = -1,
+    Simple = 0,
+    JEDEC4,
+    // JEDEC5
 };
 
 ECAD_ALWAYS_INLINE std::string toString(EPrimitiveType type)

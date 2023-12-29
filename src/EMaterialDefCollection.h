@@ -38,6 +38,9 @@ protected:
     ///Copy
     virtual Ptr<EMaterialDefCollection> CloneImp() const override { return new EMaterialDefCollection(*this); }
     virtual void PrintImp(std::ostream & os) const override;
+
+private:
+    std::unordered_map<EMaterialId, Ptr<IMaterialDef> > m_idLut;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialDefCollection)

@@ -11,6 +11,10 @@ using EPolygonData = Polygon2D<ECoord>;
 using EPolylineData = Polyline2D<ECoord>;
 using EPolygonWithHolesData = PolygonWithHoles2D<ECoord>;
 using EPolygonHolesData = typename EPolygonWithHolesData::hole_container;
+using FPolygonData = Polygon2D<EFloat>;
+using FPolylineData = Polyline2D<EFloat>;
+using FPolygonWithHolesData = PolygonWithHoles2D<EFloat>;
+using FPolygonHolesData = typename FPolygonWithHolesData::hole_container;
 
 class ETransform;
 class ECAD_API EShape : public Clonable<EShape>, public Printable

@@ -469,7 +469,7 @@ ECAD_INLINE bool WriteCTMv1PowerFile(std::string_view filename, const EGridData 
     return true;
 }
 
-ECAD_INLINE bool WriteCTMv1DensityFile(std::string_view filename, const size_t size, FCoord res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err)
+ECAD_INLINE bool WriteCTMv1DensityFile(std::string_view filename, const size_t size, EFloat res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err)
 {
     if (density.empty()) return false;
     for (const auto & layer : density) {

@@ -9,7 +9,7 @@ class ECAD_API EMaterialDef : public EDefinition, public IMaterialDef
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EMaterialDef();
 public:
-    EMaterialDef(std::string name, EMaterialId id);
+    EMaterialDef(std::string name, CPtr<IDatabase> database, EMaterialId id);
     virtual ~EMaterialDef();
 
     ///Copy

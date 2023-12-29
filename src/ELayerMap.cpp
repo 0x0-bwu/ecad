@@ -35,31 +35,18 @@ ECAD_INLINE ELayerMap::ELayerMap()
 {
 }
 
-ECAD_INLINE ELayerMap::ELayerMap(const std::string & name, Ptr<IDatabase> database)
- : EDefinition(name)
- , m_database(database)
+ECAD_INLINE ELayerMap::ELayerMap(std::string name, CPtr<IDatabase> database)
+ : EDefinition(std::move(name), database)
 {
-    SetMapping(noLayer, noLayer);
+    SetMapping(ELayerId::noLayer, ELayerId::noLayer);
+    SetMapping(ELayerId::ComponentLayer, ELayerId::ComponentLayer);
 }
 
 ECAD_INLINE ELayerMap::~ELayerMap()
 {
 }
-    
-ECAD_INLINE ELayerMap::ELayerMap(const ELayerMap & other)
-{
-    *this = other;
-}
 
-ECAD_INLINE ELayerMap & ELayerMap::operator= (const ELayerMap & other)
-{
-    EDefinition::operator=(other);
-    m_layerIdMap = other.m_layerIdMap;
-    m_database = other.m_database;
-    return *this;
-}
-
-ECAD_INLINE Ptr<IDatabase> ELayerMap::GetDatabase() const
+ECAD_INLINE CPtr<IDatabase> ELayerMap::GetDatabase() const
 {
     return m_database;
 }

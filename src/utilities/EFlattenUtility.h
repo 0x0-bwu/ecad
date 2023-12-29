@@ -36,5 +36,5 @@ private:
     mutable std::mutex m_flattenMutex;
 };
 
-}//namespace utility
+}//namespace eutils
 }//namespace ecad

@@ -10,8 +10,8 @@ struct ECTMv1Layer
 {
     virtual ~ECTMv1Layer() = default;
     std::string name;
-    EValue elevation = 0;//unit: um
-    EValue thickness = 0;//unit: um
+    EFloat elevation = 0;//unit: um
+    EFloat thickness = 0;//unit: um
 };
 
 struct ECTMv1MetalLayer : public ECTMv1Layer
@@ -29,12 +29,12 @@ struct ECTMv1Header
 {
     bool encrypted = false;
     std::string head = "Version 1.0 2022 R2";
-    EValue resolution = 10.0;//unit um
-    EValue scale = 1.0;
+    EFloat resolution = 10.0;//unit um
+    EFloat scale = 1.0;
     FBox2D size = FBox2D(0.0, 0.0, 0.0, 0.0);//unit um
     FBox2D origin = FBox2D(0.0, 0.0, 0.0, 0.0);//unit um
     ESize2D tiles = ESize2D(0, 0);
-    std::vector<EValue> temperatures;// = { 25.0, 50.0, 75.0, 100.0, 125.0 };
+    std::vector<EFloat> temperatures;// = { 25.0, 50.0, 75.0, 100.0, 125.0 };
     std::vector<ECTMv1Layer> layers;
     std::vector<std::string> techLayers;
     std::vector<ECTMv1ViaLayer> viaLayers;
@@ -68,7 +68,7 @@ public:
     EChipThermalModelV1 & operator= (EChipThermalModelV1 && other);
 
     std::string GetLastMatelLayerInStackup() const;
-    bool GetLayerHeightThickness(const std::string & name, EValue & height, EValue & thickness) const;
+    bool GetLayerHeightThickness(const std::string & name, EFloat & height, EFloat & thickness) const;
     CPtr<ECTMv1LayerStackup> GetLayerStackup(std::string * info = nullptr) const;
 
 private:

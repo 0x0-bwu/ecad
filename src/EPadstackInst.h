@@ -14,10 +14,6 @@ public:
     EPadstackInst(std::string name, CPtr<IPadstackDef> def, ENetId net);
     virtual ~EPadstackInst();
 
-    ///Copy
-    EPadstackInst(const EPadstackInst & other);
-    EPadstackInst & operator= (const EPadstackInst & other);
-
     void SetNet(ENetId net) override;
     ENetId GetNet() const override;
 

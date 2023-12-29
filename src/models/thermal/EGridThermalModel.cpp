@@ -24,7 +24,7 @@ ECAD_INLINE const ESize2D & EGridDataTable::GetTableSize() const
     return m_size;
 }
 
-ECAD_INLINE bool EGridDataTable::AddSample(ESimVal key, EGridData data)
+ECAD_INLINE bool EGridDataTable::AddSample(EFloat key, EGridData data)
 {
     if(data.Width() != m_size.x || data.Height() != m_size.y) return false;
 
@@ -33,7 +33,7 @@ ECAD_INLINE bool EGridDataTable::AddSample(ESimVal key, EGridData data)
     return true;
 }
 
-ECAD_INLINE ESimVal EGridDataTable::Query(ESimVal key, size_t x, size_t y, bool * success) const
+ECAD_INLINE EFloat EGridDataTable::Query(EFloat key, size_t x, size_t y, bool * success) const
 {
     if(success) *success = true;
     if(x >= m_size.x || y >= m_size.y) {
@@ -47,10 +47,10 @@ ECAD_INLINE ESimVal EGridDataTable::Query(ESimVal key, size_t x, size_t y, bool 
     else if(m_dataTable.size() == 1) {
         return (m_dataTable.cbegin()->second)(x, y);
     }
-    else if(math::LE<ESimVal>(key, m_dataTable.cbegin()->first)) {
+    else if(math::LE<EFloat>(key, m_dataTable.cbegin()->first)) {
         return (m_dataTable.cbegin()->second)(x, y);
     }
-    else if(math::GE<ESimVal>(key, m_dataTable.crbegin()->first)) {
+    else if(math::GE<EFloat>(key, m_dataTable.crbegin()->first)) {
         return (m_dataTable.crbegin()->second)(x, y);
     }
     else {
@@ -59,27 +59,27 @@ ECAD_INLINE ESimVal EGridDataTable::Query(ESimVal key, size_t x, size_t y, bool 
     }
 }
 
-ECAD_INLINE std::list<ESimVal> EGridDataTable::GetAllKeys() const
+ECAD_INLINE std::list<EFloat> EGridDataTable::GetAllKeys() const
 {
-    std::list<ESimVal> keys;
+    std::list<EFloat> keys;
     for(const auto & sample : m_dataTable)
         keys.push_back(sample.first);
     return keys;
 }
 
-ECAD_INLINE CPtr<EGridData> EGridDataTable::GetTable(ESimVal key) const
+ECAD_INLINE CPtr<EGridData> EGridDataTable::GetTable(EFloat key) const
 {
     auto iter = m_dataTable.find(key);
     if(iter != m_dataTable.cend()) return &(iter->second);
     return nullptr;
 }
 
-ECAD_INLINE std::pair<ESimVal, ESimVal> EGridDataTable::GetRange() const
+ECAD_INLINE std::pair<EFloat, EFloat> EGridDataTable::GetRange() const
 {
-    ESimVal min = std::numeric_limits<ESimVal>::max(), max = -min;
+    EFloat min = std::numeric_limits<EFloat>::max(), max = -min;
     for(const auto & sample : m_dataTable) {
-        min = std::min(min, sample.second.MaxOccupancy(std::less<ESimVal>()));
-        max = std::max(max, sample.second.MaxOccupancy(std::greater<ESimVal>()));
+        min = std::min(min, sample.second.MaxOccupancy(std::less<EFloat>()));
+        max = std::max(max, sample.second.MaxOccupancy(std::greater<EFloat>()));
     }
     return std::make_pair(min, max);
 }
@@ -102,7 +102,7 @@ ECAD_INLINE void EGridDataTable::BuildInterpolater() const
     if(m_interpolator) return;
     m_interpolator.reset(new EGridInterpolator(m_size.x, m_size.y, nullptr));
 
-    std::vector<ESimVal> x, y(GetSampleSize());
+    std::vector<EFloat> x, y(GetSampleSize());
     x.reserve(GetSampleSize());
     for (const auto & data : m_dataTable)
         x.push_back(data.first);
@@ -113,7 +113,7 @@ ECAD_INLINE void EGridDataTable::BuildInterpolater() const
             for (const auto & data : m_dataTable){
                 y[k++] = (data.second)(i, j);
             }
-            (*m_interpolator)(i, j) = std::make_shared<Interpolator>(std::vector<ESimVal>(x), std::vector<ESimVal>(y));
+            (*m_interpolator)(i, j) = std::make_shared<Interpolator>(std::vector<EFloat>(x), std::vector<EFloat>(y));
         }
     }
 }
@@ -146,12 +146,12 @@ ECAD_INLINE bool EGridThermalLayer::isMetalLayer() const
     return m_isMetal;
 }
 
-ECAD_INLINE void EGridThermalLayer::SetThickness(FCoord thickness)
+ECAD_INLINE void EGridThermalLayer::SetThickness(EFloat thickness)
 {
     m_thickness = thickness;
 }
 
-ECAD_INLINE FCoord EGridThermalLayer::GetThickness() const
+ECAD_INLINE EFloat EGridThermalLayer::GetThickness() const
 {
     return m_thickness;
 }
@@ -221,7 +221,7 @@ ECAD_INLINE SPtr<ELayerMetalFraction> EGridThermalLayer::GetMetalFraction() cons
     return m_metalFraction;
 }
 
-ECAD_INLINE ESimVal EGridThermalLayer::GetMetalFraction(size_t x, size_t y) const
+ECAD_INLINE EFloat EGridThermalLayer::GetMetalFraction(size_t x, size_t y) const
 {
     return (*m_metalFraction)(x, y);
 }
@@ -232,7 +232,7 @@ ECAD_INLINE ESize2D EGridThermalLayer::GetSize() const
     return ESize2D(m_metalFraction->Width(), m_metalFraction->Height());
 }
 
-ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPoint2D & ref, FCoord elevation)
+ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPoint2D & ref, EFloat elevation)
  : m_size(size), m_ref(ref), m_elevation(elevation)
 {
 
@@ -242,9 +242,9 @@ ECAD_INLINE EGridThermalModel::~EGridThermalModel()
 {
 }
 
-ECAD_INLINE FCoord EGridThermalModel::TotalThickness() const
+ECAD_INLINE EFloat EGridThermalModel::TotalThickness() const
 {
-    FCoord thickness = 0.0;
+    EFloat thickness = 0.0;
     for(const auto & layer : m_stackupLayers)
         thickness += layer.GetThickness();
     return thickness;
@@ -278,14 +278,14 @@ ECAD_INLINE const ESize2D & EGridThermalModel::GridSize() const
     return m_size;
 }
 
-ECAD_INLINE bool EGridThermalModel::SetScaleH(FCoord scaleH)
+ECAD_INLINE bool EGridThermalModel::SetScaleH(EFloat scaleH)
 {
-    if(math::LT<FCoord>(scaleH, 0)) return false;
+    if(math::LT<EFloat>(scaleH, 0)) return false;
     m_scaleH = scaleH;
     return true;
 }
 
-ECAD_INLINE FCoord EGridThermalModel::GetScaleH() const
+ECAD_INLINE EFloat EGridThermalModel::GetScaleH() const
 {
     return m_scaleH;
 }
@@ -315,7 +315,7 @@ ECAD_INLINE std::array<FCoord, 2> EGridThermalModel::GetResolution(bool scaled) 
 
 ECAD_INLINE size_t EGridThermalModel::AppendLayer(EGridThermalLayer layer)
 {
-    if (math::LT<FCoord>(layer.GetThickness(), 0)) return invalidIndex;
+    if (math::LT<EFloat>(layer.GetThickness(), 0)) return invalidIndex;
     if (layer.GetSize() != m_size) return invalidIndex;
     if (not m_stackupLayers.empty()) {
         auto & botLayer = m_stackupLayers.back();
@@ -326,12 +326,12 @@ ECAD_INLINE size_t EGridThermalModel::AppendLayer(EGridThermalLayer layer)
     return m_stackupLayers.size() - 1;
 }
 
-ECAD_INLINE void EGridThermalModel::AppendJumpConnection(ESize3D start, ESize3D end, FCoord alpha)
+ECAD_INLINE void EGridThermalModel::AppendJumpConnection(ESize3D start, ESize3D end, EFloat alpha)
 {
     m_jumpConnects.emplace_back(std::move(start), std::move(end), alpha);
 }
 
-ECAD_INLINE const std::vector<std::tuple<ESize3D, ESize3D, FCoord> > & EGridThermalModel::GetJumpConnections() const
+ECAD_INLINE const std::vector<std::tuple<ESize3D, ESize3D, EFloat> > & EGridThermalModel::GetJumpConnections() const
 {
     return m_jumpConnects;
 }
@@ -358,18 +358,6 @@ ECAD_INLINE const std::vector<SPtr<EThermalPowerModel> > & EGridThermalModel::Ge
     return m_stackupLayers.at(layer).GetPowerModels();
 }
 
-ECAD_INLINE void EGridThermalModel::SetUniformTopBotBCValue(ESimVal top, ESimVal bot)
-{
-    m_uniformBcTopBot[0] = top;
-    m_uniformBcTopBot[1] = bot;
-}
-
-ECAD_INLINE void EGridThermalModel::GetUniformTopBotBCValue(ESimVal & t, ESimVal & b) const
-{
-    t = m_uniformBcTopBot.at(0);
-    b = m_uniformBcTopBot.at(1);
-}
-
 ECAD_INLINE bool EGridThermalModel::SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot)
 {
     if(top && top->GetTableSize() != m_size) return false;
@@ -382,18 +370,6 @@ ECAD_INLINE void EGridThermalModel::GetTopBotBCModel(SPtr<EGridBCModel> & top, S
 {
     top = m_bcTopBot[0];
     bot = m_bcTopBot[1];
-}
-
-ECAD_INLINE void EGridThermalModel::SetTopBotBCType(BCType top, BCType bot)
-{
-    m_bcTypeTopBot[0] = top;
-    m_bcTypeTopBot[1] = bot;
-}
-
-ECAD_INLINE void EGridThermalModel::GetTopBotBCType(BCType & top, BCType & bot) const
-{
-    top = m_bcTypeTopBot[0];
-    bot = m_bcTypeTopBot[1];
 }
 
 ECAD_INLINE bool EGridThermalModel::NeedIteration() const

@@ -11,10 +11,6 @@ public:
     ENet(std::string name);
     virtual ~ENet();
 
-    ///Copy
-    ENet(const ENet & other);
-    ENet & operator= (const ENet & other);
-
     void SetNetId(ENetId id) override;
     ENetId GetNetId() const override;
 

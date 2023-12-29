@@ -11,33 +11,32 @@ class ECAD_API ECell : public EDefinition, public ICell
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ECell();
-    explicit ECell(std::string name, Ptr<IDatabase> database);
+    explicit ECell(std::string name, CPtr<IDatabase> database);
     virtual ~ECell();
     
     ///Copy
     ECell(const ECell & other);
     ECell & operator= (const ECell & other);
 
-    virtual const ECoordUnits & GetCoordUnits() const;
+    virtual const ECoordUnits & GetCoordUnits() const override;
 
-    virtual void SetDatabase(Ptr<IDatabase> database);
-    virtual bool SetLayoutView(UPtr<ILayoutView> layout) { return false; }
+    void SetDatabase(CPtr<IDatabase> database) override;
+    CPtr<IDatabase> GetDatabase() const override;
+    
+    virtual bool SetLayoutView(UPtr<ILayoutView> layout) override { return false; }
 
-    virtual ECellType GetCellType() const;
-    virtual Ptr<IDatabase> GetDatabase() const;
-    virtual Ptr<ILayoutView> GetLayoutView() const { return nullptr; }
-    virtual Ptr<ILayoutView> GetFlattenedLayoutView() { return nullptr; }
+    virtual ECellType GetCellType() const override;
+    virtual Ptr<ILayoutView> GetLayoutView() const override { return nullptr; }
+    virtual Ptr<ILayoutView> GetFlattenedLayoutView() override { return nullptr; }
 
-    EDefinitionType GetDefinitionType() const;
-    void Print(std::ostream & os) const;
-    const std::string & GetName() const;
-    std::string sUuid() const;
+    EDefinitionType GetDefinitionType() const override;
+    void Print(std::ostream & os) const override;
+    const std::string & GetName() const override;
+    std::string sUuid() const override;
     
 protected:
     ECellType m_cellType;
-    Ptr<IDatabase> m_database;
     UPtr<ILayoutView> m_layoutView;
-    UPtr<ILayoutView> m_flattenedLayoutView;
 };
 
 class ECAD_API ECircuitCell : public ECell
@@ -45,7 +44,7 @@ class ECAD_API ECircuitCell : public ECell
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     ECircuitCell();
-    explicit ECircuitCell(std::string name, Ptr<IDatabase> database);
+    explicit ECircuitCell(std::string name, CPtr<IDatabase> database);
     virtual ~ECircuitCell();
 
     ///Copy

@@ -15,6 +15,7 @@ ECAD_INLINE void EMaterialDefCollection::save(Archive & ar, const unsigned int v
     boost::serialization::void_cast_register<EMaterialDefCollection, IMaterialDefCollection>();
     boost::serialization::void_cast_register<EMaterialDefCollection, IDefinitionCollection>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BaseCollection);
+    ar & boost::serialization::make_nvp("id_lut", m_idLut);
 }
 
 template <typename Archive>
@@ -24,6 +25,7 @@ ECAD_INLINE void EMaterialDefCollection::load(Archive & ar, const unsigned int v
     boost::serialization::void_cast_register<EMaterialDefCollection, IMaterialDefCollection>();
     boost::serialization::void_cast_register<EMaterialDefCollection, IDefinitionCollection>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BaseCollection);
+    ar & boost::serialization::make_nvp("id_lut", m_idLut);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialDefCollection)
@@ -66,6 +68,7 @@ ECAD_INLINE Ptr<IDefinition> EMaterialDefCollection::AddDefinition(const std::st
     auto materialDef = dynamic_cast<Ptr<IMaterialDef> >(definition.get());
     if(nullptr == materialDef) return nullptr;
     Insert(name, UPtr<IMaterialDef>(materialDef));
+    m_idLut.emplace(materialDef->GetMaterialId(), materialDef);
     definition.release();
     return GetDefinition(name, type);
 }
@@ -85,12 +88,9 @@ ECAD_INLINE std::string EMaterialDefCollection::GetNextDefName(const std::string
 
 ECAD_INLINE Ptr<IMaterialDef> EMaterialDefCollection::FindMaterialDefById(EMaterialId id) const
 {
-    //todo, performance
-    auto iter = GetMaterialDefIter();
-    while (auto * material = iter->Next()) {
-        if (id == material->GetMaterialId())
-            return material;
-    }
+    auto iter = m_idLut.find(id);
+    if (iter != m_idLut.cend())
+        return iter->second;
     return nullptr;
 }
 
@@ -107,6 +107,7 @@ ECAD_INLINE size_t EMaterialDefCollection::Size() const
 ECAD_INLINE void EMaterialDefCollection::Clear()
 {
     BaseCollection::Clear();
+    m_idLut.clear();
 }
 
 ECAD_INLINE void EMaterialDefCollection::PrintImp(std::ostream & os) const

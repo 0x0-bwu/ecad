@@ -14,14 +14,10 @@ public:
     explicit ELayer(std::string name, ELayerId id = noLayer);
     virtual ~ELayer();
 
-    ///Copy
-    ELayer(const ELayer & other);
-    ELayer & operator= (const ELayer & other);
-
-    std::string GetName() const;
-    void SetLayerId(ELayerId id);
-    ELayerId GetLayerId() const;
-    ELayerType GetLayerType() const;
+    virtual std::string GetName() const;
+    virtual void SetLayerId(ELayerId id);
+    virtual ELayerId GetLayerId() const;
+    virtual ELayerType GetLayerType() const;
 
     Ptr<IStackupLayer> GetStackupLayerFromLayer();
     Ptr<IViaLayer> GetViaLayerFromLayer();
@@ -44,15 +40,16 @@ public:
     EStackupLayer(const std::string & name, ELayerType type);
     virtual ~EStackupLayer();
 
-    ///Copy
-    EStackupLayer(const EStackupLayer & other);
-    EStackupLayer & operator= (const EStackupLayer & other);
+    std::string GetName() const override;
+    void SetLayerId(ELayerId id) override;
+    ELayerId GetLayerId() const override;
+    ELayerType GetLayerType() const override;
 
-    void SetElevation(FCoord elevation) override;
-    FCoord GetElevation() const override;
+    void SetElevation(EFloat elevation) override;
+    EFloat GetElevation() const override;
 
-    void SetThickness(FCoord thickness) override;
-    FCoord GetThickness() const override;
+    void SetThickness(EFloat thickness) override;
+    EFloat GetThickness() const override;
 
     void SetConductingMaterial(const std::string & material) override;
     const std::string & GetConductingMaterial() const override;
@@ -64,8 +61,8 @@ protected:
     ///Copy
     virtual Ptr<ELayer> CloneImp() const override { return new EStackupLayer(*this);}
 protected:
-    FCoord m_elevation = 0;
-    FCoord m_thickness = 0;
+    EFloat m_elevation = 0;
+    EFloat m_thickness = 0;
     std::string m_conductingMat;
     std::string m_dielectricMat;
 };
@@ -77,10 +74,7 @@ class ECAD_API EViaLayer : public ELayer, public IViaLayer
 public:
     explicit EViaLayer(const std::string & name);
     virtual ~EViaLayer();
-
-    ///Copy
-    EViaLayer(const EViaLayer & other);
-    EViaLayer & operator= (const EViaLayer & other);
+    
 protected:
     ///Copy
     virtual Ptr<ELayer> CloneImp() const override { return new EViaLayer(*this); }

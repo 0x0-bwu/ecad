@@ -49,8 +49,8 @@ public:
     ///Layer
     ELayerId AppendLayer(UPtr<ILayer> layer) const override;
     std::vector<ELayerId> AppendLayers(std::vector<UPtr<ILayer> > layers) const override;
-    void GetStackupLayers(std::vector<Ptr<ILayer> > & layers) const override;
-    void GetStackupLayers(std::vector<CPtr<ILayer> > & layers) const override;
+    void GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const override;
+    void GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const override;
     UPtr<ILayerMap> AddDefaultDielectricLayers() const override;
     Ptr<ILayer> FindLayerByLayerId(ELayerId lyrId) const override;
     Ptr<ILayer> FindLayerByName(const std::string & name) const override;
@@ -68,11 +68,11 @@ public:
     Ptr<ICellInst> CreateCellInst(const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform) override;
     
     ///Component
-    Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform) override;
+    Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped) override;
 
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) override;
-    Ptr<IPrimitive> CreateBondwire(std::string name, ELayerId layer, ENetId net, EPoint2D start, EPoint2D end, FCoord radius) override;
+    Ptr<IBondwire> CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius) override;
 
     ///Text
     Ptr<IText> CreateText(ELayerId layer, const ETransform2D & transform, const std::string & text) override;

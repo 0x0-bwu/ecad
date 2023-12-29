@@ -55,11 +55,9 @@ public:
             }
 
             //res
-            for (size_t j = 0; j < nd.ns.size(); ++j) {
-                if (auto n = nd.ns.at(j); n > i) {
-                    auto name = "R" + std::to_string(i) + "_" + std::to_string(n);
-                    formatOs(w, name, node(i), node(n), nd.rs.at(j));
-                }
+            for (const auto & [n, r] : nd.ns) {
+                auto name = "R" + std::to_string(i) + "_" + std::to_string(n);
+                formatOs(w, name, node(i), node(n), r);
             }
 
             //t
