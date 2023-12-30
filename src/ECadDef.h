@@ -215,12 +215,13 @@ enum class ECloneOption
     LayoutView = 2
 };
 
-enum class EThermalModelType
+enum class EModelType
 {
-    CTMv1 = 0,
-    Grid = 1,
-    Prisma = 2,
-    // Tet. //todo
+    Invalid = -1,
+    ThermalCTMv1 = 0,
+    ThermalGrid = 1,
+    ThermalPrisma = 2,
+    // ThermalTet. //todo
 };
 
 }//namespace ecad

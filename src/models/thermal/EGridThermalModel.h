@@ -104,6 +104,8 @@ public:
 
     bool NeedIteration() const;
 
+    EModelType GetModelType() const { return EModelType::ThermalGrid; }
+
 private:
     ESize2D m_size;
     FPoint2D m_ref;

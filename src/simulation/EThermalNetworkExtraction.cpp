@@ -5,6 +5,7 @@
 #include "models/thermal/EGridThermalModel.h"
 #include "utilities/EMetalFractionMapping.h"
 #include "solvers/EThermalNetworkSolver.h"
+#include "models/thermal/EThermalModel.h"
 #include "utilities/ELayoutRetriever.h"
 #include "generic/tools/FileSystem.hpp"
 
@@ -23,7 +24,7 @@ ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetwor
     m_settings = std::move(settings);
 }
 
-ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout)
+ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout)
 {
     ECAD_EFFICIENCY_TRACK("generate grid thermal model")
 
@@ -52,11 +53,11 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
     const auto & coordUnits = layout->GetCoordUnits();
 
     auto [nx, ny] = mfInfo->grid;
-    EGridThermalModel model(ESize2D(nx, ny));
+    auto model = new EGridThermalModel(ESize2D(nx, ny));
 
     auto rx = coordUnits.toUnit(mfInfo->stride[0], ECoordUnits::Unit::Meter);
     auto ry = coordUnits.toUnit(mfInfo->stride[1], ECoordUnits::Unit::Meter);
-    model.SetResolution(rx, ry);
+    model->SetResolution(rx, ry);
 
     std::vector<Ptr<IStackupLayer> > layers;
     layout->GetStackupLayers(layers);
@@ -71,7 +72,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
         auto layerMetalFraction = mf->at(i);
         EGridThermalLayer layer(name, layerMetalFraction);
         layer.SetThickness(thickness);
-        auto index = model.AppendLayer(std::move(layer));
+        auto index = model->AppendLayer(std::move(layer));
         ECAD_ASSERT(index != invalidIndex)
         lyrMap.emplace(layers.at(i)->GetLayerId(), index);
     }
@@ -88,7 +89,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
             auto alpha = generic::math::pi * r * r / l;
             auto index1 = mfInfo->GetIndex(start);
             auto index2 = mfInfo->GetIndex(end);
-            model.AppendJumpConnection(ESize3D(index1, 0), ESize3D(index2, 0), alpha);
+            model->AppendJumpConnection(ESize3D(index1, 0), ESize3D(index2, 0), alpha);
         }
     }
 
@@ -122,39 +123,39 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
                     for (size_t j = ll[1]; j <= ur[1]; ++j)
                         gridData(i, j) += power;
             }
-            else model.AddPowerModel(lyrMap.at(layer), std::shared_ptr<EThermalPowerModel>(new EBlockPowerModel(ll, ur, power)));
+            else model->AddPowerModel(lyrMap.at(layer), std::shared_ptr<EThermalPowerModel>(new EBlockPowerModel(ll, ur, power)));
         }
     }
 
     for (auto & [lyrId, gridData] : gridMap) {
         auto powerModel = new EGridPowerModel(ESize2D(nx, ny));
         powerModel->GetTable().AddSample(iniT, std::move(gridData));
-        model.AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
+        model->AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
     }
 
     //htc
-    model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model.SetUniformTopBotBCValue(0, 2750);
+    model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
+    model->SetUniformTopBotBCValue(0, 2750);
     // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
     // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
-    // model.SetTopBotBCModel(nullptr, bcModel);
+    // model->SetTopBotBCModel(nullptr, bcModel);
 
     std::vector<EFloat> results;
-    EGridThermalNetworkStaticSolver solver(model);
-    // EGridThermalNetworkTransientSolver solver(model);
+    EGridThermalNetworkStaticSolver solver(*model);
+    // EGridThermalNetworkTransientSolver solver(*model);
     EThermalNetworkSolveSettings solverSettings;
     if (m_settings.dumpSpiceFile)
         solverSettings.spiceFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "spice.sp";
     solver.SetSolveSettings(solverSettings);
     if (not solver.Solve(iniT, results)) return nullptr;
 
-    auto modelSize = model.ModelSize();
+    auto modelSize = model->ModelSize();
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
     for (size_t z = 0; z < modelSize.z; ++z)
         htMap->push_back(std::make_shared<ELayerMetalFraction>(modelSize.x, modelSize.y));
 
     for (size_t i = 0; i < results.size(); ++i){
-        auto gridIndex = model.GetGridIndex(i);
+        auto gridIndex = model->GetGridIndex(i);
         auto lyrHtMap = htMap->at(gridIndex.z);
         (*lyrHtMap)(gridIndex.x, gridIndex.y) = results[i];
     }
@@ -182,13 +183,13 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GenerateGridThermalMo
             lyr->WriteImgProfile(filepng, rgbaFunc);
         }
     }
-    return std::make_unique<EThermalModel>(std::move(model));
+    return std::unique_ptr<IModel>(model);
 }
 
-ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout,  EFloat minAlpha, ECoord minLen, ECoord maxLen, size_t iteration)
+ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout,  EFloat minAlpha, ECoord minLen, ECoord maxLen, size_t iteration)
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
-    EPrismaThermalModel model(layout);
+    auto model = new EPrismaThermalModel(layout);
     auto compact = makeCompactLayout(layout);
     auto compactModelFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "compact.png";
     compact->WriteImgView(compactModelFile, 1024);
@@ -199,7 +200,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     std::list<tri::IndexEdge> edges;
     std::vector<Point2D<ECoord> > points;
     std::vector<Segment2D<ECoord> > segments;
-    auto & triangulation = model.prismaTemplate;
+    auto & triangulation = model->prismaTemplate;
     MeshFlow2D::ExtractIntersections(compact->polygons, segments);
     MeshFlow2D::ExtractTopology(segments, points, edges);
     points.insert(points.end(), compact->steinerPoints.begin(), compact->steinerPoints.end());
@@ -215,7 +216,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
         EPrismaThermalModel::PrismaLayer prismaLayer;
         prismaLayer.id = layer;
         [[maybe_unused]] auto check = compact->GetLayerHeightThickness(layer, prismaLayer.elevation, prismaLayer.thickness); { ECAD_ASSERT(check) }
-        model.AppendLayer(std::move(prismaLayer));
+        model->AppendLayer(std::move(prismaLayer));
     }
 
     std::unordered_set<EMaterialId> fluidMaterials;
@@ -228,7 +229,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;//[layer, [tempId, eleId]]
 
     auto buildOnePrismaLayer = [&](size_t index) {
-        auto & prismaLayer = model.layers.at(index);   
+        auto & prismaLayer = model->layers.at(index);   
         auto & idMap = templateIdMap.emplace(prismaLayer.id, std::unordered_map<size_t, size_t>{}).first->second;    
         for (size_t it = 0; it < triangulation.triangles.size(); ++it) {
             ECAD_ASSERT(compact->hasPolygon(prismaLayer.id))
@@ -251,12 +252,12 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
         generic::log::Trace("layer %1%'s total elements: %2%", index, prismaLayer.elements.size());
     };
 
-    for (size_t index = 0; index < model.TotalLayers(); ++index)
+    for (size_t index = 0; index < model->TotalLayers(); ++index)
         buildOnePrismaLayer(index);
     
     //build connection
-    for (size_t index = 0; index < model.TotalLayers(); ++index) {
-        auto & layer = model.layers.at(index);
+    for (size_t index = 0; index < model->TotalLayers(); ++index) {
+        auto & layer = model->layers.at(index);
         auto & elements = layer.elements;
         const auto & currIdMap = templateIdMap.at(layer.id);
         for (auto & ele : elements) {
@@ -268,8 +269,8 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
                 if (iter != currIdMap.cend()) ele.neighbors[nid] = iter->second;
             }
         }
-        if (not model.isBotLayer(index)) {
-            auto & lowerLayer = model.layers.at(index + 1);
+        if (not model->isBotLayer(index)) {
+            auto & lowerLayer = model->layers.at(index + 1);
             auto & lowerEles = lowerLayer.elements;
             const auto & lowerIdMap = templateIdMap.at(lowerLayer.id);
             for (auto & ele : elements) {
@@ -286,33 +287,33 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
     auto scaleH2Unit = coordUnit.Scale2Unit();
     auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
-    model.BuildPrismaModel(scaleH2Unit, scale2Meter);
+    model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
     for (const auto & bondwire : compact->bondwires)
-        model.AddBondWire(bondwire);
-    generic::log::Trace("total line elements: %1%", model.TotalLineElements());
+        model->AddBondWire(bondwire);
+    generic::log::Trace("total line elements: %1%", model->TotalLineElements());
 
     auto meshFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.vtk";
-    io::GenerateVTKFile(meshFile, model);
+    io::GenerateVTKFile(meshFile, *model);
 
     //htc
-    model.SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model.SetUniformTopBotBCValue(0, 2750);
-    model.uniformBcSide = 0;
+    model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
+    model->SetUniformTopBotBCValue(0, 2750);
+    model->uniformBcSide = 0;
     // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
     // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
-    // model.SetTopBotBCModel(nullptr, bcModel);
+    // model->SetTopBotBCModel(nullptr, bcModel);
 
     EFloat iniT = 25;
     std::vector<EFloat> results;
-    EPrismaThermalNetworkStaticSolver solver(model);
+    EPrismaThermalNetworkStaticSolver solver(*model);
     EThermalNetworkSolveSettings solverSettings;
     solver.SetSolveSettings(solverSettings);
     if (not solver.Solve(iniT, results)) return nullptr;
     auto hotmapFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "hotmap.vtk";
-    io::GenerateVTKFile(hotmapFile, model, &results);
+    io::GenerateVTKFile(hotmapFile, *model, &results);
 
-    return std::make_unique<EThermalModel>(std::move(model));
+    return std::unique_ptr<IModel>(model);
 }
 
 }//namespace ecad::sim

@@ -5,7 +5,8 @@
 #include <array>
 namespace ecad {
 
-struct EDataMgrSettings {
+struct EDataMgrSettings
+{
     size_t threads = 8;
     size_t circleDiv = 16;
 };
@@ -29,6 +30,13 @@ struct EMetalFractionMappingSettings
     bool mergeGeomBeforeMapping = true;
     std::array<size_t, 2> grid = {1, 1};
     std::unordered_set<ENetId> selectNets;
+};
+
+struct EMeshSettings
+{
+    EFloat minAng{20};//Deg
+    EFloat minLen{0};
+    EFloat maxLen{maxFloat};
 };
 
 struct EThermalNetworkExtractionSettings

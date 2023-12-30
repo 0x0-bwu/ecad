@@ -1,5 +1,6 @@
 #pragma once
 #include "ECadCommon.h"
+#include "interfaces/IModel.h"
 #include "utilities/EMetalFractionMapping.h"
 
 namespace boost::math::interpolators {
@@ -15,7 +16,7 @@ namespace model {
 
 using namespace generic::geometry;
 
-class ECAD_API EThermalModel
+class ECAD_API EThermalModel : public IModel
 {
 public:
     enum class BCType { HTC, HeatFlow, Temperature/*not work currently*/ };
@@ -26,6 +27,8 @@ public:
 
     virtual void SetTopBotBCType(BCType top, BCType bot);
     virtual void GetTopBotBCType(BCType & top, BCType & bot) const;
+
+    virtual EModelType GetModelType() const = 0;
 
 protected:
     std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};

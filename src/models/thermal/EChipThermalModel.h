@@ -70,6 +70,8 @@ public:
     bool GetLayerHeightThickness(const std::string & name, EFloat & height, EFloat & thickness) const;
     CPtr<ECTMv1LayerStackup> GetLayerStackup(std::string * info = nullptr) const;
 
+    EModelType GetModelType() const { return EModelType::ThermalCTMv1; }
+    
 private:
     bool isMetalLayer(const std::string & name) const;
     void BuildLayerStackup(std::string * info = nullptr) const;

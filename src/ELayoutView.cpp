@@ -19,6 +19,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #include "interfaces/ILayerCollection.h"
 #include "interfaces/INetCollection.h"
 #include "interfaces/ILayerMap.h"
+#include "interfaces/IModel.h"
 #include "interfaces/ILayer.h"
 #include "interfaces/ICell.h"
 
@@ -311,7 +312,8 @@ ECAD_INLINE bool ELayoutView::ExtractThermalNetwork(const EThermalNetworkExtract
 {
     sim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(settings);
-    return nullptr != ne.GenerateGridThermalModel(this);
+    ne.GenerateGridThermalModel(this);
+    return true;
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)

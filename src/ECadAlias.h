@@ -50,6 +50,7 @@ ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
 
 ECAD_ALWAYS_INLINE static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
 ECAD_ALWAYS_INLINE static constexpr EFloat invalidFloat = std::numeric_limits<EFloat>::max();//std::nan(quiet_Nan) has issue with AppleClang with -ffast-math
+ECAD_ALWAYS_INLINE static constexpr EFloat maxFloat = std::numeric_limits<EFloat>::max();
 
 template <typename NumType>
 ECAD_ALWAYS_INLINE  bool isValid(NumType value) { return value != std::numeric_limits<NumType>::max(); }
