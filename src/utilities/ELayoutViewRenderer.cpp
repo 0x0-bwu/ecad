@@ -6,7 +6,7 @@
 #include "EShape.h"
 
 namespace ecad {
-namespace eutils {
+namespace utils {
 using namespace generic::geometry;
 ECAD_INLINE ELayoutViewRenderer::ELayoutViewRenderer(const ELayoutViewRendererSettings & settings)
  : m_settings(settings)
@@ -78,5 +78,5 @@ ECAD_INLINE bool ELayoutViewRenderer::RendererPNG(CPtr<ILayoutView> layout)
     return GeometryIO::WritePNG(filename.c_str(), outs.begin(), outs.end(), m_settings.width);
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

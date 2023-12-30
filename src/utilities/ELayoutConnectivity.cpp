@@ -14,7 +14,7 @@
 #include "EDataMgr.h"
 #include "EShape.h"
 namespace ecad {
-namespace eutils {
+namespace utils {
 
 ECAD_INLINE void ELayoutConnectivity::ConnectivityExtraction(Ptr<ILayoutView> layout)
 {
@@ -122,5 +122,5 @@ ECAD_INLINE void ELayoutConnectivity::ConnectivityExtraction(Ptr<ILayoutView> la
     }
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

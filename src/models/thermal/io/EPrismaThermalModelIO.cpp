@@ -1,6 +1,6 @@
 #include "EPrismaThermalModelIO.h"
 #include "generic/tools/Color.hpp"
-namespace ecad::emodel::etherm::io {
+namespace ecad::model::io {
 
 ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermalModel & model, const std::vector<EFloat> * temperature, std::string * err)
 {
@@ -69,4 +69,4 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermal
     return true;
 }
 
-} // namespace ecad::emodel::etherm::io
+} // namespace ecad::model::io

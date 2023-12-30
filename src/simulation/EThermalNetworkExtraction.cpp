@@ -12,12 +12,11 @@
 #include "Mesher2D.h"
 #include "Interface.h"
 
-namespace ecad {
-namespace esim {
+namespace ecad::sim {
 
-using namespace eutils;
-using namespace esolver;
-using namespace emodel::etherm;
+using namespace ecad::model;
+using namespace ecad::utils;
+using namespace ecad::solver;
 
 ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetworkExtractionSettings settings)
 {
@@ -211,7 +210,7 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     generic::log::Trace("total elements: %1%", triangulation.triangles.size());
     //todo wrapper to mesh
 
-    eutils::ELayoutRetriever retriever(layout);
+    ecad::utils::ELayoutRetriever retriever(layout);
     for (size_t layer = 0; layer < compact->TotalLayers(); ++layer) {
         EPrismaThermalModel::PrismaLayer prismaLayer;
         prismaLayer.id = layer;
@@ -316,5 +315,4 @@ ECAD_INLINE UPtr<EThermalModel> EThermalNetworkExtraction::GeneratePrismaThermal
     return std::make_unique<EThermalModel>(std::move(model));
 }
 
-}//namespace esim
-}//namespace ecad
+}//namespace ecad::sim

@@ -1,7 +1,7 @@
 #pragma once
 #include "models/thermal/EChipThermalModel.h"
 
-namespace ecad::emodel::etherm::io {
+namespace ecad::model::io {
 
 ECAD_API bool GenerateTxtProfile(const EGridThermalModel & model, std::string_view filename, std::string * err = nullptr);
 
@@ -10,4 +10,4 @@ ECAD_API bool GenerateImageProfiles(const EGridThermalModel & model, std::string
 namespace detail {
 ECAD_API bool GenerateImageProfile(std::string_view filename, const EGridData & data, double min, double max);
 }
-}//namespace ecad::emodel::etherm::io
+}//namespace ecad::model::io

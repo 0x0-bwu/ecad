@@ -4,9 +4,8 @@
 #include "ECadSettings.h"
 #include "ECadCommon.h"
 namespace ecad {
-namespace esolver {
-using namespace emodel;
-using namespace emodel::etherm;
+namespace solver {
+using namespace ecad::model;
 ECAD_API EFloat CalculateResidual(const std::vector<EFloat> & v1, const std::vector<EFloat> & v2);
 
 class ECAD_API EThermalNetworkSolver
@@ -70,5 +69,5 @@ public:
     bool Solve(EFloat refT, std::vector<EFloat> & results);
 };
 
-}//namesapce esolver
+}//namesapce solver
 }//namespace ecad

@@ -3,10 +3,9 @@
 namespace ecad {
 
 class IMaterialDef;
-namespace emodel {
-namespace etherm {
+namespace model {
 
-using namespace eutils;
+using namespace ecad::utils;
 
 using EGridBCModel = EGridDataTable;
 
@@ -142,6 +141,5 @@ ECAD_ALWAYS_INLINE bool EGridThermalModel::isValid(const ESize3D & index) const
     return index.x < m_size.x && index.y < m_size.y && index.z < m_stackupLayers.size();
 }
 
-}//namespace etherm
-}//namesapce emodel
+}//namesapce model
 }//namespace ecad

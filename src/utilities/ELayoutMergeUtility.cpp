@@ -4,7 +4,7 @@
 #include "Interface.h"
 #include "EShape.h"
 namespace ecad {
-namespace eutils {
+namespace utils {
 
 ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform)
 {
@@ -118,5 +118,5 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     }
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

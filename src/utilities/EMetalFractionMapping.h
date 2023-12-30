@@ -6,7 +6,7 @@
 namespace ecad {
 
 class ILayoutView;
-namespace eutils {
+namespace utils {
 
 using namespace generic::geometry;
 
@@ -88,5 +88,5 @@ private:
 
 ECAD_API bool WriteThermalProfile(const EMetalFractionInfo & info, const ELayoutMetalFraction & mf, std::string_view filename);
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

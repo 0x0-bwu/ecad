@@ -1,9 +1,9 @@
  #pragma once
 #include "models/thermal/EPrismaThermalModel.h"
 #include "thermal/model/ThermalNetwork.hpp"
-namespace ecad::esolver {
+namespace ecad::solver {
 
-using namespace emodel::etherm;
+using namespace model;
 using namespace thermal::model;
 
 struct EPrismaThermalNetworkBuildSummary
@@ -53,5 +53,5 @@ private:
 private:
     const EPrismaThermalModel & m_model;
 };
-} // namespace ecad::esolver
+} // namespace ecad::solver
 

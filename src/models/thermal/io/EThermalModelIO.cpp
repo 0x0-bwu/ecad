@@ -4,7 +4,7 @@
 #include "models/thermal/io/EChipThermalModelIO.h"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"
-namespace ecad::emodel::etherm::io {
+namespace ecad::model::io {
 
 ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(std::string_view filename, size_t reduceOrder, std::string * err)
 {
@@ -185,4 +185,4 @@ ECAD_INLINE UPtr<EChipThermalModelV1> makeChipThermalModelV1FromGridThermalModel
     return ctm;
 }
 
-}// namespace ecad::emodel::etherm::io
+}// namespace ecad::model::io

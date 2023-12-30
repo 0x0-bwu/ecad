@@ -8,7 +8,7 @@
 #include "EShape.h"
 
 namespace ecad {
-namespace eutils {
+namespace utils {
     
 ECAD_INLINE ELayout2CtmUtility::ELayout2CtmUtility(Ptr<ILayoutView> layout)
  : m_layout(layout)
@@ -60,8 +60,7 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
     auto mf = mapper.GetLayoutMetalFraction();
     if(nullptr == mf) return false;
 
-    using namespace emodel;
-    using namespace emodel::etherm;
+    using namespace ecad::model;
     auto gridModel = std::make_unique<EGridThermalModel>(ESize2D(nx, ny));
     auto rx = coordUnits.toUnit(stride, ECoordUnits::Unit::Meter), ry = rx;
     gridModel->SetResolution(rx, ry);
@@ -90,5 +89,5 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
     return true;
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

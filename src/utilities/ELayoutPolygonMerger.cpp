@@ -15,7 +15,7 @@
 #include "EShape.h"
 
 namespace ecad {
-namespace eutils {
+namespace utils {
 
 using namespace generic;
 using namespace generic::geometry;
@@ -323,5 +323,5 @@ ECAD_INLINE void ELayoutPolygonMerger::WriteDomDmcForOneLayer(std::fstream & dom
         writeOnePolygonData(polygon);
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

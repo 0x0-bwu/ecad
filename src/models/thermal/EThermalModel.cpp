@@ -1,8 +1,7 @@
 #include "models/thermal/EThermalModel.h"
 
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 
 ECAD_INLINE EGridPowerModel::EGridPowerModel(const ESize2D & size)
 {
@@ -80,6 +79,5 @@ ECAD_INLINE void EThermalModel::GetTopBotBCType(BCType & top, BCType & bot) cons
     bot = m_bcTypeTopBot[1];
 }
 
-}//namespace etherm
-}//namespace emodel
+}//namespace model
 }//namespace ecad

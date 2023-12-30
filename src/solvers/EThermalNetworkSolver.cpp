@@ -7,9 +7,9 @@
 #include "generic/thread/ThreadPool.hpp"
 #include "generic/tools/Format.hpp"
 #include "EDataMgr.h"
-namespace ecad::esolver {
+namespace ecad::solver {
 
-using namespace emodel;
+using namespace ecad::model;
 
 ECAD_INLINE EFloat CalculateResidual(const std::vector<EFloat> & v1, const std::vector<EFloat> & v2)
 {
@@ -323,4 +323,4 @@ ECAD_INLINE bool EPrismaThermalNetworkTransientSolver::Solve(EFloat refT, std::v
     return false;
 }
 
-} //namespace ecad::esolver
+} //namespace ecad::solver

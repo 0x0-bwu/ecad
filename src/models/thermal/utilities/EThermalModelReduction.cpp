@@ -1,8 +1,7 @@
 #include "models/thermal/utilities/EThermalModelReduction.h"
 
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 namespace utils {
 ECAD_INLINE EThermalModelReduction::~EThermalModelReduction()
 {
@@ -211,6 +210,5 @@ ECAD_INLINE UPtr<EGridDataTable> Reduce(const EGridDataTable & data, ReduceValue
 }
 }//namespace detail
 }//namespace utils
-}//namespace etherm
-}//namespace emodel
+}//namespace model
 }//namespace ecad

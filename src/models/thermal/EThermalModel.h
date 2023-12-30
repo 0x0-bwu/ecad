@@ -11,8 +11,7 @@ template <typename T> class OccupancyGridMap;
 } //namespace generic::geometry
 
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 
 using namespace generic::geometry;
 
@@ -106,6 +105,5 @@ public:
     size_t Size() const;
 };
 
-}//namespace etherm
-}//namesapce emodel
+}//namesapce model
 }//namespace ecad

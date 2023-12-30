@@ -11,8 +11,8 @@
 #include "TestData.hpp"
 using namespace boost::unit_test;
 using namespace ecad;
-using namespace ecad::esolver;
-using namespace ecad::emodel::etherm;
+using namespace ecad::solver;
+using namespace ecad::model;
 void t_grid_thermal_model_solver_test()
 {
     std::string err;

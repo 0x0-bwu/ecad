@@ -6,8 +6,7 @@
 #include "generic/tools/Color.hpp"
 
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 namespace io {
 
 using namespace generic::str;
@@ -92,6 +91,5 @@ ECAD_INLINE bool GenerateImageProfile(std::string_view filename, const EGridData
 
 }//namespace detail
 }//namespace io
-}//namespace etherm
-}//namespace emodel
+}//namespace model
 }//namespace ecad

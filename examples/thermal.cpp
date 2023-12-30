@@ -56,7 +56,7 @@ int main(int argc, char * argv[])
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
-    esim::EThermalNetworkExtraction ne;
+    sim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
     auto gridModel = ne.GenerateGridThermalModel(layout);
 

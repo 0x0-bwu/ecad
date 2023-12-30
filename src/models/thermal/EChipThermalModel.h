@@ -3,8 +3,7 @@
 #include <unordered_map>
 #include <unordered_set>
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 
 struct ECTMv1Layer
 {
@@ -79,6 +78,5 @@ private:
     mutable UPtr<ECTMv1LayerStackup> m_layerStackup = nullptr;
 };
 
-}//namespace etherm
-}//namespace emodel
+}//namespace model
 }//namespace ecad

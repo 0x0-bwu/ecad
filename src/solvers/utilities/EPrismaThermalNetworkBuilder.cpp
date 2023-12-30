@@ -4,9 +4,9 @@
 #include "interfaces/IMaterialDef.h"
 
 #include "generic/thread/ThreadPool.hpp"
-namespace ecad::esolver {
+namespace ecad::solver {
 
-using namespace emodel;
+using namespace ecad::model;
 ECAD_INLINE EPrismaThermalNetworkBuilder::EPrismaThermalNetworkBuilder(const EPrismaThermalModel & model)
  : m_model(model)
 {
@@ -315,4 +315,4 @@ ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetMatResistivity(EMaterialId m
     return result; 
 }
 
-} // namespace ecad::esolver
+} // namespace ecad::solver

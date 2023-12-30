@@ -1,9 +1,9 @@
 #include "EGridThermalNetworkBuilder.h"
 
 namespace ecad {
-namespace esolver {
+namespace solver {
 
-using namespace emodel;
+using namespace ecad::model;
 inline static constexpr EFloat THERMAL_RD = 0.01;
 ECAD_INLINE EGridThermalNetworkBuilder::EGridThermalNetworkBuilder(const EGridThermalModel & model)
  : m_model(model), m_size(model.ModelSize())
@@ -331,5 +331,5 @@ ECAD_INLINE size_t EGridThermalNetworkBuilder::GetFlattenNeighbor(ESize3D index,
     return GetFlattenIndex(GetNeighbor(index, o));
 }
 
-}//namespace esolver
+}//namespace solver
 }//namespace ecad

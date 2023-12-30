@@ -3,8 +3,7 @@
 #include "generic/tools/Format.hpp"
 
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 
 using namespace generic::fmt;
 
@@ -169,6 +168,5 @@ ECAD_INLINE void EChipThermalModelV1::BuildLayerStackup(std::string * info) cons
     }
 }
 
-}//namespace etherm
-}//namespace emodel
+}//namespace model
 }//namespace ecad

@@ -7,7 +7,7 @@
 #include "interfaces/ILayer.h"
 #include <unordered_map>
 namespace ecad {
-namespace eutils {
+namespace utils {
 
 ECAD_INLINE UPtr<EPolygon> CalculateBoundary(CPtr<ILayoutView> layout)
 {
@@ -52,5 +52,5 @@ ECAD_INLINE UPtr<EPolygon> CalculateBoundary(CPtr<ILayoutView> layout)
     return boundary;
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

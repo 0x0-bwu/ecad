@@ -1,8 +1,7 @@
 #pragma once
 #include "models/thermal/EChipThermalModel.h"
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 namespace utils {
 
 enum class ReduceIndexMethod { Floor, Ceil };
@@ -49,6 +48,5 @@ ECAD_API UPtr<EGridDataTable> Reduce(const EGridDataTable & data, ReduceValueMet
 }//namespace detail
 
 }//namespace utils
-}//namespace etherm
-}//namesapce emodel
+}//namesapce model
 }//namespace ecad

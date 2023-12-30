@@ -76,7 +76,7 @@ void test0()
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
-    esim::EThermalNetworkExtraction ne;
+    sim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
     auto model1 = ne.GenerateGridThermalModel(layout);
     auto model2 = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(30), 1e6, 1e10, 100);
@@ -355,7 +355,7 @@ void test1()
     extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     extSettings.mergeGeomBeforeMetalMapping = false;
 
-    esim::EThermalNetworkExtraction ne;
+    sim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(extSettings);
     // auto model = ne.GenerateGridThermalModel(layout);
     auto model = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(20), 10, 1e5, 1e4);

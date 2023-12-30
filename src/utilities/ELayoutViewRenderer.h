@@ -4,7 +4,7 @@ namespace ecad {
 
 class ILayoutView;
 
-namespace eutils {
+namespace utils {
 class ECAD_API ELayoutViewRenderer
 {
 public:
@@ -20,5 +20,5 @@ private:
     ELayoutViewRendererSettings m_settings;
 };
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

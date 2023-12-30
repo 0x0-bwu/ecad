@@ -5,9 +5,9 @@
 namespace ecad {
 
 class ILayoutView;
-namespace eutils {
+namespace utils {
 
 ECAD_API UPtr<EPolygon> CalculateBoundary(CPtr<ILayoutView> layout);
 
-}//nmmespace eutils
+}//nmmespace utils
 }//nmmespace ecad

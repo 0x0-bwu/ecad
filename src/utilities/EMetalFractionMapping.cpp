@@ -17,7 +17,7 @@
 #include "EShape.h"
 
 namespace ecad {
-namespace eutils {
+namespace utils {
 using namespace generic::geometry;
 
 ECAD_INLINE ELayerMetalFractionMapper::ELayerMetalFractionMapper(const Setting & settings, ELayerMetalFraction & fraction, ELayerId layerId)
@@ -317,5 +317,5 @@ ECAD_INLINE bool WriteThermalProfile(const EMetalFractionInfo & info, const ELay
     return true;
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

@@ -5,8 +5,7 @@
 #include "generic/tools/Format.hpp"
 
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 namespace io {
 
 using namespace generic::str;
@@ -530,6 +529,5 @@ ECAD_INLINE bool GenerateCTMv1Package(std::string_view dirName, const std::strin
 
 }//namespace detail
 }//namespace io
-}//namespace etherm
-}//namespace emodel
+}//namespace model
 }//namespace ecad

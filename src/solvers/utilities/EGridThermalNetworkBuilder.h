@@ -2,9 +2,9 @@
 #include "models/thermal/EGridThermalModel.h"
 #include "thermal/model/ThermalNetwork.hpp"
 namespace ecad {
-namespace esolver {
+namespace solver {
 
-using namespace emodel::etherm;
+using namespace ecad::model;
 using namespace thermal::model;
 
 struct EGridThermalNetworkBuildSummary
@@ -125,5 +125,5 @@ ECAD_ALWAYS_INLINE bool EGridThermalNetworkBuilder::isValid(const ESize3D & inde
 //     const EGridThermalModel & m_model;
 //     const ESize3D m_size;
 // };
-}//namesapce esolver
+}//namesapce solver
 }//namespace ecad

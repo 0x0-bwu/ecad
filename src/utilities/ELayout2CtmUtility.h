@@ -4,7 +4,7 @@
 namespace ecad {
 
 class ILayoutView;
-namespace eutils {
+namespace utils {
 class ECAD_API ELayout2CtmUtility
 {
 public: 
@@ -19,5 +19,5 @@ private:
     Ptr<ILayoutView> m_layout = nullptr;
 };
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

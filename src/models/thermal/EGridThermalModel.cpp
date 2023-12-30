@@ -1,9 +1,9 @@
 #include "models/thermal/EGridThermalModel.h"
 #include "interfaces/IMaterialDef.h"
 #include <boost/math/interpolators/pchip.hpp>
-namespace ecad::emodel::etherm {
+namespace ecad::model {
 
-using namespace eutils;
+using namespace ecad::utils;
 
 ECAD_INLINE EGridDataTable::EGridDataTable(const ESize2D & size)
  : m_size(size)
@@ -385,4 +385,4 @@ ECAD_INLINE bool EGridThermalModel::NeedIteration() const
     return false;
 }
 
-} //namespace ecad::emodel::etherm
+} //namespace ecad::model

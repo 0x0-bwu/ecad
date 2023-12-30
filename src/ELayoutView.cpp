@@ -277,31 +277,31 @@ ECAD_INLINE void ELayoutView::SetBoundary(UPtr<EPolygon> boundary)
 ECAD_INLINE CPtr<EPolygon> ELayoutView::GetBoundary() const
 {
     if(nullptr == m_boundary) 
-        m_boundary = eutils::CalculateBoundary(const_cast<Ptr<ELayoutView> >(this));
+        m_boundary = utils::CalculateBoundary(const_cast<Ptr<ELayoutView> >(this));
     return m_boundary.get();
 }
 
 ECAD_INLINE bool ELayoutView::GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings)
 {
-    eutils::ELayoutMetalFractionMapper mapper(settings);
+    utils::ELayoutMetalFractionMapper mapper(settings);
     return mapper.GenerateMetalFractionMapping(this);
 }
 
 ECAD_INLINE bool ELayoutView::GenerateCTMv1File(const ELayout2CtmSettings & settings)
 {
-    eutils::ELayout2CtmUtility utility(this);
+    utils::ELayout2CtmUtility utility(this);
     utility.SetLayout2CtmSettings(settings);
     return utility.GenerateCTMv1File();
 }
 
 ECAD_INLINE void ELayoutView::ExtractConnectivity()
 {
-    eutils::ELayoutConnectivity::ConnectivityExtraction(this);
+    utils::ELayoutConnectivity::ConnectivityExtraction(this);
 }
 
 ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings)
 {
-    eutils::ELayoutPolygonMerger merger(this);
+    utils::ELayoutPolygonMerger merger(this);
     merger.SetLayoutMergeSettings(settings);
     merger.Merge();
     return true;
@@ -309,7 +309,7 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
 
 ECAD_INLINE bool ELayoutView::ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings)
 {
-    esim::EThermalNetworkExtraction ne;
+    sim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(settings);
     return nullptr != ne.GenerateGridThermalModel(this);
 }
@@ -330,7 +330,7 @@ ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)
 
 ECAD_INLINE void ELayoutView::Merge(CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform)
 {
-    eutils::ELayoutMergeUtility::Merge(this, other, layermap, transform);
+    utils::ELayoutMergeUtility::Merge(this, other, layermap, transform);
 }
 
 ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)
@@ -341,7 +341,7 @@ ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)
 
 ECAD_INLINE bool ELayoutView::Renderer(const ELayoutViewRendererSettings & settings) const
 {
-    return eutils::ELayoutViewRenderer(settings).Renderer(this);
+    return utils::ELayoutViewRenderer(settings).Renderer(this);
 }
 
 ECAD_INLINE void ELayoutView::SyncCloneReference(ECloneOption option)

@@ -9,7 +9,7 @@ class IBondwire;
 class IComponent;
 class ILayoutView;
 class IStackupLayer;
-namespace eutils {
+namespace utils {
 class ECAD_API ELayoutRetriever
 {
 public:
@@ -41,5 +41,5 @@ private:
     mutable std::unordered_map<ELayerId, std::pair<EFloat, EFloat> > m_lyrHeightsMap;
 };
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

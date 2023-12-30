@@ -1,7 +1,7 @@
 #include "utilities/ELayoutRetriever.h"
 #include "Interface.h"
 namespace ecad {
-namespace eutils {
+namespace utils {
 
 ECAD_INLINE ELayoutRetriever::ELayoutRetriever(CPtr<ILayoutView> layout)
  : m_layout(layout)
@@ -287,5 +287,5 @@ ECAD_INLINE void ELayoutRetriever::BuildLayerHeightsMap() const
     //todo via layer
 }
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

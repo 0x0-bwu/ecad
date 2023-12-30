@@ -7,7 +7,7 @@
 #include "TestData.hpp"
 using namespace boost::unit_test;
 using namespace ecad;
-using namespace ecad::emodel::etherm;
+using namespace ecad::model;
 void s_ctm_model_io_test()
 {
     std::string err;

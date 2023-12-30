@@ -13,7 +13,7 @@ namespace ecad {
 
 class EShape;
 class ILayoutView;
-namespace eutils {
+namespace utils {
 
 class ECAD_API ELayoutPolygonMerger
 {
@@ -45,5 +45,5 @@ private:
     std::unordered_map<ELayerId, UPtr<LayerMerger> > m_mergers;
 };
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

@@ -14,11 +14,11 @@ class ILayoutView;
 class IMaterialDef;
 class IMaterialDefCollection;
 
-namespace eutils {
+namespace utils {
 class ELayoutRetriever;
-} // namespace eutils
+} // namespace utils
 
-namespace emodel::etherm {
+namespace model {
 
 struct ECAD_API ECompactLayout
 {
@@ -81,7 +81,7 @@ private:
     EFloat m_vScale2Int;
 
     CPtr<ILayoutView> m_layout;
-    std::unique_ptr<eutils::ELayoutRetriever> m_retriever;
+    std::unique_ptr<utils::ELayoutRetriever> m_retriever;
 };
 
 ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
@@ -252,5 +252,5 @@ ECAD_ALWAYS_INLINE bool EPrismaThermalModel::isBotLayer(size_t lyrIndex) const
     return lyrIndex + 1 == TotalLayers();
 }
 
-} // namespace emodel::etherm
+} // namespace model
 } // namespace ecad

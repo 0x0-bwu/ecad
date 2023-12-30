@@ -3,8 +3,7 @@
 #include <set>
 
 namespace ecad {
-namespace emodel {
-namespace etherm {
+namespace model {
 namespace io {
 
 ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(std::string_view filename, std::string * err = nullptr);
@@ -26,6 +25,5 @@ ECAD_API bool GenerateCTMv1Package(std::string_view dirName, const std::string &
 
 }//namespace detail
 }//namespace io
-}//namespace etherm
-}//namespace emodel
+}//namespace model
 }//namespace ecad

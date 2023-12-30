@@ -6,7 +6,7 @@
 #include "generic/geometry/Triangulation.hpp"
 #include "generic/geometry/GeometryIO.hpp"
 #include <queue>
-namespace ecad::emodel::etherm {
+namespace ecad::model {
 
 ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, Height position, LayerRange range, EFloat powerDensity)
  : polygon(polygon), position(position), range(std::move(range)), powerDensity(powerDensity)
@@ -16,7 +16,7 @@ ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, Height positi
 ECAD_INLINE ECompactLayout::ECompactLayout(CPtr<ILayoutView> layout, EFloat vScale2Int)
  : m_vScale2Int(vScale2Int), m_layout(layout)
 {
-    m_retriever = std::make_unique<eutils::ELayoutRetriever>(m_layout);
+    m_retriever = std::make_unique<utils::ELayoutRetriever>(m_layout);
 }
 
 ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness)
@@ -178,7 +178,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
     auto compact = std::make_unique<ECompactLayout>(layout, 1e6);
     //todo, reserve size   
 
-    eutils::ELayoutRetriever retriever(layout);
+    utils::ELayoutRetriever retriever(layout);
     [[maybe_unused]] bool check;
     EFloat elevation, thickness;
     std::vector<CPtr<IStackupLayer> > stackupLayers;
@@ -450,4 +450,4 @@ std::vector<size_t> EPrismaThermalModel::SearchPrismaInstances(size_t layer, con
     return results;
 }
 
-} //namespace ecad::emodel::etherm
+} //namespace ecad::model

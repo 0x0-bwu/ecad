@@ -7,7 +7,7 @@ namespace generic { namespace thread { namespace taskflow { class TaskNode; clas
 namespace ecad {
 class ICell;
 class IDatabase;
-namespace eutils {
+namespace utils {
 class ECAD_API ECellNode
 {
 public:
@@ -36,5 +36,5 @@ private:
     mutable std::mutex m_flattenMutex;
 };
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad

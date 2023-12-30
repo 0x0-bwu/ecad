@@ -32,7 +32,7 @@ void t_thermal_network_extraction()
     settings.grid = {25, 25};
     settings.mergeGeomBeforeMetalMapping = true;
 
-    esim::EThermalNetworkExtraction ne;
+    sim::EThermalNetworkExtraction ne;
     ne.SetExtractionSettings(settings);
     BOOST_CHECK(ne.GenerateGridThermalModel(layout));
 

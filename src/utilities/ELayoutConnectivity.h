@@ -3,7 +3,7 @@
 namespace ecad {
 
 class ILayoutView;
-namespace eutils {
+namespace utils {
 
 class ECAD_API ELayoutConnectivity
 {
@@ -12,5 +12,5 @@ public:
     // static void ConnectivityCheck();//todo
 };
 
-}//namespace eutils
+}//namespace utils
 }//namespace ecad
