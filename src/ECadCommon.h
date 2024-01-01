@@ -25,12 +25,6 @@
     #define ECAD_EFFICIENCY_TRACK(task)
 #endif//ECAD_EFFICIENCY_TRACK
 
-<<<<<<< HEAD
 #define ECAD_TRACE(args...) generic::log::Trace(args);
 #define ECAD_DEBUG(args...) generic::log::Debug(args);
 #define ECAD_INFO (args...) generic::log::Info (args);
-=======
-#define ECAD_TRACE(...) generic::log::Trace(##__VA_ARGS__);
-#define ECAD_DEBUG(...) generic::log::Debug(##__VA_ARGS__);
-#define ECAD_INFO (...) generic::log::Info (##__VA_ARGS__);
->>>>>>> fb3de0a (update)
