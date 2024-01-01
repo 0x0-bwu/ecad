@@ -18,7 +18,7 @@ using namespace ecad::model;
 using namespace ecad::utils;
 using namespace ecad::solver;
 
-ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model) const
+ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & maxT) const
 {
     auto modelType = model->GetModelType();
     switch (modelType)
@@ -28,7 +28,7 @@ ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model) const
             if (gridModel) {
                 EGridThermalSimulator simulator(gridModel, setup);
                 if (EThermalSimuType::Static == setup.simuType)
-                    return simulator.RunStaticSimulation();
+                    return simulator.RunStaticSimulation(maxT);
                 else return simulator.RunTransientSimulation();
             }
             break;
@@ -38,7 +38,7 @@ ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model) const
             if (prismaModel) {
                 EPrismaThermalSimulator simulator(prismaModel, setup);
                 if (EThermalSimuType::Static == setup.simuType)
-                    return simulator.RunStaticSimulation();
+                    return simulator.RunStaticSimulation(maxT);
                 else return simulator.RunTransientSimulation();
             }
             break;
@@ -58,13 +58,15 @@ ECAD_API EGridThermalSimulator::EGridThermalSimulator(CPtr<EGridThermalModel> mo
     m_settings.iniT = setup.environmentTemperature;
 }
 
-ECAD_API bool EGridThermalSimulator::RunStaticSimulation() const
+ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("grid thermal static simulation")
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*m_model);
     solver.SetSolveSettings(m_settings);
     if (not solver.Solve(m_settings.iniT, results)) return false;
+    
+    maxT = *std::max_element(results.begin(), results.end());
 
     auto modelSize = m_model->ModelSize();
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
@@ -115,13 +117,16 @@ ECAD_API EPrismaThermalSimulator::EPrismaThermalSimulator(CPtr<EPrismaThermalMod
     m_settings.iniT = setup.environmentTemperature;
 }
 
-ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation() const
+ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("prisma thermal static simulation")
     std::vector<EFloat> results;
     EPrismaThermalNetworkStaticSolver solver(*m_model);
     solver.SetSolveSettings(m_settings);
     if (not solver.Solve(m_settings.iniT, results)) return false;
+
+    maxT = *std::max_element(results.begin(), results.end());
+
     auto hotmapFile = m_settings.workDir + ECAD_SEPS + "hotmap.vtk";
     ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
     io::GenerateVTKFile(hotmapFile, *m_model, &results);

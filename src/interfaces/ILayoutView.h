@@ -119,6 +119,9 @@ public:
     ///Thermal Model Extraction
     virtual UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) = 0;
 
+    ///Thermal Simulation
+    virtual EFloat RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetupp) = 0;
+
     ///Mapping
     virtual void Map(CPtr<ILayerMap> lyrMap) = 0;
 

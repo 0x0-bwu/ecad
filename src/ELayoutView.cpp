@@ -3,6 +3,8 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 
 #include "extraction/thermal/EThermalModelExtraction.h"
 
+#include "simulation/thermal/EThermalSimulation.h"
+
 #include "utilities/EMetalFractionMapping.h"
 #include "utilities/ELayoutPolygonMerger.h"
 #include "utilities/EBoundaryCalculator.h"
@@ -312,6 +314,17 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
 ECAD_INLINE UPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExtractionSettings & settings)
 {
     return extraction::EThermalModelExtraction::GenerateThermalModel(this, settings);
+}
+
+ECAD_INLINE EFloat ELayoutView::RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup)
+{
+    auto model = ExtractThermalModel(extractionSettings);
+    if (nullptr == model.get()) return invalidFloat;
+
+    EFloat maxT{invalidFloat};
+    simulation::EThermalSimulation sim(simulationSetup);
+    if (not sim.Run(model.get(), maxT)) return maxT;
+    return maxT;
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)

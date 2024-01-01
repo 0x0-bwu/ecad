@@ -354,16 +354,12 @@ void test1()
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-2;
     prismaSettings.meshSettings.maxLen = 500;
-    auto model = layout->ExtractThermalModel(prismaSettings);
 
-    assert(model);
-
-    simulation::EThermalSimulation sim;
-    sim.setup.simuType = EThermalSimuType::Static;
-    sim.setup.environmentTemperature = 25;
-    sim.setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    sim.Run(model.get());
-    
+    EThermalSimulationSetup setup;
+    setup.simuType = EThermalSimuType::Static;
+    setup.environmentTemperature = 25;
+    setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    [[maybe_unused]] auto maxT = layout->RunThermalSimulation(prismaSettings, setup);    
     EDataMgr::Instance().ShutDown();
 }
 int main(int argc, char * argv[])
