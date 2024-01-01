@@ -1,5 +1,5 @@
 #pragma once
-#include "thermal/model/ThermalNetwork.hpp"
+#include "solvers/thermal/network/ThermalNetwork.hpp"
 namespace thermal::utils {
 
 using namespace model;

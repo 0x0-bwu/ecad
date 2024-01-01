@@ -1,5 +1,5 @@
 #pragma once
-#include "thermal/model/ThermalNetwork.hpp"
+#include "ThermalNetwork.hpp"
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
 #include "generic/circuit/MNA.hpp"
@@ -52,8 +52,8 @@ namespace thermal
                     solver.compute(m.G);
                     x = m.L * solver.solve(m.B * rhs);
 
-                    generic::log::Trace("#iterations: %1%", solver.iterations());
-                    generic::log::Trace("estimated error: %1%", solver.error());
+                    ECAD_TRACE("#iterations: %1%", solver.iterations())
+                    ECAD_TRACE("estimated error: %1%", solver.error())
                 }
                 auto & nodes = m_network.GetNodes();
                 for (size_t i = 0; i < nodes.size(); ++i)

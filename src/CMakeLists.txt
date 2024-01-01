@@ -7,6 +7,7 @@ extension/gds/EGdsLayerMap.cpp
 extension/gds/EGdsParser.cpp
 extension/xfl/ECadExtXflHandler.cpp
 extension/ECadExtension.cpp
+extraction/thermal/EThermalModelExtraction.cpp
 models/thermal/io/EChipThermalModelIO.cpp
 models/thermal/io/EGridThermalModelIO.cpp
 models/thermal/io/EPrismaThermalModelIO.cpp
@@ -16,10 +17,10 @@ models/thermal/EChipThermalModel.cpp
 models/thermal/EGridThermalModel.cpp
 models/thermal/EPrismaThermalModel.cpp
 models/thermal/EThermalModel.cpp
-simulation/EThermalNetworkExtraction.cpp
-solvers/utilities/EGridThermalNetworkBuilder.cpp
-solvers/utilities/EPrismaThermalNetworkBuilder.cpp
-solvers/EThermalNetworkSolver.cpp
+simulation/thermal/EThermalSimulation.cpp
+solvers/thermal/utilities/EGridThermalNetworkBuilder.cpp
+solvers/thermal/utilities/EPrismaThermalNetworkBuilder.cpp
+solvers/thermal/EThermalNetworkSolver.cpp
 utilities/EBoundaryCalculator.cpp
 utilities/EFlattenUtility.cpp
 utilities/ELayout2CtmUtility.cpp

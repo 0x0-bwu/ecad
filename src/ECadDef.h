@@ -224,4 +224,16 @@ enum class EModelType
     // ThermalTet. //todo
 };
 
+ECAD_ALWAYS_INLINE std::string toString(EModelType type)
+{
+    switch(type)
+    {
+        case EModelType::Invalid : return "Invalid";
+        case EModelType::ThermalCTMv1 : return "ThermalCTMv1";
+        case EModelType::ThermalGrid : return "ThermalGrid";
+        case EModelType::ThermalPrisma : return "ThermalPrisma";
+        default : { ECAD_ASSERT(false) return std::string{}; }
+    }
+}
+
 }//namespace ecad

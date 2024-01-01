@@ -1,8 +1,8 @@
-#include "solvers/EThermalNetworkSolver.h"
-#include "thermal/utilities/BoundaryNodeReduction.hpp"
-#include "thermal/utilities/ThermalNetlistWriter.hpp"
+#include "EThermalNetworkSolver.h"
+#include "solvers/thermal/network/utilities/BoundaryNodeReduction.hpp"
+#include "solvers/thermal/network/utilities/ThermalNetlistWriter.hpp"
 #include "utilities/EPrismaThermalNetworkBuilder.h"
-#include "thermal/solver/ThermalNetworkSolver.hpp"
+#include "solvers/thermal/network/ThermalNetworkSolver.hpp"
 #include "utilities/EGridThermalNetworkBuilder.h"
 #include "generic/thread/ThreadPool.hpp"
 #include "generic/tools/Format.hpp"
@@ -61,9 +61,9 @@ ECAD_INLINE bool EGridThermalNetworkStaticSolver::Solve(EFloat refT, std::vector
                 auto res = spiceWriter.WriteSpiceNetlist(m_settings.spiceFile);
                 if (res) std::cout << "write out spice file " << m_settings.spiceFile << " successfully!" << std::endl;
             }
-            generic::log::Trace("total nodes: %1%", network->Size());
-            generic::log::Trace("intake  heat flow: %1%w", builder.summary.iHeatFlow);
-            generic::log::Trace("outtake heat flow: %1%w", builder.summary.oHeatFlow);
+            ECAD_TRACE("total nodes: %1%", network->Size())
+            ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
+            ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
             
             size_t threads = EDataMgr::Instance().DefaultThreads();
             ThermalNetworkSolver<EFloat> solver(*network, threads);
@@ -102,9 +102,9 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
     EGridThermalNetworkBuilder builder(m_model);
     auto network = builder.Build(results);
     if (nullptr == network) return false;
-    generic::log::Trace("total nodes: %1%", network->Size());
-    generic::log::Trace("intake  heat flow: %1%w", builder.summary.iHeatFlow);
-    generic::log::Trace("outtake heat flow: %1%w", builder.summary.oHeatFlow);
+    ECAD_TRACE("total nodes: %1%", network->Size())
+    ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
+    ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
             
     size_t threads = EDataMgr::Instance().DefaultThreads();
     ThermalNetworkSolver<EFloat> solver(*network, threads);
@@ -280,9 +280,9 @@ ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(EFloat refT, std::vect
             auto network = builder.Build(lastRes);
             if (nullptr == network) return false;
 
-            generic::log::Trace("total nodes: %1%", network->Size());
-            generic::log::Trace("intake  heat flow: %1%w", builder.summary.iHeatFlow);
-            generic::log::Trace("outtake heat flow: %1%w", builder.summary.oHeatFlow);
+            ECAD_TRACE("total nodes: %1%", network->Size())
+            ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
+            ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
             
             size_t threads = EDataMgr::Instance().DefaultThreads();
             ThermalNetworkSolver<EFloat> solver(*network, threads);
@@ -295,7 +295,7 @@ ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(EFloat refT, std::vect
 
             auto maxIter = std::max_element(results.begin(), results.end());
             auto minIter = std::min_element(results.begin(), results.end());
-            generic::log::Trace("hotspot: %1%, maxT: %2%, minT: %3%", std::distance(results.begin(), maxIter), *maxIter, *minIter);
+            ECAD_TRACE("hotspot: %1%, maxT: %2%, minT: %3%", std::distance(results.begin(), maxIter), *maxIter, *minIter)
 
             iteration -= 1;
             if(!needIteration || iteration == 0) break;

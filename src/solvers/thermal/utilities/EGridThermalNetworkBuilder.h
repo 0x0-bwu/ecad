@@ -1,6 +1,6 @@
 #pragma once
 #include "models/thermal/EGridThermalModel.h"
-#include "thermal/model/ThermalNetwork.hpp"
+#include "solvers/thermal/network/ThermalNetwork.hpp"
 namespace ecad {
 namespace solver {
 

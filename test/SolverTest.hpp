@@ -4,7 +4,7 @@
 #include <boost/test/test_tools.hpp>
 #include "generic/tools/Format.hpp"
 #include "generic/tools/FileSystem.hpp"
-#include "solvers/EThermalNetworkSolver.h"
+#include "solvers/thermal/EThermalNetworkSolver.h"
 #include "models/thermal/io/EThermalModelIO.h"
 #include "models/thermal/io/EGridThermalModelIO.h"
 #include "models/thermal/utilities/EThermalModelReduction.h"
@@ -25,8 +25,8 @@ void t_grid_thermal_model_solver_test()
     BOOST_CHECK(model);
     
     auto size = model->ModelSize();
-    generic::log::Trace("size: (%1%, %2%)", size.x, size.y);
-    generic::log::Trace("total nodes: %1%", model->TotalGrids());
+    ECAD_TRACE("size: (%1%, %2%)", size.x, size.y)
+    ECAD_TRACE("total nodes: %1%", model->TotalGrids())
 
     //htc
     EFloat iniT = 25.0;
@@ -66,7 +66,7 @@ void t_grid_thermal_model_solver_test()
         max = std::max(max, htMap->MaxOccupancy(std::greater<ValueType>()));
     }
     auto range = max - min;
-    generic::log::Trace("maxT: %1%, minT: %2%", max, min);
+    ECAD_TRACE("maxT: %1%, minT: %2%", max, min)
     //max: 99.4709, min: 81.9183
 
     size_t i = 0;

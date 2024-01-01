@@ -30,35 +30,61 @@ struct EMetalFractionMappingSettings
     bool mergeGeomBeforeMapping = true;
     std::array<size_t, 2> grid = {1, 1};
     std::unordered_set<ENetId> selectNets;
+    ELayoutPolygonMergeSettings polygonMergeSettings;
 };
 
 struct EMeshSettings
 {
-    EFloat minAng{20};//Deg
+    virtual ~EMeshSettings() = default;
+    EFloat minAlpha{20};//Deg
     EFloat minLen{0};
     EFloat maxLen{maxFloat};
 };
 
-struct EThermalNetworkExtractionSettings
+struct EPrismaMeshSettings : public EMeshSettings
 {
-    std::string outDir;
+    virtual ~EPrismaMeshSettings() = default;
+    size_t iteration = 0;
+};
+
+struct EThermalModelExtractionSettings
+{
+    virtual ~EThermalModelExtractionSettings() = default;
+    std::string workDir;
+};
+
+struct EGridThermalModelExtractionSettings : public EThermalModelExtractionSettings
+{
+    virtual ~EGridThermalModelExtractionSettings() = default;
     bool dumpHotmaps = false;
     bool dumpSpiceFile = false;
     bool dumpDensityFile = false;
     bool dumpTemperatureFile = false;
-    EFloat regionExtTop = 0;
-    EFloat regionExtBot = 0;
-    EFloat regionExtLeft = 0;
-    EFloat regionExtRight = 0;
-    std::array<size_t, 2> grid = {1, 1};
-    bool mergeGeomBeforeMetalMapping = true;
+    EMetalFractionMappingSettings metalFractionMappingSettings;
+};
+
+struct EPrismaThermalModelExtractionSettings : public EThermalModelExtractionSettings
+{
+    EPrismaMeshSettings meshSettings;
+    ELayoutPolygonMergeSettings polygonMergeSettings;
+};
+
+enum class EThermalSimuType { Static, Transient };
+struct EThermalSimulationSetup
+{
+    EThermalSimuType simuType = EThermalSimuType::Static;
+    std::string workDir;
+    EFloat environmentTemperature = 25;
 };
 
 struct EThermalNetworkSolveSettings
 {
-    size_t iteration = 10;
+    bool dumpHotmaps = true;
+    EFloat iniT = 25;
     EFloat residual = 0.5;
+    size_t iteration = 10;
     std::string spiceFile;
+    std::string workDir;
 };
 
 struct ELayout2CtmSettings

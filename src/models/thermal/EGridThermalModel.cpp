@@ -290,14 +290,14 @@ ECAD_INLINE EFloat EGridThermalModel::GetScaleH() const
     return m_scaleH;
 }
 
-ECAD_INLINE bool EGridThermalModel::SetResolution(FCoord x, FCoord y)
+ECAD_INLINE bool EGridThermalModel::SetResolution(EFloat x, EFloat y)
 {
-    if(math::LT<FCoord>(x, 0) || math::LT<FCoord>(y, 0)) return false;
+    if(math::LT<EFloat>(x, 0) || math::LT<FCoord>(y, 0)) return false;
     m_resolution = std::array<FCoord, 2>{x, y};
     return true;
 }
 
-ECAD_INLINE void EGridThermalModel::GetResolution(FCoord & x, FCoord & y, bool scaled) const
+ECAD_INLINE void EGridThermalModel::GetResolution(EFloat & x, EFloat & y, bool scaled) const
 {
     x = scaled ? m_scaleH * m_resolution[0] : m_resolution[0];
     y = scaled ? m_scaleH * m_resolution[1] : m_resolution[1];

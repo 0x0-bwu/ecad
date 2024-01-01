@@ -5,7 +5,6 @@
 #include <csignal>
 
 #include "../test/TestData.hpp"
-#include "simulation/EThermalNetworkExtraction.h"
 #include "EDataMgr.h"
 
 void SignalHandler(int signum)
@@ -37,7 +36,7 @@ int main(int argc, char * argv[])
     assert(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
-    auto bbox = layout->GetBoundary()->GetBBox();
+    // auto bbox = layout->GetBoundary()->GetBBox();
     auto iter = layout->GetLayerCollection()->GetLayerIter();
     while (auto layer = iter->Next())
         std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
@@ -45,20 +44,6 @@ int main(int argc, char * argv[])
     ELayoutPolygonMergeSettings mergeSettings;
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     layout->MergeLayerPolygons(mergeSettings);
-
-    EThermalNetworkExtractionSettings extSettings;
-    extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    extSettings.dumpHotmaps = true;
-    extSettings.dumpDensityFile = true;
-    extSettings.dumpTemperatureFile = true;
-
-    size_t xGrid = 50;
-    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
-    extSettings.mergeGeomBeforeMetalMapping = false;
-
-    sim::EThermalNetworkExtraction ne;
-    ne.SetExtractionSettings(extSettings);
-    auto gridModel = ne.GenerateGridThermalModel(layout);
 
     EDataMgr::Instance().ShutDown();
 

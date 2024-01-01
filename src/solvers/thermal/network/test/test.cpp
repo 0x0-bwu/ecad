@@ -1,5 +1,5 @@
-#include "thermal/utilities/ThermalNetlistWriter.hpp"
-#include "thermal/solver/ThermalNetworkSolver.hpp"
+#include "../utilities/ThermalNetlistWriter.hpp"
+#include "../ThermalNetworkSolver.hpp"
 #include <boost/stacktrace.hpp>
 #include <iostream>
 #include <cassert>

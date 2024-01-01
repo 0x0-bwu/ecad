@@ -1,7 +1,8 @@
 #include "ELayoutView.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 
-#include "simulation/EThermalNetworkExtraction.h"
+#include "extraction/thermal/EThermalModelExtraction.h"
+
 #include "utilities/EMetalFractionMapping.h"
 #include "utilities/ELayoutPolygonMerger.h"
 #include "utilities/EBoundaryCalculator.h"
@@ -308,12 +309,9 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
     return true;
 }
 
-ECAD_INLINE bool ELayoutView::ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings)
+ECAD_INLINE UPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExtractionSettings & settings)
 {
-    sim::EThermalNetworkExtraction ne;
-    ne.SetExtractionSettings(settings);
-    ne.GenerateGridThermalModel(this);
-    return true;
+    return extraction::EThermalModelExtraction::GenerateThermalModel(this, settings);
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)

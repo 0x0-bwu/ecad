@@ -1,52 +1,42 @@
-#include "EThermalNetworkExtraction.h"
+#include "EThermalModelExtraction.h"
 
 #include "models/thermal/io/EPrismaThermalModelIO.h"
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
 #include "utilities/EMetalFractionMapping.h"
-#include "solvers/EThermalNetworkSolver.h"
-#include "models/thermal/EThermalModel.h"
 #include "utilities/ELayoutRetriever.h"
 #include "generic/tools/FileSystem.hpp"
-
 
 #include "Mesher2D.h"
 #include "Interface.h"
 
-namespace ecad::sim {
+namespace ecad::extraction {
 
 using namespace ecad::model;
 using namespace ecad::utils;
-using namespace ecad::solver;
 
-ECAD_INLINE void EThermalNetworkExtraction::SetExtractionSettings(EThermalNetworkExtractionSettings settings)
+ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayoutView> layout, const EThermalModelExtractionSettings & settings)
 {
-    m_settings = std::move(settings);
+    if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
+        return GenerateGridThermalModel(layout, *gridSettings);
+    else if (auto prismaSettings = dynamic_cast<CPtr<EPrismaThermalModelExtractionSettings>>(&settings); prismaSettings)
+        return GeneratePrismaThermalModel(layout, *prismaSettings);
+    return nullptr;
 }
 
-ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout)
+ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout, const EGridThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate grid thermal model")
 
-    EMetalFractionMappingSettings settings;
-    settings.grid = m_settings.grid;
-    settings.regionExtTop = m_settings.regionExtTop;
-    settings.regionExtBot = m_settings.regionExtBot;
-    settings.regionExtLeft  = m_settings.regionExtLeft;
-    settings.regionExtRight = m_settings.regionExtRight;
-    settings.mergeGeomBeforeMapping = m_settings.mergeGeomBeforeMetalMapping;
-    if (not m_settings.outDir.empty() && m_settings.dumpDensityFile)
-        settings.outFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mf.txt";
-
-    ELayoutMetalFractionMapper mapper(settings);
+    ELayoutMetalFractionMapper mapper(settings.metalFractionMappingSettings);
     if (not mapper.GenerateMetalFractionMapping(layout)) return nullptr;
 
     auto mf = mapper.GetLayoutMetalFraction();
     auto mfInfo = mapper.GetMetalFractionInfo();
     if (nullptr == mf || nullptr == mfInfo) return nullptr;
 
-    if (not m_settings.outDir.empty() && m_settings.dumpDensityFile) {
-        auto densityFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "density.txt";
+    if (not settings.workDir.empty() && settings.dumpDensityFile) {
+        auto densityFile = settings.workDir + ECAD_SEPS + "density.txt";
         WriteThermalProfile(*mfInfo, *mf, densityFile);
     }
 
@@ -136,67 +126,25 @@ ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GenerateGridThermalModel(Ptr
     //htc
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
     model->SetUniformTopBotBCValue(0, 2750);
-    // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
-    // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
-    // model->SetTopBotBCModel(nullptr, bcModel);
 
-    std::vector<EFloat> results;
-    EGridThermalNetworkStaticSolver solver(*model);
-    // EGridThermalNetworkTransientSolver solver(*model);
-    EThermalNetworkSolveSettings solverSettings;
-    if (m_settings.dumpSpiceFile)
-        solverSettings.spiceFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "spice.sp";
-    solver.SetSolveSettings(solverSettings);
-    if (not solver.Solve(iniT, results)) return nullptr;
-
-    auto modelSize = model->ModelSize();
-    auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
-    for (size_t z = 0; z < modelSize.z; ++z)
-        htMap->push_back(std::make_shared<ELayerMetalFraction>(modelSize.x, modelSize.y));
-
-    for (size_t i = 0; i < results.size(); ++i){
-        auto gridIndex = model->GetGridIndex(i);
-        auto lyrHtMap = htMap->at(gridIndex.z);
-        (*lyrHtMap)(gridIndex.x, gridIndex.y) = results[i];
-    }
-
-    auto htMapInfo = *mfInfo;
-    if(!m_settings.outDir.empty() && m_settings.dumpTemperatureFile) {
-        auto tFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "temperature.txt";
-        WriteThermalProfile(htMapInfo, *htMap, tFile);
-    }
-
-    using ValueType = typename ELayerMetalFraction::ResultType;
-    if (not m_settings.outDir.empty() && m_settings.dumpHotmaps) {        
-        for (size_t index = 0; index < mfInfo->layers.size(); ++index) {
-            auto lyr = htMap->at(index);
-            auto min = lyr->MaxOccupancy(std::less<ValueType>());
-            auto max = lyr->MaxOccupancy(std::greater<ValueType>());
-            auto range = max - min;
-            auto rgbaFunc = [&min, &range](ValueType d) {
-                int r, g, b, a = 255;
-                generic::color::RGBFromScalar((d - min) / range, r, g, b);
-                return std::make_tuple(r, g, b, a);
-            };
-            generic::log::Trace("layer: %1%, maxT: %2%, minT: %3%", index + 1, max, min);
-            std::string filepng = m_settings.outDir + GENERIC_FOLDER_SEPS + std::to_string(index) + ".png";
-            lyr->WriteImgProfile(filepng, rgbaFunc);
-        }
-    }
     return std::unique_ptr<IModel>(model);
 }
 
-ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout,  EFloat minAlpha, ECoord minLen, ECoord maxLen, size_t iteration)
+ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout, const EPrismaThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
     auto model = new EPrismaThermalModel(layout);
     auto compact = makeCompactLayout(layout);
-    auto compactModelFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "compact.png";
+    auto compactModelFile = settings.workDir + GENERIC_FOLDER_SEPS + "compact.png";
     compact->WriteImgView(compactModelFile, 1024);
+
+    const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
 
     //todo wrapper to mesh
     using namespace emesh;
+    using namespace generic;
     using namespace generic::geometry;
+    const auto & meshSettings = settings.meshSettings;
     std::list<tri::IndexEdge> edges;
     std::vector<Point2D<ECoord> > points;
     std::vector<Segment2D<ECoord> > segments;
@@ -205,10 +153,16 @@ ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(P
     MeshFlow2D::ExtractTopology(segments, points, edges);
     points.insert(points.end(), compact->steinerPoints.begin(), compact->steinerPoints.end());
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
-    MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, iteration);
-    auto meshTemplateFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.png";
+    ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, ite: %4%", 
+                meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.iteration)
+    auto minAlpha = math::Rad(meshSettings.minAlpha);
+    auto minLen = coordUnits.toCoord(meshSettings.minLen);
+    auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
+    MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
+    auto meshTemplateFile = settings.workDir + GENERIC_FOLDER_SEPS + "mesh.png";
     GeometryIO::WritePNG(meshTemplateFile, triangulation, 4096);
-    generic::log::Trace("total elements: %1%", triangulation.triangles.size());
+    ECAD_TRACE("total elements: %1%", triangulation.triangles.size())
+
     //todo wrapper to mesh
 
     ecad::utils::ELayoutRetriever retriever(layout);
@@ -249,7 +203,7 @@ ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(P
                 }
             }
         }
-        generic::log::Trace("layer %1%'s total elements: %2%", index, prismaLayer.elements.size());
+        ECAD_TRACE("layer %1%'s total elements: %2%", index, prismaLayer.elements.size())
     };
 
     for (size_t index = 0; index < model->TotalLayers(); ++index)
@@ -283,37 +237,23 @@ ECAD_INLINE UPtr<IModel> EThermalNetworkExtraction::GeneratePrismaThermalModel(P
             }
         }
     }
-
-    const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
-    auto scaleH2Unit = coordUnit.Scale2Unit();
-    auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
+    auto scaleH2Unit = coordUnits.Scale2Unit();
+    auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
     for (const auto & bondwire : compact->bondwires)
         model->AddBondWire(bondwire);
-    generic::log::Trace("total line elements: %1%", model->TotalLineElements());
+    ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
-    auto meshFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "mesh.vtk";
+    auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
     io::GenerateVTKFile(meshFile, *model);
 
     //htc
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
     model->SetUniformTopBotBCValue(0, 2750);
     model->uniformBcSide = 0;
-    // auto bcModel = std::make_shared<EGridBCModel>(ESize2D(nx, ny));
-    // bcModel->AddSample(iniT, EGridData(nx, ny, 2750));
-    // model->SetTopBotBCModel(nullptr, bcModel);
-
-    EFloat iniT = 25;
-    std::vector<EFloat> results;
-    EPrismaThermalNetworkStaticSolver solver(*model);
-    EThermalNetworkSolveSettings solverSettings;
-    solver.SetSolveSettings(solverSettings);
-    if (not solver.Solve(iniT, results)) return nullptr;
-    auto hotmapFile = m_settings.outDir + GENERIC_FOLDER_SEPS + "hotmap.vtk";
-    io::GenerateVTKFile(hotmapFile, *model, &results);
 
     return std::unique_ptr<IModel>(model);
 }
 
-}//namespace ecad::sim
+}//namespace ecad::extraction

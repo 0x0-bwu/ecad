@@ -103,8 +103,8 @@ public:
     ///Layout Polygon Merge
     bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) override;
 
-    ///Thermal Network Extraction
-    bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) override;
+    ///Thermal Model Extraction
+    UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) override;
 
     ///Flatten
     void Flatten(const EFlattenOption & option) override;

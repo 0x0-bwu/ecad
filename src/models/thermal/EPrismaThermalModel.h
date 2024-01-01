@@ -180,7 +180,7 @@ public:
 
     std::vector<size_t> SearchPrismaInstances(size_t layer, const EPoint2D & pt) const;//todo, eff
 
-    EModelType GetModelType() const { return EModelType::ThermalGrid; }
+    EModelType GetModelType() const { return EModelType::ThermalPrisma; }
 private:
     EFloat m_scaleH2Unit;
     EFloat m_scale2Meter;

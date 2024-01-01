@@ -348,13 +348,13 @@ size_t EDataMgr::DefaultCircleDiv() const
     return m_settings.circleDiv;
 }
 
-void EDataMgr::Init()
+void EDataMgr::Init(const std::string & workDir)
 {   
     //threads
     m_settings.threads = std::thread::hardware_concurrency();
 
     //log
-    std::string logFile = generic::fs::CurrentPath() + ECAD_SEPS + "ecad.log";
+    std::string logFile = workDir.empty() ? generic::fs::CurrentPath() : workDir + ECAD_SEPS + "ecad.log";
     auto traceSink = std::make_shared<log::StreamSinkMT>(std::cout);
     auto infoSink  = std::make_shared<log::FileSinkMT>(logFile);
     traceSink->SetLevel(log::Level::Trace);

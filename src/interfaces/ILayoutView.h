@@ -8,8 +8,9 @@ namespace ecad {
 class INet;
 class ICell;
 class IText;
-class EShape;
+class IModel;
 class ILayer;
+class EShape;
 class EPolygon;
 class IBondwire;
 class ICellInst;
@@ -115,8 +116,8 @@ public:
     ///Layout Polygon Merge
     virtual bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) = 0;
 
-    ///Thermal Network Extraction
-    virtual bool ExtractThermalNetwork(const EThermalNetworkExtractionSettings & settings) = 0;
+    ///Thermal Model Extraction
+    virtual UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) = 0;
 
     ///Mapping
     virtual void Map(CPtr<ILayerMap> lyrMap) = 0;

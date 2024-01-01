@@ -15,7 +15,7 @@ class ECAD_API EDataMgr
 public:
     EDataMgr(const EDataMgr &) = delete;
     EDataMgr & operator= (const EDataMgr &) = delete;
-    void Init();
+    void Init(const std::string & workDir = {});
 
     ///Database
     SPtr<IDatabase> CreateDatabase(const std::string & name);

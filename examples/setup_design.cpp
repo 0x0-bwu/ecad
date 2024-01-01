@@ -4,8 +4,8 @@
 #include <cassert>
 #include <csignal>
 
-#include "simulation/EThermalNetworkExtraction.h"
 #include "../test/TestData.hpp"
+#include "simulation/thermal/EThermalSimulation.h"
 #include "EDataMgr.h"
 
 void SignalHandler(int signum)
@@ -64,22 +64,21 @@ void test0()
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     layout->MergeLayerPolygons(mergeSettings);
 
-    EThermalNetworkExtractionSettings extSettings;
-    extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    extSettings.dumpHotmaps = true;
-    extSettings.dumpSpiceFile = true;
-    extSettings.dumpDensityFile = true;
-    extSettings.dumpTemperatureFile = true;
-
     size_t xGrid = 3;
     auto bbox = layout->GetBoundary()->GetBBox();
-    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
-    extSettings.mergeGeomBeforeMetalMapping = false;
+    EGridThermalModelExtractionSettings gridSettings;
+    gridSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    gridSettings.dumpHotmaps = true;
+    gridSettings.dumpSpiceFile = true;
+    gridSettings.dumpDensityFile = true;
+    gridSettings.dumpTemperatureFile = true;
+    gridSettings.metalFractionMappingSettings.grid =  {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
+    gridSettings.metalFractionMappingSettings.mergeGeomBeforeMapping = false;
+    auto model1 = layout->ExtractThermalModel(gridSettings);
 
-    sim::EThermalNetworkExtraction ne;
-    ne.SetExtractionSettings(extSettings);
-    auto model1 = ne.GenerateGridThermalModel(layout);
-    auto model2 = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(30), 1e6, 1e10, 100);
+    EPrismaThermalModelExtractionSettings prismaSettings;
+    prismaSettings.workDir = gridSettings.workDir;
+    auto model2 = layout->ExtractThermalModel(prismaSettings);
 
     EDataMgr::Instance().ShutDown();
 }
@@ -88,6 +87,7 @@ void test1()
 {
     using namespace ecad;
     auto & eDataMgr = EDataMgr::Instance();
+    eDataMgr.Init();
 
     //database
     auto database = eDataMgr.CreateDatabase("RobGrant");
@@ -225,14 +225,14 @@ void test1()
     FPoint2D ploc1, ploc2;
     [[maybe_unused]] bool check;
     check = eDataMgr.GetComponentPinLocation(comp1, "Source1", ploc1); { ECAD_ASSERT(check) }
-    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), ploc1, {3000, 7500}, bwRadius);
+    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), ploc1, {2500, 8700}, bwRadius);
     sourceBW1->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW1->SetStartComponent(comp1);
     sourceBW1->SetEndLayer(iLyrWire, false);
     sourceBW1->SetCurrent(20);
 
     check = eDataMgr.GetComponentPinLocation(comp1, "Source2", ploc2); { ECAD_ASSERT(check) }
-    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), ploc2, {3000, 2500}, bwRadius);
+    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), ploc2, {3500, 8700}, bwRadius);
     sourceBW2->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW2->SetStartComponent(comp1);
     sourceBW2->SetEndLayer(iLyrWire, false);
@@ -343,23 +343,22 @@ void test1()
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     layout->MergeLayerPolygons(mergeSettings);
 
-    EThermalNetworkExtractionSettings extSettings;
-    extSettings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    extSettings.dumpHotmaps = true;
-    extSettings.dumpSpiceFile = true;
-    extSettings.dumpDensityFile = true;
-    extSettings.dumpTemperatureFile = true;
+    EPrismaThermalModelExtractionSettings prismaSettings;
+    prismaSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    prismaSettings.meshSettings.iteration = 1e5;
+    prismaSettings.meshSettings.minAlpha = 20;
+    prismaSettings.meshSettings.minLen = 1e-2;
+    prismaSettings.meshSettings.maxLen = 500;
+    auto model = layout->ExtractThermalModel(prismaSettings);
 
-    size_t xGrid = 150;
-    auto bbox = layout->GetBoundary()->GetBBox();
-    extSettings.grid = {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
-    extSettings.mergeGeomBeforeMetalMapping = false;
+    assert(model);
 
-    sim::EThermalNetworkExtraction ne;
-    ne.SetExtractionSettings(extSettings);
-    // auto model = ne.GenerateGridThermalModel(layout);
-    auto model = ne.GeneratePrismaThermalModel(layout, generic::math::Rad(20), 10, 1e5, 1e4);
-
+    simulation::EThermalSimulation sim;
+    sim.setup.simuType = EThermalSimuType::Static;
+    sim.setup.environmentTemperature = 25;
+    sim.setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    sim.Run(model.get());
+    
     EDataMgr::Instance().ShutDown();
 }
 int main(int argc, char * argv[])

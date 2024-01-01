@@ -8,11 +8,8 @@
 #include <cassert>
 
 #ifdef ECAD_DEBUG_MODE
-    #include <iostream>
-    #define ECAD_DEBUG(ex) std::cout << ex << std::endl;
     #define ECAD_ASSERT(ex) assert(ex);
 #else
-    #define ECAD_DEBUG(ex)
     #define ECAD_ASSERT(ex) do{} while(0);
 #endif//ECAD_DEBUG_MODE
 
@@ -27,3 +24,7 @@
 #else
     #define ECAD_EFFICIENCY_TRACK(task)
 #endif//ECAD_EFFICIENCY_TRACK
+
+#define ECAD_TRACE(...) generic::log::Trace(__VA_ARGS__);
+#define ECAD_DEBUG(...) generic::log::Debug(__VA_ARGS__);
+#define ECAD_INFO (...) generic::log::Info (__VA_ARGS__);

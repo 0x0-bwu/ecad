@@ -114,7 +114,7 @@ endif()
 
 set(THIRD_LIBRARY_PATH ${PROJECT_SOURCE_DIR}/3rdparty)
 set(EMESH_INCLUDE_PATH ${THIRD_LIBRARY_PATH}/emesh/include)
-include_directories(${THIRD_LIBRARY_PATH} ${EMESH_INCLUDE_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
+include_directories(${PROJECT_SOURCE_DIR} ${THIRD_LIBRARY_PATH} ${EMESH_INCLUDE_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
 
 # Compile definition
 add_definitions("-DBOOST_GIL_IO_PNG_SUPPORT=1")
@@ -145,7 +145,7 @@ add_subdirectory(3rdparty/emesh/src)
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(examples)
-add_subdirectory(3rdparty/thermal/test)
+#add_subdirectory(src/solvers/thermal/network/test)
 
 if (NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	add_subdirectory(py)

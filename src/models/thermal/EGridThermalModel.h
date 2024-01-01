@@ -79,8 +79,8 @@ public:
     bool SetScaleH(EFloat scaleH);
     EFloat GetScaleH() const;
 
-    bool SetResolution(FCoord x, FCoord y);
-    void GetResolution(FCoord & x, FCoord & y, bool scaled = false) const;
+    bool SetResolution(EFloat x, EFloat y);
+    void GetResolution(EFloat & x, EFloat & y, bool scaled = false) const;
     std::array<FCoord, 2> GetResolution(bool scaled = false) const;
 
     size_t AppendLayer(EGridThermalLayer layer);
