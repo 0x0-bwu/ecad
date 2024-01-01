@@ -1,15 +1,17 @@
 #include "utilities/ELayoutMergeUtility.h"
 
 #include <unordered_map>
-#include "Interface.h"
-#include "EShape.h"
+#include "EDataMgr.h"
 namespace ecad {
 namespace utils {
 
-ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform)
+ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, const std::string & hierName, CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform)
 {
     // ECAD_EFFICIENCY_TRACK("layout merge")
     if(layout == other) return;
+
+    char sep = EDataMgr::Instance().HierSep();
+    auto getHierName = [sep, &hierName](const std::string & name) { return hierName + sep + name; };
 
     //Boundary
     // auto boundary = *(layout->GetBoundary());
@@ -23,13 +25,10 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     netIdMap.emplace(ENetId::noNet, ENetId::noNet);
     auto netIter = other->GetNetIter();
     while (auto * net = netIter->Next()){
-        if (auto thisNet = layout->FindNetByName(net->GetName()); thisNet)
-            netIdMap.emplace(net->GetNetId(), thisNet->GetNetId());
-        else {
-            auto clone = net->Clone();
-            auto added = layout->GetNetCollection()->AddNet(std::move(clone));
-            netIdMap.emplace(net->GetNetId(), added->GetNetId());
-        }
+        auto clone = net->Clone();
+        clone->SetName(getHierName(net->GetName()));
+        auto added = layout->GetNetCollection()->AddNet(std::move(clone));
+        netIdMap.emplace(net->GetNetId(), added->GetNetId());
     }
 
     UPtr<ILayerMap> defaultLyrMap;
@@ -41,7 +40,8 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     //HierarchyObj/Cellinst
     auto cellInstIter = other->GetCellInstIter();
     while (auto * cellInst = cellInstIter->Next()){
-        auto clone = cellInst->Clone();//todo, move directly
+        auto clone = cellInst->Clone();
+        clone->SetName(getHierName(cellInst->GetName()));
         clone->SetRefLayoutView(layout);
         clone->AddTransform(transform);
         layout->GetCellInstCollection()->AddCellInst(std::move(clone));
@@ -52,6 +52,7 @@ ECAD_INLINE void ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ILayou
     auto compIter = other->GetComponentIter();
     while (auto * comp = compIter->Next()) {
         auto clone = comp->Clone();
+        clone->SetName(getHierName(comp->GetName()));
         clone->SetPlacementLayer(layermap->GetMappingForward(clone->GetPlacementLayer()));
         clone->AddTransform(transform);
         compMap.emplace(comp, layout->GetComponentCollection()->AddComponent(std::move(clone)));

@@ -34,6 +34,7 @@ public:
 
     bool GetPinLocation(const std::string & name, EPoint2D & loc) const override;
 
+    void SetName(std::string name) override;
     const std::string & GetName() const override;
 protected:
     ///Copy
@@ -45,6 +46,11 @@ protected:
     EFloat m_lossPower{0};
     bool m_flipped{false};
 };
+
+ECAD_ALWAYS_INLINE void EComponent::SetName(std::string name)
+{
+    return EHierarchyObj::SetName(std::move(name));
+}
 
 ECAD_ALWAYS_INLINE const std::string & EComponent::GetName() const
 {

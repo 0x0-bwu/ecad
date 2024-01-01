@@ -11,6 +11,7 @@ class ECAD_API IComponent : public Clonable<IComponent>, public Printable
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:
     virtual ~IComponent() = default;
+    virtual void SetName(std::string name) = 0;
     virtual const std::string & GetName() const = 0;
 
     virtual CPtr<IComponentDef> GetComponentDef() const = 0;

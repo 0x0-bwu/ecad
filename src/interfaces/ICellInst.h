@@ -5,13 +5,15 @@
 #include "Protocol.h"
 namespace ecad {
 
-class ILayoutView;
 class ILayerMap;
+class ILayoutView;
 class ECAD_API ICellInst : public Clonable<ICellInst>, public Transformable2D
 {
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:
     virtual ~ICellInst() = default;
+    virtual void SetName(std::string name) = 0;
+    virtual const std::string & GetName() const = 0;
     virtual void SetRefLayoutView(CPtr<ILayoutView> refLayout) = 0;
     virtual CPtr<ILayoutView> GetRefLayoutView() const = 0;
     virtual void SetDefLayoutView(CPtr<ILayoutView> defLayout) = 0;

@@ -133,7 +133,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
 
 
     m_result.reset(new ELayoutMetalFraction);
-    MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, EDataMgr::Instance().DefaultThreads());
+    MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, EDataMgr::Instance().Threads());
     
     auto layerIter = layout->GetLayerIter();
     //stackuplayer

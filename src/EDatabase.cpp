@@ -193,7 +193,7 @@ ECAD_INLINE bool EDatabase::GetTopCells(std::vector<Ptr<ICell> > & cells) const
 ECAD_INLINE bool EDatabase::Flatten(Ptr<ICell> cell) const
 {
     utils::EFlattenUtility utility;
-    return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, EDataMgr::Instance().DefaultThreads());
+    return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, EDataMgr::Instance().Threads());
 }
 
 ECAD_INLINE Ptr<IMaterialDefCollection> EDatabase::GetMaterialDefCollection() const

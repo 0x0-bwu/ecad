@@ -93,7 +93,7 @@ ECAD_INLINE void ELayoutConnectivity::ConnectivityExtraction(Ptr<ILayoutView> la
     }
 
     //extract
-    auto graph = extractor.Extract(EDataMgr::Instance().DefaultThreads());
+    auto graph = extractor.Extract(EDataMgr::Instance().Threads());
     std::vector<std::list<size_t> > cc;
     generic::topology::ConnectedComponents(*graph, cc);
     

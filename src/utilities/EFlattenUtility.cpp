@@ -61,7 +61,7 @@ ECAD_INLINE bool EFlattenUtility::GetTopCells(Ptr<IDatabase> database, std::vect
         if(cellNode->successors.empty())
             tops.push_back(iter->first);
     }
-    return !tops.empty();
+    return not tops.empty();
 }
 
 ECAD_INLINE void EFlattenUtility::ScheduleFlattenTasks(Ptr<FlattenFlow> flattenFlow, Ptr<FlattenNode> successor, const ECellNode & node)

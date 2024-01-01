@@ -65,7 +65,7 @@ ECAD_INLINE bool EGridThermalNetworkStaticSolver::Solve(EFloat refT, std::vector
             ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
             ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
             
-            size_t threads = EDataMgr::Instance().DefaultThreads();
+            size_t threads = EDataMgr::Instance().Threads();
             ThermalNetworkSolver<EFloat> solver(*network, threads);
             solver.SetVerbose(true);
             solver.Solve(refT);
@@ -106,7 +106,7 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
     ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
     ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
             
-    size_t threads = EDataMgr::Instance().DefaultThreads();
+    size_t threads = EDataMgr::Instance().Threads();
     ThermalNetworkSolver<EFloat> solver(*network, threads);
     solver.SetVerbose(true);
     solver.Solve(refT);
@@ -123,7 +123,7 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
         using TransSolver = ThermalNetworkTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
         using Recorder = typename TransSolver::Recorder;
-        size_t threads = EDataMgr::Instance().DefaultThreads();
+        size_t threads = EDataMgr::Instance().Threads();
         
         struct Excitation
         {
@@ -168,7 +168,7 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
         using TransSolver = ThermalNetworkReducedTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
         using Recorder = typename TransSolver::Recorder;
-        size_t threads = EDataMgr::Instance().DefaultThreads();
+        size_t threads = EDataMgr::Instance().Threads();
         
         struct Excitation
         {
@@ -284,7 +284,7 @@ ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(EFloat refT, std::vect
             ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
             ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
             
-            size_t threads = EDataMgr::Instance().DefaultThreads();
+            size_t threads = EDataMgr::Instance().Threads();
             ThermalNetworkSolver<EFloat> solver(*network, threads);
             solver.SetVerbose(true);
             solver.Solve(refT);

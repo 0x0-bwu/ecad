@@ -44,7 +44,16 @@ ECAD_INLINE ECellInst::ECellInst(std::string name, CPtr<ILayoutView> refLayout, 
 
 ECAD_INLINE ECellInst::~ECellInst()
 {
+}
 
+ECAD_INLINE void ECellInst::SetName(std::string name)
+{
+    EHierarchyObj::SetName(std::move(name));
+}
+
+ECAD_INLINE const std::string & ECellInst::GetName() const
+{
+    return EHierarchyObj::GetName();
 }
 
 ECAD_INLINE void ECellInst::SetRefLayoutView(CPtr<ILayoutView> refLayout)

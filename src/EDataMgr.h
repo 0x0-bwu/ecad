@@ -112,10 +112,12 @@ public:
     Ptr<IComponentDefPin> CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
     
     ///Settings
-    size_t DefaultThreads() const;
-    void SetDefaultThreads(size_t threads);
+    char HierSep() const;
 
-    size_t DefaultCircleDiv() const;
+    size_t Threads() const;
+    void SetThreads(size_t threads);
+
+    size_t CircleDiv() const;
 
     static EDataMgr & Instance();
 

@@ -27,12 +27,12 @@ struct ESize2D
         else return y; 
     }
 
-    bool operator== (const ESize2D & other) const
+    bool operator == (const ESize2D & other) const
     {
         return x == other.x && y == other.y;
     }
 
-    bool operator!= (const ESize2D & other) const
+    bool operator != (const ESize2D & other) const
     {
         return !(*this == other);
     }

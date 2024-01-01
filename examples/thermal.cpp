@@ -23,7 +23,7 @@ int main(int argc, char * argv[])
     using namespace generic::fs;
 
     auto & eDataMgr = EDataMgr::Instance();
-    eDataMgr.SetDefaultThreads(1);
+    eDataMgr.SetThreads(1);
     std::string filename = ecad_test::GetTestDataPath() + "/gdsii/4004.gds";
     std::string layermap = ecad_test::GetTestDataPath() + "/gdsii/4004.layermap";
     auto database = eDataMgr.CreateDatabaseFromGds("4004", filename, layermap);

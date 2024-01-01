@@ -100,7 +100,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
 
 ECAD_INLINE void ELayoutPolygonMerger::MergeLayers()
 {
-    auto threads = EDataMgr::Instance().DefaultThreads();
+    auto threads = EDataMgr::Instance().Threads();
     if(threads > 1) {
         thread::ThreadPool pool(threads);
         for(const auto & merger : m_mergers)
@@ -118,7 +118,7 @@ ECAD_INLINE void ELayoutPolygonMerger::MergeOneLayer(Ptr<LayerMerger> merger)
     //todo, add settings
     merger->SetMergeSettings(settings);
 
-    size_t threads = EDataMgr::Instance().DefaultThreads();
+    size_t threads = EDataMgr::Instance().Threads();
     PolygonMergeRunner runner(*merger, threads);
     runner.Run();
 }

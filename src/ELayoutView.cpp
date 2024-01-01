@@ -323,14 +323,14 @@ ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)
         auto layout = cellInst->GetFlattenedLayoutView();
         const auto & transform = cellInst->GetTransform();
         const auto * layermap = cellInst->GetLayerMap();
-        Merge(layout, layermap, transform);
+        Merge(cellInst->GetName(), layout, layermap, transform);
     }
     GetHierarchyObjCollection()->GetCellInstCollection()->Clear();
 }
 
-ECAD_INLINE void ELayoutView::Merge(CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform)
+ECAD_INLINE void ELayoutView::Merge(const std::string & cellInstName, CPtr<ILayoutView> layout, CPtr<ILayerMap> layermap, const ETransform2D & transform)
 {
-    utils::ELayoutMergeUtility::Merge(this, other, layermap, transform);
+    utils::ELayoutMergeUtility::Merge(this, cellInstName, layout, layermap, transform);
 }
 
 ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)

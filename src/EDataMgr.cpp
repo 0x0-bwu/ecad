@@ -258,7 +258,7 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeCircle(EPoint2D loc, ECoord radius)
 {
-    auto shape = new ECircle(std::move(loc), radius, DefaultCircleDiv());
+    auto shape = new ECircle(std::move(loc), radius, CircleDiv());
     return UPtr<EShape>(shape);
 }
 
@@ -333,22 +333,27 @@ ECAD_INLINE EDataMgr & EDataMgr::Instance()
     return mgr;
 }
 
-size_t EDataMgr::DefaultThreads() const
+ECAD_INLINE char EDataMgr::HierSep() const
+{
+    return m_settings.hierSep;
+}
+
+ECAD_INLINE size_t EDataMgr::Threads() const
 {
     return m_settings.threads;
 }
 
-void EDataMgr::SetDefaultThreads(size_t threads)
+ECAD_INLINE void EDataMgr::SetThreads(size_t threads)
 {
     m_settings.threads = threads;
 }
 
-size_t EDataMgr::DefaultCircleDiv() const
+ECAD_INLINE size_t EDataMgr::CircleDiv() const
 {
     return m_settings.circleDiv;
 }
 
-void EDataMgr::Init(const std::string & workDir)
+ECAD_INLINE void EDataMgr::Init(const std::string & workDir)
 {   
     //threads
     m_settings.threads = std::thread::hardware_concurrency();

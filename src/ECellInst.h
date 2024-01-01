@@ -14,6 +14,9 @@ public:
     ECellInst(std::string name, CPtr<ILayoutView> refLayout, CPtr<ILayoutView> defLayout);
     virtual ~ECellInst();
 
+    void SetName(std::string name) override;
+    const std::string & GetName() const override;
+    
     void SetRefLayoutView(CPtr<ILayoutView> refLayout) override;
     CPtr<ILayoutView> GetRefLayoutView() const override;
 

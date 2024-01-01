@@ -334,6 +334,11 @@ void test1()
     database->Flatten(topCell);
     auto layout = topCell->GetFlattenedLayoutView();
 
+    auto compIter = layout->GetComponentIter();
+    while (auto * comp = compIter->Next()) {
+        ECAD_TRACE("comp: %1%", comp->GetName())
+    }
+
     ELayoutViewRendererSettings rendererSettings;
     rendererSettings.format = ELayoutViewRendererSettings::Format::PNG;
     rendererSettings.dirName = ecad_test::GetTestDataPath() + "/simulation/thermal";
