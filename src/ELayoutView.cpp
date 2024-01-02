@@ -21,6 +21,8 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #include "interfaces/IConnObjCollection.h"
 #include "interfaces/ILayerCollection.h"
 #include "interfaces/INetCollection.h"
+#include "interfaces/IComponent.h"
+#include "interfaces/IPrimitive.h"
 #include "interfaces/ILayerMap.h"
 #include "interfaces/IModel.h"
 #include "interfaces/ILayer.h"
@@ -84,6 +86,16 @@ ECAD_INLINE ELayoutView & ELayoutView::operator= (const ELayoutView & other)
     if (other.m_boundary)
         m_boundary.reset(new EPolygon(*other.m_boundary));
     m_cell = other.m_cell;
+
+    auto primIter = GetPrimitiveIter();
+    while (auto * primitive = primIter->Next()) {
+        if (auto * bw = primitive->GetBondwireFromPrimitive(); bw) {
+            if (auto * comp = bw->GetStartComponent(); comp)
+                bw->SetStartComponent(FindComponentByName(comp->GetName()), bw->GetStartComponentPin());
+            if (auto * comp = bw->GetEndComponent(); comp)
+                bw->SetEndComponent(FindComponentByName(comp->GetName()), bw->GetEndComponentPin());
+        }
+    }
     //sync, todo
     return *this;
 }

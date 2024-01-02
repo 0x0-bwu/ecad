@@ -364,7 +364,7 @@ ECAD_INLINE void EDataMgr::Init(const std::string & workDir)
     traceSink->SetLevel(log::Level::Trace);
     infoSink->SetLevel(log::Level::Info);
     auto logger = log::MultiSinksLogger("ecad", {traceSink, infoSink});
-    logger->SetLevel(log::Level::Trace);
+    logger->SetLevel(log::Level::Info);
     log::SetDefaultLogger(logger);
 }
 }//namespace ecad

@@ -1,6 +1,6 @@
 #pragma once
 #define ECAD_DEBUG_MODE
-#define ECAD_EFFICIENCY_TRACK_MODE
+// #define ECAD_EFFICIENCY_TRACK_MODE
 #if defined(_WIN32) && defined(ECAD_SHARED_LIB)
 #    ifdef ECAD_EXPORTS
 #        define ECAD_API __declspec(dllexport)
