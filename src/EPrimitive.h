@@ -71,7 +71,7 @@ class ECAD_API EBondwire : public EPrimitive, public IBondwire
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EBondwire();
 public:
-    EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius);
+    EBondwire(std::string name, ENetId net, EFloat radius);
     virtual ~EBondwire() = default;
 
     const std::string & GetName() const override;
@@ -82,13 +82,18 @@ public:
     void SetRadius(EFloat r) override;
     EFloat GetRadius() const override;
 
-    const EPoint2D & GetStartPt() const override;
-    const EPoint2D & GetEndPt() const override;
+    EPoint2D GetStartPt() const override;
+    EPoint2D GetEndPt() const override;
 
-    void SetStartLayer(ELayerId layerId, bool flipped) override;
+    const std::string & GetStartComponentPin() const override;
+    const std::string & GetEndComponentPin() const override;
+
+    void SetStartLayer(ELayerId layerId, const EPoint2D & location, bool flipped) override;
+    void SetStartLayer(ELayerId layerId) override;
     ELayerId GetStartLayer(Ptr<bool> flipped) const override;
 
-    void SetEndLayer(ELayerId layerId, bool flipped) override;
+    void SetEndLayer(ELayerId layerId, const EPoint2D & location, bool flipped) override;
+    void SetEndLayer(ELayerId layerId) override;
     ELayerId GetEndLayer(Ptr<bool> flipped) const override;
 
     void SetMaterial(const std::string & material) override;
@@ -100,10 +105,10 @@ public:
     void SetHeight(EFloat height) override;
     EFloat GetHeight() const override;
 
-    void SetStartComponent(CPtr<IComponent> comp) override;
+    void SetStartComponent(CPtr<IComponent> comp, const std::string & pin) override;
     CPtr<IComponent> GetStartComponent() const override;
 
-    void SetEndComponent(CPtr<IComponent> comp) override;
+    void SetEndComponent(CPtr<IComponent> comp, const std::string & pin) override;
     CPtr<IComponent> GetEndComponent() const override;
 
     void SetSolderJoints(CPtr<IPadstackDef> s) override;
@@ -122,6 +127,7 @@ protected:
     std::string m_material;
     ELayerId m_endLayer{ELayerId::noLayer};
     std::array<CPtr<IComponent>, 2> m_mountComp{nullptr, nullptr};
+    std::array<std::string, 2> m_connectedPin;
     std::array<EPoint2D, 2> m_location;
     std::array<bool, 2> m_flipped{false, false};
     EFloat m_radius{0};

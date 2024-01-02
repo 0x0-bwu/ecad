@@ -54,13 +54,18 @@ public:
     virtual void SetRadius(EFloat r) = 0;
     virtual EFloat GetRadius() const = 0;
 
-    virtual const EPoint2D & GetStartPt() const = 0;
-    virtual const EPoint2D & GetEndPt() const = 0;
+    virtual EPoint2D GetStartPt() const = 0;
+    virtual EPoint2D GetEndPt() const = 0;
 
-    virtual void SetStartLayer(ELayerId layerId, bool flipped) = 0;
+    virtual const std::string & GetStartComponentPin() const = 0;
+    virtual const std::string & GetEndComponentPin() const = 0;
+
+    virtual void SetStartLayer(ELayerId layerId, const EPoint2D & location, bool flipped) = 0;
+    virtual void SetStartLayer(ELayerId layerId) = 0;
     virtual ELayerId GetStartLayer(Ptr<bool> flipped = nullptr) const = 0;
 
-    virtual void SetEndLayer(ELayerId layerId, bool flipped) = 0;
+    virtual void SetEndLayer(ELayerId layerId, const EPoint2D & location, bool flipped) = 0;
+    virtual void SetEndLayer(ELayerId layerId) = 0;
     virtual ELayerId GetEndLayer(Ptr<bool> flipped = nullptr) const = 0;
 
     virtual void SetMaterial(const std::string & material) = 0;
@@ -72,10 +77,10 @@ public:
     virtual void SetHeight(EFloat height) = 0;
     virtual EFloat GetHeight() const = 0;
 
-    virtual void SetStartComponent(CPtr<IComponent> comp) = 0;
+    virtual void SetStartComponent(CPtr<IComponent> comp, const std::string & pin) = 0;
     virtual CPtr<IComponent> GetStartComponent() const = 0;
 
-    virtual void SetEndComponent(CPtr<IComponent> comp) = 0;
+    virtual void SetEndComponent(CPtr<IComponent> comp, const std::string & pin) = 0;
     virtual CPtr<IComponent> GetEndComponent() const = 0;
     
     virtual void SetSolderJoints(CPtr<IPadstackDef> s) = 0;

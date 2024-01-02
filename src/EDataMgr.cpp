@@ -223,11 +223,10 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 
-ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, const FPoint2D & start, const FPoint2D & end, EFloat radius)
+ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EFloat radius)
 {
     if (nullptr == layout) return nullptr;
-    const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
-    return layout->CreateBondwire(std::move(name), net, coordUnits.toCoord(start), coordUnits.toCoord(end), radius);
+    return layout->CreateBondwire(std::move(name), net, radius);
 }
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)

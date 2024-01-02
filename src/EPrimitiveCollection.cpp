@@ -72,9 +72,9 @@ ECAD_INLINE Ptr<IPrimitive> EPrimitiveCollection::CreateGeometry2D(ELayerId laye
     return AddPrimitive(UPtr<IPrimitive>(primitive));
 }
 
-ECAD_INLINE Ptr<IBondwire> EPrimitiveCollection::CreateBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius)
+ECAD_INLINE Ptr<IBondwire> EPrimitiveCollection::CreateBondwire(std::string name, ENetId net, EFloat radius)
 {
-    auto primitve = new EBondwire(std::move(name), net, std::move(start), std::move(end), radius);
+    auto primitve = new EBondwire(std::move(name), net, radius);
     return dynamic_cast<Ptr<IBondwire>>(AddPrimitive(UPtr<IPrimitive>(primitve)));
 }
 

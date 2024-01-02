@@ -6,6 +6,7 @@
 
 #include "../test/TestData.hpp"
 #include "simulation/thermal/EThermalSimulation.h"
+#include "generic/tools/StringHelper.hpp"
 #include "EDataMgr.h"
 
 void SignalHandler(int signum)
@@ -175,8 +176,8 @@ void test1()
     eDataMgr.CreateComponentDefPin(compDef, "Source2", {1000, -1000}, EPinIOType::Receiver);
     
     bool flipped{false};
-    EFloat comp1x = 3450, comp1y = 13000;
-    EFloat comp2x = 19000, comp2y = 16000; 
+    EFloat comp1x = 2000, comp1y = 12650;
+    EFloat comp2x = 17750, comp2y = 12650; 
     [[maybe_unused]] auto comp1 = eDataMgr.CreateComponent(sicLayout, "M1", compDef, iLyrWire, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {comp1x, comp1y}), flipped);
     [[maybe_unused]] auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {comp2x, comp2y}, EMirror2D::Y), flipped);
     assert(comp1);
@@ -222,76 +223,57 @@ void test1()
     eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, gateNet->GetNetId(), std::move(rec7));
 
     //bondwire
-    FPoint2D ploc1, ploc2;
-    [[maybe_unused]] bool check;
-    check = eDataMgr.GetComponentPinLocation(comp1, "Source1", ploc1); { ECAD_ASSERT(check) }
-    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), ploc1, {2500, 8700}, bwRadius);
+    auto sourceBW1 = eDataMgr.CreateBondwire(sicLayout, "SourceBW1", sourceNet->GetNetId(), bwRadius);
     sourceBW1->SetBondwireType(EBondwireType::JEDEC4);
-    sourceBW1->SetStartComponent(comp1);
-    sourceBW1->SetEndLayer(iLyrWire, false);
+    sourceBW1->SetStartComponent(comp1, "Source1");
+    sourceBW1->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{2500, 8700}), false);
     sourceBW1->SetCurrent(20);
 
-    check = eDataMgr.GetComponentPinLocation(comp1, "Source2", ploc2); { ECAD_ASSERT(check) }
-    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), ploc2, {3500, 8700}, bwRadius);
+    auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), bwRadius);
     sourceBW2->SetBondwireType(EBondwireType::JEDEC4);
-    sourceBW2->SetStartComponent(comp1);
-    sourceBW2->SetEndLayer(iLyrWire, false);
+    sourceBW2->SetStartComponent(comp1, "Source2");
+    sourceBW2->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{3500, 8700}), false);
     sourceBW2->SetCurrent(20);
 
-    check = eDataMgr.GetComponentPinLocation(comp2, "Source1", ploc2); { ECAD_ASSERT(check) }
-    auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), ploc1, ploc2, bwRadius);
-    sourceBW3->SetStartComponent(comp1);
-    sourceBW3->SetEndComponent(comp2);
+    auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), bwRadius);
+    sourceBW3->SetStartComponent(comp1, "Source1");
+    sourceBW3->SetEndComponent(comp2, "Source1");
     sourceBW3->SetCurrent(10);
 
-    check = eDataMgr.GetComponentPinLocation(comp1, "Source2", ploc1); { ECAD_ASSERT(check) }
-    check = eDataMgr.GetComponentPinLocation(comp2, "Source2", ploc2); { ECAD_ASSERT(check) }
-    auto sourceBW4 = eDataMgr.CreateBondwire(sicLayout, "SourceBW4", sourceNet->GetNetId(), ploc1, ploc2, bwRadius);
-    sourceBW4->SetStartComponent(comp1);
-    sourceBW4->SetEndComponent(comp2);
+    auto sourceBW4 = eDataMgr.CreateBondwire(sicLayout, "SourceBW4", sourceNet->GetNetId(), bwRadius);
+    sourceBW4->SetStartComponent(comp1, "Source2");
+    sourceBW4->SetEndComponent(comp2, "Source2");
     sourceBW4->SetCurrent(10);
 
     EFloat drainBWStartX = 13500, drainBWEndX = 16500;
-    auto drainBW1 = eDataMgr.CreateBondwire(sicLayout, "DrainBW1", drainNet->GetNetId(), {drainBWStartX, 12200}, {drainBWEndX, 7500}, bwRadius);
-    drainBW1->SetStartLayer(iLyrWire, false);
-    drainBW1->SetEndLayer(iLyrWire, false);
+    auto drainBW1 = eDataMgr.CreateBondwire(sicLayout, "DrainBW1", drainNet->GetNetId(), bwRadius);
+    drainBW1->SetStartLayer(iLyrWire, coordUnits.toCoord(FPoint2D{drainBWStartX,  8200}), false);
+    drainBW1->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{drainBWEndX, 3500}), false);
 
-    auto drainBW2 = eDataMgr.CreateBondwire(sicLayout, "DrainBW2", drainNet->GetNetId(), {drainBWStartX, 10200}, {drainBWEndX, 5500}, bwRadius);
-    drainBW2->SetStartLayer(iLyrWire, false);
-    drainBW2->SetEndLayer(iLyrWire, false);
-
-    auto drainBW3 = eDataMgr.CreateBondwire(sicLayout, "DrainBW3", drainNet->GetNetId(), {drainBWStartX,  8200}, {drainBWEndX, 3500}, bwRadius);
-    drainBW3->SetStartLayer(iLyrWire, false);
-    drainBW3->SetEndLayer(iLyrWire, false);
-
-    auto drainBW4 = eDataMgr.CreateBondwire(sicLayout, "DrainBW4", drainNet->GetNetId(), {drainBWStartX,  6200}, {drainBWEndX, 1500}, bwRadius);
-    drainBW4->SetStartLayer(iLyrWire, false);
-    drainBW4->SetEndLayer(iLyrWire, false);
+    auto drainBW2 = eDataMgr.CreateBondwire(sicLayout, "DrainBW2", drainNet->GetNetId(), bwRadius);
+    drainBW2->SetStartLayer(iLyrWire, coordUnits.toCoord(FPoint2D{drainBWStartX,  6200}), false);
+    drainBW2->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{drainBWEndX, 1500}), false);
 
     EFloat gateBWEndY{21000};
-    check = eDataMgr.GetComponentPinLocation(comp1, "Gate1", ploc1); { ECAD_ASSERT(check); }
-    auto gateBW1 = eDataMgr.CreateBondwire(sicLayout, "GateBW1", gateNet->GetNetId(), ploc1, {3250, gateBWEndY}, bwRadius);
+    auto gateBW1 = eDataMgr.CreateBondwire(sicLayout, "GateBW1", gateNet->GetNetId(), bwRadius);
     gateBW1->SetBondwireType(EBondwireType::JEDEC4); 
-    gateBW1->SetStartComponent(comp1);
-    gateBW1->SetEndLayer(iLyrWire, false);
+    gateBW1->SetStartComponent(comp1, "Gate1");
+    gateBW1->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{3250, gateBWEndY}), false);
 
-    check = eDataMgr.GetComponentPinLocation(comp1, "Gate2", ploc1); { ECAD_ASSERT(check); }
-    auto gateBW2 = eDataMgr.CreateBondwire(sicLayout, "GateBW2", gateNet->GetNetId(), ploc1, {5750, gateBWEndY}, bwRadius);
+    auto gateBW2 = eDataMgr.CreateBondwire(sicLayout, "GateBW2", gateNet->GetNetId(), bwRadius);
     gateBW2->SetBondwireType(EBondwireType::JEDEC4);
-    gateBW2->SetStartComponent(comp1);
-    gateBW2->SetEndLayer(iLyrWire, false);
+    gateBW2->SetStartComponent(comp1, "Gate2");
+    gateBW2->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{5750, gateBWEndY}), false);
 
-    check = eDataMgr.GetComponentPinLocation(comp2, "Gate1", ploc1); { ECAD_ASSERT(check); }
-    auto gateBW3 = eDataMgr.CreateBondwire(sicLayout, "GateBW3", gateNet->GetNetId(), ploc1, {19750, gateBWEndY}, bwRadius);
+    auto gateBW3 = eDataMgr.CreateBondwire(sicLayout, "GateBW3", gateNet->GetNetId(), bwRadius);
     gateBW3->SetBondwireType(EBondwireType::JEDEC4);
-    gateBW3->SetStartComponent(comp2);
-    gateBW3->SetEndLayer(iLyrWire, false);
+    gateBW3->SetStartComponent(comp2, "Gate1");
+    gateBW3->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{19750, gateBWEndY}), false);
 
-    check = eDataMgr.GetComponentPinLocation(comp2, "Gate2", ploc1); { ECAD_ASSERT(check); }
-    auto gateBW4 = eDataMgr.CreateBondwire(sicLayout, "GateBW4", gateNet->GetNetId(), ploc1, {22250, gateBWEndY}, bwRadius);
+    auto gateBW4 = eDataMgr.CreateBondwire(sicLayout, "GateBW4", gateNet->GetNetId(), bwRadius);
     gateBW4->SetBondwireType(EBondwireType::JEDEC4);
-    gateBW4->SetStartComponent(comp2);
-    gateBW4->SetEndLayer(iLyrWire, false);
+    gateBW4->SetStartComponent(comp2, "Gate2");
+    gateBW4->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{22250, gateBWEndY}), false);
     
     auto bondwireSolderDef = eDataMgr.CreatePadstackDef(database, "Bondwire Solder Joints");
     auto bondwireSolderDefData = eDataMgr.CreatePadstackDefData();
@@ -336,7 +318,10 @@ void test1()
 
     auto compIter = layout->GetComponentIter();
     while (auto * comp = compIter->Next()) {
-        ECAD_TRACE("comp: %1%", comp->GetName())
+        ECAD_TRACE("component: %1%", comp->GetName())
+        if (generic::str::EndsWith(comp->GetName(), "M1"))
+            comp->AddTransform(eDataMgr.CreateTransform2D(coordUnits, 1.0, 0.0, {0, 0})); //10300, 4350
+        else comp->AddTransform(eDataMgr.CreateTransform2D(coordUnits, 1.0, 0.0, {3250, 4200})); //3250, 4200
     }
 
     ELayoutViewRendererSettings rendererSettings;

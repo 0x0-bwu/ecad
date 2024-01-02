@@ -213,6 +213,7 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     ar & boost::serialization::make_nvp("material", m_material);
     ar & boost::serialization::make_nvp("end_layer", m_endLayer);
     ar & boost::serialization::make_nvp("mount_component", m_mountComp);
+    ar & boost::serialization::make_nvp("connected_pin", m_connectedPin);
     ar & boost::serialization::make_nvp("location", m_location);
     ar & boost::serialization::make_nvp("flipped", m_flipped);
     ar & boost::serialization::make_nvp("radius", m_radius);
@@ -231,6 +232,7 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("material", m_material);
     ar & boost::serialization::make_nvp("end_layer", m_endLayer);
     ar & boost::serialization::make_nvp("mount_component", m_mountComp);
+    ar & boost::serialization::make_nvp("connected_pin", m_connectedPin);
     ar & boost::serialization::make_nvp("location", m_location);
     ar & boost::serialization::make_nvp("flipped", m_flipped);
     ar & boost::serialization::make_nvp("radius", m_radius);
@@ -244,12 +246,12 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EBondwire)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EBondwire::EBondwire()
- : EBondwire(std::string{}, noNet, EPoint2D{0, 0}, EPoint2D{0, 0}, 0)
+ : EBondwire(std::string{}, noNet, 0)
 {
 }
 
-ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, EPoint2D start, EPoint2D end, EFloat radius)
- : EPrimitive(std::move(name), ELayerId::noLayer, net), m_location({std::move(start), std::move(end)}), m_radius(radius)
+ECAD_INLINE EBondwire::EBondwire(std::string name, ENetId net, EFloat radius)
+ : EPrimitive(std::move(name), ELayerId::noLayer, net), m_radius(radius)
 {
     m_type = EPrimitiveType::Bondwire;
 }
@@ -279,21 +281,46 @@ ECAD_INLINE EFloat EBondwire::GetRadius() const
     return m_radius;
 }
 
-ECAD_INLINE const EPoint2D & EBondwire::GetStartPt() const
+ECAD_INLINE EPoint2D EBondwire::GetStartPt() const
 {
+    if (m_mountComp.front() && not m_connectedPin.front().empty()) {
+        if (EPoint2D location; m_mountComp.front()->GetPinLocation(m_connectedPin.front(), location))
+            return location;
+    }
     return m_location.front();
 }
 
-ECAD_INLINE const EPoint2D & EBondwire::GetEndPt() const
+ECAD_INLINE EPoint2D EBondwire::GetEndPt() const
 {
+    if (m_mountComp.back() && not m_connectedPin.back().empty()) {
+        if (EPoint2D location; m_mountComp.back()->GetPinLocation(m_connectedPin.back(), location))
+            return location;
+    }
     return m_location.back();
 }
 
-ECAD_INLINE void EBondwire::SetStartLayer(ELayerId layerId, bool flipped)
+ECAD_INLINE const std::string & EBondwire::GetStartComponentPin() const
 {
-    m_mountComp.front() = nullptr;
+    return m_connectedPin.front();
+}
+
+ECAD_INLINE const std::string & EBondwire::GetEndComponentPin() const
+{
+    return m_connectedPin.back();
+}
+
+ECAD_INLINE void EBondwire::SetStartLayer(ELayerId layerId, const EPoint2D & location, bool flipped)
+{
+    m_location.front() = location;
     m_flipped.front() = flipped;
-    return EPrimitive::SetLayer(layerId);
+    return SetStartLayer(layerId);
+}
+
+ECAD_INLINE void EBondwire::SetStartLayer(ELayerId layerId)
+{
+    m_connectedPin.front().clear();
+    m_mountComp.front() = nullptr;
+    return EPrimitive::SetLayer(layerId); 
 }
 
 ECAD_INLINE ELayerId EBondwire::GetStartLayer(Ptr<bool> flipped) const
@@ -302,10 +329,17 @@ ECAD_INLINE ELayerId EBondwire::GetStartLayer(Ptr<bool> flipped) const
     return EPrimitive::GetLayer();
 }
 
-ECAD_INLINE void EBondwire::SetEndLayer(ELayerId layerId, bool flipped)
+ECAD_INLINE void EBondwire::SetEndLayer(ELayerId layerId, const EPoint2D & location, bool flipped)
 {
-    m_mountComp.back() = nullptr;
+    m_location.back() = location;
     m_flipped.back() = flipped;
+    return SetEndLayer(layerId);
+}
+
+ECAD_INLINE void EBondwire::SetEndLayer(ELayerId layerId)
+{
+    m_connectedPin.back().clear();
+    m_mountComp.back() = nullptr;
     m_endLayer = layerId;
 }
 
@@ -345,9 +379,10 @@ ECAD_INLINE EFloat EBondwire::GetHeight() const
     return m_height;
 }
 
-ECAD_INLINE void EBondwire::SetStartComponent(CPtr<IComponent> comp)
+ECAD_INLINE void EBondwire::SetStartComponent(CPtr<IComponent> comp, const std::string & pin)
 {
     m_layer = ELayerId::ComponentLayer;
+    m_connectedPin.front() = pin;
     m_mountComp.front() = comp;
 }
 
@@ -356,9 +391,10 @@ ECAD_INLINE CPtr<IComponent> EBondwire::GetStartComponent() const
     return m_mountComp.front();
 }
 
-ECAD_INLINE void EBondwire::SetEndComponent(CPtr<IComponent> comp)
+ECAD_INLINE void EBondwire::SetEndComponent(CPtr<IComponent> comp, const std::string & pin)
 {
     m_endLayer = ELayerId::ComponentLayer;
+    m_connectedPin.back() = pin;
     m_mountComp.back() = comp;
 }
 
