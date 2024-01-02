@@ -86,6 +86,7 @@ public:
 
     ///Component
     virtual Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped) = 0;
+    virtual Ptr<IComponent> FindComponentByName(const std::string & name) const = 0;
 
     ///Collection
     virtual Ptr<INetCollection> GetNetCollection() const = 0;

@@ -218,6 +218,11 @@ ECAD_INLINE Ptr<IComponent> ELayoutView::CreateComponent(const std::string & nam
     return GetComponentCollection()->CreateComponent(name, this, compDef, layer, transform, flipped);
 }
 
+ECAD_INLINE Ptr<IComponent> ELayoutView::FindComponentByName(const std::string & name) const
+{
+    return GetComponentCollection()->FindComponentByName(name);
+}
+
 ECAD_INLINE Ptr<IPrimitive> ELayoutView::CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape)
 {
     return GetPrimitiveCollection()->CreateGeometry2D(layer, net, std::move(shape));

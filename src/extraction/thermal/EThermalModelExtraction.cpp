@@ -135,8 +135,10 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
     auto model = new EPrismaThermalModel(layout);
     auto compact = makeCompactLayout(layout);
-    auto compactModelFile = settings.workDir + GENERIC_FOLDER_SEPS + "compact.png";
-    compact->WriteImgView(compactModelFile, 1024);
+    if (not settings.workDir.empty()) {
+        auto compactModelFile = settings.workDir + ECAD_SEPS + "compact.png";
+        compact->WriteImgView(compactModelFile, 1024);
+    }
 
     const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
 
@@ -159,8 +161,10 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     auto minLen = coordUnits.toCoord(meshSettings.minLen);
     auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
     MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
-    auto meshTemplateFile = settings.workDir + GENERIC_FOLDER_SEPS + "mesh.png";
-    GeometryIO::WritePNG(meshTemplateFile, triangulation, 4096);
+    if (not settings.workDir.empty()) {
+        auto meshTemplateFile = settings.workDir + ECAD_SEPS + "mesh.png";
+        GeometryIO::WritePNG(meshTemplateFile, triangulation, 4096);
+    }
     ECAD_TRACE("total elements: %1%", triangulation.triangles.size())
 
     //todo wrapper to mesh
@@ -245,8 +249,10 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         model->AddBondWire(bondwire);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
-    auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
-    io::GenerateVTKFile(meshFile, *model);
+    if (not settings.workDir.empty()) { 
+        auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
+        io::GenerateVTKFile(meshFile, *model);
+    }
 
     //htc
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);

@@ -73,6 +73,13 @@ ECAD_INLINE ComponentIter EComponentCollection::GetComponentIter() const
     return ComponentIter(new EComponentIterator(*this));
 }
 
+ECAD_INLINE Ptr<IComponent> EComponentCollection::FindComponentByName(const std::string & name)
+{
+    auto iter = m_collection.find(name);
+    if (iter == m_collection.cend()) return nullptr;
+    return iter->second.get();
+}
+
 ECAD_INLINE size_t EComponentCollection::Size() const
 {
     return BaseCollection::Size();

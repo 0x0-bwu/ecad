@@ -69,6 +69,7 @@ public:
     
     ///Component
     Ptr<IComponent> CreateComponent(const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped) override;
+    Ptr<IComponent> FindComponentByName(const std::string & name) const override;
 
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(ELayerId layer, ENetId net, UPtr<EShape> shape) override;

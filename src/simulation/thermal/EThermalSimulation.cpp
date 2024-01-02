@@ -127,9 +127,11 @@ ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & maxT) const
 
     maxT = *std::max_element(results.begin(), results.end());
 
-    auto hotmapFile = m_settings.workDir + ECAD_SEPS + "hotmap.vtk";
-    ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
-    io::GenerateVTKFile(hotmapFile, *m_model, &results);
+    if (not m_settings.workDir.empty()) {
+        auto hotmapFile = m_settings.workDir + ECAD_SEPS + "hotmap.vtk";
+        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
+        io::GenerateVTKFile(hotmapFile, *m_model, &results);
+    }
     return true;
 }
 

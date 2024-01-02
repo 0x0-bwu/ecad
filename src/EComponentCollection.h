@@ -27,6 +27,8 @@ public:
 
     ComponentIter GetComponentIter() const override;
 
+    Ptr<IComponent> FindComponentByName(const std::string & name);
+
     size_t Size() const override;
     void Clear() override;
 
