@@ -37,7 +37,10 @@ void t_grid_thermal_model_solver_test()
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<EFloat> results;
+    EThermalNetworkSolveSettings settings;
+    settings.iteration = 3;
     EGridThermalNetworkStaticSolver solver(*model);
+    solver.SetSolveSettings(settings);
     BOOST_CHECK(solver.Solve(iniT, results));
 
     auto resModel = std::make_unique<EGridThermalModel>(*model);
