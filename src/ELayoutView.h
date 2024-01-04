@@ -108,11 +108,10 @@ public:
     UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) override;
 
     ///Simulation
-    EFloat RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup) override;
+    EPair<EFloat, EFloat> RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup) override;
 
     ///Flatten
     void Flatten(const EFlattenOption & option) override;
-    void Merge(const std::string & cellInstName, CPtr<ILayoutView> layout, CPtr<ILayerMap> layermap, const ETransform2D & transform);
 
     ///Mapping
     void Map(CPtr<ILayerMap> lyrMap) override;

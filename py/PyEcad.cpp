@@ -965,7 +965,6 @@ namespace {
             .def("connectivity_extraction", &ELayoutView::ExtractConnectivity)
             .def("merge_layer_polygons", &ELayoutView::MergeLayerPolygons)
             .def("flatten", &ELayoutView::Flatten)
-            .def("merge", &ELayoutView::Merge)
             .def("map", &ELayoutView::Map)
         ;
 

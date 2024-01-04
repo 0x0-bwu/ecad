@@ -4,7 +4,6 @@
 #include "ECadVersion.h"
 #include "ECadUnits.h"
 
-#include "generic/tools/Log.hpp"
 #include <cassert>
 
 #ifdef ECAD_DEBUG_MODE
@@ -24,7 +23,3 @@
 #else
     #define ECAD_EFFICIENCY_TRACK(task)
 #endif//ECAD_EFFICIENCY_TRACK
-
-#define ECAD_TRACE(args...) generic::log::Trace(args);
-#define ECAD_DEBUG(args...) generic::log::Debug(args);
-#define ECAD_INFO (args...) generic::log::Info (args);

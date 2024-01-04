@@ -18,7 +18,7 @@ using namespace ecad::model;
 using namespace ecad::utils;
 using namespace ecad::solver;
 
-ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & maxT) const
+ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & minT, EFloat & maxT) const
 {
     auto modelType = model->GetModelType();
     switch (modelType)
@@ -28,7 +28,7 @@ ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & maxT) const
             if (gridModel) {
                 EGridThermalSimulator simulator(gridModel, setup);
                 if (EThermalSimuType::Static == setup.simuType)
-                    return simulator.RunStaticSimulation(maxT);
+                    return simulator.RunStaticSimulation(minT, maxT);
                 else return simulator.RunTransientSimulation();
             }
             break;
@@ -38,7 +38,7 @@ ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & maxT) const
             if (prismaModel) {
                 EPrismaThermalSimulator simulator(prismaModel, setup);
                 if (EThermalSimuType::Static == setup.simuType)
-                    return simulator.RunStaticSimulation(maxT);
+                    return simulator.RunStaticSimulation(minT, maxT);
                 else return simulator.RunTransientSimulation();
             }
             break;
@@ -58,7 +58,7 @@ ECAD_API EGridThermalSimulator::EGridThermalSimulator(CPtr<EGridThermalModel> mo
     m_settings.iniT = setup.environmentTemperature;
 }
 
-ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & maxT) const
+ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("grid thermal static simulation")
     std::vector<EFloat> results;
@@ -66,6 +66,7 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & maxT) const
     solver.SetSolveSettings(m_settings);
     if (not solver.Solve(m_settings.iniT, results)) return false;
     
+    minT = *std::min_element(results.begin(), results.end());
     maxT = *std::max_element(results.begin(), results.end());
 
     auto modelSize = m_model->ModelSize();
@@ -117,7 +118,7 @@ ECAD_API EPrismaThermalSimulator::EPrismaThermalSimulator(CPtr<EPrismaThermalMod
     m_settings.iniT = setup.environmentTemperature;
 }
 
-ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & maxT) const
+ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("prisma thermal static simulation")
     std::vector<EFloat> results;
@@ -125,6 +126,7 @@ ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & maxT) const
     solver.SetSolveSettings(m_settings);
     if (not solver.Solve(m_settings.iniT, results)) return false;
 
+    minT = *std::min_element(results.begin(), results.end());
     maxT = *std::max_element(results.begin(), results.end());
 
     if (not m_settings.workDir.empty()) {

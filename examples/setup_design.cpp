@@ -81,14 +81,12 @@ void test0()
     prismaSettings.workDir = gridSettings.workDir;
     auto model2 = layout->ExtractThermalModel(prismaSettings);
 
-    EDataMgr::Instance().ShutDown();
 }
 
 void test1()
 {
     using namespace ecad;
     auto & eDataMgr = EDataMgr::Instance();
-    eDataMgr.Init();
 
     //database
     auto database = eDataMgr.CreateDatabase("RobGrant");
@@ -344,15 +342,17 @@ void test1()
     setup.simuType = EThermalSimuType::Static;
     setup.environmentTemperature = 25;
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    [[maybe_unused]] auto maxT = layout->RunThermalSimulation(prismaSettings, setup);    
-    EDataMgr::Instance().ShutDown();
+    [[maybe_unused]] auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
+    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
 int main(int argc, char * argv[])
 {
     ::signal(SIGSEGV, &SignalHandler);
     ::signal(SIGABRT, &SignalHandler);
 
+    ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
     // test0();
     test1();
+    ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

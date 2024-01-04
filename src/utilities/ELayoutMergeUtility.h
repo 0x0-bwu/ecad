@@ -2,14 +2,14 @@
 #include "ECadCommon.h"
 namespace ecad {
 
-class ILayerMap;
+class ICellInst;
 class ILayoutView;
 class ETransform2D;
 namespace utils {
 class ECAD_API ELayoutMergeUtility
 {
 public:
-    static void Merge(Ptr<ILayoutView> layout, const std::string & hierName, CPtr<ILayoutView> other, CPtr<ILayerMap> layermap, const ETransform2D & transform);
+    static bool Merge(Ptr<ILayoutView> layout, CPtr<ICellInst> cellInst);
 };
 
 }//namespace utils

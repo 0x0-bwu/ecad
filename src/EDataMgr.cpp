@@ -352,19 +352,16 @@ ECAD_INLINE size_t EDataMgr::CircleDiv() const
     return m_settings.circleDiv;
 }
 
-ECAD_INLINE void EDataMgr::Init(const std::string & workDir)
+ECAD_INLINE void EDataMgr::Init(ELogLevel level, const std::string & workDir)
 {   
     //threads
     m_settings.threads = std::thread::hardware_concurrency();
 
     //log
     std::string logFile = workDir.empty() ? generic::fs::CurrentPath() : workDir + ECAD_SEPS + "ecad.log";
-    auto traceSink = std::make_shared<log::StreamSinkMT>(std::cout);
-    auto infoSink  = std::make_shared<log::FileSinkMT>(logFile);
-    traceSink->SetLevel(log::Level::Trace);
-    infoSink->SetLevel(log::Level::Info);
-    auto logger = log::MultiSinksLogger("ecad", {traceSink, infoSink});
-    logger->SetLevel(log::Level::Info);
+    auto logger = workDir.empty() ? log::OstreamLoggerMT("ecad", std::cout) : 
+                log::BasicLoggerMT("ecad", workDir + ECAD_SEPS + "ecad.log");
+    logger->SetLevel(level);
     log::SetDefaultLogger(logger);
 }
 }//namespace ecad

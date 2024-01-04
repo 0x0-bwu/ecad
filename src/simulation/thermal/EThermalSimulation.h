@@ -16,7 +16,7 @@ public:
     EThermalSimulationSetup setup;
     explicit EThermalSimulation(EThermalSimulationSetup setup) : setup(std::move(setup)) {}
     virtual ~EThermalSimulation() = default;
-    bool Run(CPtr<IModel> model, EFloat & maxT) const;
+    bool Run(CPtr<IModel> model, EFloat & minT, EFloat & maxT) const;
 };
 
 class ECAD_API EGridThermalSimulator
@@ -25,7 +25,7 @@ public:
     explicit EGridThermalSimulator(CPtr<EGridThermalModel> model, const EThermalSimulationSetup & setup);
     virtual ~EGridThermalSimulator() = default;
 
-    bool RunStaticSimulation(EFloat & maxT) const;
+    bool RunStaticSimulation(EFloat & minT, EFloat & maxT) const;
     bool RunTransientSimulation() const;
 protected:
     EThermalNetworkSolveSettings m_settings;
@@ -38,7 +38,7 @@ public:
     explicit EPrismaThermalSimulator(CPtr<EPrismaThermalModel> model, const EThermalSimulationSetup & setup);
     virtual ~EPrismaThermalSimulator() = default;
 
-    bool RunStaticSimulation(EFloat & maxT) const;
+    bool RunStaticSimulation(EFloat & minT, EFloat & maxT) const;
     bool RunTransientSimulation() const;
 protected:
     EThermalNetworkSolveSettings m_settings;

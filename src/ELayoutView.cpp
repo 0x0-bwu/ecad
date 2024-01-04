@@ -333,15 +333,15 @@ ECAD_INLINE UPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExt
     return extraction::EThermalModelExtraction::GenerateThermalModel(this, settings);
 }
 
-ECAD_INLINE EFloat ELayoutView::RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup)
+ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup)
 {
+    EPair<EFloat, EFloat> temperature{invalidFloat, invalidFloat};
     auto model = ExtractThermalModel(extractionSettings);
-    if (nullptr == model.get()) return invalidFloat;
+    if (nullptr == model.get()) return temperature;
 
-    EFloat maxT{invalidFloat};
     simulation::EThermalSimulation sim(simulationSetup);
-    if (not sim.Run(model.get(), maxT)) return maxT;
-    return maxT;
+    [[maybe_unused]] auto check = sim.Run(model.get(), temperature.first, temperature.second); { ECAD_ASSERT(check) }
+    return temperature;
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)
@@ -349,18 +349,10 @@ ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)
     ECAD_UNUSED(option)//todo
     
     auto cellInstIter = GetCellInstIter();
-    while(auto cellInst = cellInstIter->Next()){
-        auto layout = cellInst->GetFlattenedLayoutView();
-        const auto & transform = cellInst->GetTransform();
-        const auto * layermap = cellInst->GetLayerMap();
-        Merge(cellInst->GetName(), layout, layermap, transform);
+    while (auto cellInst = cellInstIter->Next()) {
+        utils::ELayoutMergeUtility::Merge(this, cellInst);
     }
     GetHierarchyObjCollection()->GetCellInstCollection()->Clear();
-}
-
-ECAD_INLINE void ELayoutView::Merge(const std::string & cellInstName, CPtr<ILayoutView> layout, CPtr<ILayerMap> layermap, const ETransform2D & transform)
-{
-    utils::ELayoutMergeUtility::Merge(this, cellInstName, layout, layermap, transform);
 }
 
 ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)

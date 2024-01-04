@@ -1,6 +1,7 @@
 #pragma once
 #include "ECadConfig.h"
 #include "generic/geometry/Box.hpp"
+#include "generic/tools/Log.hpp"
 #include <boost/uuid/uuid.hpp>
 #include <cstddef>
 #include <memory>
@@ -19,6 +20,9 @@ using SPtr = std::shared_ptr<T>;
 
 template <typename T, typename Deleter = std::default_delete<T> >
 using UPtr = std::unique_ptr<T, Deleter>;
+
+template <typename T1, typename T2>
+using EPair = std::pair<T1, T2>;
 
 using EFloat = double;
 using FCoord = double;
@@ -44,6 +48,8 @@ using EUuid = boost::uuids::uuid;
 class EShape;
 using ETemplateShape = SPtr<const EShape>;
 
+using ELogLevel = generic::log::Level;
+
 ECAD_ALWAYS_INLINE static constexpr char sPadstack[] = "padstack";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
@@ -55,3 +61,7 @@ ECAD_ALWAYS_INLINE static constexpr EFloat maxFloat = std::numeric_limits<EFloat
 template <typename NumType>
 ECAD_ALWAYS_INLINE  bool isValid(NumType value) { return value != std::numeric_limits<NumType>::max(); }
 }//namespace ecad
+
+#define ECAD_TRACE(args...) generic::log::Trace(args);
+#define ECAD_DEBUG(args...) generic::log::Debug(args);
+#define ECAD_INFO(args...) generic::log::Info(args);

@@ -463,9 +463,6 @@ def test_layout_view() :
     #flatten
     layout.flatten(ecad.EFlattenOption())
 
-    #merge
-    layout.merge(layout, layer_map, ecad.ETransform2D())
-
     #map
     layout.map(layer_map)
 
