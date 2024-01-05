@@ -314,12 +314,34 @@ void test1()
     database->Flatten(topCell);
     auto layout = topCell->GetFlattenedLayoutView();
 
-    auto compIter = layout->GetComponentIter();
-    while (auto * comp = compIter->Next()) {
-        ECAD_TRACE("component: %1%", comp->GetName())
-        if (generic::str::EndsWith(comp->GetName(), "M1"))
-            comp->AddTransform(eDataMgr.CreateTransform2D(coordUnits, 1.0, 0.0, {0, 0})); //10300, 4350
-        else comp->AddTransform(eDataMgr.CreateTransform2D(coordUnits, 1.0, 0.0, {3250, 4200})); //3250, 4200
+    auto compIdxMap = std::unordered_map<size_t, std::string> {
+            {0, "Inst1/M1"}, {1, "Inst2/M1"}, {2, "Inst3/M1"}, {3, "Inst1/M2"}, {4, "Inst2/M2"}, {5, "Inst3/M2"}
+    };
+
+    // std::vector<double> parameters{
+    //     0.895351, 0.861775, 0.158995, 0.483945, 0.283657, 0.84234, 
+    //     0.37849, 0.280513, 0.889224, 0.866983, 0.765416, 0.594158
+    // };//max
+    
+    std::vector<double> parameters{
+        0.10748, 0.446148, 0.305696, 0.454668, 0.331198, 0.495352,
+        0.622851, 0.548639, 0.660065, 0.226427, 0.776296, 0.7115
+    };//min
+
+    for (size_t i = 0; i < 3; ++i) {
+        auto comp = layout->FindComponentByName(compIdxMap.at(i));
+        ECAD_TRACE("comp: %1%", comp->GetName())
+        FVector2D shift(parameters[i * 2 + 0] * 10300, parameters[i * 2 + 1] * 4350);
+        auto transform = EDataMgr::Instance().CreateTransform2D(coordUnits, 1.0, 0.0, shift);
+        comp->AddTransform(transform);
+    }
+
+    for (size_t i = 3; i < 6; ++i) {
+        auto comp = layout->FindComponentByName(compIdxMap.at(i));
+        ECAD_TRACE("comp: %1%", comp->GetName())
+        FVector2D shift(parameters[i * 2 + 0] * 3250, parameters[i * 2 + 1] * 4200);
+        auto transform = EDataMgr::Instance().CreateTransform2D(coordUnits, 1.0, 0.0, shift);
+        comp->AddTransform(transform);
     }
 
     ELayoutViewRendererSettings rendererSettings;

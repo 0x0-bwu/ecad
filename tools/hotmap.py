@@ -13,55 +13,64 @@ def main():
     reader.Update()
 
     # The geometry
-    geometryShrink = vtk.vtkShrinkFilter()
-    geometryShrink.SetInputConnection(reader.GetOutputPort())
-    geometryShrink.SetShrinkFactor(1.0)
+    geometry_shrink = vtk.vtkShrinkFilter()
+    geometry_shrink.SetInputConnection(reader.GetOutputPort())
+    geometry_shrink.SetShrinkFactor(1.0)
 
-    # NOTE: We must copy the originalLut because the CategoricalLegend
-    # needs an indexed lookup table, but the geometryMapper uses a
-    # non-index lookup table
-    categoricalLut = vtk.vtkLookupTable()
-    originalLut = reader.GetOutput().GetCellData().GetScalars().GetLookupTable()
+    scalar = reader.GetOutput().GetCellData().GetScalars()
+    scalar_lut = scalar.GetLookupTable()
+    scalar_bar = vtk.vtkScalarBarActor()
+    scalar_bar.SetLookupTable(scalar_lut)  # Link to the mapper's LUT
+    scalar_bar.SetTitle("Temperature")
+    scalar_bar.SetHeight(0.4)  # Adjust height as needed (0-1)
+    scalar_bar.SetWidth(0.05)  # Adjust width as needed (0-1)
 
-    categoricalLut.DeepCopy(originalLut)
-    categoricalLut.IndexedLookupOn()
+    title_prop = scalar_bar.GetTitleTextProperty()
+    title_prop.SetFontSize(5)
 
-    geometryMapper = vtk.vtkDataSetMapper()
-    geometryMapper.SetInputConnection(geometryShrink.GetOutputPort())
-    geometryMapper.SetScalarModeToUseCellData()
-    geometryMapper.SetScalarRange(0, 1)
+    label_prop = scalar_bar.GetLabelTextProperty()
+    label_prop.SetFontSize(5)
 
-    geometryActor = vtk.vtkActor()
-    geometryActor.SetMapper(geometryMapper)
-    geometryActor.GetProperty().SetLineWidth(0.3)
-    geometryActor.GetProperty().EdgeVisibilityOn()
-    geometryActor.GetProperty().SetEdgeColor(0, 0, 0)
-    geometryActor.SetScale(1.0, 1.0, 2)
+    scalar_range = scalar.GetRange()
+    geometry_mapper = vtk.vtkDataSetMapper()
+    geometry_mapper.SetInputConnection(geometry_shrink.GetOutputPort())
+    geometry_mapper.SetScalarModeToUseCellData()
+    geometry_mapper.SetScalarRange(scalar_range[0], scalar_range[1])
 
-    contextView = vtk.vtkContextView()
+    geometry_actor = vtk.vtkActor()
+    geometry_actor.SetMapper(geometry_mapper)
+    geometry_actor.GetProperty().SetLineWidth(0.2)
+    geometry_actor.GetProperty().EdgeVisibilityOn()
+    geometry_actor.GetProperty().SetEdgeColor(0, 0, 0)
+    # geometry_actor.GetProperty().SetEdgeOpacity(0.5)
+    geometry_actor.SetScale(1.0, 1.0, 2)
 
-    renderer = contextView.GetRenderer()
+    context_view = vtk.vtkContextView()
 
-    renderWindow = contextView.GetRenderWindow()
+    renderer = context_view.GetRenderer()
 
-    renderWindowInteractor = vtk.vtkRenderWindowInteractor()
-    renderWindowInteractor.SetRenderWindow(renderWindow)
+    render_window = context_view.GetRenderWindow()
 
-    renderer.AddActor(geometryActor)
+    render_window_interactor = vtk.vtkRenderWindowInteractor()
+    render_window_interactor.SetRenderWindow(render_window)
+
+    renderer.AddActor(geometry_actor)
     renderer.SetBackground(colors.GetColor3d('SlateGray'))
+    # renderer.SetBackground(colors.GetColor3d('Black'))
+    renderer.AddActor(scalar_bar)
 
-    aCamera = vtk.vtkCamera()
-    aCamera.Azimuth(-40.0)
-    aCamera.Elevation(50.0)
+    camera = vtk.vtkCamera()
+    camera.Azimuth(0)
+    camera.Elevation(0)
 
-    renderer.SetActiveCamera(aCamera)
+    renderer.SetActiveCamera(camera)
     renderer.ResetCamera()
 
-    renderWindow.SetSize(640, 480)
-    renderWindow.SetWindowName('ReadLegacyUnstructuredGrid')
-    renderWindow.Render()
+    render_window.SetSize(3000, 2000)
+    render_window.SetWindowName('ReadLegacyUnstructuredGrid')
+    render_window.Render()
 
-    renderWindowInteractor.Start()
+    render_window_interactor.Start()
 
 if __name__ == '__main__':
     main()
