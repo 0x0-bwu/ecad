@@ -52,6 +52,8 @@ struct EThermalModelExtractionSettings
 {
     virtual ~EThermalModelExtractionSettings() = default;
     std::string workDir;
+protected:
+    EThermalModelExtractionSettings() = default;
 };
 
 struct EGridThermalModelExtractionSettings : public EThermalModelExtractionSettings
@@ -70,20 +72,34 @@ struct EPrismaThermalModelExtractionSettings : public EThermalModelExtractionSet
     ELayoutPolygonMergeSettings polygonMergeSettings;
 };
 
-enum class EThermalSimuType { Static, Transient };
 struct EThermalSimulationSetup
 {
-    EThermalSimuType simuType = EThermalSimuType::Static;
+    virtual ~EThermalSimulationSetup() = default;
     std::string workDir;
     EFloat environmentTemperature = 25;
+    bool dumpHotmaps = true;
+    EFloat residual = 0.5;
+    size_t iteration = 10;
+protected:
+    EThermalSimulationSetup() = default;
+};
+
+struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
+{
+    std::string dumpSpiceFile{false};
+};
+
+struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
+{
+    bool mor{false};
 };
 
 struct EThermalNetworkSolveSettings
 {
-    bool dumpHotmaps = true;
     EFloat iniT = 25;
     EFloat residual = 0.5;
     size_t iteration = 10;
+    bool dumpHotmaps = false;
     std::string spiceFile;
     std::string workDir;
 };

@@ -347,8 +347,7 @@ void t_thermal_static_flow2()
     prismaSettings.meshSettings.minLen = 1e-2;
     prismaSettings.meshSettings.maxLen = 500;
 
-    EThermalSimulationSetup setup;
-    setup.simuType = EThermalSimuType::Static;
+    EThermalStaticSimulationSetup setup;
     setup.environmentTemperature = 25;
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
