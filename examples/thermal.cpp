@@ -42,6 +42,7 @@ int main(int argc, char * argv[])
         std::cout << "thickness: " << layer->GetStackupLayerFromLayer()->GetThickness() << std::endl;
 
     ELayoutPolygonMergeSettings mergeSettings;
+    mergeSettings.threads = eDataMgr.Threads();
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     layout->MergeLayerPolygons(mergeSettings);
 

@@ -12,8 +12,6 @@
 #include "interfaces/ILayoutView.h"
 #include "interfaces/IPrimitive.h"
 #include "interfaces/ILayer.h"
-
-#include "EDataMgr.h"
 #include "EShape.h"
 
 namespace ecad {
@@ -106,6 +104,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
     
     if(m_settings.mergeGeomBeforeMapping) {
         ELayoutPolygonMergeSettings settings;
+        settings.threads = m_settings.threads;
         settings.selectNets = m_settings.selectNets;
         layout->MergeLayerPolygons(settings);
     }
@@ -133,7 +132,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
 
 
     m_result.reset(new ELayoutMetalFraction);
-    MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, EDataMgr::Instance().Threads());
+    MapCtrl ctrl(bbox, {m_mfInfo->stride[0], m_mfInfo->stride[1]}, m_settings.threads);
     
     auto layerIter = layout->GetLayerIter();
     //stackuplayer

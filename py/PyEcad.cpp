@@ -1082,6 +1082,7 @@ namespace {
 
         //ECadSettings
         class_<EMetalFractionMappingSettings>("EMetalFractionMappingSettings")
+            .def_readwrite("threads", &EMetalFractionMappingSettings::threads)
             .def_readwrite("out_file", &EMetalFractionMappingSettings::outFile)
             .def_readwrite("region_ext_top", &EMetalFractionMappingSettings::regionExtTop)
             .def_readwrite("region_ext_bot", &EMetalFractionMappingSettings::regionExtBot)
@@ -1101,7 +1102,9 @@ namespace {
             ;
         
         class_<ELayoutPolygonMergeSettings>("ELayoutPolygonMergeSettings")
+            .def_readwrite("threads", &ELayoutPolygonMergeSettings::threads)
             .def_readwrite("out_file", &ELayoutPolygonMergeSettings::outFile)
+            .def_readwrite("mt_by_layer", &ELayoutPolygonMergeSettings::mtByLayer)
             .def_readwrite("include_padstack_inst", &ELayoutPolygonMergeSettings::includePadstackInst)
             .def_readwrite("include_dielectric_layer", &ELayoutPolygonMergeSettings::includeDielectricLayer)
             .def_readwrite("skip_top_bot_dielectric_layers", &ELayoutPolygonMergeSettings::skipTopBotDielectricLayers)

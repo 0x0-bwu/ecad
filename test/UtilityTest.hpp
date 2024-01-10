@@ -94,6 +94,7 @@ void t_metal_fraction_mapping()
 
     EMetalFractionMappingSettings settings;
     settings.grid = {50, 50};
+    settings.threads = 4;
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
 
     BOOST_CHECK(flattened->GenerateMetalFractionMapping(settings));
@@ -121,6 +122,7 @@ void t_metal_fraction_mapping_select_nets()
 
     EMetalFractionMappingSettings settings;
     settings.grid = {50, 50};
+    settings.threads = 4;
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
     settings.selectNets.insert(static_cast<ENetId>(1));
 
@@ -144,6 +146,7 @@ void t_layout_to_ctm()
     auto layout = cells.front()->GetLayoutView();
 
     ELayout2CtmSettings settings;
+    settings.threads = 4;
     settings.dirName = ecad_test::GetTestDataPath() + "/simulation/ctm";
     settings.filename = "pop";
     BOOST_CHECK(layout->GenerateCTMv1File(settings));

@@ -455,6 +455,7 @@ def test_layout_view() :
 
     #generate metal fraction mapping
     mf_settings = ecad.EMetalFractionMappingSettings()
+    mf_settings.threads = 4
     assert(layout.generate_metal_fraction_mapping(mf_settings))
 
     #connectivity extraction

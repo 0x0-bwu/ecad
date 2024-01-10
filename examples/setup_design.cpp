@@ -62,6 +62,7 @@ void test0()
     layout->Renderer(rendererSettings);
     
     ELayoutPolygonMergeSettings mergeSettings;
+    mergeSettings.threads = eDataMgr.Threads();
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     layout->MergeLayerPolygons(mergeSettings);
 
@@ -350,6 +351,7 @@ void test1()
     layout->Renderer(rendererSettings);
     
     ELayoutPolygonMergeSettings mergeSettings;
+    mergeSettings.threads = eDataMgr.Threads();
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     layout->MergeLayerPolygons(mergeSettings);
 

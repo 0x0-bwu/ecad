@@ -2,6 +2,7 @@
 #include "ECadCommon.h"
 #include "ECadDef.h"
 #include <unordered_set>
+#include <functional>
 #include <array>
 #include <set>
 namespace ecad {
@@ -15,7 +16,9 @@ struct EDataMgrSettings
 
 struct ELayoutPolygonMergeSettings
 {
+    size_t threads = 1;
     std::string outFile;
+    bool mtByLayer{true};
     bool includePadstackInst = true;
     bool includeDielectricLayer = true;
     bool skipTopBotDielectricLayers = false;
@@ -24,6 +27,7 @@ struct ELayoutPolygonMergeSettings
 
 struct EMetalFractionMappingSettings
 {
+    size_t threads = 1;
     std::string outFile;
     EFloat regionExtTop = 0;
     EFloat regionExtBot = 0;
@@ -117,10 +121,12 @@ struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettin
 {
     bool mor;
     std::set<size_t> probs;
+    std::shared_ptr<std::function<EFloat(EFloat)> > excitation{nullptr};
 };
 
 struct ELayout2CtmSettings
 {
+    size_t threads = 1;
     std::string dirName;
     std::string filename;
     EFloat resolution = 10;//unit: um
