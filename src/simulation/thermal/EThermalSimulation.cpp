@@ -112,7 +112,9 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloa
 
     std::vector<EFloat> results;
     EGridThermalNetworkTransientSolver solver(*model);
+    solver.settings.mor = setup->mor;
     solver.settings.workDir = setup->workDir;
+    solver.settings.excitation = setup->excitation;
     solver.settings.iniT = setup->environmentTemperature;
     if (not solver.Solve(minT, maxT)) return false;
     return true;

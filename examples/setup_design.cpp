@@ -78,6 +78,14 @@ void test0()
     gridSettings.metalFractionMappingSettings.mergeGeomBeforeMapping = false;
     auto model1 = layout->ExtractThermalModel(gridSettings);
 
+    EThermalTransientSimulationSetup transSimuSetup;
+    transSimuSetup.mor = false;
+    transSimuSetup.environmentTemperature = 25;
+    transSimuSetup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::sin(generic::math::pi * t / 0.5)); };
+    transSimuSetup.excitation = &excitation;
+    layout->RunThermalSimulation(gridSettings, transSimuSetup);
+
     EPrismaThermalModelExtractionSettings prismaSettings;
     prismaSettings.workDir = gridSettings.workDir;
     auto model2 = layout->ExtractThermalModel(prismaSettings);
@@ -374,7 +382,7 @@ int main(int argc, char * argv[])
     ::signal(SIGABRT, &SignalHandler);
 
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
-    // test0();
+    test0();
     test1();
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;

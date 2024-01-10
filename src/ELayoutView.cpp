@@ -349,9 +349,9 @@ ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)
     ECAD_UNUSED(option)//todo
     
     auto cellInstIter = GetCellInstIter();
-    while (auto cellInst = cellInstIter->Next()) {
+    while (auto cellInst = cellInstIter->Next())
         utils::ELayoutMergeUtility::Merge(this, cellInst);
-    }
+        
     GetHierarchyObjCollection()->GetCellInstCollection()->Clear();
 }
 

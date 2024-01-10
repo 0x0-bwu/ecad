@@ -94,10 +94,12 @@ struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
     std::string dumpSpiceFile{false};
 };
 
+using EThermalTransientExcitation = std::function<EFloat(EFloat)>;
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
 {
     bool mor{false};
-    std::vector<FPoint3D> monitor;
+    std::vector<FPoint3D> monitor; //todo
+    CPtr<EThermalTransientExcitation> excitation{nullptr};
 };
 
 struct EThermalNetworkSolveSettings
@@ -121,7 +123,7 @@ struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettin
 {
     bool mor;
     std::set<size_t> probs;
-    std::shared_ptr<std::function<EFloat(EFloat)> > excitation{nullptr};
+    CPtr<EThermalTransientExcitation> excitation{nullptr};
 };
 
 struct ELayout2CtmSettings
