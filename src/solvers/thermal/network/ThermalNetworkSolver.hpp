@@ -21,7 +21,7 @@ namespace thermal
         using namespace model;
         using namespace generic;
         using namespace generic::ckt;
-        template <typename num_type>
+        template <typename num_type, bool direct = false>
         class ThermalNetworkSolver
         {
         public:
@@ -32,15 +32,15 @@ namespace thermal
             }
 
             virtual ~ThermalNetworkSolver() = default;
-            void SetVerbose(int verbose) { m_verbose = verbose; }
 
-            void Solve(num_type refT) const
+            void Solve(num_type refT, std::vector<num_type> & result) const
             {
-                constexpr bool direct = false;
+                using namespace generic::math::la;
                 auto m = makeMNA(m_network, true);
                 auto rhs = makeRhs(m_network, true, refT);
-                Eigen::Matrix<num_type, Eigen::Dynamic, 1> x;
-                if (direct) {
+                result.resize(m_network.GetNodes().size(), refT);
+                Eigen::Map<DenseVector<num_type>> x(result.data(), result.size());
+                if constexpr (direct) {
                     // Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver;
                     Eigen::SimplicialCholesky<Eigen::SparseMatrix<num_type> > solver;
                     solver.analyzePattern(m.G);
@@ -55,13 +55,9 @@ namespace thermal
                     ECAD_TRACE("#iterations: %1%", solver.iterations())
                     ECAD_TRACE("estimated error: %1%", solver.error())
                 }
-                auto & nodes = m_network.GetNodes();
-                for (size_t i = 0; i < nodes.size(); ++i)
-                    nodes[i].t = x[i];
             }
 
         private:
-            int m_verbose = 0;
             ThermalNetwork<num_type> & m_network;
         };
 

@@ -12,12 +12,24 @@ class ECAD_API EThermalNetworkSolver
 {
 public:
     virtual ~EThermalNetworkSolver() = default;
-    void SetSolveSettings(const EThermalNetworkSolveSettings & settings);
-protected:
-    EThermalNetworkSolveSettings m_settings;
+    virtual bool Solve(EFloat & minT, EFloat & maxT) = 0;
 };
 
-class ECAD_API EGridThermalNetworkSolver : public EThermalNetworkSolver
+class ECAD_API EThermalNetworkStaticSolver : public EThermalNetworkSolver
+{
+public:
+    EThermalNetworkStaticSolveSettings settings;
+    virtual ~EThermalNetworkStaticSolver() = default;
+};
+
+class ECAD_API EThermalNetworkTransientSolver : public EThermalNetworkSolver
+{
+public:
+    EThermalNetworkTransientSolveSettings settings;
+    virtual ~EThermalNetworkTransientSolver() = default;
+};
+
+class ECAD_API EGridThermalNetworkSolver
 {
 public:
     virtual ~EGridThermalNetworkSolver() = default;    
@@ -27,23 +39,25 @@ protected:
     const EGridThermalModel & m_model;
 };
 
-class ECAD_API EGridThermalNetworkStaticSolver : public EGridThermalNetworkSolver
+class ECAD_API EGridThermalNetworkStaticSolver : public EGridThermalNetworkSolver, EThermalNetworkStaticSolver
 {
 public:
+    using EThermalNetworkStaticSolver::settings;
     explicit EGridThermalNetworkStaticSolver(const EGridThermalModel & model);
     virtual ~EGridThermalNetworkStaticSolver() = default;
-    bool Solve(EFloat refT, std::vector<EFloat> & results);
+    bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
-class ECAD_API EGridThermalNetworkTransientSolver : public EGridThermalNetworkSolver
+class ECAD_API EGridThermalNetworkTransientSolver : public EGridThermalNetworkSolver, EThermalNetworkTransientSolver
 {
 public:
+    using EThermalNetworkTransientSolver::settings;
     explicit EGridThermalNetworkTransientSolver(const EGridThermalModel & model);
     virtual ~EGridThermalNetworkTransientSolver() = default;
-    bool Solve(EFloat refT, std::vector<EFloat> & results);
+    bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
-class ECAD_API EPrismaThermalNetworkSolver : public EThermalNetworkSolver
+class ECAD_API EPrismaThermalNetworkSolver
 {
 public:
     virtual ~EPrismaThermalNetworkSolver() = default;
@@ -53,20 +67,22 @@ protected:
     const EPrismaThermalModel & m_model;
 };
 
-class ECAD_API EPrismaThermalNetworkStaticSolver : public EPrismaThermalNetworkSolver
+class ECAD_API EPrismaThermalNetworkStaticSolver : public EPrismaThermalNetworkSolver, EThermalNetworkStaticSolver
 {
 public:
+    using EThermalNetworkStaticSolver::settings;
     explicit EPrismaThermalNetworkStaticSolver(const EPrismaThermalModel & model);
     virtual ~EPrismaThermalNetworkStaticSolver() = default;
-    bool Solve(EFloat refT, std::vector<EFloat> & results);
+    bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
-class ECAD_API EPrismaThermalNetworkTransientSolver : public EPrismaThermalNetworkSolver
+class ECAD_API EPrismaThermalNetworkTransientSolver : public EPrismaThermalNetworkSolver, EThermalNetworkTransientSolver
 {
 public:
+    using EThermalNetworkTransientSolver::settings;
     explicit EPrismaThermalNetworkTransientSolver(const EPrismaThermalModel & model);
     virtual ~EPrismaThermalNetworkTransientSolver() = default;
-    bool Solve(EFloat refT, std::vector<EFloat> & results);
+    bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
 }//namesapce solver

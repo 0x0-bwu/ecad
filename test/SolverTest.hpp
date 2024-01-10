@@ -37,56 +37,12 @@ void t_grid_thermal_model_solver_test()
     model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
 
     std::vector<EFloat> results;
-    EThermalNetworkSolveSettings settings;
-    settings.iteration = 3;
     EGridThermalNetworkStaticSolver solver(*model);
-    solver.SetSolveSettings(settings);
-    BOOST_CHECK(solver.Solve(iniT, results));
-
-    auto resModel = std::make_unique<EGridThermalModel>(*model);
-    auto resSize = resModel->GridSize();
-    auto & layer = resModel->GetLayers();
-    for(size_t z = 0; z < layer.size(); ++z) {
-        auto htMap = std::make_shared<ELayerMetalFraction>(resSize.x, resSize.y);
-        for(size_t x = 0; x < resSize.x; ++x) {
-            for(size_t y = 0; y < resSize.y; ++y) {
-                (*htMap)(x, y) = results[resModel->GetFlattenIndex(ESize3D(x, y, z))];
-            }
-        }
-        layer[z].SetMetalFraction(htMap);
-    }
-
-    std::string outDir = ecad_test::GetTestDataPath() + "/simulation/ctm/rhsc_ctm5";
-    std::string txtProfile = outDir + "/ThermalProfile_rhsc_ctm5.txt";
-    io::GenerateTxtProfile(*resModel, txtProfile);
-
-    using ValueType = typename ELayerMetalFraction::ResultType;
-    ValueType min = std::numeric_limits<ValueType>::max(), max = -min;
-    for(const auto & layer :  resModel->GetLayers()) {
-        auto htMap = layer.GetMetalFraction();
-        if(nullptr == htMap) continue;
-        min = std::min(min, htMap->MaxOccupancy(std::less<ValueType>()));
-        max = std::max(max, htMap->MaxOccupancy(std::greater<ValueType>()));
-    }
-    auto range = max - min;
-    ECAD_TRACE("maxT: %1%, minT: %2%", max, min)
+    solver.settings.iteration = 3;
+    EFloat minT, maxT;
+    BOOST_CHECK(solver.Solve(minT, maxT));
+    ECAD_TRACE("maxT: %1%, minT: %2%", maxT, minT)
     //max: 99.4709, min: 81.9183
-
-    size_t i = 0;
-    for(const auto & layer :  resModel->GetLayers()) {
-        auto htMap = layer.GetMetalFraction();
-        if(nullptr == htMap) continue;
-        min = std::min(min, htMap->MaxOccupancy(std::less<ValueType>()));
-        max = std::max(max, htMap->MaxOccupancy(std::greater<ValueType>()));
-        range = max - min;
-        auto rgbaFunc = [&min, &range](ValueType d) {
-            int r, g, b, a = 255;
-            generic::color::RGBFromScalar((d - min) / range, r, g, b);
-            return std::make_tuple(r, g, b, a);
-        };
-        std::string filepng = outDir + GENERIC_FOLDER_SEPS + "layer_" + std::to_string(++i) + ".png";
-        htMap->WriteImgProfile(filepng, rgbaFunc);
-    }
 }
 
 test_suite * create_ecad_solver_test_suite()

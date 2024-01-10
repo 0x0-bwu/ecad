@@ -37,7 +37,6 @@ int main(int argc, char * argv[])
 
     float_t refT = 25;
     solver::ThermalNetworkSolver<float_t> staticSolver(network, 1);
-    staticSolver.SetVerbose(1);
     staticSolver.Solve(refT);
 
     const auto & nodes = network.GetNodes();

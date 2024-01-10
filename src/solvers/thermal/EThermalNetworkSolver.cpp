@@ -1,12 +1,12 @@
 #include "EThermalNetworkSolver.h"
 #include "solvers/thermal/network/utilities/BoundaryNodeReduction.hpp"
 #include "solvers/thermal/network/utilities/ThermalNetlistWriter.hpp"
-#include "utilities/EPrismaThermalNetworkBuilder.h"
 #include "solvers/thermal/network/ThermalNetworkSolver.hpp"
+#include "models/thermal/io/EPrismaThermalModelIO.h"
+#include "utilities/EPrismaThermalNetworkBuilder.h"
 #include "utilities/EGridThermalNetworkBuilder.h"
 #include "generic/thread/ThreadPool.hpp"
 #include "generic/tools/Format.hpp"
-#include "EDataMgr.h"
 namespace ecad::solver {
 
 using namespace ecad::model;
@@ -22,11 +22,6 @@ ECAD_INLINE EFloat CalculateResidual(const std::vector<EFloat> & v1, const std::
     return residual;
 }
 
-ECAD_INLINE void EThermalNetworkSolver::SetSolveSettings(const EThermalNetworkSolveSettings & settings)
-{
-    m_settings = settings;
-}
-
 ECAD_INLINE EGridThermalNetworkSolver::EGridThermalNetworkSolver(const EGridThermalModel & model)
  : m_model(model)
 {
@@ -37,53 +32,33 @@ ECAD_INLINE EGridThermalNetworkStaticSolver::EGridThermalNetworkStaticSolver(con
 {
 }
 
-ECAD_INLINE bool EGridThermalNetworkStaticSolver::Solve(EFloat refT, std::vector<EFloat> & results)
+ECAD_INLINE bool EGridThermalNetworkStaticSolver::Solve(EFloat & minT, EFloat & maxT)
 {
     using namespace thermal::utils;
     using namespace thermal::solver;
     ECAD_EFFICIENCY_TRACK("grid thermal network static solve")
 
-    results.assign(m_model.TotalGrids(), refT);
-    bool needIteration = m_model.NeedIteration();
-    if (m_settings.iteration > 0 && math::GT<EFloat>(m_settings.residual, 0)) {
-
-        EFloat residual = m_settings.residual;
-        size_t iteration = m_settings.iteration;
-        EGridThermalNetworkBuilder builder(m_model);
-        do {
-            std::vector<EFloat> lastRes(results);
-            auto network = builder.Build(lastRes);
-            if (nullptr == network) return false;
-
-            if (not m_settings.spiceFile.empty()) {
-                auto spiceWriter = ThermalNetlistWriter(*network);
-                spiceWriter.SetReferenceTemperature(refT);
-                auto res = spiceWriter.WriteSpiceNetlist(m_settings.spiceFile);
-                if (res) std::cout << "write out spice file " << m_settings.spiceFile << " successfully!" << std::endl;
-            }
-            ECAD_TRACE("total nodes: %1%", network->Size())
-            ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
-            ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
-            
-            size_t threads = EDataMgr::Instance().Threads();
-            ThermalNetworkSolver<EFloat> solver(*network, threads);
-            solver.SetVerbose(true);
-            solver.Solve(refT);
-
-            const auto & nodes = network->GetNodes();
-            for (size_t n = 0; n < results.size(); ++n)
-                results[n] = nodes[n].t;
-
-            iteration -= 1;
-            if(!needIteration || iteration == 0) break;
-
-            residual = CalculateResidual(results, lastRes);
-            needIteration = math::GE(residual, m_settings.residual);
-            std::cout << "Residual: " << residual << ", Remain Iteration: " << (needIteration ? iteration : 0) << std::endl;
+    EGridThermalNetworkBuilder builder(m_model);
+    std::vector<EFloat> results(m_model.TotalGrids(), settings.iniT);
     
-        } while (needIteration);
-    }
+    EFloat residual = maxFloat;
+    size_t iteration = m_model.NeedIteration() ? settings.iteration : 1;
+    do {
+        std::vector<EFloat> prevRes(results);
+        auto network = builder.Build(prevRes);
+        if (nullptr ==  network) return false;
+        ECAD_TRACE("total nodes: %1%", network->Size())
+        ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
+        ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
 
+        ThermalNetworkSolver<EFloat> solver(*network, settings.threads);
+        solver.Solve(settings.iniT, results);
+
+        residual = CalculateResidual(results, prevRes);
+        ECAD_TRACE("Residual: %1%, Remain Iteration: %2%", residual, --iteration);
+    } while (residual > settings.residual && iteration > 0);
+    minT = *std::min_element(results.begin(), results.end());
+    maxT = *std::max_element(results.begin(), results.end());
     return true;
 }
 
@@ -92,39 +67,37 @@ ECAD_INLINE EGridThermalNetworkTransientSolver::EGridThermalNetworkTransientSolv
 {
 }
 
-ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vector<EFloat> & results)
+ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat & minT, EFloat & maxT)
 {
     using namespace thermal::utils;
     using namespace thermal::solver;
     ECAD_EFFICIENCY_TRACK("grid thermal network transient solve")
 
-    results.assign(m_model.TotalGrids(), refT);
+    UPtr<ThermalNetwork<EFloat> > network;
     EGridThermalNetworkBuilder builder(m_model);
-    auto network = builder.Build(results);
-    if (nullptr == network) return false;
-    ECAD_TRACE("total nodes: %1%", network->Size())
-    ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
-    ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
-            
-    size_t threads = EDataMgr::Instance().Threads();
-    ThermalNetworkSolver<EFloat> solver(*network, threads);
-    solver.SetVerbose(true);
-    solver.Solve(refT);
+    std::vector<EFloat> results(m_model.TotalGrids(), settings.iniT);
+    auto probs = settings.probs;
+    if (probs.empty()) {
+        network = builder.Build(results);
+        if (nullptr == network) return false;
+        ECAD_TRACE("total nodes: %1%", network->Size())
+        ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
+        ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
+                
+        ThermalNetworkSolver<EFloat> solver(*network, settings.threads);
+        solver.Solve(settings.iniT, results);
 
-    const auto & nodes = network->GetNodes();
-    for (size_t n = 0; n < results.size(); ++n)
-        results[n] = nodes[n].t;
-
-    size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
-    std::cout << "hotspot: " << maxId << std::endl;
-    std::set<size_t> probs{maxId};
-    if (false) {
+        size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
+        ECAD_TRACE("no input probs, will use static simulation hotspot id:%1% as prob!", maxId);
+        probs.emplace(maxId);
+    }
+    if (nullptr == network) network = builder.Build(results);
+    
+    if (not settings.mor) {
         ECAD_EFFICIENCY_TRACK("impedence origin")
         using TransSolver = ThermalNetworkTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
-        using Recorder = typename TransSolver::Recorder;
-        size_t threads = EDataMgr::Instance().Threads();
-        
+        using Recorder = typename TransSolver::Recorder;        
         struct Excitation
         {
             EFloat cycle, duty;
@@ -139,8 +112,8 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
         for (size_t i = 0; i < 12; ++i)
             cycles.emplace_back(std::pow(10, 0.5 * i - 2.5));
         std::vector<EFloat> dutys {0.01, 0.02, 0.05, 0.1, 0.3, 0.5};
-        TransSolver solver(*network, refT, probs);
-        generic::thread::ThreadPool pool(threads);
+        TransSolver solver(*network, settings.iniT, probs);
+        generic::thread::ThreadPool pool(settings.threads);
         std::cout << "available threads: " << pool.Threads() << std::endl;
             
         for (size_t i = 0, index = 0; i < cycles.size(); ++i) {
@@ -148,9 +121,9 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
                 auto cycle = cycles.at(i);
                 auto duty = dutys.at(j);
                 pool.Submit(
-                    [cycle, duty, refT, index, &solver, &network] {
+                    [&] {
                         Excitation excitation(cycle, duty);
-                        StateType initState(network->Size(), refT);
+                        StateType initState(network->Size(), settings.iniT);
                         EFloat t0 = 0, t1 = std::min<EFloat>(std::max<EFloat>(10, cycle * 50), 20), dt = std::min<EFloat>(0.5 * cycle * duty, 0.1);
                         std::ofstream ofs(fmt::Fmt2Str("./origin_%1%.txt", index));
                         Recorder recorder(solver, ofs, dt * 0.05);
@@ -163,13 +136,11 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
             }
         }
     }  
-    if (false) {
+    else {
         ECAD_EFFICIENCY_TRACK("impedence reduce")
         using TransSolver = ThermalNetworkReducedTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
-        using Recorder = typename TransSolver::Recorder;
-        size_t threads = EDataMgr::Instance().Threads();
-        
+        using Recorder = typename TransSolver::Recorder;        
         struct Excitation
         {
             EFloat cycle, duty;
@@ -184,17 +155,17 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
         for (size_t i = 0; i < 12; ++i)
             cycles.emplace_back(std::pow(10, 0.5 * i - 2.5));
         std::vector<EFloat> dutys {0.01, 0.02, 0.05, 0.1, 0.3, 0.5};
-        TransSolver solver(*network, refT, probs);
-        generic::thread::ThreadPool pool(threads);
+        TransSolver solver(*network, settings.iniT, probs);
+        generic::thread::ThreadPool pool(settings.threads);
         std::cout << "available threads: " << pool.Threads() << std::endl;            
         for (size_t i = 0, index = 0; i < cycles.size(); ++i) {
             for (size_t j = 0; j < dutys.size(); ++j) {
                 auto cycle = cycles.at(i);
                 auto duty = dutys.at(j);
                 pool.Submit(
-                    [cycle, duty, refT, index, &solver, &network] {
+                    [&] {
                         Excitation excitation(cycle, duty);
-                        StateType initState(network->Size(), refT);
+                        StateType initState(network->Size(), settings.iniT);
                         EFloat t0 = 0, t1 = std::min<EFloat>(std::max<EFloat>(10, cycle * 50), 20), dt = std::min<EFloat>(0.5 * cycle * duty, 0.1);
                         std::ofstream ofs(fmt::Fmt2Str("./reduce_%1%.txt", index));
                         Recorder recorder(solver, ofs, dt * 0.05);
@@ -225,10 +196,10 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
         using TransSolver = ThermalNetworkTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
         using Recorder = typename TransSolver::Recorder;
-        TransSolver solver(*network, refT, probs);
+        TransSolver solver(*network, settings.iniT, probs);
         std::ofstream ofs("./orig.txt");
         Recorder recorder(solver, ofs, 0.01);
-        StateType initState(solver.StateSize(), refT);
+        StateType initState(solver.StateSize(), settings.iniT);
         solver.Solve(initState, EFloat{0}, EFloat{10}, EFloat{0.01}, std::move(recorder), excitation);
     });
     // bool reduceBounds = false;
@@ -243,8 +214,8 @@ ECAD_INLINE bool EGridThermalNetworkTransientSolver::Solve(EFloat refT, std::vec
         using TransSolver = ThermalNetworkReducedTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
         using Recorder = typename TransSolver::Recorder;
-        StateType initT(network->Size(), refT);
-        TransSolver solver(*network, refT, probs);
+        StateType initT(network->Size(), settings.iniT);
+        TransSolver solver(*network, settings.iniT, probs);
         std::ofstream ofs("./mor.txt");
         Recorder recorder(solver, ofs, 0.01);
         solver.Solve(initT, EFloat{0}, EFloat{10}, EFloat{0.01}, std::move(recorder), excitation);
@@ -262,51 +233,39 @@ ECAD_INLINE EPrismaThermalNetworkStaticSolver::EPrismaThermalNetworkStaticSolver
 {
 }
 
-ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(EFloat refT, std::vector<EFloat> & results)
+ECAD_INLINE bool EPrismaThermalNetworkStaticSolver::Solve(EFloat & minT, EFloat & maxT)
 {
     using namespace thermal::utils;
     using namespace thermal::solver;
     ECAD_EFFICIENCY_TRACK("prisma thermal network static solve")
 
-    results.assign(m_model.TotalElements(), refT);
-    bool needIteration = m_model.NeedIteration();
-    if (m_settings.iteration > 0 && math::GT<EFloat>(m_settings.residual, 0)) {
+    EPrismaThermalNetworkBuilder builder(m_model);
+    std::vector<EFloat> results(m_model.TotalElements(), settings.iniT);
 
-        EFloat residual = m_settings.residual;
-        size_t iteration = m_settings.iteration;
-        EPrismaThermalNetworkBuilder builder(m_model);
-        do {
-            std::vector<EFloat> lastRes(results);
-            auto network = builder.Build(lastRes);
-            if (nullptr == network) return false;
+    EFloat residual = maxFloat;
+    size_t iteration = m_model.NeedIteration() ? settings.iteration : 1;
+    do {
+        std::vector<EFloat> prevRes(results);
+        auto network = builder.Build(prevRes);
+        if (nullptr ==  network) return false;
+        ECAD_TRACE("total nodes: %1%", network->Size())
+        ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
+        ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
 
-            ECAD_TRACE("total nodes: %1%", network->Size())
-            ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
-            ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
-            
-            size_t threads = EDataMgr::Instance().Threads();
-            ThermalNetworkSolver<EFloat> solver(*network, threads);
-            solver.SetVerbose(true);
-            solver.Solve(refT);
+        ThermalNetworkSolver<EFloat> solver(*network, settings.threads);
+        solver.Solve(settings.iniT, results);
 
-            const auto & nodes = network->GetNodes();
-            for (size_t n = 0; n < results.size(); ++n)
-                results[n] = nodes[n].t;
+        residual = CalculateResidual(results, prevRes);
+        ECAD_TRACE("Residual: %1%, Remain Iteration: %2%", residual, --iteration);
+    } while (residual > settings.residual && iteration > 0);
+    minT = *std::min_element(results.begin(), results.end());
+    maxT = *std::max_element(results.begin(), results.end());
 
-            auto maxIter = std::max_element(results.begin(), results.end());
-            auto minIter = std::min_element(results.begin(), results.end());
-            ECAD_TRACE("hotspot: %1%, maxT: %2%, minT: %3%", std::distance(results.begin(), maxIter), *maxIter, *minIter)
-
-            iteration -= 1;
-            if(!needIteration || iteration == 0) break;
-
-            residual = CalculateResidual(results, lastRes);
-            needIteration = math::GE(residual, m_settings.residual);
-            std::cout << "Residual: " << residual << ", Remain Iteration: " << (needIteration ? iteration : 0) << std::endl;
-    
-        } while (needIteration);
+    if (settings.dumpHotmaps) {
+        auto hotmapFile = settings.workDir + ECAD_SEPS + "hotmap.vtk";
+        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
+        io::GenerateVTKFile(hotmapFile, m_model, &results);
     }
-
     return true;
 }
 
@@ -315,7 +274,7 @@ ECAD_INLINE EPrismaThermalNetworkTransientSolver::EPrismaThermalNetworkTransient
 {
 }
 
-ECAD_INLINE bool EPrismaThermalNetworkTransientSolver::Solve(EFloat refT, std::vector<EFloat> & results)
+ECAD_INLINE bool EPrismaThermalNetworkTransientSolver::Solve(EFloat &, EFloat &)
 {
     using namespace thermal::utils;
     using namespace thermal::solver;

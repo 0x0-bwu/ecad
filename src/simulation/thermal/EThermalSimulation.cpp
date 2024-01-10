@@ -68,16 +68,10 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
 
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);
-    EThermalNetworkSolveSettings settings;
-    settings.workDir = setup->workDir;
-    settings.spiceFile = setup->workDir + ECAD_SEPS + "spice.sp";
-    settings.iniT = setup->environmentTemperature;
-    solver.SetSolveSettings(settings);
-    if (not solver.Solve(settings.iniT, results)) return false;
+    solver.settings.workDir = setup->workDir;
+    solver.settings.iniT = setup->environmentTemperature;
+    if (not solver.Solve(minT, maxT)) return false;
     
-    minT = *std::min_element(results.begin(), results.end());
-    maxT = *std::max_element(results.begin(), results.end());
-
     auto modelSize = model->ModelSize();
     auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
     for (size_t z = 0; z < modelSize.z; ++z)
@@ -109,7 +103,7 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
     return true;
 }
 
-ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat &, EFloat &) const
+ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("grid thermal transient simulation")
     auto model = dynamic_cast<CPtr<EGridThermalModel> >(m_model);
@@ -118,12 +112,9 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat &, EFloat &) 
 
     std::vector<EFloat> results;
     EGridThermalNetworkTransientSolver solver(*model);
-    EThermalNetworkSolveSettings settings;
-    settings.workDir = setup->workDir;
-    settings.spiceFile = setup->workDir + ECAD_SEPS + "spice.sp";
-    settings.iniT = setup->environmentTemperature;
-    solver.SetSolveSettings(settings);
-    if (not solver.Solve(settings.iniT, results)) return false;
+    solver.settings.workDir = setup->workDir;
+    solver.settings.iniT = setup->environmentTemperature;
+    if (not solver.Solve(minT, maxT)) return false;
     return true;
 }
 
@@ -141,22 +132,9 @@ ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat
 
     std::vector<EFloat> results;
     EPrismaThermalNetworkStaticSolver solver(*model);
-    EThermalNetworkSolveSettings settings;
-    settings.workDir = setup->workDir;
-    settings.spiceFile = setup->workDir + ECAD_SEPS + "spice.sp";
-    settings.iniT = setup->environmentTemperature;
-    solver.SetSolveSettings(settings);
-    if (not solver.Solve(settings.iniT, results)) return false;
-
-    minT = *std::min_element(results.begin(), results.end());
-    maxT = *std::max_element(results.begin(), results.end());
-
-    if (not setup->workDir.empty()) {
-        auto hotmapFile = setup->workDir + ECAD_SEPS + "hotmap.vtk";
-        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
-        io::GenerateVTKFile(hotmapFile, *model, &results);
-    }
-    return true;
+    solver.settings.workDir = setup->workDir;
+    solver.settings.iniT = setup->environmentTemperature;
+    return solver.Solve(minT, maxT);
 }
 
 ECAD_API bool EPrismaThermalSimulator::RunTransientSimulation(EFloat &, EFloat &) const

@@ -3,6 +3,7 @@
 #include "ECadDef.h"
 #include <unordered_set>
 #include <array>
+#include <set>
 namespace ecad {
 
 struct EDataMgrSettings
@@ -92,16 +93,30 @@ struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
 {
     bool mor{false};
+    std::vector<FPoint3D> monitor;
 };
 
 struct EThermalNetworkSolveSettings
 {
+    virtual ~EThermalNetworkSolveSettings() = default;
     EFloat iniT = 25;
+    size_t threads = 1;
+    std::string workDir;
+protected:
+    EThermalNetworkSolveSettings() = default;
+};
+
+struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings
+{
     EFloat residual = 0.5;
     size_t iteration = 10;
     bool dumpHotmaps = false;
-    std::string spiceFile;
-    std::string workDir;
+};
+
+struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettings
+{
+    bool mor;
+    std::set<size_t> probs;
 };
 
 struct ELayout2CtmSettings
