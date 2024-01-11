@@ -22,7 +22,7 @@ public:
     virtual ~EThermalNetworkStaticSolver() = default;
 
     template <typename ThermalNetworkBuilder>
-    bool Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<EFloat> & results);
+    bool Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<EFloat> & results) const;
 };
 
 class ECAD_API EThermalNetworkTransientSolver : public EThermalNetworkSolver
@@ -30,6 +30,9 @@ class ECAD_API EThermalNetworkTransientSolver : public EThermalNetworkSolver
 public:
     EThermalNetworkTransientSolveSettings settings;
     virtual ~EThermalNetworkTransientSolver() = default;
+
+    template <typename ThermalNetworkBuilder>
+    bool Solve(const typename ThermalNetworkBuilder::ModelType & model, EFloat & minT, EFloat & maxT) const;
 };
 
 class ECAD_API EGridThermalNetworkSolver

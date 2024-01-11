@@ -112,13 +112,7 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloa
 
     std::vector<EFloat> results;
     EGridThermalNetworkTransientSolver solver(*model);
-    solver.settings.mor = setup->mor;
-    solver.settings.workDir = setup->workDir;
-    solver.settings.excitation = setup->excitation;
-    solver.settings.dumpRawData = setup->dumpRawData;
-    solver.settings.iniT = setup->environmentTemperature;
-    solver.settings.samplingWindow = setup->samplingWindow;
-    solver.settings.minSamplingInterval = setup->minSamplingInterval;
+    solver.settings = setup->settings;
     if (not solver.Solve(minT, maxT)) return false;
     return true;
 }
@@ -151,13 +145,7 @@ ECAD_API bool EPrismaThermalSimulator::RunTransientSimulation(EFloat & minT, EFl
 
     std::vector<EFloat> results;
     EPrismaThermalNetworkTransientSolver solver(*model);
-    solver.settings.mor = setup->mor;
-    solver.settings.workDir = setup->workDir;
-    solver.settings.excitation = setup->excitation;
-    solver.settings.dumpRawData = setup->dumpRawData;
-    solver.settings.iniT = setup->environmentTemperature;
-    solver.settings.samplingWindow = setup->samplingWindow;
-    solver.settings.minSamplingInterval = setup->minSamplingInterval;
+    solver.settings = setup->settings;
     if (not solver.Solve(minT, maxT)) return false;
     return true;
 }

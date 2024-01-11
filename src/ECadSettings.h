@@ -95,14 +95,26 @@ struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
 };
 
 using EThermalTransientExcitation = std::function<EFloat(EFloat)>;
-struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
+struct EThermalTransientSettings
 {
+    virtual ~EThermalTransientSettings() = default;
+
     bool mor{false};
+    bool adaptive{true};
     bool dumpRawData{false};
-    std::vector<FPoint3D> monitor; //todo
+    EFloat step{1};
+    EFloat duration{10};
+    EFloat absoluteError{1e-6};
+    EFloat relativeError{1e-6};
     EFloat minSamplingInterval{0};
     EFloat samplingWindow{maxFloat};
     CPtr<EThermalTransientExcitation> excitation{nullptr};
+};
+
+struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
+{
+    std::vector<FPoint3D> monitors; //todo
+    EThermalTransientSettings settings;
 };
 
 struct EThermalNetworkSolveSettings
@@ -122,14 +134,14 @@ struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings
     bool dumpHotmaps = false;
 };
 
-struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettings
+struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettings, EThermalTransientSettings
 {
-    bool mor;
-    bool dumpRawData;
     std::set<size_t> probs;
-    EFloat minSamplingInterval{0};
-    EFloat samplingWindow{maxFloat};
-    CPtr<EThermalTransientExcitation> excitation{nullptr};
+
+    void operator= (const EThermalTransientSettings & settings)
+    {
+        dynamic_cast<EThermalTransientSettings&>(*this) = settings;
+    }
 };
 
 struct ELayout2CtmSettings

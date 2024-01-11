@@ -7,8 +7,8 @@
 #include "generic/tools/Log.hpp"
 
 #include <boost/numeric/odeint.hpp>
-#include <forward_list>
 #include <memory>
+#include <list>
 
 #include <Eigen/IterativeLinearSolvers>
 #include <Eigen/SparseCholesky>
@@ -59,34 +59,40 @@ namespace thermal::solver {
     };
 
     template <typename num_type>
+    using Sample = std::vector<num_type>;
+
+    template <typename num_type>
+    using Samples = std::list<Sample<num_type>>;
+
+    template <typename num_type>
     class ThermalNetworkTransientSolver
     {
     public:
         using StateType = std::vector<num_type>;
         struct Sampler
         {
-            using Sample = std::vector<num_type>;
-            using Samples = std::forward_list<Sample>;
-            Samples & samples;
             num_type prev{0};
             num_type count{0};
             num_type window{0};
             num_type interval{0};
+            Samples<num_type> & samples;
             const ThermalNetworkTransientSolver & solver;
-            Sampler(const ThermalNetworkTransientSolver & solver, Samples & samples, num_type window, num_type interval)
-                : samples(samples), window(window), interval(interval), solver(solver) {}
+            Sampler(const ThermalNetworkTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval)
+                : window(window), interval(interval), samples(samples), solver(solver) {}
             virtual ~Sampler() = default;
             void operator() (const StateType & x, num_type t)
             {
                 if (count += t - prev; count > interval) {
                     const auto & probs = solver.Probs();
-                    Sample sample; sample.reserve(probs.size());
+                    Sample<num_type> sample; sample.reserve(probs.size());
                     sample.emplace_back(t);
                     for (auto p : probs) sample.emplace_back(x[p]);
-                    samples.emplace_after(samples.end(), std::move(sample));
+                    ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    samples.emplace_back(std::move(sample));
                     while (t - samples.front().front() > window) {
                         samples.pop_front();
                     }
+                    count = 0;
                 }
                 prev = t;
             }
@@ -175,8 +181,16 @@ namespace thermal::solver {
         {
             if (initState.size() != StateSize()) return 0;
             using namespace boost::numeric::odeint;
+            return integrate_const(runge_kutta4<StateType>{}, Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, std::move(observer));
+        }
+
+        template <typename Observer = Sampler, typename Excitation>
+        size_t SolveAdaptive(StateType & initState, num_type t0, num_type duration, num_type dt, num_type absErr, num_type relErr, Observer observer, const Excitation * e = nullptr)
+        {
+            if (initState.size() != StateSize()) return 0;
+            using namespace boost::numeric::odeint;
             using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
-            return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
+            return integrate_adaptive(make_controlled<ErrorStepperType>(absErr, relErr),
                                     Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, std::move(observer));
         }
 
@@ -254,29 +268,29 @@ namespace thermal::solver {
 
         struct Sampler
         {
-            using Sample = std::vector<num_type>;
-            using Samples = std::forward_list<Sample>;
             StateType out;
-            Samples & samples;
             num_type prev{0};
             num_type count{0};
             num_type window{0};
             num_type interval{0};
+            Samples<num_type> & samples;
             const ThermalNetworkReducedTransientSolver & solver;
-            Sampler(const ThermalNetworkReducedTransientSolver & solver, Samples & samples, num_type window, num_type interval)
-                : samples(samples), window(window), interval(interval), solver(solver) {}
+            Sampler(const ThermalNetworkReducedTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval)
+                : window(window), interval(interval), samples(samples), solver(solver) {}
             virtual ~Sampler() = default;
             void operator() (const StateType & x, num_type t)
             {
                 if (count += t - prev; count > interval) {
                     solver.Im().State2Output(x, out);
-                    Sample sample; sample.reserve(out.size() + 1);
+                    Sample<num_type> sample; sample.reserve(out.size() + 1);
                     sample.emplace_back(t);
                     sample.insert(sample.end(), out.begin(), out.end());
-                    samples.emplace_after(samples.end(), std::move(sample));
+                    ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    samples.emplace_back(std::move(sample));
                     while (t - samples.front().front() > window) {
                         samples.pop_front();
                     }
+                    count = 0;
                 }
                 prev = t;
             }
@@ -349,10 +363,21 @@ namespace thermal::solver {
             if (not m_im->Input2State(initT, initState)) return 0;
 
             using namespace boost::numeric::odeint;
+            return integrate_const(runge_kutta4<StateType>{}, Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
+        }
+
+        template <typename Observer = FileRecorder, typename Excitation>
+        size_t SolveAdaptive(StateType & initT, num_type t0, num_type duration, num_type dt, num_type absErr, num_type relErr, Observer observer, const Excitation * e = nullptr)
+        {
+            StateType initState;
+            if (not m_im->Input2State(initT, initState)) return 0;
+
+            using namespace boost::numeric::odeint;
             using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
-            return integrate_adaptive(make_controlled<ErrorStepperType>(num_type{1e-12}, num_type{1e-10}),
+            return integrate_adaptive(make_controlled<ErrorStepperType>(absErr, relErr),
                                     Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
         }
+
         const std::set<size_t> Probs() const { return m_probs; }
         const Intermidiate & Im() const { return *m_im; }
     private:
