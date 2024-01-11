@@ -5,7 +5,7 @@ namespace solver {
 
 using namespace ecad::model;
 inline static constexpr EFloat THERMAL_RD = 0.01;
-ECAD_INLINE EGridThermalNetworkBuilder::EGridThermalNetworkBuilder(const EGridThermalModel & model)
+ECAD_INLINE EGridThermalNetworkBuilder::EGridThermalNetworkBuilder(const ModelType & model)
  : m_model(model), m_size(model.ModelSize())
 {
 }

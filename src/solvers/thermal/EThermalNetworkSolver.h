@@ -20,6 +20,9 @@ class ECAD_API EThermalNetworkStaticSolver : public EThermalNetworkSolver
 public:
     EThermalNetworkStaticSolveSettings settings;
     virtual ~EThermalNetworkStaticSolver() = default;
+
+    template <typename ThermalNetworkBuilder>
+    bool Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<EFloat> & results);
 };
 
 class ECAD_API EThermalNetworkTransientSolver : public EThermalNetworkSolver

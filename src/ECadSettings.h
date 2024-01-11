@@ -98,7 +98,10 @@ using EThermalTransientExcitation = std::function<EFloat(EFloat)>;
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
 {
     bool mor{false};
+    bool dumpRawData{false};
     std::vector<FPoint3D> monitor; //todo
+    EFloat minSamplingInterval{0};
+    EFloat samplingWindow{maxFloat};
     CPtr<EThermalTransientExcitation> excitation{nullptr};
 };
 
@@ -122,7 +125,10 @@ struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings
 struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettings
 {
     bool mor;
+    bool dumpRawData;
     std::set<size_t> probs;
+    EFloat minSamplingInterval{0};
+    EFloat samplingWindow{maxFloat};
     CPtr<EThermalTransientExcitation> excitation{nullptr};
 };
 

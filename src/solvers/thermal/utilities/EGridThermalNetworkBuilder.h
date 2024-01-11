@@ -20,9 +20,10 @@ class ECAD_API EGridThermalNetworkBuilder
 {
     enum class Axis { X = 0, Y = 1, Z = 2};
 public:
+    using ModelType = EGridThermalModel;
     mutable EGridThermalNetworkBuildSummary summary;
     enum class Orientation { Top, Bot, Left, Right, Front, End };
-    explicit EGridThermalNetworkBuilder(const EGridThermalModel & model);
+    explicit EGridThermalNetworkBuilder(const ModelType & model);
     virtual ~EGridThermalNetworkBuilder() = default;
 
     UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT) const;
@@ -64,7 +65,7 @@ public:
     static bool isValid(const ESize3D & index);
 
 private:
-    const EGridThermalModel & m_model;
+    const ModelType & m_model;
     const ESize3D m_size;
 };
 

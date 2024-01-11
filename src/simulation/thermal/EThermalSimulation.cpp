@@ -115,7 +115,10 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloa
     solver.settings.mor = setup->mor;
     solver.settings.workDir = setup->workDir;
     solver.settings.excitation = setup->excitation;
+    solver.settings.dumpRawData = setup->dumpRawData;
     solver.settings.iniT = setup->environmentTemperature;
+    solver.settings.samplingWindow = setup->samplingWindow;
+    solver.settings.minSamplingInterval = setup->minSamplingInterval;
     if (not solver.Solve(minT, maxT)) return false;
     return true;
 }
@@ -139,10 +142,24 @@ ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat
     return solver.Solve(minT, maxT);
 }
 
-ECAD_API bool EPrismaThermalSimulator::RunTransientSimulation(EFloat &, EFloat &) const
+ECAD_API bool EPrismaThermalSimulator::RunTransientSimulation(EFloat & minT, EFloat & maxT) const
 {
-    ECAD_EFFICIENCY_TRACK("grid thermal transient simulation")
-    return false;
+    ECAD_EFFICIENCY_TRACK("prisma thermal transient simulation")
+    auto model = dynamic_cast<CPtr<EPrismaThermalModel> >(m_model);
+    auto setup = dynamic_cast<CPtr<EThermalTransientSimulationSetup> >(&m_setup);
+    if (nullptr == model || nullptr == setup) return false;
+
+    std::vector<EFloat> results;
+    EPrismaThermalNetworkTransientSolver solver(*model);
+    solver.settings.mor = setup->mor;
+    solver.settings.workDir = setup->workDir;
+    solver.settings.excitation = setup->excitation;
+    solver.settings.dumpRawData = setup->dumpRawData;
+    solver.settings.iniT = setup->environmentTemperature;
+    solver.settings.samplingWindow = setup->samplingWindow;
+    solver.settings.minSamplingInterval = setup->minSamplingInterval;
+    if (not solver.Solve(minT, maxT)) return false;
+    return true;
 }
 
 } // namespace ecad::simulation

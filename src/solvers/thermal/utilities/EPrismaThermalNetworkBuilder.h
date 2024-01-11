@@ -18,8 +18,9 @@ struct EPrismaThermalNetworkBuildSummary
 class ECAD_API EPrismaThermalNetworkBuilder
 {
 public:
+    using ModelType = EPrismaThermalModel;
     mutable EPrismaThermalNetworkBuildSummary summary;
-    explicit EPrismaThermalNetworkBuilder(const EPrismaThermalModel & model);
+    explicit EPrismaThermalNetworkBuilder(const ModelType & model);
     virtual ~EPrismaThermalNetworkBuilder() = default;
 
     UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT, size_t threads = 1) const;
@@ -51,7 +52,7 @@ private:
     EFloat GetLineArea(size_t index) const;
 
 private:
-    const EPrismaThermalModel & m_model;
+    const ModelType & m_model;
 };
 } // namespace ecad::solver
 

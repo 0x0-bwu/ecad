@@ -7,7 +7,7 @@
 namespace ecad::solver {
 
 using namespace ecad::model;
-ECAD_INLINE EPrismaThermalNetworkBuilder::EPrismaThermalNetworkBuilder(const EPrismaThermalModel & model)
+ECAD_INLINE EPrismaThermalNetworkBuilder::EPrismaThermalNetworkBuilder(const ModelType & model)
  : m_model(model)
 {
 }
