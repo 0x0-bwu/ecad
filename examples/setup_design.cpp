@@ -79,11 +79,11 @@ void test0()
     auto model1 = layout->ExtractThermalModel(gridSettings);
 
     EThermalTransientSimulationSetup transSimuSetup;
-    transSimuSetup.mor = false;
+    transSimuSetup.settings.mor = false;
     transSimuSetup.environmentTemperature = 25;
     transSimuSetup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::sin(generic::math::pi * t / 0.5)); };
-    transSimuSetup.excitation = &excitation;
+    transSimuSetup.settings.excitation = &excitation;
     layout->RunThermalSimulation(gridSettings, transSimuSetup);
 
     EPrismaThermalModelExtractionSettings prismaSettings;
@@ -371,6 +371,7 @@ void test1()
     prismaSettings.meshSettings.maxLen = 500;
 
     EThermalStaticSimulationSetup setup;
+    setup.dumpHotmaps = true;
     setup.environmentTemperature = 25;
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    

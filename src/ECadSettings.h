@@ -89,12 +89,20 @@ protected:
     EThermalSimulationSetup() = default;
 };
 
+struct EThermalStaticSettings
+{
+    EFloat residual = 0.5;
+    size_t iteration = 10;
+    bool dumpHotmaps = false;
+};
+
 struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
 {
-    std::string dumpSpiceFile{false};
+    EThermalStaticSettings settings;
 };
 
 using EThermalTransientExcitation = std::function<EFloat(EFloat)>;
+
 struct EThermalTransientSettings
 {
     virtual ~EThermalTransientSettings() = default;
@@ -127,11 +135,12 @@ protected:
     EThermalNetworkSolveSettings() = default;
 };
 
-struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings
+struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings, EThermalStaticSettings
 {
-    EFloat residual = 0.5;
-    size_t iteration = 10;
-    bool dumpHotmaps = false;
+    void operator= (const EThermalStaticSettings & settings)
+    {
+        dynamic_cast<EThermalStaticSettings&>(*this) = settings;
+    }
 };
 
 struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettings, EThermalTransientSettings

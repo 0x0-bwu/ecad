@@ -12,6 +12,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #include "utilities/ELayoutConnectivity.h"
 #include "utilities/ELayoutViewRenderer.h"
 #include "utilities/ELayout2CtmUtility.h"
+#include "utilities/ELayoutModifier.h"
 
 #include "interfaces/IHierarchyObjCollection.h"
 #include "interfaces/IPadstackInstCollection.h"
@@ -364,6 +365,11 @@ ECAD_INLINE void ELayoutView::Map(CPtr<ILayerMap> lyrMap)
 ECAD_INLINE bool ELayoutView::Renderer(const ELayoutViewRendererSettings & settings) const
 {
     return utils::ELayoutViewRenderer(settings).Renderer(this);
+}
+
+ECAD_INLINE bool ELayoutView::ModifyStackupLayerThickness(const std::string & name, EFloat thickness)
+{
+    return utils::ELayoutModifier::ModifyStackupLayerThickness(this, name, thickness);
 }
 
 ECAD_INLINE void ELayoutView::SyncCloneReference(ECloneOption option)

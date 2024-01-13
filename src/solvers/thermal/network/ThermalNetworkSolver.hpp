@@ -87,7 +87,7 @@ namespace thermal::solver {
                     Sample<num_type> sample; sample.reserve(probs.size());
                     sample.emplace_back(t);
                     for (auto p : probs) sample.emplace_back(x[p]);
-                    ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    // ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
                     samples.emplace_back(std::move(sample));
                     while (t - samples.front().front() > window) {
                         samples.pop_front();
@@ -285,7 +285,7 @@ namespace thermal::solver {
                     Sample<num_type> sample; sample.reserve(out.size() + 1);
                     sample.emplace_back(t);
                     sample.insert(sample.end(), out.begin(), out.end());
-                    ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    // ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
                     samples.emplace_back(std::move(sample));
                     while (t - samples.front().front() > window) {
                         samples.pop_front();

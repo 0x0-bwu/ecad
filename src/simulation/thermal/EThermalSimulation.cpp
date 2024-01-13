@@ -20,6 +20,7 @@ using namespace ecad::solver;
 
 ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & minT, EFloat & maxT) const
 {
+    generic::fs::CreateDir(m_setup.workDir);
     auto modelType = model->GetModelType();
     switch (modelType)
     {
@@ -69,7 +70,7 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);
     solver.settings.workDir = setup->workDir;
-    solver.settings.iniT = setup->environmentTemperature;
+    solver.settings = setup->settings;
     if (not solver.Solve(minT, maxT)) return false;
     
     auto modelSize = model->ModelSize();
@@ -112,6 +113,7 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloa
 
     std::vector<EFloat> results;
     EGridThermalNetworkTransientSolver solver(*model);
+    solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
     if (not solver.Solve(minT, maxT)) return false;
     return true;
@@ -132,7 +134,7 @@ ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat
     std::vector<EFloat> results;
     EPrismaThermalNetworkStaticSolver solver(*model);
     solver.settings.workDir = setup->workDir;
-    solver.settings.iniT = setup->environmentTemperature;
+    solver.settings = setup->settings;
     return solver.Solve(minT, maxT);
 }
 
@@ -145,6 +147,7 @@ ECAD_API bool EPrismaThermalSimulator::RunTransientSimulation(EFloat & minT, EFl
 
     std::vector<EFloat> results;
     EPrismaThermalNetworkTransientSolver solver(*model);
+    solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
     if (not solver.Solve(minT, maxT)) return false;
     return true;

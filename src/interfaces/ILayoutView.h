@@ -128,6 +128,10 @@ public:
 
     ///Renderer
     virtual bool Renderer(const ELayoutViewRendererSettings & settings) const = 0;
+
+    ///Modify
+    virtual bool ModifyStackupLayerThickness(const std::string & name, EFloat thickness) = 0;
+    
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ILayoutView)

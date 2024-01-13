@@ -109,8 +109,8 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         else steps = solver.Solve(initT, EFloat{0}, settings.duration, settings.step, std::move(sampler), settings.excitation);
     }
     for (const auto & sample : samples) {
-        minT = std::min(minT, *std::min_element(sample.begin()++, sample.end()));
-        maxT = std::max(maxT, *std::max_element(sample.begin()++, sample.end()));
+        minT = std::min(minT, *std::min_element(++sample.begin(), sample.end()));
+        maxT = std::max(maxT, *std::max_element(++sample.begin(), sample.end()));
     }
     if (settings.dumpRawData) {
         auto filename = settings.workDir + ECAD_SEPS + "trans.txt";

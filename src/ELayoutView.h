@@ -119,6 +119,8 @@ public:
     ///Render
     bool Renderer(const ELayoutViewRendererSettings & settings) const override;
 
+    ///Modify
+    bool ModifyStackupLayerThickness(const std::string & name, EFloat thickness) override;
 protected:
     ///Copy
     virtual Ptr<ELayoutView> CloneImp() const override { return new ELayoutView(*this); }
