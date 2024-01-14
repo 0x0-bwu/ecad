@@ -5,7 +5,7 @@
 #include <list>
 namespace ecad {
 
-enum class EMirror2D { No = -1, X = 0, Y = 1 };
+enum class EMirror2D { No = -1, X = 0, Y = 1, XY = 2 };
 
 struct ECAD_API ETransformData2D
 {

@@ -384,6 +384,224 @@ void test1()
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
+
+void test2()
+{
+    using namespace ecad;
+    auto & eDataMgr = EDataMgr::Instance();
+
+    //database
+    auto database = eDataMgr.CreateDatabase("CREE62mm");
+
+    auto matAl = database->CreateMaterialDef("Al");
+    matAl->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(238));
+    matAl->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(880));
+    matAl->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2700));
+    matAl->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(2.82e-8));
+
+    auto matCu = database->CreateMaterialDef("Cu");
+    matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(398));
+    matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(380));
+    matCu->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(8850));
+
+    auto matAir = database->CreateMaterialDef("Air");
+    matAir->SetMaterialType(EMaterialType::Fluid);
+    matAir->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(0.026));
+    matAir->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(1.003));
+    matAir->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(1.225));
+
+    auto matSiC = database->CreateMaterialDef("SiC");  
+    matSiC->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(370));
+    matSiC->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(750));
+    matSiC->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(3210));
+
+    auto matSi3N4 = database->CreateMaterialDef("Si3N4");
+    matSi3N4->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(70));
+    matSi3N4->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(691));
+    matSi3N4->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2400));
+
+    auto matSolder = database->CreateMaterialDef("Sn-3.5Ag");
+    matSolder->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(33));
+    matSolder->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(200));
+    matSolder->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(7360));
+    matSolder->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(11.4e-8));
+
+    //coord units
+    ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
+    database->SetCoordUnits(coordUnits);
+    
+    //top cell
+    auto baseCell = eDataMgr.CreateCircuitCell(database, "Base");
+    auto baseLayout = baseCell->GetLayoutView();
+
+    EPolygonWithHolesData pwh;
+    pwh.outline = std::move(eDataMgr.CreatePolygon(coordUnits, {{-52.2, -29.7}, {52.2, -29.7}, {52.5, 29.7}, {-52.2, 29.7}}).shape);//R=5.3
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {-46.5, -24}, 3.85)->GetContour());
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, { 46.5, -24}, 3.85)->GetContour());
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, { 46.5,  24}, 3.85)->GetContour());
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {-46.5,  24}, 3.85)->GetContour());
+    baseLayout->SetBoundary(eDataMgr.CreateShapePolygonWithHoles(std::move(pwh)));
+
+    eDataMgr.CreateNet(baseLayout, "Gate");
+    eDataMgr.CreateNet(baseLayout, "Drain");
+    eDataMgr.CreateNet(baseLayout, "Source");
+
+    //base
+    [[maybe_unused]] auto topCuLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCuLayer", ELayerType::ConductingLayer, 0, 0.3, matCu->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto ceramicLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("CeramicLayer",  ELayerType::DielectricLayer, -0.3, 0.38, matSi3N4->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto botCuLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("BotCuLayer", ELayerType::ConductingLayer, -0.68, 0.3, matCu->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto solderLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("SolderLayer", ELayerType::ConductingLayer, -0.98, 0.1, matSolder->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto baseLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("BaseLayer", ELayerType::ConductingLayer, -1.08, 3, matCu->GetName(), matCu->GetName()));
+
+    //driver
+    auto driverCell = eDataMgr.CreateCircuitCell(database, "Driver");
+    auto driverLayout = driverCell->GetLayoutView();
+
+    //layer
+    [[maybe_unused]] auto driverLayer1 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer1", ELayerType::DielectricLayer, -0.3, 0.38, matSi3N4->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto driverLayer2 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer2", ELayerType::ConductingLayer, -0.68, 0.3, matCu->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto driverLayer3 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer3", ELayerType::ConductingLayer, -0.98, 0.1, matSolder->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto driverLayer4 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer4", ELayerType::ConductingLayer, -0.98, 0.1, matSolder->GetName(), matAir->GetName()));
+
+    //layer map
+    auto driverLayerMap = eDataMgr.CreateLayerMap(database, "DriverLayerMap");
+    driverLayerMap->SetMapping(driverLayer1, topCuLayer);
+    driverLayerMap->SetMapping(driverLayer2, ceramicLayer);
+    driverLayerMap->SetMapping(driverLayer3, botCuLayer);
+    driverLayerMap->SetMapping(driverLayer4, solderLayer);
+
+    //boundary   
+    driverLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}));
+
+    //net
+    eDataMgr.CreateNet(driverLayout, "Gate");
+    eDataMgr.CreateNet(driverLayout, "Drain");
+    eDataMgr.CreateNet(driverLayout, "Source");
+
+    //wire
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, 9.625}, {4.45, 9.625}, {4.45, 13.925}, {-4.7, 13.925}}));//R0.25
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, 4.325}, {4.45, 4.325}, {4.45,  8.625}, {-4.7,  8.625}}));//R0.25
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, -13.925}, {4.7, -13.925}, {4.7, 1.075}, {3.2, 1.075},
+        {3.2, -1.775}, {4.2, -1.775}, {4.2, -4.925}, {3.2, -4.925}, {3.2, -7.025}, {4.2, -7.025}, {4.2, -11.425}, {-1.5, -11.425}, {-1.5, -9.725}, {-4.7, -9.725}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, -8.525}, {1.7, -8.525}, {1.7, -10.325}, {3.2, -10.325},
+        {3.2, -8.225}, {2.2, -8.225}, {2.2, -3.875}, {3.2, -3.875}, {3.2, -2.825}, {2.2, -2.825}, {2.2, 2.175}, {4.7, 2.175}, {4.7, 3.225}, {1.7, 3.225}, {1.7, -4.325}, {-4.7, -4.325}})
+    );//R0.25
+
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}));
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, -13.925}, {4.7, -13.925}, {4.7, 13.925}, {-4.7, 13.925}}));//R0.25
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}));
+
+    //instance
+    auto driverL = eDataMgr.CreateCellInst(baseLayout, "DriverL", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-44, 0}));
+    driverL->SetLayerMap(driverLayerMap);
+
+    auto driverR = eDataMgr.CreateCellInst(baseLayout, "DriverR", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {44, 0}, EMirror2D::XY));
+    driverR->SetLayerMap(driverLayerMap);
+
+    //bridge cell
+    auto botBridgeCell = eDataMgr.CreateCircuitCell(database, "BotBridgeCell");
+    auto botBridgeLayout = botBridgeCell->GetLayoutView();
+
+    //layer
+    [[maybe_unused]] auto botBridgeLayer1 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer1", ELayerType::DielectricLayer, -0.3, 0.38, matSi3N4->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto botBridgeLayer2 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer2", ELayerType::ConductingLayer, -0.68, 0.3, matCu->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto botBridgeLayer3 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer3", ELayerType::ConductingLayer, -0.98, 0.1, matSolder->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto botBridgeLayer4 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer4", ELayerType::ConductingLayer, -0.98, 0.1, matSolder->GetName(), matAir->GetName()));
+
+    //layer map
+    auto botBridgeLayerMap = eDataMgr.CreateLayerMap(database, "BotBridgeLayerMap");
+    botBridgeLayerMap->SetMapping(botBridgeLayer1, topCuLayer);
+    botBridgeLayerMap->SetMapping(botBridgeLayer2, ceramicLayer);
+    botBridgeLayerMap->SetMapping(botBridgeLayer3, botCuLayer);
+    botBridgeLayerMap->SetMapping(botBridgeLayer4, solderLayer);
+
+    //boundary   
+    botBridgeLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
+    
+    //net
+    eDataMgr.CreateNet(botBridgeLayout, "Gate");
+    eDataMgr.CreateNet(botBridgeLayout, "Drain");
+    eDataMgr.CreateNet(botBridgeLayout, "Source");
+
+    //wire
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -11.2}, {13.35, -11.2}, {13.95, -11.6}, {15.45, -11.6},
+        {15.45, -10.8}, {-15.05, -10.8}, {-15.05, -1.3}, {-14.7, -0.7}, {-14.7, 11.45}, {-15.45, 11.45}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-14.2, -10.4}, {15.45, -10.4}, {15.45, -9.6}, {13.95, -9.6},
+        {13.35, -10}, {-13.8, -10}, {-13.8, -2.55}, {-11.1, -2.55}, {-11.1, 11.45}, {-11.85, 11.45}, {-11.85, -2}, {-14.2, -2}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-12.6, -8.8}, {12.35, -8.8}, {12.95, -8.4}, {15.45, -8.4},
+        {15.45, -5.97}, {7.95, -5.97}, {7.95, 9.03}, {15.45, 9.03}, {15.45, 11.45}, {-9.75, 11.45}, {-9.75, -3.75}, {-12.6, -3.75}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{9.5, -4.77}, {15.8, -4.77}, {15.8, 7.83}, {9.5, 7.83}}));//R0.25
+
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.25, -12}, {16.25, -12}, {16.25, 12}, {-16.25, 12}}));//R0.25
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
+
+    //instance
+    auto botBridge1 = eDataMgr.CreateCellInst(baseLayout, "botBridge1", botBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-17.75, 13}));
+    botBridge1->SetLayerMap(botBridgeLayerMap);
+
+    auto botBridge2 = eDataMgr.CreateCellInst(baseLayout, "BotBridge2", botBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-17.75, -13}, EMirror2D::X));
+    botBridge2->SetLayerMap(botBridgeLayerMap);
+
+    auto topBridgeCell = eDataMgr.CreateCircuitCell(database, "TopBridgeCell");
+    auto topBridgeLayout = topBridgeCell->GetLayoutView();
+
+    //layer
+    [[maybe_unused]] auto topBridgeLayer1 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer1", ELayerType::DielectricLayer, -0.3, 0.38, matSi3N4->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto topBridgeLayer2 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer2", ELayerType::ConductingLayer, -0.68, 0.3, matCu->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto topBridgeLayer3 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer3", ELayerType::ConductingLayer, -0.98, 0.1, matSolder->GetName(), matAir->GetName()));
+    [[maybe_unused]] auto topBridgeLayer4 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer4", ELayerType::ConductingLayer, -0.98, 0.1, matSolder->GetName(), matAir->GetName()));
+
+    //layer map
+    auto topBridgeLayerMap = eDataMgr.CreateLayerMap(database, "TopBridgeLayerMap");
+    topBridgeLayerMap->SetMapping(topBridgeLayer1, topCuLayer);
+    topBridgeLayerMap->SetMapping(topBridgeLayer2, ceramicLayer);
+    topBridgeLayerMap->SetMapping(topBridgeLayer3, botCuLayer);
+    topBridgeLayerMap->SetMapping(topBridgeLayer4, solderLayer);
+
+    //boundary   
+    topBridgeLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
+    
+    //net
+    eDataMgr.CreateNet(topBridgeLayout, "Gate");
+    eDataMgr.CreateNet(topBridgeLayout, "Drain");
+    eDataMgr.CreateNet(topBridgeLayout, "Source");
+
+    //wire
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.25, -12}, {16.25, -12}, {16.25, 12}, {-16.25, 12}}));//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
+
+    //instance
+    auto topBridge1 = eDataMgr.CreateCellInst(baseLayout, "topBridge1", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, 13}));
+    topBridge1->SetLayerMap(botBridgeLayerMap);
+
+    auto topBridge2 = eDataMgr.CreateCellInst(baseLayout, "topBridge2", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, -13}, EMirror2D::X));
+    topBridge2->SetLayerMap(botBridgeLayerMap);
+
+    //flatten
+    database->Flatten(baseCell);
+    auto layout = baseCell->GetFlattenedLayoutView();
+    
+    EPrismaThermalModelExtractionSettings prismaSettings;
+    prismaSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    prismaSettings.meshSettings.iteration = 1e5;
+    prismaSettings.meshSettings.minAlpha = 20;
+    prismaSettings.meshSettings.minLen = 1e-2;
+    prismaSettings.meshSettings.maxLen = 500;
+
+    EThermalStaticSimulationSetup setup;
+    setup.settings.dumpHotmaps = true;
+    setup.environmentTemperature = 25;
+    setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
+    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
+}
+
 int main(int argc, char * argv[])
 {
     ::signal(SIGSEGV, &SignalHandler);
@@ -392,6 +610,7 @@ int main(int argc, char * argv[])
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
     // test0();
     test1();
+    // test2();
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

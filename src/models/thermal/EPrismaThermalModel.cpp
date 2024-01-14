@@ -71,7 +71,7 @@ ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData p
     auto area = polygon.Area();
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
     if (invalidIndex == index) return false;
-    Height height = (elevation - thickness * position) * m_vScale2Int;
+    Height height = GetHeight(elevation - thickness * position);
     powerBlocks.emplace(index, PowerBlock(index, height, GetLayerRange(elevation, thickness), totalP / area));
     return true;
 }
@@ -116,8 +116,8 @@ ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
     }
 
     for (auto & bw : bondwires) {
-        bw.layer.front() = m_height2Index.at(bw.heights.front() * m_vScale2Int);
-        bw.layer.back() = m_height2Index.at(bw.heights.back() * m_vScale2Int);
+        bw.layer.front() = m_height2Index.at(GetHeight(bw.heights.front()));
+        bw.layer.back() = m_height2Index.at(GetHeight(bw.heights.back()));
     }
 
     for (size_t layer = 0; layer < TotalLayers(); ++layer) {
@@ -168,9 +168,14 @@ ECAD_INLINE const EPolygonData & ECompactLayout::GetLayoutBoundary() const
     return polygons.front();
 }
 
+ECAD_INLINE ECompactLayout::Height ECompactLayout::GetHeight(EFloat height) const
+{
+    return std::round(height * m_vScale2Int);
+}
+
 ECAD_INLINE ECompactLayout::LayerRange ECompactLayout::GetLayerRange(EFloat elevation, EFloat thickness) const
 {
-    return LayerRange{elevation * m_vScale2Int, (elevation - thickness) * m_vScale2Int};
+    return LayerRange{GetHeight(elevation), GetHeight(elevation - thickness)};
 }
 
 ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)

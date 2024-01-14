@@ -70,6 +70,7 @@ struct ECAD_API ECompactLayout
     bool GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const;
     const EPolygonData & GetLayoutBoundary() const;
 private:
+    Height GetHeight(EFloat height) const;
     LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
 private:
     using RtVal = std::pair<EBox2D, size_t>;
