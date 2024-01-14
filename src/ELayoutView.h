@@ -89,8 +89,8 @@ public:
     Ptr<IPadstackInstCollection> GetPadstackInstCollection() const override;
 
     ///Boundary
-    void SetBoundary(UPtr<EPolygon> boundary) override;
-    CPtr<EPolygon> GetBoundary() const override;
+    void SetBoundary(UPtr<EShape> boundary) override;
+    CPtr<EShape> GetBoundary() const override;
 
     ///Metal Fraction Mapping
     bool GenerateMetalFractionMapping(const EMetalFractionMappingSettings & settings) override;
@@ -127,7 +127,7 @@ protected:
     virtual void SyncCloneReference(ECloneOption option);
 
 protected:
-    mutable UPtr<EPolygon> m_boundary;
+    mutable UPtr<EShape> m_boundary;
     Ptr<ICell> m_cell;
 };
 

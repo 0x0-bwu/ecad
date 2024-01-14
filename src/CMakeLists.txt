@@ -21,7 +21,6 @@ simulation/thermal/EThermalSimulation.cpp
 solvers/thermal/utilities/EGridThermalNetworkBuilder.cpp
 solvers/thermal/utilities/EPrismaThermalNetworkBuilder.cpp
 solvers/thermal/EThermalNetworkSolver.cpp
-utilities/EBoundaryCalculator.cpp
 utilities/EFlattenUtility.cpp
 utilities/ELayout2CtmUtility.cpp
 utilities/ELayoutConnectivity.cpp

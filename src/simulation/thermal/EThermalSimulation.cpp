@@ -85,7 +85,7 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
     }
 
     using ValueType = typename ELayerMetalFraction::ResultType;
-    if (not setup->workDir.empty() && setup->dumpHotmaps) {        
+    if (not setup->workDir.empty() && setup->settings.dumpHotmaps) {        
         for (size_t index = 0; index < htMap->size(); ++index) {
             auto lyr = htMap->at(index);
             auto min = lyr->MaxOccupancy(std::less<ValueType>());

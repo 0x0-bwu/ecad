@@ -99,8 +99,8 @@ public:
     virtual Ptr<IPadstackInstCollection> GetPadstackInstCollection() const = 0;
 
     ///Boundary
-    virtual void SetBoundary(UPtr<EPolygon> boundary) = 0;
-    virtual CPtr<EPolygon> GetBoundary() const = 0;
+    virtual void SetBoundary(UPtr<EShape> boundary) = 0;
+    virtual CPtr<EShape> GetBoundary() const = 0;
 
     ///Flatten
     virtual void Flatten(const EFlattenOption & option) = 0;

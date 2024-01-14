@@ -193,18 +193,18 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
             ECAD_ASSERT(compact->hasPolygon(prismaLayer.id))
             auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
             auto pid = compact->SearchPolygon(prismaLayer.id, ctPoint);
-            if (pid != invalidIndex) {
-                if (not fluidMaterials.count(compact->materials.at(pid))) {
-                    auto & ele = prismaLayer.AddElement(it);
-                    idMap.emplace(it, ele.id);
-                    ele.matId = compact->materials.at(pid);
-                    ele.netId = compact->nets.at(pid);
-                    auto iter = compact->powerBlocks.find(pid);
-                    if (iter != compact->powerBlocks.cend()) {
-                        auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
-                        ele.avePower = area * iter->second.powerDensity;
-                    }
-                }
+            if (pid == invalidIndex) continue;;
+            if (fluidMaterials.count(compact->materials.at(pid))) continue;
+            if (EMaterialId::noMaterial == compact->materials.at(pid)) continue;
+
+            auto & ele = prismaLayer.AddElement(it);
+            idMap.emplace(it, ele.id);
+            ele.matId = compact->materials.at(pid);
+            ele.netId = compact->nets.at(pid);
+            auto iter = compact->powerBlocks.find(pid);
+            if (iter != compact->powerBlocks.cend()) {
+                auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
+                ele.avePower = area * iter->second.powerDensity;
             }
         }
         ECAD_TRACE("layer %1%'s total elements: %2%", index, prismaLayer.elements.size())

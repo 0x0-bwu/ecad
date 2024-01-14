@@ -7,12 +7,12 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 
 #include "utilities/EMetalFractionMapping.h"
 #include "utilities/ELayoutPolygonMerger.h"
-#include "utilities/EBoundaryCalculator.h"
 #include "utilities/ELayoutMergeUtility.h"
 #include "utilities/ELayoutConnectivity.h"
 #include "utilities/ELayoutViewRenderer.h"
 #include "utilities/ELayout2CtmUtility.h"
 #include "utilities/ELayoutModifier.h"
+#include "utilities/ELayoutRetriever.h"
 
 #include "interfaces/IHierarchyObjCollection.h"
 #include "interfaces/IPadstackInstCollection.h"
@@ -84,8 +84,8 @@ ECAD_INLINE ELayoutView & ELayoutView::operator= (const ELayoutView & other)
 {
     ECollectionCollection::operator=(other);
     EObject::operator=(other);
-    if (other.m_boundary)
-        m_boundary.reset(new EPolygon(*other.m_boundary));
+    
+    m_boundary = CloneHelper(other.m_boundary);
     m_cell = other.m_cell;
 
     auto primIter = GetPrimitiveIter();
@@ -291,15 +291,15 @@ ECAD_INLINE Ptr<IPadstackInstCollection> ELayoutView::GetPadstackInstCollection(
     return GetConnObjCollection()->GetPadstackInstCollection();
 }
 
-ECAD_INLINE void ELayoutView::SetBoundary(UPtr<EPolygon> boundary)
+ECAD_INLINE void ELayoutView::SetBoundary(UPtr<EShape> boundary)
 {
     m_boundary = std::move(boundary);
 }
 
-ECAD_INLINE CPtr<EPolygon> ELayoutView::GetBoundary() const
+ECAD_INLINE CPtr<EShape> ELayoutView::GetBoundary() const
 {
     if(nullptr == m_boundary) 
-        m_boundary = utils::CalculateBoundary(const_cast<Ptr<ELayoutView> >(this));
+        m_boundary = utils::ELayoutRetriever::CalculateLayoutBoundaryShape(const_cast<Ptr<ELayoutView> >(this));
     return m_boundary.get();
 }
 

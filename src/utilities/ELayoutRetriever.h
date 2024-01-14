@@ -29,6 +29,7 @@ public:
     UPtr<EShape> GetBondwireEndSolderJointParameters(CPtr<IBondwire> bondwire, EFloat & elevation, EFloat & thickness, std::string & material) const;
     CPtr<IStackupLayer> SearchStackupLayer(EFloat height) const;
 
+    static UPtr<EShape> CalculateLayoutBoundaryShape(CPtr<ILayoutView> layout);
 private:    
     UPtr<EShape> GetBondwireStartSolderJointShape(CPtr<IBondwire> bondwire, EFloat & thickness) const;
     UPtr<EShape> GetBondwireEndSolderJointShape(CPtr<IBondwire> bondwire, EFloat & thickness) const;

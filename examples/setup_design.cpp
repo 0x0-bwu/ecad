@@ -35,8 +35,10 @@ void test0()
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
     auto topLayout = topCell->GetLayoutView();
-    auto topBouds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
-    topLayout->SetBoundary(std::move(topBouds));
+    EPolygonWithHolesData pwh;
+    pwh.outline = std::move(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}).shape);
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {-4900, -4900}, 600)->GetContour());
+    topLayout->SetBoundary(eDataMgr.CreateShapePolygonWithHoles(std::move(pwh)));
 
     [[maybe_unused]] auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 400, matCu->GetName(), matCu->GetName()));
 
@@ -140,8 +142,13 @@ void test1()
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell");
     auto topLayout = topCell->GetLayoutView();
-    auto topBouds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
-    topLayout->SetBoundary(std::move(topBouds));
+    EPolygonWithHolesData pwh;
+    pwh.outline = std::move(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}).shape);
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {-4000, -4000}, 750)->GetContour());
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {85000, -4000}, 750)->GetContour());
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {85000, 30000}, 750)->GetContour());
+    pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {-4000, 30000}, 750)->GetContour());
+    topLayout->SetBoundary(eDataMgr.CreateShapePolygonWithHoles(std::move(pwh)));
 
     eDataMgr.CreateNet(topLayout, "Gate");
     eDataMgr.CreateNet(topLayout, "Drain");
@@ -371,7 +378,7 @@ void test1()
     prismaSettings.meshSettings.maxLen = 500;
 
     EThermalStaticSimulationSetup setup;
-    setup.dumpHotmaps = true;
+    setup.settings.dumpHotmaps = true;
     setup.environmentTemperature = 25;
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
@@ -383,7 +390,7 @@ int main(int argc, char * argv[])
     ::signal(SIGABRT, &SignalHandler);
 
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
-    test0();
+    // test0();
     test1();
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;

@@ -82,9 +82,6 @@ struct EThermalSimulationSetup
     virtual ~EThermalSimulationSetup() = default;
     std::string workDir;
     EFloat environmentTemperature = 25;
-    bool dumpHotmaps = true;
-    EFloat residual = 0.5;
-    size_t iteration = 10;
 protected:
     EThermalSimulationSetup() = default;
 };

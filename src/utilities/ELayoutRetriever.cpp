@@ -1,5 +1,8 @@
 #include "ELayoutRetriever.h"
 #include "Interface.h"
+
+#include "generic/geometry/Utility.hpp"
+
 namespace ecad {
 namespace utils {
 
@@ -271,6 +274,49 @@ ECAD_INLINE CPtr<IStackupLayer> ELayoutRetriever::SearchStackupLayer(EFloat heig
             return stackupLayer;
     }
     return nullptr;
+}
+
+ECAD_INLINE UPtr<EShape> ELayoutRetriever::CalculateLayoutBoundaryShape(CPtr<ILayoutView> layout)
+{
+    if(nullptr == layout) return nullptr;
+
+    std::unordered_map<ELayerId, EBox2D> bounds;
+    auto lyrIter = layout->GetLayerIter();
+    while(auto lyr = lyrIter->Next())
+        bounds.insert(std::make_pair(lyr->GetLayerId(), EBox2D{}));
+
+    auto primIter = layout->GetPrimitiveIter();
+    while(auto prim = primIter->Next()){
+        auto layer = prim->GetLayer();
+        if(!bounds.count(layer)) continue;
+
+        auto primType = prim->GetPrimitiveType();
+        switch(primType){
+            case EPrimitiveType::Geometry2D : {
+                auto shape = prim->GetGeometry2DFromPrimitive()->GetShape();
+                if(shape) bounds[layer] |= shape->GetBBox();
+                break;
+            }
+            case EPrimitiveType::Text : {
+                break;
+            }
+            default : break;
+        }
+    }
+
+    EBox2D bbox;
+    for(const auto & bound : bounds) bbox |= bound.second;
+
+    auto cellInstIter = layout->GetCellInstIter();
+    while(auto cellInst = cellInstIter->Next()){
+        auto bdy = cellInst->GetDefLayoutView()->GetBoundary()->Clone();
+        bdy->Transform(cellInst->GetTransform());
+        bbox |= bdy->GetBBox();
+    }
+
+    auto boundary = new EPolygon;
+    boundary->shape = generic::geometry::toPolygon(bbox);
+    return std::unique_ptr<EShape>(boundary);
 }
 
 ECAD_INLINE void ELayoutRetriever::BuildLayerHeightsMap() const

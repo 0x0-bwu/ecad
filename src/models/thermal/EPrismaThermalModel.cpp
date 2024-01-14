@@ -102,7 +102,7 @@ ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
     m_rtrees.clear();
     m_lyrPolygons.clear();
     for (size_t i = 0; i < polygons.size(); ++i) {
-        if (EMaterialId::noMaterial == materials.at(i)) continue;
+        // if (EMaterialId::noMaterial == materials.at(i)) continue;
 
         const auto & range = ranges.at(i);
         size_t sLayer = m_height2Index.at(range.first);
