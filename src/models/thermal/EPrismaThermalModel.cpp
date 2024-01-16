@@ -61,9 +61,11 @@ ECAD_INLINE void ECompactLayout::AddComponent(CPtr<IComponent> component)
     else AddPolygon(ENetId::noNet, material->GetMaterialId(), boundary, false, elevation, thickness);
 
     check = m_retriever->GetComponentBallBumpThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
-    auto solderMat = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetSolderFillingMaterial()); { ECAD_ASSERT(solderMat) }
-    AddPolygon(ENetId::noNet, solderMat->GetMaterialId(), boundary, false, elevation, thickness);
-    //todo solder ball/bump
+    if (thickness > 0) {
+        auto solderMat = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetSolderFillingMaterial()); { ECAD_ASSERT(solderMat) }
+        AddPolygon(ENetId::noNet, solderMat->GetMaterialId(), boundary, false, elevation, thickness);
+        //todo solder ball/bump
+    }
 }
 
 ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat position)

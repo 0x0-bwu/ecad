@@ -429,7 +429,45 @@ void test2()
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
     database->SetCoordUnits(coordUnits);
+
+    auto bondwireSolderDef = eDataMgr.CreatePadstackDef(database, "Bondwire Solder Joints");
+    auto bondwireSolderDefData = eDataMgr.CreatePadstackDefData();
+    bondwireSolderDefData->SetTopSolderBumpMaterial(matSolder->GetName());
+    bondwireSolderDefData->SetBotSolderBallMaterial(matSolder->GetName());
     
+    EFloat bwRadius = 0.15;
+    auto bumpR = bwRadius * 1.2;
+    auto topBump = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
+    bondwireSolderDefData->SetTopSolderBumpParameters(std::move(topBump), 0.1);
+    
+    auto botBall = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
+    bondwireSolderDefData->SetBotSolderBallParameters(std::move(botBall), 0.1);
+
+    bondwireSolderDef->SetPadstackDefData(std::move(bondwireSolderDefData));
+
+    //component
+    auto sicDie = eDataMgr.CreateComponentDef(database, "SicDie");
+    sicDie->SetSolderBallBumpHeight(0.1);
+    sicDie->SetSolderFillingMaterial(matSolder->GetName());
+    sicDie->SetBondingBox(eDataMgr.CreateBox(coordUnits, FPoint2D(-2.545, -2.02), FPoint2D(2.545, 2.02)));
+    sicDie->SetMaterial(matSiC->GetName());
+    sicDie->SetHeight(0.18);
+
+    auto pin1 = eDataMgr.CreateComponentDefPin(sicDie, "Pin1", {0, 1}, EPinIOType::Receiver);
+    auto pin2 = eDataMgr.CreateComponentDefPin(sicDie, "Pin2", {1.25, 1}, EPinIOType::Receiver);
+    auto pin3 = eDataMgr.CreateComponentDefPin(sicDie, "Pin3", {0, -1}, EPinIOType::Receiver);
+    auto pin4 = eDataMgr.CreateComponentDefPin(sicDie, "Pin4", {1.25, -1}, EPinIOType::Receiver);
+
+    auto r1 = eDataMgr.CreateComponentDef(database, "R1");
+    r1->SetBondingBox(eDataMgr.CreateBox(coordUnits, FPoint2D(-1.1, -0.7), FPoint2D(1.1, 0.7)));
+    r1->SetMaterial(matSiC->GetName());
+    r1->SetHeight(0.5);
+
+    auto r2 = eDataMgr.CreateComponentDef(database, "R2");
+    r2->SetBondingBox(eDataMgr.CreateBox(coordUnits, FPoint2D(-1.05, -0.65), FPoint2D(1.05, 0.65)));
+    r2->SetMaterial(matSiC->GetName());
+    r2->SetHeight(0.5);
+
     //top cell
     auto baseCell = eDataMgr.CreateCircuitCell(database, "Base");
     auto baseLayout = baseCell->GetLayoutView();
@@ -492,6 +530,8 @@ void test2()
     eDataMgr.CreateGeometry2D(driverLayout, driverLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, -13.925}, {4.7, -13.925}, {4.7, 13.925}, {-4.7, 13.925}}));//R0.25
     eDataMgr.CreateGeometry2D(driverLayout, driverLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}));
 
+    eDataMgr.CreateComponent(driverLayout, "R1", r1, driverLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, math::Rad(90), {2.75, 9.125}), false)->SetLossPower(5);
+
     //instance
     auto driverL = eDataMgr.CreateCellInst(baseLayout, "DriverL", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-44, 0}));
     driverL->SetLayerMap(driverLayerMap);
@@ -534,14 +574,39 @@ void test2()
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-12.6, -8.8}, {12.35, -8.8}, {12.95, -8.4}, {15.45, -8.4},
         {15.45, -5.97}, {7.95, -5.97}, {7.95, 9.03}, {15.45, 9.03}, {15.45, 11.45}, {-9.75, 11.45}, {-9.75, -3.75}, {-12.6, -3.75}})
     );//R0.25
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, -0.72}, {-12.9, -0.72}, {-12.9, 2.58}, {-13.65, 2.58}}));//R0.25
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, 3.6}, {-12.9, 3.6}, {-12.9, 6.9}, {-13.65, 6.9}}));//R0.25
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, 8.15}, {-12.9, 8.15}, {-12.9, 11.45}, {-13.65, 11.45}}));//R0.25
+
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{9.5, -4.77}, {15.8, -4.77}, {15.8, 7.83}, {9.5, 7.83}}));//R0.25
 
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.25, -12}, {16.25, -12}, {16.25, 12}, {-16.25, 12}}));//R0.25
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
 
+    auto botDie1 = eDataMgr.CreateComponent(botBridgeLayout, "BotDie1", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-2.205, 0}), false);
+    botDie1->SetLossPower(50);
+
+    eDataMgr.CreateComponent(botBridgeLayout, "R2", r2, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 0}), false)->SetLossPower(5);
+
+    auto bw1 = eDataMgr.CreateBondwire(botBridgeLayout, "BW1", ENetId::noNet, bwRadius);
+    bw1->SetStartComponent(botDie1, pin1->GetName());
+    bw1->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{11.36, 5.94}), false);
+
+    auto bw2 = eDataMgr.CreateBondwire(botBridgeLayout, "BW2", ENetId::noNet, bwRadius);
+    bw2->SetStartComponent(botDie1, pin2->GetName());
+    bw2->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{12.86, 5.94}), false);
+
+    auto bw3 = eDataMgr.CreateBondwire(botBridgeLayout, "BW3", ENetId::noNet, bwRadius);
+    bw3->SetStartComponent(botDie1, pin3->GetName());
+    bw3->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{12.05, -3.74}), false);
+
+    auto bw4 = eDataMgr.CreateBondwire(botBridgeLayout, "BW4", ENetId::noNet, bwRadius);
+    bw4->SetStartComponent(botDie1, pin4->GetName());
+    bw4->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{13.73, -2.46}), false);
+
     //instance
-    auto botBridge1 = eDataMgr.CreateCellInst(baseLayout, "botBridge1", botBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-17.75, 13}));
+    auto botBridge1 = eDataMgr.CreateCellInst(baseLayout, "BotBridge1", botBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-17.75, 13}));
     botBridge1->SetLayerMap(botBridgeLayerMap);
 
     auto botBridge2 = eDataMgr.CreateCellInst(baseLayout, "BotBridge2", botBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-17.75, -13}, EMirror2D::X));
@@ -572,9 +637,51 @@ void test2()
     eDataMgr.CreateNet(topBridgeLayout, "Source");
 
     //wire
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -11.6}, {-13.95, -11.6}, {-13.35, -11.2}, {13.35, -11.2},
+        {13.95, -11.6}, {15.45, -11.6}, {15.45, -10.8}, {-15.45, -10.8}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -10.4}, {15.45, -10.4}, {15.45, -9.6}, {13.95, -9.6},
+        {13.35, -10}, {-13.35, -10}, {-13.95, -9.6}, {-15.45, -9.6}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -8.4}, {-12.95, -8.4}, {-12.35, -8.8}, {-9.15, -8.8},
+        {-9.15, -3.1}, {-15.45, -3.1}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -1.9}, {-7.95, -1.9}, {-7.95, -8.8}, {9.75, -8.8},
+        {9.75, 11.45}, {-7.95, 11.45}, {-7.95, 4.45}, {-15.45, 4.45}})
+    );//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, 5.65}, {-9.15, 5.65}, {-9.15, 11.45}, {-15.45, 11.45}}));//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{11.1, -8.5}, {11.85, -8.5}, {11.85, 11.45}, {11.1, 11.45}}));//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, -5.5}, {13.65, -5.5}, {13.65, -2.2}, {12.9, -2.2}}));//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, -0.7}, {13.65, -0.7}, {13.65, 2.6}, {12.9, 2.6}}));//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, 7.4}, {13.65, 7.4}, {13.65, 10.7}, {12.9, 10.7}}));//R0.25
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, -8.5}, {15.45, -8.5}, {15.45, 11.45}, {14.7, 11.45},
+        {14.7, -6.55}, {12.9, -6.55}})
+    );//R0.25
+
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.25, -12}, {16.25, -12}, {16.25, 12}, {-16.25, 12}}));//R0.25
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
+
+    auto topDie1 = eDataMgr.CreateComponent(topBridgeLayout, "TopDie1", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {2.205, 0}, EMirror2D::Y), false);
+    topDie1->SetLossPower(50);
+
+    eDataMgr.CreateComponent(topBridgeLayout, "R3", r2, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 0}), false)->SetLossPower(5);
+
+    auto bw5 = eDataMgr.CreateBondwire(topBridgeLayout, "BW5", ENetId::noNet, bwRadius);
+    bw5->SetStartComponent(topDie1, pin1->GetName());
+    bw5->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-10.98, 7.41}), false);
+
+    auto bw6 = eDataMgr.CreateBondwire(topBridgeLayout, "BW6", ENetId::noNet, bwRadius);
+    bw6->SetStartComponent(topDie1, pin2->GetName());
+    bw6->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-12.48, 7.41}), false);
+
+    auto bw7 = eDataMgr.CreateBondwire(topBridgeLayout, "BW7", ENetId::noNet, bwRadius);
+    bw7->SetStartComponent(topDie1, pin3->GetName());
+    bw7->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-10.98, -7.41}), false);
+
+    auto bw8 = eDataMgr.CreateBondwire(topBridgeLayout, "BW8", ENetId::noNet, bwRadius);
+    bw8->SetStartComponent(topDie1, pin4->GetName());
+    bw8->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-12.48, -7.41}), false);
 
     //instance
     auto topBridge1 = eDataMgr.CreateCellInst(baseLayout, "topBridge1", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, 13}));
@@ -583,16 +690,74 @@ void test2()
     auto topBridge2 = eDataMgr.CreateCellInst(baseLayout, "topBridge2", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, -13}, EMirror2D::X));
     topBridge2->SetLayerMap(botBridgeLayerMap);
 
+    auto bw9 = eDataMgr.CreateBondwire(baseLayout, "BW9", ENetId::noNet, bwRadius);
+    bw9->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, 23.8}), false);
+    bw9->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, 23.8}), false);
+
+    auto bw10 = eDataMgr.CreateBondwire(baseLayout, "BW10", ENetId::noNet, bwRadius);
+    bw10->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, 23}), false);
+    bw10->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, 23}), false);
+
+    auto bw11 = eDataMgr.CreateBondwire(baseLayout, "BW11", ENetId::noNet, bwRadius);
+    bw11->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, 6.2}), false);
+    bw11->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, 6.2}), false);
+
+    auto bw12 = eDataMgr.CreateBondwire(baseLayout, "BW12", ENetId::noNet, bwRadius);
+    bw12->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, 5.4}), false);
+    bw12->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, 5.4}), false);
+
+    auto bw13 = eDataMgr.CreateBondwire(baseLayout, "BW13", ENetId::noNet, bwRadius);
+    bw13->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, 3}), false);
+    bw13->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, 3}), false);
+
+    auto bw14 = eDataMgr.CreateBondwire(baseLayout, "BW14", ENetId::noNet, bwRadius);
+    bw14->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, 1.8}), false);
+    bw14->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, 1.8}), false);
+
+    auto bw15 = eDataMgr.CreateBondwire(baseLayout, "BW15", ENetId::noNet, bwRadius);
+    bw15->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, -23.8}), false);
+    bw15->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, -23.8}), false);
+
+    auto bw16 = eDataMgr.CreateBondwire(baseLayout, "BW16", ENetId::noNet, bwRadius);
+    bw16->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, -23}), false);
+    bw16->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, -23}), false);
+
+    auto bw17 = eDataMgr.CreateBondwire(baseLayout, "BW17", ENetId::noNet, bwRadius);
+    bw17->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, -6.2}), false);
+    bw17->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, -6.2}), false);
+
+    auto bw18 = eDataMgr.CreateBondwire(baseLayout, "BW18", ENetId::noNet, bwRadius);
+    bw18->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, -5.4}), false);
+    bw18->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, -5.4}), false);
+
+    auto bw19 = eDataMgr.CreateBondwire(baseLayout, "BW19", ENetId::noNet, bwRadius);
+    bw19->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, -3}), false);
+    bw19->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, -3}), false);
+
+    auto bw20 = eDataMgr.CreateBondwire(baseLayout, "BW20", ENetId::noNet, bwRadius);
+    bw20->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D{-3, -1.8}), false);
+    bw20->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D{3, -1.8}), false);
+
     //flatten
     database->Flatten(baseCell);
     auto layout = baseCell->GetFlattenedLayoutView();
-    
+
+    auto primIter = baseLayout->GetPrimitiveIter();
+    while (auto * prim = primIter->Next()) {
+        if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
+            bw->SetBondwireType(EBondwireType::Simple);
+            bw->SetSolderJoints(bondwireSolderDef);
+            bw->SetMaterial(matAl->GetName());
+            bw->SetHeight(0.5);
+        }
+    }
+      
     EPrismaThermalModelExtractionSettings prismaSettings;
     prismaSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
-    prismaSettings.meshSettings.minLen = 1e-2;
-    prismaSettings.meshSettings.maxLen = 500;
+    prismaSettings.meshSettings.minLen = 1e-5;
+    prismaSettings.meshSettings.maxLen = 0.5;
 
     EThermalStaticSimulationSetup setup;
     setup.settings.dumpHotmaps = true;
@@ -609,8 +774,8 @@ int main(int argc, char * argv[])
 
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
     // test0();
-    test1();
-    // test2();
+    // test1();
+    test2();
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }
