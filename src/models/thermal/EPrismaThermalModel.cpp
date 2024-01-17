@@ -226,7 +226,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
                 auto sjMat = layout->GetDatabase()->FindMaterialDefByName(sjMatName); { ECAD_ASSERT(sjMat) }
                 if (auto current = bondwire->GetCurrent(); current > 0) {
                     EFloat resistivity;
-                    check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }
+                    check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }//wbtest, T
                     auto r = resistivity * thickness / (shape->GetContour().Area() * scale2Unit * scale2Unit * scale2Meter);
                     compact->AddPowerBlock(sjMat->GetMaterialId(), shape->GetContour(), current * r * r, elevation, thickness, 0.5);
                 }
@@ -239,7 +239,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
                 auto sjMat = layout->GetDatabase()->FindMaterialDefByName(sjMatName); { ECAD_ASSERT(sjMat) }
                 if (auto current = bondwire->GetCurrent(); current > 0) {
                     EFloat resistivity;
-                    check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }
+                    check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }//wbtest, T
                     auto r = resistivity * thickness / (shape->GetContour().Area() * scale2Unit * scale2Unit * scale2Meter);
                     compact->AddPowerBlock(sjMat->GetMaterialId(), shape->GetContour(), current * r * r, elevation, thickness, 0.5);
                 }

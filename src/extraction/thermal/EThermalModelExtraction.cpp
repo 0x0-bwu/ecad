@@ -137,7 +137,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     auto compact = makeCompactLayout(layout);
     if (not settings.workDir.empty()) {
         auto compactModelFile = settings.workDir + ECAD_SEPS + "compact.png";
-        compact->WriteImgView(compactModelFile, 1024);
+        compact->WriteImgView(compactModelFile, 2048);
     }
 
     const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
@@ -147,6 +147,12 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     using namespace generic;
     using namespace generic::geometry;
     const auto & meshSettings = settings.meshSettings;
+    ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, tolerance: %4%, ite: %5%", 
+                meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.tolerance, meshSettings.iteration)
+    auto minAlpha = math::Rad(meshSettings.minAlpha);
+    auto minLen = coordUnits.toCoord(meshSettings.minLen);
+    auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
+    auto tolerance = coordUnits.toCoord(meshSettings.tolerance);
     std::list<tri::IndexEdge> edges;
     std::vector<Point2D<ECoord> > points;
     std::vector<Segment2D<ECoord> > segments;
@@ -154,12 +160,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     MeshFlow2D::ExtractIntersections(compact->polygons, segments);
     MeshFlow2D::ExtractTopology(segments, points, edges);
     points.insert(points.end(), compact->steinerPoints.begin(), compact->steinerPoints.end());
+    MeshFlow2D::MergeClosePointsAndRemapEdge(points, edges, tolerance);
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
-    ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, ite: %4%", 
-                meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.iteration)
-    auto minAlpha = math::Rad(meshSettings.minAlpha);
-    auto minLen = coordUnits.toCoord(meshSettings.minLen);
-    auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
     MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
     if (not settings.workDir.empty()) {
         auto meshTemplateFile = settings.workDir + ECAD_SEPS + "mesh.png";

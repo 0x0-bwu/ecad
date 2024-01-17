@@ -45,6 +45,7 @@ struct EMeshSettings
     EFloat minAlpha{20};//Deg
     EFloat minLen{0};
     EFloat maxLen{maxFloat};
+    EFloat tolerance{0};
 };
 
 struct EPrismaMeshSettings : public EMeshSettings

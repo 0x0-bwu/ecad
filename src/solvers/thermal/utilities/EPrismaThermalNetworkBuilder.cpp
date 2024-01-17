@@ -255,7 +255,7 @@ ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineJouleHeat(size_t index, 
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     auto rho = GetMatResistivity(line.matId, refT);
-    return rho * GetLineLength(index) / GetLineArea(index) * line.current * line.current;
+    return rho * GetLineLength(index) * line.current * line.current / GetLineArea(index);
 }
 
 ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineVolume(size_t index) const
