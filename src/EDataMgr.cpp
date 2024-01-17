@@ -244,8 +244,13 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(const ECoordUnits & coordUnit
     return CreateShapePath(coordUnits.toCoord(points), coordUnits.toCoord(width));
 }
 
-ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points)
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat cornerR)
 {
+    if (cornerR > 0) {
+        generic::geometry::Polygon2D<EFloat> polygon; polygon.Set(points);
+        polygon = generic::geometry::RoundCorners(polygon, cornerR, CircleDiv());
+        return CreateShapePolygon(coordUnits.toCoord(polygon.GetPoints()));
+    }
     return CreateShapePolygon(coordUnits.toCoord(points));
 }
 
