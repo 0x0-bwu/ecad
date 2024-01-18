@@ -15,7 +15,7 @@ namespace fmt = generic::fmt;
 ECAD_INLINE ECadExtXflHandler::ECadExtXflHandler(const std::string & xflFile, size_t circleDiv)
  : m_xflFile(xflFile), m_circleDiv(circleDiv) {}
 
-ECAD_INLINE SPtr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string & name, std::string * err)
+ECAD_INLINE Ptr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string & name, std::string * err)
 {
     auto & mgr = EDataMgr::Instance();
     if(mgr.OpenDatabase(name)){
@@ -393,7 +393,7 @@ ECAD_INLINE void ECadExtXflHandler::Reset()
 {
     m_scale = 1.0;
 
-    m_database.reset();
+    m_database = nullptr;
     m_xflDB.reset(new EXflDB);
 
     m_netIdMap.clear();

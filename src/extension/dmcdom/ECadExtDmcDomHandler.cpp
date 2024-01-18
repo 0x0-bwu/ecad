@@ -64,7 +64,7 @@ ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & 
 ECAD_INLINE ECadExtDmcDomHandler::ECadExtDmcDomHandler(const std::string & dmc, const std::string & dom, ECoordUnits units)
  : m_dmc(dmc), m_dom(dom), m_units(units) {}
 
-ECAD_INLINE SPtr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::string & name, std::string * err)
+ECAD_INLINE Ptr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::string & name, std::string * err)
 {
     auto & mgr = EDataMgr::Instance();
     if(mgr.OpenDatabase(name)){

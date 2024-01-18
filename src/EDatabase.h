@@ -30,7 +30,7 @@ public:
     ///Cell
     Ptr<ICellCollection> GetCellCollection() const override;
     Ptr<ICell> CreateCircuitCell(const std::string & name) override;
-    Ptr<ICell> FindCellByName(const std::string & name) override;
+    Ptr<ICell> FindCellByName(const std::string & name) const override;
     bool GetCircuitCells(std::vector<Ptr<ICell> > & cells) const override;
     bool GetTopCells(std::vector<Ptr<ICell> > & cells) const override;
     bool Flatten(Ptr<ICell> cell) const override;
@@ -44,7 +44,7 @@ public:
     ///ComponentDef
     Ptr<IComponentDefCollection> GetComponentDefCollection() const override;
     Ptr<IComponentDef> CreateComponentDef(const std::string & name) override;
-    Ptr<IComponentDef> FindComponentDefByName(const std::string & name) override;
+    Ptr<IComponentDef> FindComponentDefByName(const std::string & name) const override;
 
     ///LayerMap
     Ptr<ILayerMapCollection> GetLayerMapCollection() const override;

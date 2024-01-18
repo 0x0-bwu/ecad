@@ -971,7 +971,7 @@ def test_extension() :
 
     #gds
     gds_file = cwd + '/../test/data/gdsii/4004.gds'
-    gds_database = mgr.create_database_from_gds('4004', gds_file)
+    gds_database = mgr.create_database_from_gds('4004', gds_file, "")
     assert(gds_database)
 
     # xfl

@@ -16,7 +16,7 @@ class ECAD_API ECadExtGdsHandler
 {
 public:
     explicit ECadExtGdsHandler(const std::string & gdsFile, const std::string & lyrMapFile = std::string{});
-    SPtr<IDatabase> CreateDatabase(const std::string & name, Ptr<std::string> err = nullptr);
+    Ptr<IDatabase> CreateDatabase(const std::string & name, Ptr<std::string> err = nullptr);
 private:
     ///cell and cell primitives
     void ImportOneCell(const EGdsCell & cell, Ptr<ICell> iCell);
@@ -36,7 +36,7 @@ private:
 
 private:
     // temporary data
-    SPtr<IDatabase> m_database = nullptr;
+    Ptr<IDatabase> m_database = nullptr;
     std::map<EGdsObject::LayerId, std::set<ELayerId> > m_layerIdMap;
 };
 

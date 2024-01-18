@@ -18,27 +18,27 @@ public:
     void Init(ELogLevel level = ELogLevel::Info, const std::string & workDir = {});
 
     ///Database
-    SPtr<IDatabase> CreateDatabase(const std::string & name);
-    SPtr<IDatabase> OpenDatabase(const std::string & name);
+    Ptr<IDatabase> CreateDatabase(const std::string & name);
+    Ptr<IDatabase> OpenDatabase(const std::string & name);
     bool RemoveDatabase(const std::string & name);
     void ShutDown(bool autoSave = true);
 
     ///Thirdpart
-    SPtr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap = std::string{});
-    SPtr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl);
+    Ptr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap = std::string{});
+    Ptr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl);
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    bool SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
-    bool LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
+    bool SaveDatabase(CPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
+    bool LoadDatabase(Ptr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
     ///Cell
-    Ptr<ICell> CreateCircuitCell(SPtr<IDatabase> database, const std::string & name);
-    Ptr<ICell> FindCellByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<ICell> CreateCircuitCell(Ptr<IDatabase> database, const std::string & name);
+    Ptr<ICell> FindCellByName(CPtr<IDatabase> database, const std::string & name);
 
     ///Net
     Ptr<INet> CreateNet(Ptr<ILayoutView> layout, const std::string & name);
-    Ptr<INet> FindNetByName(Ptr<ILayoutView> layout, const std::string & name);
+    Ptr<INet> FindNetByName(Ptr<ILayoutView> layout, const std::string & name) const;
 
     ///Layer
     UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, EFloat elevation, EFloat thickness,
@@ -46,23 +46,23 @@ public:
                                     const std::string & dirlectricMat = sDefaultDielectricMat);
     
     ///ComponentDef
-    Ptr<IComponentDef> CreateComponentDef(SPtr<IDatabase> database, const std::string & name);
-    Ptr<IComponentDef> FindComponentDefByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<IComponentDef> CreateComponentDef(Ptr<IDatabase> database, const std::string & name);
+    Ptr<IComponentDef> FindComponentDefByName(CPtr<IDatabase> database, const std::string & name);
 
     ///Material
-    Ptr<IMaterialDef> CreateMaterialDef(SPtr<IDatabase> database, const std::string & name);
-    Ptr<IMaterialDef> FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<IMaterialDef> CreateMaterialDef(Ptr<IDatabase> database, const std::string & name);
+    Ptr<IMaterialDef> FindMaterialDefByName(CPtr<IDatabase> database, const std::string & name);
     UPtr<IMaterialProp> CreateSimpleMaterialProp(EFloat value);
     UPtr<IMaterialProp> CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values);
     UPtr<IMaterialProp> CreateTensorMateriaProp(const std::array<EFloat, 9> & values);
 
     ///LayerMap
-    Ptr<ILayerMap> CreateLayerMap(SPtr<IDatabase> database, const std::string & name);
-    Ptr<ILayerMap> FindLayerMapByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<ILayerMap> CreateLayerMap(Ptr<IDatabase> database, const std::string & name);
+    Ptr<ILayerMap> FindLayerMapByName(CPtr<IDatabase> database, const std::string & name);
 
     ///PadstackDef
-    Ptr<IPadstackDef> CreatePadstackDef(SPtr<IDatabase> database, const std::string & name);
-    Ptr<IPadstackDef> FindPadstackDefByName(SPtr<IDatabase> database, const std::string & name) const;
+    Ptr<IPadstackDef> CreatePadstackDef(Ptr<IDatabase> database, const std::string & name);
+    Ptr<IPadstackDef> FindPadstackDefByName(CPtr<IDatabase> database, const std::string & name) const;
     UPtr<IPadstackDefData> CreatePadstackDefData();
 
     ///PadstackInst

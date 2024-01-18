@@ -20,20 +20,20 @@ ECAD_INLINE EDataMgr::~EDataMgr()
 {
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabase(const std::string & name)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabase(const std::string & name)
 {
-    if(m_databases.count(name)) return nullptr;
+    if (m_databases.count(name)) return nullptr;
 
     auto database = std::make_shared<EDatabase>(name);
     m_databases.insert(std::make_pair(name, database));
-    return database;
+    return database.get();
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::OpenDatabase(const std::string & name)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::OpenDatabase(const std::string & name)
 {
-    if(!m_databases.count(name)) return nullptr;
+    if (not m_databases.count(name)) return nullptr;
     //todo, add is open flag
-    return m_databases[name];
+    return m_databases.at(name).get();
 }
 
 ECAD_INLINE bool EDataMgr::RemoveDatabase(const std::string & name)
@@ -49,47 +49,37 @@ ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
     log::ShutDown();
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
 {
-    if (m_databases.count(name)) return nullptr;
-
-    auto database = ext::CreateDatabaseFromGds(name, gds, lyrMap);
-    if (database) m_databases.insert(std::make_pair(name, database));
-    return database;
+    return ext::CreateDatabaseFromGds(name, gds, lyrMap);
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & name, const std::string & xfl)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & name, const std::string & xfl)
 {
-    if(m_databases.count(name)) return nullptr;
-
-    auto database = ext::CreateDatabaseFromXfl(name, xfl);
-    if(database) {
-        m_databases.insert(std::make_pair(name, database));
-    }
-    return database;
+    return ext::CreateDatabaseFromXfl(name, xfl);
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-ECAD_INLINE bool EDataMgr::SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
+ECAD_INLINE bool EDataMgr::SaveDatabase(CPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
 {
     if(nullptr == database) return false;
     return database->Save(archive, fmt);
 }
     
-ECAD_INLINE bool EDataMgr::LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
+ECAD_INLINE bool EDataMgr::LoadDatabase(Ptr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
 {
     if(nullptr == database) return false;
     return database->Load(archive, fmt);
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE Ptr<ICell> EDataMgr::CreateCircuitCell(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<ICell> EDataMgr::CreateCircuitCell(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateCircuitCell(name);
 }
 
-ECAD_INLINE Ptr<ICell> EDataMgr::FindCellByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<ICell> EDataMgr::FindCellByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindCellByName(name);
@@ -101,7 +91,7 @@ ECAD_INLINE Ptr<INet> EDataMgr::CreateNet(Ptr<ILayoutView> layout, const std::st
     return layout->CreateNet(name);
 }
 
-ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std::string & name)
+ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std::string & name) const
 {
     if(nullptr == layout) return nullptr;
     return layout->FindNetByName(name);
@@ -118,25 +108,25 @@ ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, 
     return UPtr<ILayer>(stackupLayer);
 }
 
-ECAD_INLINE Ptr<IComponentDef> EDataMgr::CreateComponentDef(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IComponentDef> EDataMgr::CreateComponentDef(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateComponentDef(name);
 }
 
-ECAD_INLINE Ptr<IComponentDef> EDataMgr::FindComponentDefByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IComponentDef> EDataMgr::FindComponentDefByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindComponentDefByName(name);
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EDataMgr::CreateMaterialDef(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IMaterialDef> EDataMgr::CreateMaterialDef(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateMaterialDef(name);
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindMaterialDefByName(name);
@@ -157,25 +147,25 @@ ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::arr
     return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
-ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateLayerMap(name);
 }
 
-ECAD_INLINE Ptr<ILayerMap> EDataMgr::FindLayerMapByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<ILayerMap> EDataMgr::FindLayerMapByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindLayerMapByName(name);
 }
 
-ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreatePadstackDef(name);
 }
 
-ECAD_INLINE Ptr<IPadstackDef> EDataMgr::FindPadstackDefByName(SPtr<IDatabase> database, const std::string & name) const
+ECAD_INLINE Ptr<IPadstackDef> EDataMgr::FindPadstackDefByName(CPtr<IDatabase> database, const std::string & name) const
 {
     if(nullptr == database) return nullptr;
     return database->FindPadstackDefByName(name);

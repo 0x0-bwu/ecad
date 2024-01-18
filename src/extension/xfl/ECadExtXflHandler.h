@@ -14,7 +14,7 @@ class ECAD_API ECadExtXflHandler
 {
 public:
     explicit ECadExtXflHandler(const std::string & xflFile, size_t circleDiv = 12);
-    SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
+    Ptr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:
     void ImportComponentDefs();
@@ -42,7 +42,7 @@ private:
     // temporary data
     double m_scale = 1.0;
     UPtr<EXflDB> m_xflDB = nullptr;
-    SPtr<IDatabase> m_database = nullptr;
+    Ptr<IDatabase> m_database = nullptr;
     std::map<int, ELayerId> m_layerIdMap;//xfl to ecad
     std::map<int, ELayerId> m_metalLyrIdMap;//xfl metal Id to ecad
     std::unordered_map<std::string, ENetId> m_netIdMap;

@@ -29,7 +29,7 @@ class ECAD_API ECadExtDmcDomHandler
 {
 public:
     explicit ECadExtDmcDomHandler(const std::string & dmc, const std::string & dom, ECoordUnits units);
-    SPtr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
+    Ptr<IDatabase> CreateDatabase(const std::string & name, std::string * err = nullptr);
 
 private:
     bool ParseDomFile(std::string_view filename, std::vector<EPoint2D> & points, std::string * err = nullptr);

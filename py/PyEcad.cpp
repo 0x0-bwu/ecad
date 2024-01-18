@@ -1047,19 +1047,19 @@ namespace {
 
         //DataMgr
         class_<EDataMgr,boost::noncopyable>("EDataMgr", no_init)
-            .def("create_database", &EDataMgr::CreateDatabase)
-            .def("open_database", &EDataMgr::OpenDatabase)
+            .def("create_database", &EDataMgr::CreateDatabase, return_internal_reference<>())
+            .def("open_database", &EDataMgr::OpenDatabase, return_internal_reference<>())
             .def("remove_database", &EDataMgr::RemoveDatabase)
             .def("shutdown", &EDataMgr::SaveDatabase)
             .def("shutdown", static_cast<void(EDataMgr::*)(bool)>(&EDataMgr::ShutDown), EDataMgrShutDownWithAutoSave())
-            .def("create_database_from_gds", &EDataMgr::CreateDatabaseFromGds)
-            .def("create_database_from_gds", static_cast<SPtr<IDatabase>(EDataMgr::*)(const std::string &, const std::string &, const std::string &)>(&EDataMgr::CreateDatabaseFromGds), EDataMgrCreateDatabaseFromGdsWithoutLayrMap())
-            .def("create_database_from_xfl", &EDataMgr::CreateDatabaseFromXfl)
+            .def("create_database_from_gds", &EDataMgr::CreateDatabaseFromGds, return_internal_reference<>())
+            // .def("create_database_from_gds", static_cast<Ptr<IDatabase>(EDataMgr::*)(const std::string &, const std::string &, const std::string &)>(&EDataMgr::CreateDatabaseFromGds), EDataMgrCreateDatabaseFromGdsWithoutLayrMap())
+            .def("create_database_from_xfl", &EDataMgr::CreateDatabaseFromXfl, return_internal_reference<>())
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("save_database", &EDataMgr::SaveDatabase)
-            .def("save_database", static_cast<bool(EDataMgr::*)(SPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::SaveDatabase), EDataMgrSaveDatabaseBin())
+            .def("save_database", static_cast<bool(EDataMgr::*)(CPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::SaveDatabase), EDataMgrSaveDatabaseBin())
             .def("load_database", &EDataMgr::LoadDatabase)
-            .def("load_database", static_cast<bool(EDataMgr::*)(SPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseBin())
+            .def("load_database", static_cast<bool(EDataMgr::*)(Ptr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseBin())
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("create_circuit_cell", &EDataMgr::CreateCircuitCell, return_internal_reference<>())
             .def("find_cell_by_name", &EDataMgr::FindCellByName, return_internal_reference<>())

@@ -38,7 +38,7 @@ public:
 
     virtual Ptr<ICellCollection> GetCellCollection() const = 0;
     virtual Ptr<ICell> CreateCircuitCell(const std::string & name) = 0;
-    virtual Ptr<ICell> FindCellByName(const std::string & name) = 0;
+    virtual Ptr<ICell> FindCellByName(const std::string & name) const = 0;
     virtual bool GetCircuitCells(std::vector<Ptr<ICell> > & cells) const = 0;
     virtual bool GetTopCells(std::vector<Ptr<ICell> > & cells) const = 0;
     virtual bool Flatten(Ptr<ICell> cell) const = 0;
@@ -50,7 +50,7 @@ public:
 
     virtual Ptr<IComponentDefCollection> GetComponentDefCollection() const = 0;
     virtual Ptr<IComponentDef> CreateComponentDef(const std::string & name) = 0;
-    virtual Ptr<IComponentDef> FindComponentDefByName(const std::string & name) = 0;
+    virtual Ptr<IComponentDef> FindComponentDefByName(const std::string & name) const = 0;
 
     virtual Ptr<ILayerMapCollection> GetLayerMapCollection() const = 0;
     virtual Ptr<ILayerMap> CreateLayerMap(const std::string & name) = 0;

@@ -169,7 +169,7 @@ ECAD_INLINE Ptr<ICell> EDatabase::CreateCircuitCell(const std::string & name)
     return dynamic_cast<Ptr<ICell> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(cell)));
 }
 
-ECAD_INLINE Ptr<ICell> EDatabase::FindCellByName(const std::string & name)
+ECAD_INLINE Ptr<ICell> EDatabase::FindCellByName(const std::string & name) const
 {
     return dynamic_cast<Ptr<ICell> >(EDefinitionCollection::GetDefinition(name, EDefinitionType::Cell));
 }
@@ -235,7 +235,7 @@ ECAD_INLINE Ptr<IComponentDef> EDatabase::CreateComponentDef(const std::string &
     return dynamic_cast<Ptr<IComponentDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(compDef)));
 }
 
-ECAD_INLINE Ptr<IComponentDef> EDatabase::FindComponentDefByName(const std::string & name)
+ECAD_INLINE Ptr<IComponentDef> EDatabase::FindComponentDefByName(const std::string & name) const
 {
     auto compDef = EDefinitionCollection::GetDefinition(name, EDefinitionType::ComponentDef);
     return dynamic_cast<Ptr<IComponentDef> >(compDef);

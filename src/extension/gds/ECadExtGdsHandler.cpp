@@ -16,21 +16,21 @@ namespace fmt = generic::fmt;
 ECAD_INLINE ECadExtGdsHandler::ECadExtGdsHandler(const std::string & gdsFile, const std::string & lyrMapFile)
  : m_gdsFile(gdsFile), m_lyrMapFile(lyrMapFile){}
 
-ECAD_INLINE SPtr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
+ECAD_INLINE Ptr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
 {
     EGdsDB db;
     EGdsReader reader(db);
-    if(!reader(m_gdsFile)) return nullptr;
+    if (not reader(m_gdsFile)) return nullptr;
 
     auto & eMgr = EDataMgr::Instance();
-    if(eMgr.OpenDatabase(name)){
+    if (eMgr.OpenDatabase(name)){
         if(err) *err = fmt::Fmt2Str("Error: database %1% is already exist.", name);
         return nullptr;
     }
 
     //reset temporary data
     Reset();
-    m_database = eMgr.CreateDatabase(name);
+    m_database= eMgr.CreateDatabase(name);
     if(nullptr == m_database) return nullptr;
 
     //set units
@@ -216,7 +216,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOneCellRefArray(CPtr<EGdsCellRefArray>
 
 ECAD_INLINE void ECadExtGdsHandler::Reset()
 {
-    m_database.reset();
+    m_database = nullptr;
     m_layerIdMap.clear();
 }
 
