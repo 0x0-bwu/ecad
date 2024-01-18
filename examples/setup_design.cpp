@@ -19,6 +19,10 @@ void SignalHandler(int signum)
 using namespace ecad;
 auto & eDataMgr = EDataMgr::Instance();
 inline static constexpr EFloat BONDWIRE_RADIUS = 0.15;
+inline static constexpr std::string_view RES_GATE = "Rg";
+inline static constexpr std::string_view NET_GATE = "Gate";
+inline static constexpr std::string_view NET_DRAIN = "Drain";
+inline static constexpr std::string_view NET_SOURCE = "Source";
 void SetupMaterials(Ptr<IDatabase> database)
 {
     auto matAl = eDataMgr.CreateMaterialDef(database, "Al");
@@ -84,10 +88,10 @@ Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
     sicDie->SetHeight(0.18);
 
     eDataMgr.CreateComponentDefPin(sicDie, "G", {-1.25, 1}, EPinIOType::Receiver);
-    eDataMgr.CreateComponentDefPin(sicDie, "A", {-1.25, 0}, EPinIOType::Receiver);
-    eDataMgr.CreateComponentDefPin(sicDie, "B", {-1.25, -1}, EPinIOType::Receiver);
-    eDataMgr.CreateComponentDefPin(sicDie, "C", {1.25, 1}, EPinIOType::Receiver);
-    eDataMgr.CreateComponentDefPin(sicDie, "D", {1.25, 0}, EPinIOType::Receiver);
+    eDataMgr.CreateComponentDefPin(sicDie, "B", {-1.25, 0}, EPinIOType::Receiver);
+    eDataMgr.CreateComponentDefPin(sicDie, "D", {-1.25, -1}, EPinIOType::Receiver);
+    eDataMgr.CreateComponentDefPin(sicDie, "A", {1.25, 1}, EPinIOType::Receiver);
+    eDataMgr.CreateComponentDefPin(sicDie, "C", {1.25, 0}, EPinIOType::Receiver);
     eDataMgr.CreateComponentDefPin(sicDie, "E", {1.25, -1}, EPinIOType::Receiver);
     return sicDie;
 }
@@ -124,12 +128,13 @@ Ptr<IComponentDef> CreateR1ComponentDef(Ptr<IDatabase> database)
     return r1;
 }
 
-Ptr<IComponentDef> CreateR2ComponentDef(Ptr<IDatabase> database)
-{    auto r2 = eDataMgr.CreateComponentDef(database, "R2");
-    r2->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-1.05, -0.65), FPoint2D(1.05, 0.65)));
-    r2->SetMaterial("SiC");//wbtest
-    r2->SetHeight(0.5);
-    return r2;
+Ptr<IComponentDef> CreateGateResistanceComponentDef(Ptr<IDatabase> database)
+{  
+    auto r = eDataMgr.CreateComponentDef(database, RES_GATE.data());
+    r->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-1.05, -0.65), FPoint2D(1.05, 0.65)));
+    r->SetMaterial("SiC");//wbtest
+    r->SetHeight(0.5);
+    return r;
 }
 
 Ptr<ILayerMap> CreateDefaultLayerMap(Ptr<IDatabase> database, Ptr<ILayoutView> fromLayout, Ptr<ILayoutView> toLayout, const std::string & name)
@@ -262,7 +267,7 @@ Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
     return driverLayout;
 }
 
-Ptr<ILayoutView> CreateBottomBridgeLayout(Ptr<IDatabase> database)
+Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
 {
     const auto & coordUnits = database->GetCoordUnits();
     auto botBridgeCell = eDataMgr.CreateCircuitCell(database, "BotBridgeCell");
@@ -278,9 +283,9 @@ Ptr<ILayoutView> CreateBottomBridgeLayout(Ptr<IDatabase> database)
     botBridgeLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
     
     //net
-    eDataMgr.CreateNet(botBridgeLayout, "Gate");
-    eDataMgr.CreateNet(botBridgeLayout, "Drain");
-    eDataMgr.CreateNet(botBridgeLayout, "Source");
+    auto ng = eDataMgr.CreateNet(botBridgeLayout, "Gate");
+    auto nd = eDataMgr.CreateNet(botBridgeLayout, "Drain");
+    auto ns = eDataMgr.CreateNet(botBridgeLayout, "Source");
 
     //wire
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -11.2}, {13.35, -11.2}, {13.95, -11.6}, {15.45, -11.6},
@@ -302,28 +307,48 @@ Ptr<ILayoutView> CreateBottomBridgeLayout(Ptr<IDatabase> database)
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.25, -12}, {16.25, -12}, {16.25, 12}, {-16.25, 12}}, 0.25));
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}, 0.25));
 
+    std::array<Ptr<IComponent>, 3> dieComp;
     auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
-    auto botDie1 = eDataMgr.CreateComponent(botBridgeLayout, "BotDie1", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-2.205, 0}), false);
-    botDie1->SetLossPower(50);
+    dieComp[0] = eDataMgr.CreateComponent(botBridgeLayout, "Die1", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, 8.93}), false);
+    dieComp[0]->SetLossPower(50);
 
-    auto r2 = eDataMgr.FindComponentDefByName(database, "R2");
-    eDataMgr.CreateComponent(botBridgeLayout, "R2", r2, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 0}), false)->SetLossPower(5);
+    dieComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Die2", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, 3.86}), false);
+    dieComp[1]->SetLossPower(50);
 
-    auto bw1 = eDataMgr.CreateBondwire(botBridgeLayout, "BW1", ENetId::noNet, BONDWIRE_RADIUS);
-    bw1->SetStartComponent(botDie1, "A");
-    bw1->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{11.36, 5.94}), false);
+    dieComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Die3", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, -1.21}), false);
+    dieComp[2]->SetLossPower(50);
 
-    auto bw2 = eDataMgr.CreateBondwire(botBridgeLayout, "BW2", ENetId::noNet, BONDWIRE_RADIUS);
-    bw2->SetStartComponent(botDie1, "B");
-    bw2->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{12.86, 5.94}), false);
+    std::array<Ptr<IComponent>, 3> diodeComp;
+    auto diode = eDataMgr.FindComponentDefByName(database, "Diode");
+    diodeComp[0] = eDataMgr.CreateComponent(botBridgeLayout, "Diode1", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, 8.08}), false);
+    diodeComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Diode2", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, 1.33}), false);
+    diodeComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Diode3", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, -5.42}), false);
 
-    auto bw3 = eDataMgr.CreateBondwire(botBridgeLayout, "BW3", ENetId::noNet, BONDWIRE_RADIUS);
-    bw3->SetStartComponent(botDie1, "C");
-    bw3->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{12.05, -3.74}), false);
+    auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
+    eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false)->SetLossPower(5);
+    eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 5.95}), false)->SetLossPower(5);
+    eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.63}), false)->SetLossPower(5);
 
-    auto bw4 = eDataMgr.CreateBondwire(botBridgeLayout, "BW4", ENetId::noNet, BONDWIRE_RADIUS);
-    bw4->SetStartComponent(botDie1, "D");
-    bw4->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{13.73, -2.46}), false);
+    auto gateBw1 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), BONDWIRE_RADIUS);
+    gateBw1->SetStartComponent(dieComp[0], "G");
+    gateBw1->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 9.1}), false);
+
+    auto gateBw2 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw2", ng->GetNetId(), BONDWIRE_RADIUS);
+    gateBw2->SetStartComponent(dieComp[1], "G");
+    gateBw2->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 4.55}), false);
+
+    auto gateBw3 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), BONDWIRE_RADIUS);
+    gateBw3->SetStartComponent(dieComp[2], "G");
+    gateBw3->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 0.23}), false);
+
+    std::vector<std::string> pins{"A", "B", "C", "D", "E"};
+    for (size_t i = 0; i < dieComp.size(); ++i) {
+        for (size_t j = 0; j < pins.size(); ++j) {
+            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, pins.at(j), ns->GetNetId(), BONDWIRE_RADIUS);
+            bw->SetStartComponent(dieComp[i], pins.at(j));
+            bw->SetEndComponent(diodeComp[i], pins.at(j));
+        }
+    }
 
     return botBridgeLayout;
 }
@@ -374,26 +399,39 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
 
     auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
-    auto topDie1 = eDataMgr.CreateComponent(topBridgeLayout, "TopDie1", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {2.205, 0}, EMirror2D::Y), false);
-    topDie1->SetLossPower(50);
+    auto die1 = eDataMgr.CreateComponent(topBridgeLayout, "Die1", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, 8.08}, EMirror2D::Y), false);
+    die1->SetLossPower(50);
 
-    auto r2 = eDataMgr.FindComponentDefByName(database, "R2");
-    eDataMgr.CreateComponent(topBridgeLayout, "R3", r2, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 0}), false)->SetLossPower(5);
+    auto die2 = eDataMgr.CreateComponent(topBridgeLayout, "Die2", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, 1.33}, EMirror2D::Y), false);
+    die2->SetLossPower(50);
+
+    auto die3 = eDataMgr.CreateComponent(topBridgeLayout, "Die3", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, -5.42}, EMirror2D::Y), false);
+    die3->SetLossPower(50);
+
+    auto diode = eDataMgr.FindComponentDefByName(database, "Diode");
+    eDataMgr.CreateComponent(topBridgeLayout, "Diode1", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, 8.08}), false);
+    eDataMgr.CreateComponent(topBridgeLayout, "Diode2", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, 1.33}), false);
+    eDataMgr.CreateComponent(topBridgeLayout, "Diode3", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, -5.42}), false);
+
+    auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
+    eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false)->SetLossPower(5);
+    eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 0.25}), false)->SetLossPower(5);
+    eDataMgr.CreateComponent(topBridgeLayout, "R3", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, -4.55}), false)->SetLossPower(5);
 
     auto bw5 = eDataMgr.CreateBondwire(topBridgeLayout, "BW5", ENetId::noNet, BONDWIRE_RADIUS);
-    bw5->SetStartComponent(topDie1, "A");
+    bw5->SetStartComponent(die1, "A");
     bw5->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-10.98, 7.41}), false);
 
     auto bw6 = eDataMgr.CreateBondwire(topBridgeLayout, "BW6", ENetId::noNet, BONDWIRE_RADIUS);
-    bw6->SetStartComponent(topDie1, "B");
+    bw6->SetStartComponent(die1, "B");
     bw6->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-12.48, 7.41}), false);
 
     auto bw7 = eDataMgr.CreateBondwire(topBridgeLayout, "BW7", ENetId::noNet, BONDWIRE_RADIUS);
-    bw7->SetStartComponent(topDie1, "C");
+    bw7->SetStartComponent(die1, "C");
     bw7->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-10.98, -7.41}), false);
 
     auto bw8 = eDataMgr.CreateBondwire(topBridgeLayout, "BW8", ENetId::noNet, BONDWIRE_RADIUS);
-    bw8->SetStartComponent(topDie1, "D");
+    bw8->SetStartComponent(die1, "D");
     bw8->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{-12.48, -7.41}), false);
 
     return topBridgeLayout;
@@ -414,9 +452,10 @@ void test2()
     auto bondwireSolderDef = CreateBondwireSolderJoints(database, "Source Solder Joints", BONDWIRE_RADIUS);
 
     //component
-    auto sicDie = CreateSicDieComponentDef(database);
-    auto r1 = CreateR1ComponentDef(database);
-    auto r2 = CreateR2ComponentDef(database);
+    CreateSicDieComponentDef(database);
+    CreateDiodeComponentDef(database);
+    CreateR1ComponentDef(database);
+    CreateGateResistanceComponentDef(database);
 
     auto baseLayout = CreateBaseLayout(database);
     auto driverLayout = CreateDriverLayout(database);
@@ -428,7 +467,7 @@ void test2()
     auto driverR = eDataMgr.CreateCellInst(baseLayout, "DriverR", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {44, 0}, EMirror2D::XY));
     driverR->SetLayerMap( driverLayerMap);
 
-    auto botBridgeLayout = CreateBottomBridgeLayout(database);
+    auto botBridgeLayout = CreateBotBridgeLayout(database);
     auto botBridgeLayerMap = CreateDefaultLayerMap(database, botBridgeLayout, baseLayout, "BotBridgeLayerMap");
 
     //instance
@@ -443,10 +482,10 @@ void test2()
 
     //instance
     auto topBridge1 = eDataMgr.CreateCellInst(baseLayout, "topBridge1", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, 13}));
-    topBridge1->SetLayerMap(botBridgeLayerMap);
+    topBridge1->SetLayerMap(topBridgeLayerMap);
 
     auto topBridge2 = eDataMgr.CreateCellInst(baseLayout, "topBridge2", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, -13}, EMirror2D::X));
-    topBridge2->SetLayerMap(botBridgeLayerMap);
+    topBridge2->SetLayerMap(topBridgeLayerMap);
 
     //flatten
     baseLayout->Flatten(EFlattenOption{});
