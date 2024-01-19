@@ -80,7 +80,10 @@ ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData p
 
 ECAD_INLINE bool ECompactLayout::WriteImgView(std::string_view filename, size_t width) const
 {
-    return generic::geometry::GeometryIO::WritePNG(filename, polygons.begin(), polygons.end(), width);
+    auto shapes = polygons;
+    for (const auto & bw : bondwires)
+        shapes.emplace_back(EPolygonData(bw.pt2ds));
+    return generic::geometry::GeometryIO::WritePNG(filename, shapes.begin(), shapes.end(), width);
 }
 
 ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
