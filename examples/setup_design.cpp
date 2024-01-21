@@ -24,40 +24,48 @@ inline static constexpr std::string_view RES_GATE = "Rg";
 inline static constexpr std::string_view NET_GATE = "Gate";
 inline static constexpr std::string_view NET_DRAIN = "Drain";
 inline static constexpr std::string_view NET_SOURCE = "Source";
+
+inline static constexpr std::string_view MAT_AL = "Al";
+inline static constexpr std::string_view MAT_CU = "Cu";
+inline static constexpr std::string_view MAT_AIR = "Air";
+inline static constexpr std::string_view MAT_ALN = "AlN";
+inline static constexpr std::string_view MAT_SIC = "SiC";
+inline static constexpr std::string_view MAT_SAC305 = "SAC305";
+
 void SetupMaterials(Ptr<IDatabase> database)
 {
-    auto matAl = eDataMgr.CreateMaterialDef(database, "Al");
+    auto matAl = eDataMgr.CreateMaterialDef(database, MAT_AL.data());
     matAl->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(238));
     matAl->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(880));
     matAl->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2700));
     matAl->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(2.82e-8));
 
-    auto matCu = eDataMgr.CreateMaterialDef(database, "Cu");
-    matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(398));
-    matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(380));
+    auto matCu = eDataMgr.CreateMaterialDef(database, MAT_CU.data());
+    matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreatePolynomialMaterialProp({{437.6, -0.165, 1.825e-4, -1.427e-7, 3.979e-11}}));
+    matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreatePolynomialMaterialProp({{342.8, 0.134, 5.535e-5, -1.971e-7, 1.141e-10}}));
     matCu->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(8850));
 
-    auto matAir = eDataMgr.CreateMaterialDef(database, "Air");
+    auto matAir = eDataMgr.CreateMaterialDef(database, MAT_AIR.data());
     matAir->SetMaterialType(EMaterialType::Fluid);
     matAir->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(0.026));
     matAir->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(1.003));
     matAir->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(1.225));
 
-    auto matSiC = eDataMgr.CreateMaterialDef(database, "SiC");  
-    matSiC->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(370));
-    matSiC->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(750));
+    auto matSiC = eDataMgr.CreateMaterialDef(database, MAT_SIC.data());  
+    matSiC->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreatePolynomialMaterialProp({{1860, -11.7, 0.03442, -4.869e-5, 2.675e-8}}));
+    matSiC->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreatePolynomialMaterialProp({{-3338, 33.12, -0.1037, 0.0001522, -8.553e-8}}));
     matSiC->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(3210));
 
-    auto matSi3N4 = eDataMgr.CreateMaterialDef(database, "Si3N4");
-    matSi3N4->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(70));
-    matSi3N4->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(691));
-    matSi3N4->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(2400));
+    auto matAlN= eDataMgr.CreateMaterialDef(database, MAT_ALN.data());
+    matAlN->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreatePolynomialMaterialProp({{421.7867, -1.1262, 0.001}}));
+    matAlN->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreatePolynomialMaterialProp({{170.2, -2.018, 0.032, -8.957e-5, 1.032e-7, -4.352e-11}}));
+    matAlN->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(3260));
 
-    auto matSn35Ag = eDataMgr.CreateMaterialDef(database, "Sn-3.5Ag");
-    matSn35Ag->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(33));
-    matSn35Ag->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(200));
-    matSn35Ag->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(7360));
-    matSn35Ag->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(11.4e-8));
+    auto matSolder = eDataMgr.CreateMaterialDef(database, MAT_SAC305.data());
+    matSolder->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(55));
+    matSolder->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(218));
+    matSolder->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(7800));
+    matSolder->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(11.4e-8));
 }
 
 Ptr<IPadstackDef> CreateBondwireSolderJoints(Ptr<IDatabase> database, const std::string & name, EFloat bwRadius)
@@ -65,8 +73,8 @@ Ptr<IPadstackDef> CreateBondwireSolderJoints(Ptr<IDatabase> database, const std:
     const auto & coordUnits = database->GetCoordUnits();
     auto def = eDataMgr.CreatePadstackDef(database, name);
     auto defData = eDataMgr.CreatePadstackDefData();
-    defData->SetTopSolderBumpMaterial("Sn-3.5Ag");
-    defData->SetBotSolderBallMaterial("Sn-3.5Ag");
+    defData->SetTopSolderBumpMaterial(MAT_SAC305.data());
+    defData->SetBotSolderBallMaterial(MAT_SAC305.data());
     
     auto bumpR = bwRadius * 1.1;
     auto topBump = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
@@ -83,9 +91,9 @@ Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
 {
     auto sicDie = eDataMgr.CreateComponentDef(database, "SicDie");
     sicDie->SetSolderBallBumpHeight(0.1);
-    sicDie->SetSolderFillingMaterial("Sn-3.5Ag");
+    sicDie->SetSolderFillingMaterial(MAT_SAC305.data());
     sicDie->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-2.545, -2.02), FPoint2D(2.545, 2.02)));
-    sicDie->SetMaterial("SiC");
+    sicDie->SetMaterial(MAT_SIC.data());
     sicDie->SetHeight(0.18);
 
     eDataMgr.CreateComponentDefPin(sicDie, "G", {-1.25, 1}, EPinIOType::Receiver);
@@ -101,9 +109,9 @@ Ptr<IComponentDef> CreateDiodeComponentDef(Ptr<IDatabase> database)
 {
     auto diode = eDataMgr.CreateComponentDef(database, "Diode");
     diode->SetSolderBallBumpHeight(0.1);
-    diode->SetSolderFillingMaterial("Sn-3.5Ag");
+    diode->SetSolderFillingMaterial(MAT_SAC305.data());
     diode->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-2.25, -2.25), FPoint2D(2.25, 2.25)));
-    diode->SetMaterial("SiC");
+    diode->SetMaterial(MAT_SIC.data());
     diode->SetHeight(0.18);
 
     eDataMgr.CreateComponentDefPin(diode, "A", {-1.125, 1.5}, EPinIOType::Receiver);
@@ -124,7 +132,7 @@ Ptr<IComponentDef> CreateR1ComponentDef(Ptr<IDatabase> database)
 {
     auto r1 = eDataMgr.CreateComponentDef(database, "R1");
     r1->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-1.1, -0.7), FPoint2D(1.1, 0.7)));
-    r1->SetMaterial("SiC");//wbtest
+    r1->SetMaterial(MAT_SIC.data());//wbtest
     r1->SetHeight(0.5);
     return r1;
 }
@@ -133,7 +141,7 @@ Ptr<IComponentDef> CreateGateResistanceComponentDef(Ptr<IDatabase> database)
 {  
     auto r = eDataMgr.CreateComponentDef(database, RES_GATE.data());
     r->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-1.05, -0.65), FPoint2D(1.05, 0.65)));
-    r->SetMaterial("SiC");//wbtest
+    r->SetMaterial(MAT_SIC.data());//wbtest
     r->SetHeight(0.5);
     return r;
 }
@@ -171,11 +179,11 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
     eDataMgr.CreateNet(baseLayout, "Source");
 
     //base
-    auto topCuLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCuLayer", ELayerType::ConductingLayer, 0, 0.3, "Cu", "Air"));
-    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("CeramicLayer",  ELayerType::DielectricLayer, -0.3, 0.38, "Si3N4", "Air"));
-    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("BotCuLayer", ELayerType::ConductingLayer, -0.68, 0.3, "Cu", "Air"));
-    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("SolderLayer", ELayerType::ConductingLayer, -0.98, 0.1, "Sn-3.5Ag", "Air"));
-    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("BaseLayer", ELayerType::ConductingLayer, -1.08, 3, "Cu", "Cu"));
+    auto topCuLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCuLayer", ELayerType::ConductingLayer, 0, 0.3, MAT_CU.data(), MAT_AIR.data()));
+    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("CeramicLayer",  ELayerType::DielectricLayer, -0.3, 0.38, MAT_ALN.data(), MAT_AIR.data()));
+    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("BotCuLayer", ELayerType::ConductingLayer, -0.68, 0.3, MAT_CU.data(), MAT_AIR.data()));
+    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("SolderLayer", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
+    baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("BaseLayer", ELayerType::ConductingLayer, -1.08, 3, MAT_CU.data(), MAT_CU.data()));
     
     std::vector<FPoint2D> dPLoc{
         {-3, 24}, {-3, 23.275}, {-3, 22.55}, {-4, 23.275}, {-4, 22.55}, {-3, 6.525}, {-3, 5.8}, {-3, 5.075}, {-4, 6.525}, {-4, 5.8},
@@ -216,10 +224,10 @@ Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
     auto driverLayout = driverCell->GetLayoutView();
 
     //layer
-    auto driverLayer1 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer1", ELayerType::DielectricLayer, -0.3, 0.38, "Si3N4", "Air"));
-    auto driverLayer2 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer2", ELayerType::ConductingLayer, -0.68, 0.3, "Cu", "Air"));
-    auto driverLayer3 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer3", ELayerType::ConductingLayer, -0.98, 0.1, "Sn-3.5Ag", "Air"));
-    auto driverLayer4 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer4", ELayerType::ConductingLayer, -0.98, 0.1, "Sn-3.5Ag", "Air"));
+    auto driverLayer1 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer1", ELayerType::DielectricLayer, -0.3, 0.38, MAT_ALN.data(), MAT_AIR.data()));
+    auto driverLayer2 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer2", ELayerType::ConductingLayer, -0.68, 0.3, MAT_CU.data(), MAT_AIR.data()));
+    auto driverLayer3 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer3", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
+    auto driverLayer4 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer4", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
 
     //boundary   
     driverLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}));
@@ -257,10 +265,10 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     auto botBridgeLayout = botBridgeCell->GetLayoutView();
 
     //layer
-    auto botBridgeLayer1 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer1", ELayerType::DielectricLayer, -0.3, 0.38, "Si3N4", "Air"));
-    auto botBridgeLayer2 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer2", ELayerType::ConductingLayer, -0.68, 0.3, "Cu", "Air"));
-    auto botBridgeLayer3 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer3", ELayerType::ConductingLayer, -0.98, 0.1, "Sn-3.5Ag", "Air"));
-    auto botBridgeLayer4 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer4", ELayerType::ConductingLayer, -0.98, 0.1, "Sn-3.5Ag", "Air"));
+    auto botBridgeLayer1 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer1", ELayerType::DielectricLayer, -0.3, 0.38, MAT_ALN.data(), MAT_AIR.data()));
+    auto botBridgeLayer2 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer2", ELayerType::ConductingLayer, -0.68, 0.3, MAT_CU.data(), MAT_AIR.data()));
+    auto botBridgeLayer3 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer3", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
+    auto botBridgeLayer4 = botBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer4", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
 
     //boundary   
     botBridgeLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
@@ -356,10 +364,10 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     auto topBridgeLayout = topBridgeCell->GetLayoutView();
 
     //layer
-    auto topBridgeLayer1 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer1", ELayerType::DielectricLayer, -0.3, 0.38,"Si3N4", "Air"));
-    auto topBridgeLayer2 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer2", ELayerType::ConductingLayer, -0.68, 0.3, "Cu", "Air"));
-    auto topBridgeLayer3 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer3", ELayerType::ConductingLayer, -0.98, 0.1, "Sn-3.5Ag", "Air"));
-    auto topBridgeLayer4 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer4", ELayerType::ConductingLayer, -0.98, 0.1, "Sn-3.5Ag", "Air"));
+    auto topBridgeLayer1 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer1", ELayerType::DielectricLayer, -0.3, 0.38,MAT_ALN.data(), MAT_AIR.data()));
+    auto topBridgeLayer2 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer2", ELayerType::ConductingLayer, -0.68, 0.3, MAT_CU.data(), MAT_AIR.data()));
+    auto topBridgeLayer3 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer3", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
+    auto topBridgeLayer4 = topBridgeLayout->AppendLayer(eDataMgr.CreateStackupLayer("Layer4", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
 
     //boundary   
     topBridgeLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
@@ -510,7 +518,7 @@ void test2()
         if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
             bw->SetBondwireType(EBondwireType::Simple);
             bw->SetSolderJoints(bondwireSolderDef);
-            bw->SetMaterial("Al");
+            bw->SetMaterial(MAT_AL.data());
             bw->SetHeight(0.5);
         }
     }

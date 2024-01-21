@@ -173,7 +173,7 @@ public:
     const PrismaInstance & GetPrisma(size_t index) const { return m_prismas.at(index); }
     const LineElement & GetLine(size_t index) const { return m_lines.at(index); }
 
-    bool NeedIteration() const { return false; } //wbtest,todo
+    bool NeedIteration() const { return true; }
     bool isTopLayer(size_t lyrIndex) const;
     bool isBotLayer(size_t lyrIndex) const;
     size_t AddPoint(FPoint3D point);

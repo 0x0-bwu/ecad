@@ -147,6 +147,11 @@ ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::arr
     return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreatePolynomialMaterialProp(std::vector<std::vector<EFloat>> coefficients)
+{
+    return UPtr<IMaterialProp>(new EMaterialPropPolynomial(std::move(coefficients)));
+}
+
 ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;

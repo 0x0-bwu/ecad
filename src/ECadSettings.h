@@ -83,6 +83,13 @@ struct EThermalSimulationSetup
     virtual ~EThermalSimulationSetup() = default;
     std::string workDir;
     EFloat environmentTemperature = 25;
+    generic::unit::Temperature unit = generic::unit::Temperature::Celsius;
+
+    EFloat GetInitTemperature() const
+    {
+        using namespace generic::unit;
+        return unit == Temperature::Celsius ? Celsius2Kelvins(environmentTemperature) : environmentTemperature;
+    }
 protected:
     EThermalSimulationSetup() = default;
 };

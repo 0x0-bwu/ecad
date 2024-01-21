@@ -55,6 +55,7 @@ public:
     UPtr<IMaterialProp> CreateSimpleMaterialProp(EFloat value);
     UPtr<IMaterialProp> CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values);
     UPtr<IMaterialProp> CreateTensorMateriaProp(const std::array<EFloat, 9> & values);
+    UPtr<IMaterialProp> CreatePolynomialMaterialProp(std::vector<std::vector<EFloat>> coefficients);
 
     ///LayerMap
     Ptr<ILayerMap> CreateLayerMap(Ptr<IDatabase> database, const std::string & name);

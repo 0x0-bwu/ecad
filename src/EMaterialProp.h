@@ -2,6 +2,9 @@
 #include "interfaces/IMaterialProp.h"
 #include <vector>
 #include <map>
+
+///@note for temperature dependent material property, the index unit use Kelvin
+
 namespace ecad {
 
 enum class EMatDependency { None, Temperature/*degC*/, Frequency/*Hz*/ };
@@ -11,9 +14,12 @@ class ECAD_API EMaterialProp : public IMaterialProp
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     virtual ~EMaterialProp() = default;
-
+    virtual bool isPropValue() const override { return false;  } 
+    virtual bool isPropTable() const override { return false; }
+    virtual bool isPropPolynomial() const override { return false; }
     virtual Ptr<IMaterialPropValue> GetPropValue() override { ECAD_ASSERT(false) return nullptr; }
     virtual Ptr<IMaterialPropTable> GetPropTable() override { ECAD_ASSERT(false) return nullptr; }
+    virtual Ptr<IMaterialPropPolynomial> GetPropPolynomial() override { ECAD_ASSERT(false) return nullptr; }
 };
 
 class ECAD_API EMaterialPropValue : public EMaterialProp, public IMaterialPropValue
@@ -27,7 +33,6 @@ public:
     ~EMaterialPropValue() = default;
 
     bool isPropValue() const override { return true;  } 
-    bool isPropTable() const override { return false; }
     Ptr<IMaterialPropValue> GetPropValue() override;
 
     void SetSimpleProperty(const EFloat & value) override;
@@ -65,7 +70,6 @@ public:
     EMaterialPropTable(const EMaterialPropTable & other);
     EMaterialPropTable & operator= (const EMaterialPropTable & other);
 
-    bool isPropValue() const override { return false; } 
     bool isPropTable() const override { return true;  }
     Ptr<IMaterialPropTable> GetPropTable() override;
 
@@ -82,7 +86,32 @@ private:
     std::map<EFloat, UPtr<IMaterialProp> > m_values;
 };
 
+class ECAD_API EMaterialPropPolynomial : public EMaterialProp, public IMaterialPropPolynomial
+{
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+    EMaterialPropPolynomial();
+public:
+    explicit EMaterialPropPolynomial(std::vector<std::vector<EFloat>> coefficients);
+    ~EMaterialPropPolynomial() = default;
+
+    bool isPropPolynomial() const override { return true;  } 
+    Ptr<IMaterialPropPolynomial> GetPropPolynomial() override;
+
+    bool GetSimpleProperty(EFloat index, EFloat & value) const override;
+    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override;
+    bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override;
+
+protected:
+    ///Copy
+    virtual Ptr<EMaterialPropPolynomial> CloneImp() const override { return new EMaterialPropPolynomial(*this); }
+
+    static EFloat Calculate(const std::vector<EFloat> & coefficients, EFloat index);
+private:
+    std::vector<std::vector<EFloat> > m_coefficients;
+};
+
 }//namespace ecad
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialProp)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialPropValue)
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialPropTable)
+ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::EMaterialPropPolynomial)

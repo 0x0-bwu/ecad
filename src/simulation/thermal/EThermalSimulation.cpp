@@ -70,6 +70,7 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);
     solver.settings.workDir = setup->workDir;
+    solver.settings.iniT = setup->GetInitTemperature();
     solver.settings = setup->settings;
     if (not solver.Solve(minT, maxT)) return false;
     

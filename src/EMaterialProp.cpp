@@ -65,6 +65,26 @@ ECAD_INLINE void EMaterialPropTable::load(Archive & ar, const unsigned int versi
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropTable)
 
+template <typename Archive>
+ECAD_INLINE void EMaterialPropPolynomial::save(Archive & ar, const unsigned int version) const
+{
+    ECAD_UNUSED(version)
+    boost::serialization::void_cast_register<EMaterialPropPolynomial, IMaterialPropPolynomial>();
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EMaterialProp);
+    ar & boost::serialization::make_nvp("coefficients", m_coefficients);
+}
+
+template <typename Archive>
+ECAD_INLINE void EMaterialPropPolynomial::load(Archive & ar, const unsigned int version)
+{
+    ECAD_UNUSED(version)
+    boost::serialization::void_cast_register<EMaterialPropPolynomial, IMaterialPropPolynomial>();
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EMaterialProp);
+    ar & boost::serialization::make_nvp("coefficients", m_coefficients);
+}
+
+ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropPolynomial)
+
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EMaterialPropValue::EMaterialPropValue(const std::array<EFloat, 9> & values)
@@ -201,6 +221,48 @@ ECAD_INLINE EMaterialPropTable & EMaterialPropTable::operator= (const EMaterialP
         m_values.insert(std::make_pair(value.first, CloneHelper(value.second)));
     }
     return *this;  
+}
+
+ECAD_INLINE EMaterialPropPolynomial::EMaterialPropPolynomial(std::vector<std::vector<EFloat>> coefficients)
+ : m_coefficients(std::move(coefficients))
+{
+}
+
+ECAD_INLINE EMaterialPropPolynomial::EMaterialPropPolynomial()
+{
+    ECAD_ASSERT(false)
+}
+
+ECAD_INLINE Ptr<IMaterialPropPolynomial> EMaterialPropPolynomial::GetPropPolynomial()
+{
+    return dynamic_cast<Ptr<IMaterialPropPolynomial> >(this);
+}
+
+ECAD_INLINE EFloat EMaterialPropPolynomial::Calculate(const std::vector<EFloat> & coefficients, EFloat index)
+{
+    ECAD_ASSERT(not coefficients.empty())
+    EFloat value = coefficients.front();
+    for (size_t i = 1; i < coefficients.size(); ++i)
+        value += std::pow(index, i) * coefficients.at(i);
+    return value;
+}
+
+ECAD_INLINE bool EMaterialPropPolynomial::GetSimpleProperty(EFloat index, EFloat & value) const
+{
+    value = Calculate(m_coefficients.front(), index);
+    return true;
+}
+
+ECAD_INLINE bool EMaterialPropPolynomial::GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const
+{
+    value = Calculate(m_coefficients.at(row), index);
+    return true;
+}
+
+ECAD_INLINE bool EMaterialPropPolynomial::GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const
+{
+    value = Calculate(m_coefficients.at(row * 3 + col), index);
+    return true;
 }
 
 }//namespace ecad
