@@ -55,28 +55,17 @@ ECAD_INLINE size_t EBlockPowerModel::Size() const
     return (ur.y - ll.y + 1) * (ur.x - ll.x + 1);
 }
 
-ECAD_INLINE void EThermalModel::SetUniformTopBotBCValue(EFloat top, EFloat bot)
+ECAD_INLINE void EThermalModel::SetUniformBC(EOrientation orient, EThermalBondaryCondition bc)
 {
-    m_uniformBcTopBot[0] = top;
-    m_uniformBcTopBot[1] = bot;
+    m_uniformBC.emplace(orient, std::move(bc));
 }
 
-ECAD_INLINE void EThermalModel::GetUniformTopBotBCValue(EFloat & t, EFloat & b) const
+ECAD_INLINE CPtr<EThermalBondaryCondition> EThermalModel::GetUniformBC(EOrientation orient) const
 {
-    t = m_uniformBcTopBot.at(0);
-    b = m_uniformBcTopBot.at(1);
-}
-
-ECAD_INLINE void EThermalModel::SetTopBotBCType(BCType top, BCType bot)
-{
-    m_bcTypeTopBot[0] = top;
-    m_bcTypeTopBot[1] = bot;
-}
-
-ECAD_INLINE void EThermalModel::GetTopBotBCType(BCType & top, BCType & bot) const
-{
-    top = m_bcTypeTopBot[0];
-    bot = m_bcTypeTopBot[1];
+    auto iter = m_uniformBC.find(orient);
+    if (iter == m_uniformBC.cend()) return nullptr;
+    if (not iter->second.isValid()) return nullptr;
+    return &iter->second;
 }
 
 }//namespace model

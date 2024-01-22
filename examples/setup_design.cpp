@@ -525,6 +525,8 @@ void test2()
       
     EPrismaThermalModelExtractionSettings prismaSettings;
     prismaSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
+    prismaSettings.botUniformBC.value = 2750;
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
@@ -532,8 +534,9 @@ void test2()
     prismaSettings.meshSettings.tolerance = 1e-6;
 
     EThermalStaticSimulationSetup setup;
+    setup.settings.iteration = 10;
     setup.settings.dumpHotmaps = true;
-    setup.environmentTemperature = 25;
+    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = baseLayout->RunThermalSimulation(prismaSettings, setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
@@ -545,8 +548,6 @@ int main(int argc, char * argv[])
     ::signal(SIGABRT, &SignalHandler);
 
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
-    // test0();
-    // test1();
     test2();
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;

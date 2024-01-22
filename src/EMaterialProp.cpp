@@ -249,20 +249,41 @@ ECAD_INLINE EFloat EMaterialPropPolynomial::Calculate(const std::vector<EFloat> 
 
 ECAD_INLINE bool EMaterialPropPolynomial::GetSimpleProperty(EFloat index, EFloat & value) const
 {
-    value = Calculate(m_coefficients.front(), index);
+    const auto & coeffs = m_coefficients.front();
+    value = Calculate(coeffs, index);
     return true;
 }
 
 ECAD_INLINE bool EMaterialPropPolynomial::GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const
 {
-    value = Calculate(m_coefficients.at(row), index);
+    const auto & coeffs = 3 == m_coefficients.size() ? m_coefficients.at(row) : m_coefficients.front();
+    value = Calculate(coeffs, index);
     return true;
 }
 
 ECAD_INLINE bool EMaterialPropPolynomial::GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const
 {
-    value = Calculate(m_coefficients.at(row * 3 + col), index);
+    const auto & coeffs = 9 == m_coefficients.size() ? m_coefficients.at(row * 3 + col) :
+                        (3 == m_coefficients.size() ? m_coefficients.at(row) : m_coefficients.front());
+    value = Calculate(coeffs, index);
     return true;
+}
+
+    //1x1-simple, 3x1-anisotropic, 3x3-tensor
+ECAD_INLINE void EMaterialPropPolynomial::GetDimensions(size_t & row, size_t & col) const
+{
+    if (1 == m_coefficients.size()) {
+        row = 1; col = 1;
+    }
+    else if (3 == m_coefficients.size()) {
+        row = 3; col = 1;
+    }
+    else if (9 == m_coefficients.size()) {
+        row = 3; col = 3;
+    }
+    else {
+        ECAD_ASSERT(false)
+    }
 }
 
 }//namespace ecad

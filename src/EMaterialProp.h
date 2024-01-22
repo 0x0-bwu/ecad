@@ -101,6 +101,9 @@ public:
     bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override;
     bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override;
 
+    //1x1-simple, 3x1-anisotropic, 3x3-tensor
+    void GetDimensions(size_t & row, size_t & col) const override;
+    
 protected:
     ///Copy
     virtual Ptr<EMaterialPropPolynomial> CloneImp() const override { return new EMaterialPropPolynomial(*this); }

@@ -70,39 +70,8 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);
     solver.settings.workDir = setup->workDir;
-    solver.settings.iniT = setup->GetInitTemperature();
     solver.settings = setup->settings;
-    if (not solver.Solve(minT, maxT)) return false;
-    
-    auto modelSize = model->ModelSize();
-    auto htMap = std::unique_ptr<ELayoutMetalFraction>(new ELayoutMetalFraction);
-    for (size_t z = 0; z < modelSize.z; ++z)
-        htMap->push_back(std::make_shared<ELayerMetalFraction>(modelSize.x, modelSize.y));
-
-    for (size_t i = 0; i < results.size(); ++i){
-        auto gridIndex = model->GetGridIndex(i);
-        auto lyrHtMap = htMap->at(gridIndex.z);
-        (*lyrHtMap)(gridIndex.x, gridIndex.y) = results[i];
-    }
-
-    using ValueType = typename ELayerMetalFraction::ResultType;
-    if (not setup->workDir.empty() && setup->settings.dumpHotmaps) {        
-        for (size_t index = 0; index < htMap->size(); ++index) {
-            auto lyr = htMap->at(index);
-            auto min = lyr->MaxOccupancy(std::less<ValueType>());
-            auto max = lyr->MaxOccupancy(std::greater<ValueType>());
-            auto range = max - min;
-            auto rgbaFunc = [&min, &range](ValueType d) {
-                int r, g, b, a = 255;
-                generic::color::RGBFromScalar((d - min) / range, r, g, b);
-                return std::make_tuple(r, g, b, a);
-            };
-            ECAD_TRACE("layer: %1%, maxT: %2%, minT: %3%", index + 1, max, min)
-            std::string filepng = setup->workDir + ECAD_SEPS + std::to_string(index) + ".png";
-            lyr->WriteImgProfile(filepng, rgbaFunc);
-        }
-    }
-    return true;
+    return solver.Solve(minT, maxT);
 }
 
 ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloat & maxT) const
@@ -116,8 +85,7 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloa
     EGridThermalNetworkTransientSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
-    if (not solver.Solve(minT, maxT)) return false;
-    return true;
+    return solver.Solve(minT, maxT);
 }
 
 ECAD_API EPrismaThermalSimulator::EPrismaThermalSimulator(CPtr<EPrismaThermalModel> model, const EThermalSimulationSetup & setup)
@@ -150,8 +118,7 @@ ECAD_API bool EPrismaThermalSimulator::RunTransientSimulation(EFloat & minT, EFl
     EPrismaThermalNetworkTransientSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
-    if (not solver.Solve(minT, maxT)) return false;
-    return true;
+    return solver.Solve(minT, maxT);
 }
 
 } // namespace ecad::simulation

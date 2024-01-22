@@ -6,6 +6,8 @@ namespace ecad {
 
 enum class EArchiveFormat { TXT = 0, XML = 1, BIN = 2};
 
+enum class EOrientation { Top, Bot, /*Left, Right, Front, Back*/};
+
 enum class EObjType
 {
     Invalid = -1
@@ -235,5 +237,7 @@ ECAD_ALWAYS_INLINE std::string toString(EModelType type)
         default : { ECAD_ASSERT(false) return std::string{}; }
     }
 }
+
+enum class EThermalBondaryConditionType { HTC, HeatFlow, /*Temperature*/ /*not work currently*/};
 
 }//namespace ecad

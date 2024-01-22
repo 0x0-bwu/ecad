@@ -29,8 +29,8 @@ public:
     UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT) const;
 
 private:
-    void ApplyBoundaryConditionForLayer(const std::vector<EFloat> & iniT, const EGridDataTable & dataTable, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<EFloat> & network) const;
-    void ApplyUniformBoundaryConditionForLayer(EFloat value, EGridThermalModel::BCType type, size_t layer, ThermalNetwork<EFloat> & network) const;
+    void ApplyHeatFlowForLayer(const std::vector<EFloat> & iniT, const EGridDataTable & dataTable, size_t layer, ThermalNetwork<EFloat> & network) const;
+    void ApplyUniformBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, ThermalNetwork<EFloat> & network) const;
 
 public:
     EFloat GetMetalComposite(const ESize3D & index) const;

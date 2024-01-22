@@ -29,15 +29,12 @@ void t_grid_thermal_model_solver_test()
     ECAD_TRACE("total nodes: %1%", model->TotalGrids())
 
     //htc
-    EFloat iniT = 25.0;
-    auto bcModel = std::make_shared<EGridBCModel>(ESize2D(size.x, size.y));
-    bcModel->AddSample(iniT, EGridData(size.x, size.y, 200000));
-
-    model->SetTopBotBCModel(bcModel, bcModel);
-    model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
+    model->SetUniformBC(EOrientation::Top, EThermalBondaryCondition(200000, EThermalBondaryConditionType::HTC));
+    model->SetUniformBC(EOrientation::Bot, EThermalBondaryCondition(200000, EThermalBondaryConditionType::HTC));
 
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);
+    solver.settings.envTemperature.value = 25;
     solver.settings.iteration = 3;
     EFloat minT, maxT;
     BOOST_CHECK(solver.Solve(minT, maxT));

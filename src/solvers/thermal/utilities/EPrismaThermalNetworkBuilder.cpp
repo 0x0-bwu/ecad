@@ -45,12 +45,9 @@ ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EPrismaThermalNetworkBuilder::Build(co
 
 ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const
 {
-    EThermalModel::BCType topType, botType;
-    m_model.GetTopBotBCType(topType, botType);
-
-    EFloat uniformTopBC, uniformBotBC;
-    m_model.GetUniformTopBotBCValue(uniformTopBC, uniformBotBC);
-
+    auto topBC = m_model.GetUniformBC(EOrientation::Top);
+    auto botBC = m_model.GetUniformBC(EOrientation::Bot);
+    
     for (size_t i = start; i < end; ++i) {
         const auto & inst = m_model.GetPrisma(i);
         if (auto p = inst.element->avePower; p > 0) {
@@ -71,18 +68,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
         for (size_t ie = 0; ie < 3; ++ie) {
             auto vArea = GetPrismaSideArea(i, ie);
             if (auto nid = neighbors.at(ie); tri::noNeighbor == nid) {
-                if (m_model.uniformBcSide != invalidFloat) {
-                    if (EThermalModel::BCType::HTC == m_model.sideBCType) {
-                        network->AddHTC(i, m_model.uniformBcSide * vArea);
-                        summary.boundaryNodes += 1;
-                    }
-                    else if (EThermalModel::BCType::HeatFlow == m_model.sideBCType) {
-                        network->AddHF(i, m_model.uniformBcSide);
-                        if (m_model.uniformBcSide > 0)
-                            summary.iHeatFlow += m_model.uniformBcSide;
-                        else summary.oHeatFlow += m_model.uniformBcSide;
-                    }
-                }
+                //todo, side bc
             }
             else if (i < nid) { //one way
                 const auto & nb = m_model.GetPrisma(nid);
@@ -104,16 +90,16 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
         //top
         auto nTop = neighbors.at(EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nTop) {
-            if (uniformTopBC != invalidFloat) {
-                if (EThermalModel::BCType::HTC == topType) {
-                    network->AddHTC(i, uniformTopBC * hArea);
+            if (nullptr != topBC) {
+                if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
+                    network->SetHTC(i, topBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalModel::BCType::HeatFlow == topType) {
-                    network->AddHF(i, uniformTopBC);
-                    if (uniformTopBC > 0)
-                        summary.iHeatFlow += uniformTopBC;
-                    else summary.oHeatFlow += uniformTopBC;
+                else if (EThermalBondaryCondition::BCType::HeatFlow == topBC->type) {
+                    network->AddHF(i, topBC->value);
+                    if (topBC->value > 0)
+                        summary.iHeatFlow += topBC->value;
+                    else summary.oHeatFlow += topBC->value;
                 }
             }
         }
@@ -127,16 +113,16 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
         //bot
         auto nBot = neighbors.at(EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nBot) {
-            if (uniformBotBC != invalidFloat) {
-                if (EThermalModel::BCType::HTC == botType) {
-                    network->AddHTC(i, uniformBotBC * hArea);
+            if (nullptr != botBC) {
+                if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
+                    network->SetHTC(i, botBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalModel::BCType::HeatFlow == botType) {
-                    network->AddHF(i, uniformBotBC);
-                    if (uniformTopBC > 0)
-                        summary.iHeatFlow += uniformBotBC;
-                    else summary.oHeatFlow += uniformBotBC;
+                else if (EThermalBondaryCondition::BCType::HeatFlow == botBC->type) {
+                    network->AddHF(i, botBC->value);
+                    if (botBC->value > 0)
+                        summary.iHeatFlow += botBC->value;
+                    else summary.oHeatFlow += botBC->value;
                 }
             }
         }

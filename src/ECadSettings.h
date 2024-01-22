@@ -54,10 +54,22 @@ struct EPrismaMeshSettings : public EMeshSettings
     size_t iteration = 0;
 };
 
+struct EThermalBondaryCondition
+{
+    using BCType = EThermalBondaryConditionType;
+    BCType type{BCType::HTC};
+    EFloat value{invalidFloat};
+    EThermalBondaryCondition() = default;
+    EThermalBondaryCondition(EFloat value, BCType type) : type(type), value(value) {}
+    bool isValid() const { return ecad::isValid(value); }
+};
+
 struct EThermalModelExtractionSettings
 {
     virtual ~EThermalModelExtractionSettings() = default;
     std::string workDir;
+    EThermalBondaryCondition topUniformBC;
+    EThermalBondaryCondition botUniformBC;
 protected:
     EThermalModelExtractionSettings() = default;
 };
@@ -66,7 +78,6 @@ struct EGridThermalModelExtractionSettings : public EThermalModelExtractionSetti
 {
     virtual ~EGridThermalModelExtractionSettings() = default;
     bool dumpHotmaps = false;
-    bool dumpSpiceFile = false;
     bool dumpDensityFile = false;
     bool dumpTemperatureFile = false;
     EMetalFractionMappingSettings metalFractionMappingSettings;
@@ -82,23 +93,18 @@ struct EThermalSimulationSetup
 {
     virtual ~EThermalSimulationSetup() = default;
     std::string workDir;
-    EFloat environmentTemperature = 25;
-    generic::unit::Temperature unit = generic::unit::Temperature::Celsius;
-
-    EFloat GetInitTemperature() const
-    {
-        using namespace generic::unit;
-        return unit == Temperature::Celsius ? Celsius2Kelvins(environmentTemperature) : environmentTemperature;
-    }
 protected:
     EThermalSimulationSetup() = default;
 };
 
 struct EThermalStaticSettings
 {
-    EFloat residual = 0.5;
-    size_t iteration = 10;
+    bool maximumRes = true;
     bool dumpHotmaps = false;
+    EFloat residual = 0.1;
+    size_t threads = 1;
+    size_t iteration = 10;
+    ETemperature envTemperature{25, ETemperatureUnit::Celsius};
 };
 
 struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
@@ -115,6 +121,7 @@ struct EThermalTransientSettings
     bool mor{false};
     bool adaptive{true};
     bool dumpRawData{false};
+    size_t threads = 1;
     EFloat step{1};
     EFloat duration{10};
     EFloat absoluteError{1e-6};
@@ -122,6 +129,7 @@ struct EThermalTransientSettings
     EFloat minSamplingInterval{0};
     EFloat samplingWindow{maxFloat};
     CPtr<EThermalTransientExcitation> excitation{nullptr};
+    ETemperature envTemperature{25, ETemperatureUnit::Celsius};
 };
 
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
@@ -133,8 +141,6 @@ struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
 struct EThermalNetworkSolveSettings
 {
     virtual ~EThermalNetworkSolveSettings() = default;
-    EFloat iniT = 25;
-    size_t threads = 1;
     std::string workDir;
 protected:
     EThermalNetworkSolveSettings() = default;

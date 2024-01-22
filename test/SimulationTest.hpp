@@ -29,6 +29,8 @@ void t_thermal_network_extraction()
     settings.dumpTemperatureFile = true;
     settings.metalFractionMappingSettings.grid = {25, 25};
     settings.metalFractionMappingSettings.mergeGeomBeforeMapping = true;
+    settings.botUniformBC.type = EThermalBondaryConditionType::HTC;
+    settings.botUniformBC.value = 2750;
     BOOST_CHECK(layout->ExtractThermalModel(settings));
 
     EDataMgr::Instance().ShutDown();

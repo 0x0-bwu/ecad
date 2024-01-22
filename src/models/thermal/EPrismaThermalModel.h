@@ -143,8 +143,6 @@ public:
         std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
     };
     
-    EFloat uniformBcSide{0};
-    BCType sideBCType{BCType::HTC};
     PrismaTemplate prismaTemplate;
     std::vector<PrismaLayer> layers;
     explicit EPrismaThermalModel(CPtr<ILayoutView> layout);

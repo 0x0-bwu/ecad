@@ -52,6 +52,9 @@ class ECAD_API IMaterialPropPolynomial
     ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION
 public:
     virtual ~IMaterialPropPolynomial() = default;
+
+    //1x1-simple, 3x1-anisotropic, 3x3-tensor
+    virtual void GetDimensions(size_t & row, size_t & col) const = 0;
 };
 
 }//namespace ecad

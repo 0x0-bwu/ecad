@@ -7,8 +7,6 @@ namespace model {
 
 using namespace ecad::utils;
 
-using EGridBCModel = EGridDataTable;
-
 namespace utils {
 class EGridThermalModelReduction;
 }//namespace utils;
@@ -94,9 +92,6 @@ public:
     bool AddPowerModel(size_t layer, SPtr<EThermalPowerModel> pwrModel);
     const std::vector<SPtr<EThermalPowerModel> > & GetPowerModels(size_t layer) const;
 
-    bool SetTopBotBCModel(SPtr<EGridBCModel> top, SPtr<EGridBCModel> bot);
-    void GetTopBotBCModel(SPtr<EGridBCModel> & top, SPtr<EGridBCModel> & bot) const;
-
     size_t GetFlattenIndex(const ESize3D & index) const;
     ESize3D GetGridIndex(size_t index) const;
     bool isValid(const ESize2D & index) const;
@@ -113,7 +108,6 @@ private:
     EFloat m_scaleH = 1.0;//only apply for horizontal
     std::array<FCoord, 2> m_resolution = {0, 0};//unit: m
     std::vector<EGridThermalLayer> m_stackupLayers;
-    std::array<SPtr<EGridBCModel>, 2> m_bcTopBot = {nullptr, nullptr};
     std::vector<std::tuple<ESize3D, ESize3D, EFloat> > m_jumpConnects;
 };
 

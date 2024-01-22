@@ -85,19 +85,6 @@ ECAD_INLINE bool EGridThermalModelReduction::Reduce()
         }
         layer.m_metalFraction = mfMap.at(layer.m_metalFraction);
     }
-
-    std::unordered_map<SPtr<EGridBCModel>, SPtr<EGridBCModel> > bcMap { {nullptr, nullptr} };
-    for(size_t i = 0; i < 2; ++i) {
-        auto & bc = m_model.m_bcTopBot[i];
-        auto bcType = m_model.m_bcTypeTopBot[i];
-        if (not bcMap.count(bc)) {
-            auto method = (bcType == EGridThermalModel::BCType::HeatFlow) ?
-                            ReduceValueMethod::Acumulation : ReduceValueMethod::Average;
-            auto reduced = std::shared_ptr<EGridBCModel>(detail::Reduce(*bc, method));
-            bcMap.insert(std::make_pair(bc, reduced));
-        }
-        bc = bcMap.at(bc);
-    }  
     return true;
 }
 

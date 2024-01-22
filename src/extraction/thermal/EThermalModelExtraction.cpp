@@ -123,10 +123,11 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         model->AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
     }
 
-    //htc
-    model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model->SetUniformTopBotBCValue(0, 2750);
-
+    //bc
+    if (settings.topUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
+    if (settings.botUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Bot, settings.botUniformBC);
     return std::unique_ptr<IModel>(model);
 }
 
@@ -256,11 +257,11 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         io::GenerateVTKFile(meshFile, *model);
     }
 
-    //htc
-    model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
-    model->SetUniformTopBotBCValue(0, 2750);
-    model->uniformBcSide = 0;
-
+    //bc
+    if (settings.topUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
+    if (settings.botUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Bot, settings.botUniformBC);
     return std::unique_ptr<IModel>(model);
 }
 

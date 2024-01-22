@@ -22,17 +22,13 @@ public:
     enum class BCType { HTC, HeatFlow, Temperature/*not work currently*/ };
     virtual ~EThermalModel() = default;
 
-    virtual void SetUniformTopBotBCValue(EFloat top, EFloat bot);
-    virtual void GetUniformTopBotBCValue(EFloat & t, EFloat & b) const;
-
-    virtual void SetTopBotBCType(BCType top, BCType bot);
-    virtual void GetTopBotBCType(BCType & top, BCType & bot) const;
+    virtual void SetUniformBC(EOrientation orient, EThermalBondaryCondition bc);
+    CPtr<EThermalBondaryCondition> GetUniformBC(EOrientation orient) const;
 
     virtual EModelType GetModelType() const = 0;
 
 protected:
-    std::array<BCType, 2> m_bcTypeTopBot = {BCType::HTC, BCType::HTC};
-    std::array<EFloat, 2> m_uniformBcTopBot{invalidFloat, invalidFloat};
+    std::unordered_map<EOrientation, EThermalBondaryCondition> m_uniformBC;
 };
 
 using EGridData = OccupancyGridMap<EFloat>;

@@ -63,11 +63,12 @@ void t_thermal_static_flow1()
     EGridThermalModelExtractionSettings gridSettings;
     gridSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     gridSettings.dumpHotmaps = true;
-    gridSettings.dumpSpiceFile = true;
     gridSettings.dumpDensityFile = true;
     gridSettings.dumpTemperatureFile = true;
     gridSettings.metalFractionMappingSettings.grid =  {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     gridSettings.metalFractionMappingSettings.mergeGeomBeforeMapping = false;
+    gridSettings.botUniformBC.type = EThermalBondaryConditionType::HTC;
+    gridSettings.botUniformBC.value = 2750;
     auto model1 = layout->ExtractThermalModel(gridSettings); BOOST_CHECK(model1);
 
     EPrismaThermalModelExtractionSettings prismaSettings;
@@ -346,9 +347,11 @@ void t_thermal_static_flow2()
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-2;
     prismaSettings.meshSettings.maxLen = 500;
+    prismaSettings.botUniformBC.type = EThermalBondaryConditionType::HTC;
+    prismaSettings.botUniformBC.value = 2750;
 
     EThermalStaticSimulationSetup setup;
-    setup.environmentTemperature = 25;
+    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
     BOOST_CHECK_CLOSE(minT, 45.3413, 2);

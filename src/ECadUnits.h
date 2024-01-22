@@ -124,6 +124,36 @@ struct ESize3D
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 };
 
+struct ETemperature
+{
+    EFloat value{25};
+    ETemperatureUnit unit{ETemperatureUnit::Celsius};
+    EFloat inCelsius() const { return unit == ETemperatureUnit::Celsius ? value : generic::unit::Kelvins2Celsius(value); }
+    EFloat inKelvins() const { return unit == ETemperatureUnit::Kelvins ? value : generic::unit::Celsius2Kelvins(value); }
+    static EFloat Kelvins2Celsius(EFloat t) { return generic::unit::Kelvins2Celsius(t); }
+    static EFloat Celsius2Kelvins(EFloat t) { return generic::unit::Celsius2Kelvins(t); }
+
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void save(Archive & ar, const unsigned int version) const
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("value", value);
+        ar & boost::serialization::make_nvp("unit", unit);
+    }
+
+    template <typename Archive>
+    void load(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("value", value);
+        ar & boost::serialization::make_nvp("unit", unit);
+    }
+    BOOST_SERIALIZATION_SPLIT_MEMBER()
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+};
+
 class ECoordUnits
 {
     EFloat unit = 1e-3;
