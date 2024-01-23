@@ -66,10 +66,14 @@ struct EThermalBondaryCondition
 
 struct EThermalModelExtractionSettings
 {
+    using BlockBoundaryCondition = std::pair<FBox2D, EThermalBondaryCondition>;
     virtual ~EThermalModelExtractionSettings() = default;
     std::string workDir;
     EThermalBondaryCondition topUniformBC;
     EThermalBondaryCondition botUniformBC;
+    std::vector<BlockBoundaryCondition> topBlockBC;
+    std::vector<BlockBoundaryCondition> botBlokcBC;
+    ETemperature envTemperature{25, ETemperatureUnit::Celsius};
 protected:
     EThermalModelExtractionSettings() = default;
 };

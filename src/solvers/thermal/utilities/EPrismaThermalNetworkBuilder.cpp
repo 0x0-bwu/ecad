@@ -96,7 +96,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
                     summary.boundaryNodes += 1;
                 }
                 else if (EThermalBondaryCondition::BCType::HeatFlow == topBC->type) {
-                    network->AddHF(i, topBC->value);
+                    network->SetHF(i, topBC->value);
                     if (topBC->value > 0)
                         summary.iHeatFlow += topBC->value;
                     else summary.oHeatFlow += topBC->value;
@@ -119,7 +119,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
                     summary.boundaryNodes += 1;
                 }
                 else if (EThermalBondaryCondition::BCType::HeatFlow == botBC->type) {
-                    network->AddHF(i, botBC->value);
+                    network->SetHF(i, botBC->value);
                     if (botBC->value > 0)
                         summary.iHeatFlow += botBC->value;
                     else summary.oHeatFlow += botBC->value;

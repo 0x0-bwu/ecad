@@ -15,6 +15,19 @@ namespace ecad::extraction {
 using namespace ecad::model;
 using namespace ecad::utils;
 
+ECAD_INLINE void ApplyBondaryCondition(const EThermalModelExtractionSettings & settings, const ECoordUnits & coordUnits, EThermalModel & model)
+{
+    //bc
+    if (settings.topUniformBC.isValid())
+        model.SetUniformBC(EOrientation::Top, settings.topUniformBC);
+    if (settings.botUniformBC.isValid())
+        model.SetUniformBC(EOrientation::Bot, settings.botUniformBC);
+    for (const auto & block : settings.topBlockBC)
+        model.AddBlockBC(EOrientation::Top, coordUnits.toCoord(block.first), block.second);
+    for (const auto & block : settings.botBlokcBC)
+        model.AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
+}
+
 ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayoutView> layout, const EThermalModelExtractionSettings & settings)
 {
     if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
@@ -83,7 +96,6 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         }
     }
 
-    EFloat iniT = 25;
     constexpr bool useGridPower = true;
     auto compIter = layout->GetComponentIter();
     std::unordered_map<size_t, EGridData> gridMap;
@@ -119,15 +131,11 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
 
     for (auto & [lyrId, gridData] : gridMap) {
         auto powerModel = new EGridPowerModel(ESize2D(nx, ny));
-        powerModel->GetTable().AddSample(iniT, std::move(gridData));
+        powerModel->GetTable().AddSample(settings.envTemperature.inKelvins(), std::move(gridData));
         model->AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
     }
 
-    //bc
-    if (settings.topUniformBC.isValid())
-        model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
-    if (settings.botUniformBC.isValid())
-        model->SetUniformBC(EOrientation::Bot, settings.botUniformBC);
+    ApplyBondaryCondition(settings, coordUnits, *model);
     return std::unique_ptr<IModel>(model);
 }
 
@@ -257,11 +265,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         io::GenerateVTKFile(meshFile, *model);
     }
 
-    //bc
-    if (settings.topUniformBC.isValid())
-        model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
-    if (settings.botUniformBC.isValid())
-        model->SetUniformBC(EOrientation::Bot, settings.botUniformBC);
+    ApplyBondaryCondition(settings, coordUnits, *model);
     return std::unique_ptr<IModel>(model);
 }
 

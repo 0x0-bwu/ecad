@@ -57,8 +57,8 @@ ECAD_INLINE size_t EBlockPowerModel::Size() const
 
 ECAD_INLINE EThermalModel::EThermalModel()
 {
-    m_blockBC.emplace(EOrientation::Top, {});
-    m_blockBC.emplace(EOrientation::Bot, {});
+    m_blockBC.emplace(EOrientation::Top, std::vector<BlockBC>{});
+    m_blockBC.emplace(EOrientation::Bot, std::vector<BlockBC>{});
 }
 
 ECAD_INLINE void EThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc)

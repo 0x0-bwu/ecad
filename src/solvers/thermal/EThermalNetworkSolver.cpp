@@ -8,7 +8,6 @@
 #include "utilities/EGridThermalNetworkBuilder.h"
 #include "generic/thread/ThreadPool.hpp"
 #include "generic/tools/Format.hpp"
-#include <execution>
 namespace ecad::solver {
 
 using namespace ecad::model;
@@ -53,7 +52,7 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
     } while (residual > settings.residual && iteration > 0);
 
     if (settings.envTemperature.unit == ETemperatureUnit::Celsius) 
-        std::for_each(std::execution::par_unseq, results.begin(), results.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
+        std::for_each(results.begin(), results.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
 
     return true;   
 }
@@ -119,7 +118,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
     }
     for (auto & sample : samples) {
         if (settings.envTemperature.unit == ETemperatureUnit::Celsius)
-            std::for_each(std::execution::par_unseq, sample.begin(), sample.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
+            std::for_each(sample.begin(), sample.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
        
         minT = std::min(minT, *std::min_element(++sample.begin(), sample.end()));
         maxT = std::max(maxT, *std::max_element(++sample.begin(), sample.end()));

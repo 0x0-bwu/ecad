@@ -248,6 +248,11 @@ public:
         return EPoint2D(toCoord(fp[0]), toCoord(fp[1]));
     }
 
+    EBox2D toCoord(const FBox2D & fb) const
+    {
+        return EBox2D(toCoord(fb[0]), toCoord(fb[1]));
+    }
+
     std::vector<EPoint2D> toCoord(const std::vector<FPoint2D> & fpoints) const
     {
         std::vector<EPoint2D> points; points.reserve(fpoints.size());

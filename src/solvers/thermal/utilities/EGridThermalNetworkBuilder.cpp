@@ -98,9 +98,9 @@ ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EGridThermalNetworkBuilder::Build(cons
     }
 
     //bc
-    if (auto topBC = m_model.GetUniformBC(EOrientation::Top); topBC && topBC.isValid())
+    if (auto topBC = m_model.GetUniformBC(EOrientation::Top); topBC && topBC->isValid())
         ApplyUniformBoundaryConditionForLayer(*topBC, 0, *network);
-    if (auto botBC = m_model.GetUniformBC(EOrientation::Bot); botBC && botBC.isValid())
+    if (auto botBC = m_model.GetUniformBC(EOrientation::Bot); botBC && botBC->isValid())
         ApplyUniformBoundaryConditionForLayer(*botBC, m_size.z - 1, *network);
     return network;
 }
@@ -137,7 +137,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyUniformBoundaryConditionForLay
                 case EThermalBondaryCondition::BCType::HeatFlow : {
                     if(bc.value > 0) summary.iHeatFlow += bc.value;
                     else summary.oHeatFlow -= bc.value;
-                    network.AddHF(index, bc.value);
+                    network.SetHF(index, bc.value);
                     break;
                 }
                 default : {
