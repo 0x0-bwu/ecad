@@ -90,7 +90,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
         //top
         auto nTop = neighbors.at(EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nTop) {
-            if (nullptr != topBC) {
+            if (nullptr != topBC && topBC->isValid()) {
                 if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
                     network->SetHTC(i, topBC->value * hArea);
                     summary.boundaryNodes += 1;
@@ -113,7 +113,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
         //bot
         auto nBot = neighbors.at(EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nBot) {
-            if (nullptr != botBC) {
+            if (nullptr != botBC && botBC->isValid()) {
                 if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
                     network->SetHTC(i, botBC->value * hArea);
                     summary.boundaryNodes += 1;

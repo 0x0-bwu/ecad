@@ -98,9 +98,9 @@ ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EGridThermalNetworkBuilder::Build(cons
     }
 
     //bc
-    if (auto topBC = m_model.GetUniformBC(EOrientation::Top); topBC)
+    if (auto topBC = m_model.GetUniformBC(EOrientation::Top); topBC && topBC.isValid())
         ApplyUniformBoundaryConditionForLayer(*topBC, 0, *network);
-    if (auto botBC = m_model.GetUniformBC(EOrientation::Bot); botBC)
+    if (auto botBC = m_model.GetUniformBC(EOrientation::Bot); botBC && botBC.isValid())
         ApplyUniformBoundaryConditionForLayer(*botBC, m_size.z - 1, *network);
     return network;
 }

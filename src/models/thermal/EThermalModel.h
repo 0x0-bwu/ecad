@@ -19,15 +19,20 @@ using namespace generic::geometry;
 class ECAD_API EThermalModel : public IModel
 {
 public:
-    enum class BCType { HTC, HeatFlow, Temperature/*not work currently*/ };
+    using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
     virtual ~EThermalModel() = default;
 
     virtual void SetUniformBC(EOrientation orient, EThermalBondaryCondition bc);
-    CPtr<EThermalBondaryCondition> GetUniformBC(EOrientation orient) const;
+    virtual CPtr<EThermalBondaryCondition> GetUniformBC(EOrientation orient) const;
+
+    virtual void AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc);
+    virtual const std::vector<BlockBC> & GetBlockBC(EOrientation orient) const;  
 
     virtual EModelType GetModelType() const = 0;
 
 protected:
+    EThermalModel();
+    std::unordered_map<EOrientation, std::vector<BlockBC>> m_blockBC;
     std::unordered_map<EOrientation, EThermalBondaryCondition> m_uniformBC;
 };
 
