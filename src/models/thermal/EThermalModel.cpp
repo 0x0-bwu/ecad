@@ -55,22 +55,6 @@ ECAD_INLINE size_t EBlockPowerModel::Size() const
     return (ur.y - ll.y + 1) * (ur.x - ll.x + 1);
 }
 
-ECAD_INLINE EThermalModel::EThermalModel()
-{
-    m_blockBC.emplace(EOrientation::Top, std::vector<BlockBC>{});
-    m_blockBC.emplace(EOrientation::Bot, std::vector<BlockBC>{});
-}
-
-ECAD_INLINE void EThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc)
-{
-    m_blockBC.at(orient).emplace_back(std::move(block), std::move(bc));
-}
-
-ECAD_INLINE const std::vector<EThermalModel::BlockBC> & EThermalModel::GetBlockBC(EOrientation orient) const
-{
-    return m_blockBC.at(orient);
-}
-
 ECAD_INLINE void EThermalModel::SetUniformBC(EOrientation orient, EThermalBondaryCondition bc)
 {
     m_uniformBC.emplace(orient, std::move(bc));

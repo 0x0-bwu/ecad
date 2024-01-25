@@ -31,6 +31,7 @@ public:
 private:
     void ApplyHeatFlowForLayer(const std::vector<EFloat> & iniT, const EGridDataTable & dataTable, size_t layer, ThermalNetwork<EFloat> & network) const;
     void ApplyUniformBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, ThermalNetwork<EFloat> & network) const;
+    void ApplyBlockBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, ThermalNetwork<EFloat> & network) const;
 
 public:
     EFloat GetMetalComposite(const ESize3D & index) const;

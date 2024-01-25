@@ -71,14 +71,15 @@ namespace thermal::solver {
         using StateType = std::vector<num_type>;
         struct Sampler
         {
+            bool verbose{false};
             num_type prev{0};
             num_type count{0};
             num_type window{0};
             num_type interval{0};
             Samples<num_type> & samples;
             const ThermalNetworkTransientSolver & solver;
-            Sampler(const ThermalNetworkTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval)
-                : window(window), interval(interval), samples(samples), solver(solver) {}
+            Sampler(const ThermalNetworkTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval, bool verbose)
+                : verbose(verbose), window(window), interval(interval), samples(samples), solver(solver) {}
             virtual ~Sampler() = default;
             void operator() (const StateType & x, num_type t)
             {
@@ -87,7 +88,9 @@ namespace thermal::solver {
                     Sample<num_type> sample; sample.reserve(probs.size());
                     sample.emplace_back(t);
                     for (auto p : probs) sample.emplace_back(x[p]);
-                    // ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    if (verbose) {
+                        ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    }
                     samples.emplace_back(std::move(sample));
                     while (t - samples.front().front() > window) {
                         samples.pop_front();
@@ -269,14 +272,15 @@ namespace thermal::solver {
         struct Sampler
         {
             StateType out;
+            bool verbose{false};
             num_type prev{0};
             num_type count{0};
             num_type window{0};
             num_type interval{0};
             Samples<num_type> & samples;
             const ThermalNetworkReducedTransientSolver & solver;
-            Sampler(const ThermalNetworkReducedTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval)
-                : window(window), interval(interval), samples(samples), solver(solver) {}
+            Sampler(const ThermalNetworkReducedTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval, bool verbose)
+                : verbose(verbose), window(window), interval(interval), samples(samples), solver(solver) {}
             virtual ~Sampler() = default;
             void operator() (const StateType & x, num_type t)
             {
@@ -285,7 +289,9 @@ namespace thermal::solver {
                     Sample<num_type> sample; sample.reserve(out.size() + 1);
                     sample.emplace_back(t);
                     sample.insert(sample.end(), out.begin(), out.end());
-                    // ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    if (verbose) {
+                        ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                    }
                     samples.emplace_back(std::move(sample));
                     while (t - samples.front().front() > window) {
                         samples.pop_front();

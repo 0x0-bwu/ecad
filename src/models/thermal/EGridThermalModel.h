@@ -63,6 +63,7 @@ class ECAD_API EGridThermalModel : public EThermalModel
 {
     friend class utils::EGridThermalModelReduction;
 public:
+    using BlockBC = EPair<std::array<ESize2D, 2>, EThermalBondaryCondition>;
     explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), EFloat elevation = 0);
     virtual ~EGridThermalModel();
 
@@ -92,6 +93,9 @@ public:
     bool AddPowerModel(size_t layer, SPtr<EThermalPowerModel> pwrModel);
     const std::vector<SPtr<EThermalPowerModel> > & GetPowerModels(size_t layer) const;
 
+    void AddBlockBC(EOrientation orient, ESize2D ll, ESize2D ur, EThermalBondaryCondition bc);
+    const std::vector<BlockBC> & GetBlockBC(EOrientation orient) const;
+
     size_t GetFlattenIndex(const ESize3D & index) const;
     ESize3D GetGridIndex(size_t index) const;
     bool isValid(const ESize2D & index) const;
@@ -109,6 +113,8 @@ private:
     std::array<FCoord, 2> m_resolution = {0, 0};//unit: m
     std::vector<EGridThermalLayer> m_stackupLayers;
     std::vector<std::tuple<ESize3D, ESize3D, EFloat> > m_jumpConnects;
+    std::vector<BlockBC> m_topBlockBCs;
+    std::vector<BlockBC> m_botBlockBCs;
 };
 
 ECAD_ALWAYS_INLINE size_t EGridThermalModel::GetFlattenIndex(const ESize3D & index) const

@@ -97,7 +97,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         using StateType = typename TransSolver::StateType;
         using Sampler = typename TransSolver::Sampler;
         TransSolver solver(*network, envT, probs);
-        Sampler sampler(solver, samples, settings.samplingWindow, settings.minSamplingInterval);
+        Sampler sampler(solver, samples, settings.samplingWindow, settings.minSamplingInterval, settings.verbose);
         StateType initState(solver.StateSize(), envT);
         ECAD_TRACE("duration: %1%, step: %2%, abs error: %3%, rel error: %4%", settings.duration, settings.step, settings.absoluteError, settings.relativeError);
         if (settings.adaptive)
@@ -111,7 +111,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         using Sampler = typename TransSolver::Sampler;
         StateType initT(network->Size(), envT);
         TransSolver solver(*network, envT, probs);
-        Sampler sampler(solver, samples, settings.samplingWindow, settings.minSamplingInterval);
+        Sampler sampler(solver, samples, settings.samplingWindow, settings.minSamplingInterval, settings.verbose);
         if (settings.adaptive)
             steps = solver.SolveAdaptive(initT, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
         else steps = solver.Solve(initT, EFloat{0}, settings.duration, settings.step, std::move(sampler), settings.excitation);

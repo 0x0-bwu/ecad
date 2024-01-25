@@ -15,19 +15,6 @@ namespace ecad::extraction {
 using namespace ecad::model;
 using namespace ecad::utils;
 
-ECAD_INLINE void ApplyBondaryCondition(const EThermalModelExtractionSettings & settings, const ECoordUnits & coordUnits, EThermalModel & model)
-{
-    //bc
-    if (settings.topUniformBC.isValid())
-        model.SetUniformBC(EOrientation::Top, settings.topUniformBC);
-    if (settings.botUniformBC.isValid())
-        model.SetUniformBC(EOrientation::Bot, settings.botUniformBC);
-    for (const auto & block : settings.topBlockBC)
-        model.AddBlockBC(EOrientation::Top, coordUnits.toCoord(block.first), block.second);
-    for (const auto & block : settings.botBlokcBC)
-        model.AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
-}
-
 ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayoutView> layout, const EThermalModelExtractionSettings & settings)
 {
     if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
@@ -135,7 +122,25 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         model->AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
     }
 
-    ApplyBondaryCondition(settings, coordUnits, *model);
+    //bc
+    if (settings.topUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
+    if (settings.botUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Bot, settings.botUniformBC);
+    for (const auto & block : settings.topBlockBC) {
+        if (not block.second.isValid()) continue;
+        const auto & bbox = coordUnits.toCoord(block.first);
+        auto ll = mfInfo->GetIndex(bbox[0]);
+        auto ur = mfInfo->GetIndex(bbox[1]);
+        model->AddBlockBC(EOrientation::Top, std::move(ll), std::move(ur), block.second);
+    }
+    for (const auto & block : settings.botBlokcBC) {
+        if (not block.second.isValid()) continue;
+        const auto & bbox = coordUnits.toCoord(block.first);
+        auto ll = mfInfo->GetIndex(bbox[0]);
+        auto ur = mfInfo->GetIndex(bbox[1]);
+        model->AddBlockBC(EOrientation::Bot, std::move(ll), std::move(ur), block.second);
+    }        
     return std::unique_ptr<IModel>(model);
 }
 
@@ -260,12 +265,26 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         model->AddBondWire(bondwire);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
+    //bc
+    if (settings.topUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
+    if (settings.botUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Bot, settings.botUniformBC);
+        
+    for (const auto & block : settings.topBlockBC) {
+        if (not block.second.isValid()) continue;
+        model->AddBlockBC(EOrientation::Top, coordUnits.toCoord(block.first), block.second);
+    }
+    for (const auto & block : settings.botBlokcBC) {
+        if (not block.second.isValid()) continue;
+        model->AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
+    }
+        
     if (not settings.workDir.empty()) { 
         auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
         io::GenerateVTKFile(meshFile, *model);
     }
 
-    ApplyBondaryCondition(settings, coordUnits, *model);
     return std::unique_ptr<IModel>(model);
 }
 

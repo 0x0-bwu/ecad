@@ -150,6 +150,8 @@ public:
 
     CPtr<IMaterialDefCollection> GetMaterialLibrary() const;
 
+    void AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc);
+
     PrismaLayer & AppendLayer(PrismaLayer layer);
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
 
@@ -188,6 +190,8 @@ private:
     std::vector<LineElement> m_lines;
     std::vector<PrismaInstance> m_prismas;
     std::vector<size_t> m_indexOffset;
+    using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
+    std::unordered_map<EOrientation, std::vector<BlockBC>> m_blockBCs;
 };
 
 ECAD_ALWAYS_INLINE EFloat EPrismaThermalModel::Scale2Meter() const

@@ -313,6 +313,11 @@ CPtr<IMaterialDefCollection> EPrismaThermalModel::GetMaterialLibrary() const
     return m_layout->GetDatabase()->GetMaterialDefCollection();
 }
 
+ECAD_INLINE void EPrismaThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc)
+{
+    m_blockBCs.at(orient).emplace_back(std::move(block), std::move(bc));
+}
+
 ECAD_INLINE EPrismaThermalModel::PrismaLayer & EPrismaThermalModel::AppendLayer(PrismaLayer layer)
 {
     return layers.emplace_back(std::move(layer));

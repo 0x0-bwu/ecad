@@ -461,10 +461,10 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     return topBridgeLayout;
 }
 
-void test2()
+Ptr<ILayoutView> SetupDesign(const std::string & name)
 {
     //database
-    auto database = eDataMgr.CreateDatabase("CREE62mm");
+    auto database = eDataMgr.CreateDatabase(name);
 
     //material
     SetupMaterials(database);
@@ -522,23 +522,53 @@ void test2()
             bw->SetHeight(0.5);
         }
     }
-      
+
+    return baseLayout;
+}
+
+EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
+{
     EPrismaThermalModelExtractionSettings prismaSettings;
-    prismaSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
-    prismaSettings.meshSettings.minLen = 1e-4;
-    prismaSettings.meshSettings.maxLen = 0.5;
+    prismaSettings.meshSettings.minLen = 1e-3;
+    prismaSettings.meshSettings.maxLen = 10;
     prismaSettings.meshSettings.tolerance = 1e-6;
+    return prismaSettings;
+}
 
+void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
+{
     EThermalStaticSimulationSetup setup;
     setup.settings.iteration = 10;
     setup.settings.dumpHotmaps = true;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    auto [minT, maxT] = baseLayout->RunThermalSimulation(prismaSettings, setup);    
+    setup.workDir = workDir;
+    auto [minT, maxT] = layout->RunThermalSimulation(ExtractionSettings(workDir), setup);    
+    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
+}
+
+void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
+{
+    EThermalTransientSimulationSetup setup;
+    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
+    setup.workDir = workDir;
+    setup.settings.mor = false;
+    setup.settings.verbose = true;
+    setup.settings.adaptive = true;
+    setup.settings.dumpRawData = true;
+    setup.settings.duration = 1;
+    setup.settings.step = 0.01;
+    setup.settings.samplingWindow = 0.1;
+    setup.settings.minSamplingInterval = 0.0005;
+    setup.settings.absoluteError = 1e-1;
+    setup.settings.relativeError = 1e-1;
+    EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::sin(generic::math::pi * t / 0.05)); };
+    setup.settings.excitation = &excitation;
+    auto [minT, maxT] = layout->RunThermalSimulation(ExtractionSettings(workDir), setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
 
@@ -548,7 +578,11 @@ int main(int argc, char * argv[])
     ::signal(SIGABRT, &SignalHandler);
 
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
-    test2();
+
+    std::string workDir = "./results";
+    auto layout = SetupDesign("CREE62mm");
+    StaticThermalFlow(layout, workDir);
+    TransientThermalFlow(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

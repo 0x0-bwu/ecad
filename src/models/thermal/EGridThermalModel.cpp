@@ -358,6 +358,18 @@ ECAD_INLINE const std::vector<SPtr<EThermalPowerModel> > & EGridThermalModel::Ge
     return m_stackupLayers.at(layer).GetPowerModels();
 }
 
+ECAD_INLINE void EGridThermalModel::AddBlockBC(EOrientation orient, ESize2D ll, ESize2D ur, EThermalBondaryCondition bc)
+{
+    auto & bcs = EOrientation::Top == orient ? m_topBlockBCs : m_botBlockBCs;
+    bcs.emplace_back(std::array<ESize2D, 2>{std::move(ll), std::move(ur)}, std::move(bc));
+}
+
+ECAD_INLINE const std::vector<EGridThermalModel::BlockBC> & EGridThermalModel::GetBlockBC(EOrientation orient) const
+{
+    ECAD_ASSERT(orient == EOrientation::Top || orient == EOrientation::Bot)
+    return orient == EOrientation::Top ? m_topBlockBCs : m_botBlockBCs;
+}
+
 ECAD_INLINE bool EGridThermalModel::NeedIteration() const
 {
     return true;

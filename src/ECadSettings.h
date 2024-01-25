@@ -123,6 +123,7 @@ struct EThermalTransientSettings
     virtual ~EThermalTransientSettings() = default;
 
     bool mor{false};
+    bool verbose{false};
     bool adaptive{true};
     bool dumpRawData{false};
     size_t threads = 1;
