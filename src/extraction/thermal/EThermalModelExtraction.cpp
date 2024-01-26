@@ -203,7 +203,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;//[layer, [tempId, eleId]]
 
     auto buildOnePrismaLayer = [&](size_t index) {
-        auto & prismaLayer = model->layers.at(index);   
+        auto & prismaLayer = model->layers.at(index);
         auto & idMap = templateIdMap.emplace(prismaLayer.id, std::unordered_map<size_t, size_t>{}).first->second;    
         for (size_t it = 0; it < triangulation.triangles.size(); ++it) {
             ECAD_ASSERT(compact->hasPolygon(prismaLayer.id))
@@ -218,7 +218,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
             ele.matId = compact->materials.at(pid);
             ele.netId = compact->nets.at(pid);
             auto iter = compact->powerBlocks.find(pid);
-            if (iter != compact->powerBlocks.cend()) {
+            if (iter != compact->powerBlocks.cend() &&
+                prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.first)) {
                 auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
                 ele.avePower = area * iter->second.powerDensity;
             }

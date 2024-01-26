@@ -28,10 +28,9 @@ struct ECAD_API ECompactLayout
     struct PowerBlock
     {
         size_t polygon;
-        Height position;
         LayerRange range;
         EFloat powerDensity;
-        PowerBlock(size_t polygon, Height position, LayerRange range, EFloat powerDensity);
+        PowerBlock(size_t polygon, LayerRange range, EFloat powerDensity);
     };
 
     struct Bondwire
@@ -58,7 +57,7 @@ struct ECAD_API ECompactLayout
     virtual ~ECompactLayout() = default;
     void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness);
     size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness);
-    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat position = 0.1);
+    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat pwrPosition = 0.1, EFloat pwrThickness = 0.1);
     void AddComponent(CPtr<IComponent> component);    
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
@@ -68,6 +67,7 @@ struct ECAD_API ECompactLayout
     bool hasPolygon(size_t layer) const;
     size_t SearchPolygon(size_t layer, const EPoint2D & pt) const;
     bool GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const;
+    size_t GetLayerIndexByHeight(Height height) const;
     const EPolygonData & GetLayoutBoundary() const;
 private:
     Height GetHeight(EFloat height) const;

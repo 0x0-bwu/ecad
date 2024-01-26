@@ -8,8 +8,8 @@
 #include <queue>
 namespace ecad::model {
 
-ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, Height position, LayerRange range, EFloat powerDensity)
- : polygon(polygon), position(position), range(std::move(range)), powerDensity(powerDensity)
+ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, LayerRange range, EFloat powerDensity)
+ : polygon(polygon), range(std::move(range)), powerDensity(powerDensity)
 {
 }
 
@@ -68,13 +68,14 @@ ECAD_INLINE void ECompactLayout::AddComponent(CPtr<IComponent> component)
     }
 }
 
-ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat position)
+ECAD_INLINE bool ECompactLayout::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat pwrPosition, EFloat pwrThickness)
 {
     auto area = polygon.Area();
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
     if (invalidIndex == index) return false;
-    Height height = GetHeight(elevation - thickness * position);
-    powerBlocks.emplace(index, PowerBlock(index, height, GetLayerRange(elevation, thickness), totalP / area));
+    EFloat pe = elevation - thickness * pwrPosition;
+    EFloat pt = std::min(thickness * pwrThickness, thickness - elevation + pe);
+    powerBlocks.emplace(index, PowerBlock(index, GetLayerRange(pe, pt), totalP / area));
     return true;
 }
 
@@ -96,8 +97,10 @@ ECAD_INLINE void ECompactLayout::BuildLayerPolygonLUT()
         heights.emplace(ranges.at(i).first);
         heights.emplace(ranges.at(i).second);
         auto iter = powerBlocks.find(i);
-        if (iter != powerBlocks.cend())
-            heights.emplace(iter->second.position);
+        if (iter != powerBlocks.cend()) {
+            heights.emplace(iter->second.range.first);
+            heights.emplace(iter->second.range.second);
+        }
     }
     m_layerOrder = std::vector(heights.begin(), heights.end());
     std::reverse(m_layerOrder.begin(), m_layerOrder.end());
@@ -166,6 +169,13 @@ ECAD_INLINE bool ECompactLayout::GetLayerHeightThickness(size_t layer, EFloat & 
     elevation = EFloat(m_layerOrder.at(layer)) / m_vScale2Int;
     thickness = elevation - EFloat(m_layerOrder.at(layer + 1)) / m_vScale2Int;
     return true;
+}
+
+ECAD_INLINE size_t ECompactLayout::GetLayerIndexByHeight(Height height) const
+{
+    auto iter = m_height2Index.find(height);
+    if (iter == m_height2Index.cend()) return invalidIndex;
+    return iter->second;
 }
 
 ECAD_INLINE const EPolygonData & ECompactLayout::GetLayoutBoundary() const

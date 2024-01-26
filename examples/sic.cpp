@@ -253,7 +253,7 @@ Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
     eDataMgr.CreateGeometry2D(driverLayout, driverLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}, 0.25));
 
     auto r1 = eDataMgr.FindComponentDefByName(database, "R1");
-    eDataMgr.CreateComponent(driverLayout, "R1", r1, driverLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, math::Rad(90), {2.75, 9.125}), false)->SetLossPower(5);
+    eDataMgr.CreateComponent(driverLayout, "R1", r1, driverLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, math::Rad(90), {2.75, 9.125}), false)->SetLossPower(0);
 
     return driverLayout;
 }
@@ -315,10 +315,11 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     diodeComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Diode2", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, 1.33}), false);
     diodeComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Diode3", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, -5.42}), false);
 
+    EFloat resP{0.1};
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
-    eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false)->SetLossPower(5);
-    eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 5.95}), false)->SetLossPower(5);
-    eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.63}), false)->SetLossPower(5);
+    eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 5.95}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.63}), false)->SetLossPower(resP);
 
     auto gateBw1 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
     gateBw1->SetStartComponent(dieComp[0], "G");
@@ -419,10 +420,11 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     diodeComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Diode2", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, 1.33}, EMirror2D::Y), false);
     diodeComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Diode3", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, -5.42}, EMirror2D::Y), false);
 
+    EFloat resP{0.1};
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
-    eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false)->SetLossPower(5);
-    eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 0.25}), false)->SetLossPower(5);
-    eDataMgr.CreateComponent(topBridgeLayout, "R3", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, -4.55}), false)->SetLossPower(5);
+    eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 0.25}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(topBridgeLayout, "R3", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, -4.55}), false)->SetLossPower(resP);
 
     auto gateBw1 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
     gateBw1->SetStartComponent(dieComp[0], "G");
@@ -579,10 +581,10 @@ int main(int argc, char * argv[])
 
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
 
-    std::string workDir = "./results";
+    std::string workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto layout = SetupDesign("CREE62mm");
     StaticThermalFlow(layout, workDir);
-    TransientThermalFlow(layout, workDir);
+    // TransientThermalFlow(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }
