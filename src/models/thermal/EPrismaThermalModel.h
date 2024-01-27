@@ -82,13 +82,15 @@ private:
     EFloat m_vScale2Int;
 
     CPtr<ILayoutView> m_layout;
-    std::unique_ptr<utils::ELayoutRetriever> m_retriever;
+    std::unique_ptr<ecad::utils::ELayoutRetriever> m_retriever;
 };
 
 ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
 
+class ECAD_API EPrismaThermalModelQuery;
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {
+    friend class EPrismaThermalModelQuery;
 public:
     struct LineElement
     {
