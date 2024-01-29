@@ -1,6 +1,6 @@
 #include "models/thermal/io/EThermalModelIO.h"
 
-#include "models/thermal/utilities/EThermalModelReduction.h"
+#include "models/thermal/utils/EThermalModelReduction.h"
 #include "models/thermal/io/EChipThermalModelIO.h"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"

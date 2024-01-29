@@ -1,7 +1,7 @@
 #pragma once
 #include "ECadCommon.h"
 #include "interfaces/IModel.h"
-#include "utilities/EMetalFractionMapping.h"
+#include "utils/EMetalFractionMapping.h"
 
 namespace boost::math::interpolators {
 template <class RandomAccessContainer> class pchip;

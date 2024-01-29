@@ -2,10 +2,10 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 
 #include "generic/tools/FileSystem.hpp"
-#include "utilities/EFlattenUtility.h"
 #include "EComponentDefCollection.h"
 #include "EMaterialDefCollection.h"
 #include "EPadstackDefCollection.h"
+#include "utils/EFlattenUtility.h"
 #include "ELayerMapCollection.h"
 #include "ECellCollection.h"
 #include "EComponentDef.h"

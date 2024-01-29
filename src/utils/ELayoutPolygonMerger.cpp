@@ -1,4 +1,4 @@
-#include "utilities/ELayoutPolygonMerger.h"
+#include "utils/ELayoutPolygonMerger.h"
 
 #include "generic/geometry/PolygonMerge.hpp"
 #include "generic/geometry/GeometryIO.hpp"

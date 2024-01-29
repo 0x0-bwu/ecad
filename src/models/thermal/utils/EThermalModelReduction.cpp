@@ -1,4 +1,4 @@
-#include "models/thermal/utilities/EThermalModelReduction.h"
+#include "models/thermal/utils/EThermalModelReduction.h"
 
 namespace ecad {
 namespace model {

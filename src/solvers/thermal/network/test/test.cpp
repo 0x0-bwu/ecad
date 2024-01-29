@@ -1,4 +1,4 @@
-#include "../utilities/ThermalNetlistWriter.hpp"
+#include "../utils/ThermalNetlistWriter.hpp"
 #include "../ThermalNetworkSolver.hpp"
 #include <boost/stacktrace.hpp>
 #include <iostream>

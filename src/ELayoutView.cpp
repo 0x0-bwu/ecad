@@ -5,14 +5,14 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 
 #include "simulation/thermal/EThermalSimulation.h"
 
-#include "utilities/EMetalFractionMapping.h"
-#include "utilities/ELayoutPolygonMerger.h"
-#include "utilities/ELayoutMergeUtility.h"
-#include "utilities/ELayoutConnectivity.h"
-#include "utilities/ELayoutViewRenderer.h"
-#include "utilities/ELayout2CtmUtility.h"
-#include "utilities/ELayoutModifier.h"
-#include "utilities/ELayoutRetriever.h"
+#include "utils/EMetalFractionMapping.h"
+#include "utils/ELayoutPolygonMerger.h"
+#include "utils/ELayoutMergeUtility.h"
+#include "utils/ELayoutConnectivity.h"
+#include "utils/ELayoutViewRenderer.h"
+#include "utils/ELayout2CtmUtility.h"
+#include "utils/ELayoutModifier.h"
+#include "utils/ELayoutRetriever.h"
 
 #include "interfaces/IHierarchyObjCollection.h"
 #include "interfaces/IPadstackInstCollection.h"

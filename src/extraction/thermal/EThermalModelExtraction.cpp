@@ -3,8 +3,8 @@
 #include "models/thermal/io/EPrismaThermalModelIO.h"
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
-#include "utilities/EMetalFractionMapping.h"
-#include "utilities/ELayoutRetriever.h"
+#include "utils/EMetalFractionMapping.h"
+#include "utils/ELayoutRetriever.h"
 #include "generic/tools/FileSystem.hpp"
 
 #include "Mesher2D.h"

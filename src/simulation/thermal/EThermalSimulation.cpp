@@ -1,13 +1,13 @@
 #include "EThermalSimulation.h"
 #include "models/thermal/io/EPrismaThermalModelIO.h"
+#include "solvers/thermal/EThermalNetworkSolver.h"
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
-#include "utilities/EMetalFractionMapping.h"
-#include "solvers/thermal/EThermalNetworkSolver.h"
 #include "models/thermal/EThermalModel.h"
-#include "utilities/ELayoutRetriever.h"
-#include "generic/tools/FileSystem.hpp"
+#include "utils/EMetalFractionMapping.h"
+#include "utils/ELayoutRetriever.h"
 
+#include "generic/tools/FileSystem.hpp"
 
 #include "Mesher2D.h"
 #include "Interface.h"

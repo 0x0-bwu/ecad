@@ -1,5 +1,5 @@
 #include "EPrismaThermalNetworkBuilder.h"
-#include "models/thermal/utilities/EPrismaThermalModelQuery.h"
+#include "models/thermal/utils/EPrismaThermalModelQuery.h"
 #include "interfaces/IMaterialDefCollection.h"
 #include "interfaces/IMaterialProp.h"
 #include "interfaces/IMaterialDef.h"

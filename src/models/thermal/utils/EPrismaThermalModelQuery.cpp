@@ -1,4 +1,4 @@
-#include "models/thermal/utilities/EPrismaThermalModelQuery.h"
+#include "models/thermal/utils/EPrismaThermalModelQuery.h"
 #include "models/thermal/EPrismaThermalModel.h"
 
 namespace ecad {
@@ -14,7 +14,6 @@ ECAD_INLINE void EPrismaThermalModelQuery::SearchPrismaInstances(const EBox2D & 
     results.clear();
     auto rtree = BuildIndexTree();
     rtree->query(boost::geometry::index::within(area), std::back_inserter(results));
-
 }
 
 ECAD_INLINE void EPrismaThermalModelQuery::SearchPrismaInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const

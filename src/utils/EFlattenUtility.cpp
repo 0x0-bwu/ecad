@@ -1,4 +1,4 @@
-#include "utilities/EFlattenUtility.h"
+#include "utils/EFlattenUtility.h"
 
 #include "generic/thread/TaskFlow.hpp"
 #include "interfaces/ILayoutView.h"

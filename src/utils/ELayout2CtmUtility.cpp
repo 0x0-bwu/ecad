@@ -1,4 +1,4 @@
-#include "utilities/ELayout2CtmUtility.h"
+#include "utils/ELayout2CtmUtility.h"
 
 #include "models/thermal/io/EChipThermalModelIO.h"
 #include "models/thermal/io/EThermalModelIO.h"

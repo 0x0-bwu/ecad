@@ -1,6 +1,7 @@
-#include "utilities/ELayoutConnectivity.h"
+#include "utils/ELayoutConnectivity.h"
 
 #include "generic/geometry/Connectivity.hpp"
+
 #include "interfaces/IPadstackInstCollection.h"
 #include "interfaces/IPrimitiveCollection.h"
 #include "interfaces/IConnObjCollection.h"

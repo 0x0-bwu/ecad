@@ -1,6 +1,6 @@
 #include "models/thermal/EPrismaThermalModel.h"
-#include "models/thermal/utilities/EPrismaThermalModelQuery.h"
-#include "utilities/ELayoutRetriever.h"
+#include "models/thermal/utils/EPrismaThermalModelQuery.h"
+#include "utils/ELayoutRetriever.h"
 #include "Interface.h"
 
 #include "generic/geometry/BoostGeometryRegister.hpp"

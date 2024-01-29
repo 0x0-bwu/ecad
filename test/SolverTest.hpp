@@ -7,7 +7,7 @@
 #include "solvers/thermal/EThermalNetworkSolver.h"
 #include "models/thermal/io/EThermalModelIO.h"
 #include "models/thermal/io/EGridThermalModelIO.h"
-#include "models/thermal/utilities/EThermalModelReduction.h"
+#include "models/thermal/utils/EThermalModelReduction.h"
 #include "TestData.hpp"
 using namespace boost::unit_test;
 using namespace ecad;
