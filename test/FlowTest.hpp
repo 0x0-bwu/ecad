@@ -91,8 +91,8 @@ void t_thermal_static_flow2()
     matAl->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(2.82e-8));
 
     auto matCu = database->CreateMaterialDef("Cu"); BOOST_CHECK(matCu);
-    matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(398));
-    matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(380));
+    matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreatePolynomialMaterialProp({{437.6, -0.165, 1.825e-4, -1.427e-7, 3.979e-11}}));
+    matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreatePolynomialMaterialProp({{342.8, 0.134, 5.535e-5, -1.971e-7, 1.141e-10}}));
     matCu->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(8850));
 
     auto matAir = database->CreateMaterialDef("Air"); BOOST_CHECK(matAir);
@@ -102,8 +102,8 @@ void t_thermal_static_flow2()
     matAir->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(1.225));
 
     auto matSiC = database->CreateMaterialDef("SiC"); BOOST_CHECK(matSiC);
-    matSiC->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreateSimpleMaterialProp(370));
-    matSiC->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(750));
+    matSiC->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreatePolynomialMaterialProp({{1860, -11.7, 0.03442, -4.869e-5, 2.675e-8}}));
+    matSiC->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreatePolynomialMaterialProp({{-3338, 33.12, -0.1037, 0.0001522, -8.553e-8}}));
     matSiC->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(3210));
 
     auto matSi3N4 = database->CreateMaterialDef("Si3N4"); BOOST_CHECK(matSi3N4);
@@ -351,11 +351,12 @@ void t_thermal_static_flow2()
     prismaSettings.botUniformBC.value = 2750;
 
     EThermalStaticSimulationSetup setup;
+    setup.settings.iteration = 10;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
-    BOOST_CHECK_CLOSE(minT, 45.3413, 2);
-    BOOST_CHECK_CLOSE(maxT, 153.902, 2);
+    BOOST_CHECK_CLOSE(minT, 35.09, 2);
+    BOOST_CHECK_CLOSE(maxT, 91.55, 2);
     EDataMgr::Instance().ShutDown();
 }
 
