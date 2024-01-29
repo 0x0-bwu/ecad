@@ -13,14 +13,21 @@ ECAD_INLINE void EPrismaThermalModelQuery::SearchPrismaInstances(const EBox2D & 
 {
     results.clear();
     auto rtree = BuildIndexTree();
-    rtree->query(boost::geometry::index::within(area), std::back_inserter(results));
+    rtree->query(boost::geometry::index::covered_by(area), std::back_inserter(results));
 }
 
 ECAD_INLINE void EPrismaThermalModelQuery::SearchPrismaInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const
 {
     results.clear();
     auto rtree = BuildLayerIndexTree(layer);
-    rtree->query(boost::geometry::index::within(area), std::back_inserter(results));
+    rtree->query(boost::geometry::index::covered_by(area), std::back_inserter(results));
+}
+
+ECAD_INLINE void EPrismaThermalModelQuery::SearchNearestPrismaInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const
+{
+    results.clear();
+    auto rtree = BuildLayerIndexTree(layer);
+    rtree->query(boost::geometry::index::nearest(pt, k), std::back_inserter(results));
 }
 
 ECAD_INLINE size_t EPrismaThermalModelQuery::NearestLayer(EFloat height) const
@@ -62,7 +69,7 @@ ECAD_INLINE CPtr<EPrismaThermalModelQuery::Rtree> EPrismaThermalModelQuery::Buil
         ECAD_ASSERT(layer == prismas.at(i).layer->id)
         auto it = prismas.at(i).element->templateId;
         auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
-        m_rtree->insert(std::make_pair(point, i));
+        rtree->insert(std::make_pair(point, i));
     }    
     return rtree.get();
 }

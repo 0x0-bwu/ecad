@@ -262,8 +262,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
-    for (const auto & bondwire : compact->bondwires)
-        model->AddBondWire(bondwire);
+    model->AddBondWires(compact->bondwires);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
     //bc

@@ -16,6 +16,7 @@ public:
     virtual ~EPrismaThermalModelQuery() = default;
     void SearchPrismaInstances(const EBox2D & area, std::vector<RtVal> & results) const;
     void SearchPrismaInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const;
+    void SearchNearestPrismaInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const;
     size_t NearestLayer(EFloat height) const;
 
 protected:

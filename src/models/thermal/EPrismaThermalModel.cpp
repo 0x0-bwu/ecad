@@ -414,7 +414,14 @@ ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit, EFloa
     }
 }
 
-ECAD_INLINE void EPrismaThermalModel::AddBondWire(const ECompactLayout::Bondwire & bondwire)
+ECAD_INLINE void EPrismaThermalModel::AddBondWires(const std::vector<ECompactLayout::Bondwire> & bondwires)
+{
+    utils::EPrismaThermalModelQuery query(this);
+    for (const auto & bondwire : bondwires)
+        AddBondWire(bondwire, &query);
+}
+
+ECAD_INLINE void EPrismaThermalModel::AddBondWire(const ECompactLayout::Bondwire & bondwire, CPtr<utils::EPrismaThermalModelQuery> query)
 {
     const auto & pts = bondwire.pt2ds;
     ECAD_ASSERT(pts.size() == bondwire.heights.size());
@@ -425,9 +432,10 @@ ECAD_INLINE void EPrismaThermalModel::AddBondWire(const ECompactLayout::Bondwire
         auto & line = AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current);
         //connection
         if (0 == curr) {
-            auto ids = SearchPrismaInstances(bondwire.layer.front(), pts.at(curr));
-            ECAD_ASSERT(not ids.empty())
-            std::swap(line.neighbors.front(), ids);
+            std::vector<utils::EPrismaThermalModelQuery::RtVal> results;
+            query->SearchNearestPrismaInstances(bondwire.layer.front(), pts.at(curr), 1, results);
+            ECAD_ASSERT(results.size() == 1)
+            std::for_each(results.begin(), results.end(), [&](const auto & r) { line.neighbors.front().push_back(r.second); });
         }
         else {
             auto & prevLine = m_lines.at(m_lines.size() - 2);
@@ -435,9 +443,10 @@ ECAD_INLINE void EPrismaThermalModel::AddBondWire(const ECompactLayout::Bondwire
             prevLine.neighbors.back().emplace_back(line.id);
         }
         if (next == pts.size() - 1) {
-            auto ids = SearchPrismaInstances(bondwire.layer.back(), pts.at(next));
-            ECAD_ASSERT(not ids.empty())
-            std::swap(line.neighbors.back(), ids);
+            std::vector<utils::EPrismaThermalModelQuery::RtVal> results;
+            query->SearchNearestPrismaInstances(bondwire.layer.back(), pts.at(next), 1, results);
+            ECAD_ASSERT(results.size() == 1)
+            std::for_each(results.begin(), results.end(), [&](const auto & r) { line.neighbors.back().push_back(r.second); });
         }
     }
 }
@@ -460,22 +469,6 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
     vtxIndex = vtxIndex % 3;
     const auto & pt2d = points.at(triangle.vertices.at(vtxIndex));
     return FPoint3D{pt2d[0] * m_scaleH2Unit, pt2d[1] * m_scaleH2Unit, height};
-}
-
-std::vector<size_t> EPrismaThermalModel::SearchPrismaInstances(size_t layer, const EPoint2D & pt) const//todo, eff
-{
-    //todo, refactor
-    using namespace generic::geometry;
-    std::vector<size_t> results;
-    for (size_t i = 0; i < m_prismas.size(); ++i) {
-        auto [lyrIdx, eleIdx] = PrismaLocalIndex(i);
-        if (lyrIdx != layer) continue;
-        auto it = m_prismas.at(i).element->templateId;
-        auto triangle = tri::TriangulationUtility<EPoint2D>::GetTriangle(prismaTemplate, it);
-        if (Contains(triangle, pt, true)) results.emplace_back(i);
-        // if (not results.empty()) return results;
-    }
-    return results;
 }
 
 } //namespace ecad::model

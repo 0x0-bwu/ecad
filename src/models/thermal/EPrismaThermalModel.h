@@ -88,7 +88,7 @@ private:
 
 ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
 
-namespace utils { class ECAD_API EPrismaThermalModelQuery; }
+namespace utils { class EPrismaThermalModelQuery; }
 
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {
@@ -162,7 +162,8 @@ public:
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
 
     void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
-    void AddBondWire(const ECompactLayout::Bondwire & bondwire);
+    void AddBondWires(const std::vector<ECompactLayout::Bondwire> & bondwires);
+    void AddBondWire(const ECompactLayout::Bondwire & bondwire, CPtr<utils::EPrismaThermalModelQuery> query);
     EFloat Scale2Meter() const;  
     size_t TotalLayers() const;
     size_t TotalElements() const;
@@ -184,8 +185,6 @@ public:
     bool isBotLayer(size_t lyrIndex) const;
     size_t AddPoint(FPoint3D point);
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
-
-    std::vector<size_t> SearchPrismaInstances(size_t layer, const EPoint2D & pt) const;//todo, eff
 
     EModelType GetModelType() const { return EModelType::ThermalPrisma; }
 protected:

@@ -26,13 +26,13 @@
             ]
         },
         {
-            "name": "thermal",
+            "name": "sic",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/bin/thermal.exe",
+            "program": "${workspaceFolder}/build.debug/bin/sic.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build",
+            "cwd": "${workspaceFolder}/build.debug",
             "environment": [],
             "externalConsole": false,
             "linux": { "MIMode": "gdb"},
@@ -46,10 +46,10 @@
             ]
         },
         {
-            "name": "setup design",
+            "name": "vlsi",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build.debug/bin/setup_design.exe",
+            "program": "${workspaceFolder}/build.debug/bin/vlsi.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build.debug",
