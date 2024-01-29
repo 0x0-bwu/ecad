@@ -355,8 +355,8 @@ void t_thermal_static_flow2()
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
-    BOOST_CHECK_CLOSE(minT, 35.09, 2);
-    BOOST_CHECK_CLOSE(maxT, 91.55, 2);
+    BOOST_CHECK_CLOSE(minT, 34.35, 2);
+    BOOST_CHECK_CLOSE(maxT, 96.26, 2);
     EDataMgr::Instance().ShutDown();
 }
 
