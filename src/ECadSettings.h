@@ -54,6 +54,14 @@ struct EPrismaMeshSettings : public EMeshSettings
     size_t iteration = 0;
 };
 
+struct ELayerCutModelExtractionSettings
+{
+    size_t layerCutPrecision = 6;
+    bool addCircleCenterAsSteinerPoints{false};
+};
+
+using ELayerCutModelBuildSettings = ELayerCutModelExtractionSettings;
+
 struct EThermalBondaryCondition
 {
     using BCType = EThermalBondaryConditionType;

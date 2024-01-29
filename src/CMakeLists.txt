@@ -7,7 +7,10 @@ extension/gds/EGdsLayerMap.cpp
 extension/gds/EGdsParser.cpp
 extension/xfl/ECadExtXflHandler.cpp
 extension/ECadExtension.cpp
+#extraction/geometry/EGeometryModelExtraction.cpp
 extraction/thermal/EThermalModelExtraction.cpp
+#models/geometry/utils/ELayerCutModelBuilder.cpp
+#models/geometry/ELayerCutModel.cpp
 models/thermal/io/EChipThermalModelIO.cpp
 models/thermal/io/EGridThermalModelIO.cpp
 models/thermal/io/EPrismaThermalModelIO.cpp

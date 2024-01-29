@@ -220,9 +220,10 @@ enum class ECloneOption
 enum class EModelType
 {
     Invalid = -1,
-    ThermalCTMv1 = 0,
-    ThermalGrid = 1,
-    ThermalPrisma = 2,
+    LayerCut = 0,
+    ThermalCTMv1 = 10,
+    ThermalGrid = 11,
+    ThermalPrisma = 12,
     // ThermalTet. //todo
 };
 
