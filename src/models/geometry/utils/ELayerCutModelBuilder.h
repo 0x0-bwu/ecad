@@ -1,20 +1,18 @@
 #pragma once
 #include "ECadCommon.h"
+#include "ECadSettings.h"
+#include "models/geometry/ELayerCutModel.h"
 #include "interfaces/IModel.h"
 
 namespace ecad {
 
-class EShape;
 class IComponent;
 class ILayoutView;
 namespace utils {
 class ELayoutRetriever;
 }
 
-namespace model {
-
-class ELayerCutModel;
-namespace utils {
+namespace model::utils {
 
 class ECAD_API ELayerCutModelBuilder
 {
@@ -31,17 +29,14 @@ public:
     CPtr<LayoutRetriever> GetLayoutRetriever() const; 
 
 protected:
-    Height GetHeight(EFloat height) const;
-    LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
+    ELayerCutModel::Height GetHeight(EFloat height) const;
+    ELayerCutModel::LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
 
 protected:
     CPtr<ILayoutView> m_layout{nullptr};
     Ptr<ELayerCutModel> m_model{nullptr};
     ELayerCutModelBuildSettings m_settings;
-
-    EFloat m_vScale2Int;
-    std::unique_ptr<LayoutRetriever> m_retriever;
+    UPtr<LayoutRetriever> m_retriever;
 };
-} // namespace utils
-} // namespace model
-} // namespace ecad
+} // namespace model::utils
+} // namespace ecad;

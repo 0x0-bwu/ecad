@@ -1,12 +1,17 @@
 #pragma once
 #include "ECadCommon.h"
+#include "EShape.h"
 #include "interfaces/IModel.h"
 
 namespace ecad::model {
-namespace utils { class ELayerCutModelBuilder; }
+namespace utils { 
+class ELayerCutModelQuery;
+class ELayerCutModelBuilder;
+} // namespace utils
 class ECAD_API ELayerCutModel : public IModel
 {
 public:
+    friend class utils::ELayerCutModelQuery;
     friend class utils::ELayerCutModelBuilder;
     using Height = int;
     using LayerRange = std::pair<Height, Height>;
@@ -39,6 +44,9 @@ public:
     bool GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const;
     size_t GetLayerIndexByHeight(Height height) const;
     const EPolygonData & GetLayoutBoundary() const;
+    
+    Height GetHeight(EFloat height) const;
+    LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
 
     virtual EModelType GetModelType() const { return EModelType::LayerCut; }
 
@@ -57,5 +65,6 @@ protected:
     std::unordered_map<size_t, std::vector<size_t> > m_lyrPolygons;
     std::unordered_map<Height, size_t> m_height2Index;
     std::vector<Height> m_layerOrder;
+    EFloat m_vScale2Int;
 };
 } // namespace ecad::model 

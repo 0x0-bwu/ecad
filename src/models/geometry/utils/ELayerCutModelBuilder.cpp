@@ -1,6 +1,5 @@
-#include "ELayerCutModel.h"
+#include "ELayerCutModelBuilder.h"
 
-#include "models/geometry/ELayerCutModel.h"
 #include "utils/ELayoutRetriever.h"
 #include "Interface.h"
 
@@ -9,7 +8,7 @@ namespace ecad::model::utils {
 ECAD_INLINE ELayerCutModelBuilder::ELayerCutModelBuilder(CPtr<ILayoutView> layout, Ptr<ELayerCutModel> model, ELayerCutModelBuildSettings settings)
  : m_layout(layout), m_model(model), m_settings(std::move(settings))
 {
-    m_vScale2Int = std::exp(10, m_settings.layerCutPrecision);
+    m_model->m_vScale2Int = std::pow(10, m_settings.layerCutPrecision);
     m_retriever = std::make_unique<ecad::utils::ELayoutRetriever>(m_layout);
 }
 
@@ -49,7 +48,7 @@ ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygo
     if (invalidIndex == index) return false;
     EFloat pe = elevation - thickness * pwrPosition;
     EFloat pt = std::min(thickness * pwrThickness, thickness - elevation + pe);
-    m_model->m_powerBlocks.emplace(index, PowerBlock(index, GetLayerRange(pe, pt), totalP / area));
+    m_model->m_powerBlocks.emplace(index, ELayerCutModel::PowerBlock(index, GetLayerRange(pe, pt), totalP / area));
     return true;
 }
 
@@ -83,14 +82,14 @@ ECAD_INLINE CPtr<ELayerCutModelBuilder::LayoutRetriever> ELayerCutModelBuilder::
     return m_retriever.get();
 }
 
-ECAD_INLINE ELayerCutModelBuilder::Height ELayerCutModelBuilder::GetHeight(EFloat height) const
+ECAD_INLINE ELayerCutModel::Height ELayerCutModelBuilder::GetHeight(EFloat height) const
 {
-    return std::round(height * m_vScale2Int);
+    return m_model->GetHeight(height);
 }
 
-ECAD_INLINE ELayerCutModelBuilder::LayerRange ELayerCutModelBuilder::GetLayerRange(EFloat elevation, EFloat thickness) const
+ECAD_INLINE ELayerCutModel::LayerRange ELayerCutModelBuilder::GetLayerRange(EFloat elevation, EFloat thickness) const
 {
-    return LayerRange{GetHeight(elevation), GetHeight(elevation - thickness)};
+    return m_model->GetLayerRange(elevation, thickness);
 }
 
 } // namespace ecad::model::utils

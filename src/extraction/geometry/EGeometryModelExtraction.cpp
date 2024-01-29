@@ -2,6 +2,7 @@
 
 #include "models/geometry/utils/ELayerCutModelBuilder.h"
 #include "models/geometry/ELayerCutModel.h"
+#include "utils/ELayoutRetriever.h"
 #include "Interface.h"
 
 #include "generic/tools/FileSystem.hpp"
@@ -16,7 +17,7 @@ ECAD_INLINE UPtr<IModel> GenerateLayerCutModel(Ptr<ILayoutView> layout, const EL
     ECAD_EFFICIENCY_TRACK("generate layer cut model")
 
     auto model = new ELayerCutModel;
-    ELayerCutModelBuilder builder(layout, model, settings);
+    model::utils::ELayerCutModelBuilder builder(layout, model, settings);
     auto retriever = builder.GetLayoutRetriever();
     
     [[maybe_unused]] bool check;
@@ -43,7 +44,7 @@ ECAD_INLINE UPtr<IModel> GenerateLayerCutModel(Ptr<ILayoutView> layout, const EL
     for (size_t i = 0; i < primitives->Size(); ++i) {
         auto prim = primitives->GetPrimitive(i);
         if (auto bondwire = prim->GetBondwireFromPrimitive(); bondwire) {
-            ECompactLayout::Bondwire bw;
+            ELayerCutModel::Bondwire bw;
             check = retriever->GetBondwireSegmentsWithMinSeg(bondwire, bw.pt2ds, bw.heights, 20); { ECAD_ASSERT(check) }
             auto material = layout->GetDatabase()->FindMaterialDefByName(bondwire->GetMaterial());
             ECAD_ASSERT(material)
@@ -51,7 +52,7 @@ ECAD_INLINE UPtr<IModel> GenerateLayerCutModel(Ptr<ILayoutView> layout, const EL
             bw.radius = bondwire->GetRadius();
             bw.netId = bondwire->GetNet();
             bw.current = bondwire->GetCurrent();
-            builder.AddBondWire(std::move(bw));
+            builder.AddBondwire(std::move(bw));
 
             if (bondwire->GetSolderJoints() && bondwire->GetSolderJoints()->GetPadstackDefData()->hasTopSolderBump()) {
                 std::string sjMatName;

@@ -1,4 +1,4 @@
-#include "models/thermal/utils/EPrismaThermalModelQuery.h"
+#include "EPrismaThermalModelQuery.h"
 #include "models/thermal/EPrismaThermalModel.h"
 
 namespace ecad {
