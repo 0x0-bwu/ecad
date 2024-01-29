@@ -1,4 +1,5 @@
 #include "models/thermal/EPrismaThermalModel.h"
+#include "models/thermal/utilities/EPrismaThermalModelQuery.h"
 #include "utilities/ELayoutRetriever.h"
 #include "Interface.h"
 
@@ -16,7 +17,7 @@ ECAD_INLINE ECompactLayout::PowerBlock::PowerBlock(size_t polygon, LayerRange ra
 ECAD_INLINE ECompactLayout::ECompactLayout(CPtr<ILayoutView> layout, EFloat vScale2Int)
  : m_vScale2Int(vScale2Int), m_layout(layout)
 {
-    m_retriever = std::make_unique<utils::ELayoutRetriever>(m_layout);
+    m_retriever = std::make_unique<ecad::utils::ELayoutRetriever>(m_layout);
 }
 
 ECAD_INLINE void ECompactLayout::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness)
@@ -198,7 +199,7 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
     auto compact = std::make_unique<ECompactLayout>(layout, 1e6);
     //todo, reserve size   
 
-    utils::ELayoutRetriever retriever(layout);
+    ecad::utils::ELayoutRetriever retriever(layout);
     [[maybe_unused]] bool check;
     EFloat elevation, thickness;
     std::vector<CPtr<IStackupLayer> > stackupLayers;
@@ -316,6 +317,8 @@ ECAD_INLINE UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout)
 ECAD_INLINE EPrismaThermalModel::EPrismaThermalModel(CPtr<ILayoutView> layout)
  : m_layout(layout)
 {
+    m_blockBCs.emplace(EOrientation::Top, std::vector<BlockBC>{});
+    m_blockBCs.emplace(EOrientation::Bot, std::vector<BlockBC>{});
 }
 
 CPtr<IMaterialDefCollection> EPrismaThermalModel::GetMaterialLibrary() const

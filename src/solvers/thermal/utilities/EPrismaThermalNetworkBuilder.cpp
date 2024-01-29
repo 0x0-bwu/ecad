@@ -1,4 +1,5 @@
 #include "EPrismaThermalNetworkBuilder.h"
+#include "models/thermal/utilities/EPrismaThermalModelQuery.h"
 #include "interfaces/IMaterialDefCollection.h"
 #include "interfaces/IMaterialProp.h"
 #include "interfaces/IMaterialDef.h"
@@ -38,8 +39,9 @@ ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EPrismaThermalNetworkBuilder::Build(co
             pool.Submit(std::bind(&EPrismaThermalNetworkBuilder::BuildPrismaElement, this, std::ref(iniT), network.get(), begin, end));        
     }
     else BuildPrismaElement(iniT, network.get(), 0, m_model.TotalPrismaElements());
-
+    
     BuildLineElement(iniT, network.get());
+    ApplyBlockBCs(network.get());
     return network;
 }
 
@@ -172,6 +174,46 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildLineElement(const std::vecto
         for (auto nb : line.neighbors.front()) setR(nb);
         for (auto nb : line.neighbors.back()) setR(nb);
     }
+}
+
+ECAD_INLINE void EPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const
+{
+    const auto & topBCs = m_model.GetBlockBCs(EOrientation::Top);
+    const auto & botBCs = m_model.GetBlockBCs(EOrientation::Bot);
+    if (topBCs.empty() && botBCs.empty()) return;
+
+    model::utils::EPrismaThermalModelQuery query(&m_model);
+    using RtVal = model::utils::EPrismaThermalModelQuery::RtVal;
+
+    auto applyBlockBC = [&](const auto & block, bool isTop)
+    {
+        std::vector<RtVal> results;
+        if (not block.second.isValid()) return;
+        auto value = block.second.value;
+        if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type)
+            value /= block.first.Area();
+
+        for (size_t lyr = 0; lyr <  m_model.TotalLayers(); ++lyr) {
+            query.SearchPrismaInstances(lyr, block.first, results);
+            if (results.empty()) continue;
+            for (const auto & result : results) {
+                const auto & prisma = m_model.GetPrisma(result.second);
+                auto nid = isTop ? EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX : 
+                                   EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX ;
+                if (prisma.element->neighbors.at(nid) != noNeighbor) continue;
+                if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type) {
+                    auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(m_model.prismaTemplate, prisma.element->templateId);
+                    network->SetHF(result.second, value * area);
+                }
+                else network->SetHTC(result.second, value);
+            }    
+        }
+    };
+
+    for (const auto & block : topBCs)
+        applyBlockBC(block, true);
+    for (const auto & block : botBCs)
+        applyBlockBC(block, false);
 }
 
 ECAD_INLINE const FPoint3D & EPrismaThermalNetworkBuilder::GetPrismaVertexPoint(size_t index, size_t iv) const

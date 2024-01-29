@@ -28,6 +28,8 @@ public:
 private:
     void BuildPrismaElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const;
     void BuildLineElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network) const;
+    void ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const;
+
     std::array<EFloat, 3> GetMatThermalConductivity(EMaterialId matId, EFloat refT) const;
     EFloat GetMatMassDensity(EMaterialId matId, EFloat refT) const;
     EFloat GetMatSpecificHeat(EMaterialId matId, EFloat refT) const;

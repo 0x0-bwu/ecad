@@ -10,20 +10,22 @@ namespace utils {
 class ECAD_API EPrismaThermalModelQuery
 {
 public:
+    using RtVal = std::pair<EPoint2D, size_t>;
+    using Rtree = boost::geometry::index::rtree<RtVal, boost::geometry::index::rstar<8>>;
     explicit EPrismaThermalModelQuery(CPtr<EPrismaThermalModel> model);
     virtual ~EPrismaThermalModelQuery() = default;
-    void SearchPrismaInstances(const EBox2D & area, std::vector<size_t> & indices) const;
-    void SearchPrismaInstances(size_t layer, const EPoint2D & pt, std::vector<size_t> & indices) const;
+    void SearchPrismaInstances(const EBox2D & area, std::vector<RtVal> & results) const;
+    void SearchPrismaInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const;
     size_t NearestLayer(EFloat height) const;
 
 protected:
-    void BuildIndexTree() const;
+    CPtr<Rtree> BuildIndexTree() const;
+    CPtr<Rtree> BuildLayerIndexTree(size_t layer) const;
 protected:
     CPtr<EPrismaThermalModel> m_model{nullptr};
 
-    using RtVal = std::pair<EPoint2D, size_t>;
-    using Rtree = boost::geometry::index::rtree<RtVal, boost::geometry::index::rstar<8>>;
     mutable UPtr<Rtree> m_rtree{nullptr};
+    mutable std::unordered_map<size_t, SPtr<Rtree> > m_lyrRtrees;
 };
 } // namespace utils
 } // namespace model

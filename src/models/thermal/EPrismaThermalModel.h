@@ -1,5 +1,6 @@
 #pragma once
 
+#include "generic/geometry/BoostGeometryRegister.hpp"
 #include "generic/geometry/Triangulation.hpp"
 #include <boost/geometry/index/rtree.hpp>
 
@@ -87,11 +88,13 @@ private:
 
 ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
 
-class ECAD_API EPrismaThermalModelQuery;
+namespace utils { class ECAD_API EPrismaThermalModelQuery; }
+
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {
-    friend class EPrismaThermalModelQuery;
 public:
+    friend class utils::EPrismaThermalModelQuery;
+    using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
     struct LineElement
     {
         ENetId netId;
@@ -153,6 +156,7 @@ public:
     CPtr<IMaterialDefCollection> GetMaterialLibrary() const;
 
     void AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc);
+    const std::vector<BlockBC> & GetBlockBCs(EOrientation orient) const { return m_blockBCs.at(orient); }
 
     PrismaLayer & AppendLayer(PrismaLayer layer);
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
@@ -184,7 +188,7 @@ public:
     std::vector<size_t> SearchPrismaInstances(size_t layer, const EPoint2D & pt) const;//todo, eff
 
     EModelType GetModelType() const { return EModelType::ThermalPrisma; }
-private:
+protected:
     EFloat m_scaleH2Unit;
     EFloat m_scale2Meter;
     CPtr<ILayoutView> m_layout;
@@ -192,7 +196,6 @@ private:
     std::vector<LineElement> m_lines;
     std::vector<PrismaInstance> m_prismas;
     std::vector<size_t> m_indexOffset;
-    using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
     std::unordered_map<EOrientation, std::vector<BlockBC>> m_blockBCs;
 };
 
