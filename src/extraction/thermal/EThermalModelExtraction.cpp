@@ -1,5 +1,6 @@
 #include "EThermalModelExtraction.h"
 
+#include "models/geometry/utils/ELayerCutModelQuery.h"
 #include "models/thermal/io/EPrismaThermalModelIO.h"
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
@@ -148,10 +149,13 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
     auto model = new EPrismaThermalModel(layout);
-    auto compact = makeCompactLayout(layout);
-    if (not settings.workDir.empty()) {
-        auto compactModelFile = settings.workDir + ECAD_SEPS + "compact.png";
-        compact->WriteImgView(compactModelFile, 2048);
+    auto lcModel = layout->ExtractLayerCutModel(settings.layerCutSettings);
+    auto compact = dynamic_cast<Ptr<ELayerCutModel>>(lcModel.get());
+    ECAD_ASSERT(compact)
+
+    if (not settings.workDir.empty() && settings.layerCutSettings.dumpSketchImg) {
+        std::string filename = settings.workDir + ECAD_SEPS + "LayerCut.png";
+        compact->WriteImgView(filename);
     }
 
     const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
@@ -171,9 +175,11 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     std::vector<Point2D<ECoord> > points;
     std::vector<Segment2D<ECoord> > segments;
     auto & triangulation = model->prismaTemplate;
-    MeshFlow2D::ExtractIntersections(compact->polygons, segments);
+    const auto & polygons = compact->GetAllPolygonData();
+    const auto & steinerPoints = compact->GetSteinerPoints();
+    MeshFlow2D::ExtractIntersections(polygons, segments);
     MeshFlow2D::ExtractTopology(segments, points, edges);
-    points.insert(points.end(), compact->steinerPoints.begin(), compact->steinerPoints.end());
+    points.insert(points.end(), steinerPoints.begin(), steinerPoints.end());
     MeshFlow2D::MergeClosePointsAndRemapEdge(points, edges, tolerance);
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
     MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
@@ -200,6 +206,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
             fluidMaterials.emplace(material->GetMaterialId());
     }
 
+    model::utils::ELayerCutModelQuery query(compact);
+    const auto & powerBlocks = compact->GetAllPowerBlocks();
     std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;//[layer, [tempId, eleId]]
 
     auto buildOnePrismaLayer = [&](size_t index) {
@@ -208,17 +216,17 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         for (size_t it = 0; it < triangulation.triangles.size(); ++it) {
             ECAD_ASSERT(compact->hasPolygon(prismaLayer.id))
             auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
-            auto pid = compact->SearchPolygon(prismaLayer.id, ctPoint);
+            auto pid = query.SearchPolygon(prismaLayer.id, ctPoint);
             if (pid == invalidIndex) continue;;
-            if (fluidMaterials.count(compact->materials.at(pid))) continue;
-            if (EMaterialId::noMaterial == compact->materials.at(pid)) continue;
+            if (fluidMaterials.count(compact->GetMaterialId(pid))) continue;
+            if (EMaterialId::noMaterial == compact->GetMaterialId(pid)) continue;
 
             auto & ele = prismaLayer.AddElement(it);
             idMap.emplace(it, ele.id);
-            ele.matId = compact->materials.at(pid);
-            ele.netId = compact->nets.at(pid);
-            auto iter = compact->powerBlocks.find(pid);
-            if (iter != compact->powerBlocks.cend() &&
+            ele.matId = compact->GetMaterialId(pid);
+            ele.netId = compact->GetNetId(pid);
+            auto iter = powerBlocks.find(pid);
+            if (iter != powerBlocks.cend() &&
                 prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.first)) {
                 auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
                 ele.avePower = area * iter->second.powerDensity;
@@ -262,7 +270,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
-    model->AddBondWires(compact->bondwires);
+    model->AddBondWires(compact->GetAllBondwires());
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
     //bc

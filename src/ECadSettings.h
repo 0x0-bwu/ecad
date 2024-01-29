@@ -56,6 +56,7 @@ struct EPrismaMeshSettings : public EMeshSettings
 
 struct ELayerCutModelExtractionSettings
 {
+    bool dumpSketchImg = true;
     size_t layerCutPrecision = 6;
     bool addCircleCenterAsSteinerPoints{false};
 };
@@ -99,6 +100,7 @@ struct EPrismaThermalModelExtractionSettings : public EThermalModelExtractionSet
 {
     EPrismaMeshSettings meshSettings;
     ELayoutPolygonMergeSettings polygonMergeSettings;
+    ELayerCutModelExtractionSettings layerCutSettings;
 };
 
 struct EThermalSimulationSetup

@@ -55,14 +55,6 @@ ECAD_INLINE void ELayerCutModel::BuildLayerPolygonLUT()
         bw.layer.front() = m_height2Index.at(GetHeight(bw.heights.front()));
         bw.layer.back() = m_height2Index.at(GetHeight(bw.heights.back()));
     }
-
-    // for (size_t layer = 0; layer < TotalLayers(); ++layer) {
-    //     auto & rtree = m_rtrees.emplace(layer, std::make_shared<Rtree>()).first->second;
-    //     for (auto i : m_lyrPolygons.at(layer)) {
-    //         auto bbox = generic::geometry::Extent(polygons.at(i));
-    //         rtree->insert(std::make_pair(bbox, i));
-    //     }
-    // }
 }
 
 ECAD_INLINE size_t ELayerCutModel::TotalLayers() const

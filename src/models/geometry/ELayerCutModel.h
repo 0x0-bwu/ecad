@@ -43,8 +43,15 @@ public:
     bool hasPolygon(size_t layer) const;
     bool GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const;
     size_t GetLayerIndexByHeight(Height height) const;
-    const EPolygonData & GetLayoutBoundary() const;
     
+    const EPolygonData & GetLayoutBoundary() const;
+    const std::unordered_map<size_t, PowerBlock> & GetAllPowerBlocks() const { return m_powerBlocks; }
+    const std::vector<EPolygonData> & GetAllPolygonData() const { return m_polygons; }
+    const std::vector<EPoint2D> & GetSteinerPoints() const { return m_steinerPoints; }
+    const std::vector<Bondwire> GetAllBondwires() const { return m_bondwires; }
+    EMaterialId GetMaterialId(size_t pid) const { return m_materials.at(pid); }
+    ENetId GetNetId(size_t pid) const { return m_nets.at(pid); }
+
     Height GetHeight(EFloat height) const;
     LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
 

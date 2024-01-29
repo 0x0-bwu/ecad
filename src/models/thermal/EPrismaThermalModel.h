@@ -4,6 +4,7 @@
 #include "generic/geometry/Triangulation.hpp"
 #include <boost/geometry/index/rtree.hpp>
 
+#include "models/geometry/ELayerCutModel.h"
 #include "EThermalModel.h"
 #include "EShape.h"
 
@@ -20,73 +21,6 @@ class ELayoutRetriever;
 } // namespace utils
 
 namespace model {
-
-struct ECAD_API ECompactLayout
-{
-    using Height = int;
-    using LayerRange = std::pair<Height, Height>;
-    static bool isValid(const LayerRange & range) { return range.first > range.second; }
-    struct PowerBlock
-    {
-        size_t polygon;
-        LayerRange range;
-        EFloat powerDensity;
-        PowerBlock(size_t polygon, LayerRange range, EFloat powerDensity);
-    };
-
-    struct Bondwire
-    {
-        ENetId netId;
-        EFloat radius{0};
-        EMaterialId matId;
-        EFloat current{0};
-        std::array<size_t, 2> layer;
-        std::vector<EFloat> heights;
-        std::vector<EPoint2D> pt2ds;
-    };
-
-    std::vector<ENetId> nets;
-    std::vector<LayerRange> ranges; 
-    std::vector<Bondwire> bondwires;
-    std::vector<EMaterialId> materials;
-    std::vector<EPolygonData> polygons;
-    std::vector<EPoint2D> steinerPoints;
-    bool addCircleCenterAsSteinerPoints{false};
-    std::unordered_map<size_t, PowerBlock> powerBlocks;
-
-    explicit ECompactLayout(CPtr<ILayoutView> layout, EFloat vScale2Int);
-    virtual ~ECompactLayout() = default;
-    void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness);
-    size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness);
-    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat pwrPosition = 0.1, EFloat pwrThickness = 0.1);
-    void AddComponent(CPtr<IComponent> component);    
-    bool WriteImgView(std::string_view filename, size_t width = 512) const;
-
-    void BuildLayerPolygonLUT();
-
-    size_t TotalLayers() const;
-    bool hasPolygon(size_t layer) const;
-    size_t SearchPolygon(size_t layer, const EPoint2D & pt) const;
-    bool GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const;
-    size_t GetLayerIndexByHeight(Height height) const;
-    const EPolygonData & GetLayoutBoundary() const;
-private:
-    Height GetHeight(EFloat height) const;
-    LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
-private:
-    using RtVal = std::pair<EBox2D, size_t>;
-    using Rtree = boost::geometry::index::rtree<RtVal, boost::geometry::index::rstar<8>>;
-    std::unordered_map<size_t, std::shared_ptr<Rtree> > m_rtrees;
-    std::unordered_map<size_t, std::vector<size_t> > m_lyrPolygons;
-    std::unordered_map<Height, size_t> m_height2Index;
-    std::vector<Height> m_layerOrder;
-    EFloat m_vScale2Int;
-
-    CPtr<ILayoutView> m_layout;
-    std::unique_ptr<ecad::utils::ELayoutRetriever> m_retriever;
-};
-
-ECAD_API UPtr<ECompactLayout> makeCompactLayout(CPtr<ILayoutView> layout);
 
 namespace utils { class EPrismaThermalModelQuery; }
 
@@ -162,8 +96,8 @@ public:
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
 
     void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
-    void AddBondWires(const std::vector<ECompactLayout::Bondwire> & bondwires);
-    void AddBondWire(const ECompactLayout::Bondwire & bondwire, CPtr<utils::EPrismaThermalModelQuery> query);
+    void AddBondWires(const std::vector<ELayerCutModel::Bondwire> & bondwires);
+    void AddBondWire(const ELayerCutModel::Bondwire & bondwire, CPtr<utils::EPrismaThermalModelQuery> query);
     EFloat Scale2Meter() const;  
     size_t TotalLayers() const;
     size_t TotalElements() const;
