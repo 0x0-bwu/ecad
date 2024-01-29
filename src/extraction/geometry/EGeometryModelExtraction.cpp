@@ -131,7 +131,7 @@ ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILa
         }
     }
 
-    model->BuildLayerPolygonLUT();
+    model->BuildLayerPolygonLUT(settings.layerTransitionRatio);
     return std::unique_ptr<IModel>(model);
 }
 

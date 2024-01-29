@@ -58,6 +58,7 @@ struct ELayerCutModelExtractionSettings
 {
     bool dumpSketchImg = true;
     size_t layerCutPrecision = 6;
+    EFloat layerTransitionRatio = 2;
     bool addCircleCenterAsSteinerPoints{false};
 };
 

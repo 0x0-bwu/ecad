@@ -155,7 +155,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
 
     if (not settings.workDir.empty() && settings.layerCutSettings.dumpSketchImg) {
         std::string filename = settings.workDir + ECAD_SEPS + "LayerCut.png";
-        compact->WriteImgView(filename);
+        compact->WriteImgView(filename, 3000);
     }
 
     const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
@@ -270,7 +270,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
-    model->AddBondWires(compact->GetAllBondwires());
+    model->AddBondWiresFromLayerCutModel(compact);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
     //bc

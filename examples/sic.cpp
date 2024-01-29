@@ -536,8 +536,8 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.botUniformBC.value = 2750;
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
-    prismaSettings.meshSettings.minLen = 1e-3;
-    prismaSettings.meshSettings.maxLen = 10;
+    prismaSettings.meshSettings.minLen = 1e-4;
+    prismaSettings.meshSettings.maxLen = 1;
     prismaSettings.meshSettings.tolerance = 1e-6;
     return prismaSettings;
 }

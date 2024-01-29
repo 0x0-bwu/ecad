@@ -96,8 +96,7 @@ public:
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
 
     void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
-    void AddBondWires(const std::vector<ELayerCutModel::Bondwire> & bondwires);
-    void AddBondWire(const ELayerCutModel::Bondwire & bondwire, CPtr<utils::EPrismaThermalModelQuery> query);
+    void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm);
     EFloat Scale2Meter() const;  
     size_t TotalLayers() const;
     size_t TotalElements() const;

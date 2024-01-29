@@ -16,10 +16,7 @@ public:
     virtual ~ELayerCutModelQuery() = default;
 
     size_t SearchPolygon(size_t layer, const EPoint2D & pt) const;
-
-protected:
-    CPtr<Rtree> BuildLayerIndexTree(size_t layer) const;
-
+    
 protected:
     CPtr<ELayerCutModel> m_model{nullptr};
     mutable std::unordered_map<size_t, std::shared_ptr<Rtree> > m_rtrees;

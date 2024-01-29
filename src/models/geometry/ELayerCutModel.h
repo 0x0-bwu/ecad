@@ -29,7 +29,6 @@ public:
         EFloat radius{0};
         EMaterialId matId;
         EFloat current{0};
-        std::array<size_t, 2> layer;
         std::vector<EFloat> heights;
         std::vector<EPoint2D> pt2ds;
     };
@@ -37,7 +36,7 @@ public:
     virtual ~ELayerCutModel() = default;
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
-    void BuildLayerPolygonLUT();
+    void BuildLayerPolygonLUT(EFloat vTransitionRatio);
 
     size_t TotalLayers() const;
     bool hasPolygon(size_t layer) const;
@@ -57,8 +56,9 @@ public:
 
     virtual EModelType GetModelType() const { return EModelType::LayerCut; }
 
+    static Height Thickness(const LayerRange & range) { return range.first - range.second; }
     static bool isValid(const LayerRange & range) { return range.first > range.second; }
-
+    static bool SliceOverheightLayers(std::list<LayerRange> & ranges, EFloat ratio);
 protected:
     //data
     std::vector<ENetId> m_nets;
@@ -69,7 +69,7 @@ protected:
     std::vector<EPoint2D> m_steinerPoints;
     std::unordered_map<size_t, PowerBlock> m_powerBlocks;
 
-    std::unordered_map<size_t, std::vector<size_t> > m_lyrPolygons;
+    std::unordered_map<size_t, SPtr<std::vector<size_t>> > m_lyrPolygons;
     std::unordered_map<Height, size_t> m_height2Index;
     std::vector<Height> m_layerOrder;
     EFloat m_vScale2Int;
