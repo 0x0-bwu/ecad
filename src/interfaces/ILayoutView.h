@@ -117,6 +117,9 @@ public:
     ///Layout Polygon Merge
     virtual bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) = 0;
 
+    ///Geometry Model Extraction
+    virtual UPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) = 0;
+    
     ///Thermal Model Extraction
     virtual UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) = 0;
 

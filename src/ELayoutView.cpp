@@ -1,6 +1,7 @@
 #include "ELayoutView.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 
+#include "extraction/geometry/EGeometryModelExtraction.h"
 #include "extraction/thermal/EThermalModelExtraction.h"
 
 #include "simulation/thermal/EThermalSimulation.h"
@@ -327,6 +328,11 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
     merger.SetLayoutMergeSettings(settings);
     merger.Merge();
     return true;
+}
+
+ECAD_INLINE UPtr<IModel> ELayoutView::ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings)
+{
+    return extraction::EGeometryModelExtraction::GenerateLayerCutModel(this, settings);
 }
 
 ECAD_INLINE UPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExtractionSettings & settings)

@@ -104,6 +104,9 @@ public:
     ///Layout Polygon Merge
     bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) override;
 
+    ///Geometry Model Extraction
+    UPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) override;
+
     ///Thermal Model Extraction
     UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) override;
 

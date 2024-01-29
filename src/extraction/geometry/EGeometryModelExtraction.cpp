@@ -12,7 +12,7 @@ namespace ecad::extraction {
 
 using namespace ecad::model;
 
-ECAD_INLINE UPtr<IModel> GenerateLayerCutModel(Ptr<ILayoutView> layout, const ELayerCutModelExtractionSettings & settings)
+ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILayoutView> layout, const ELayerCutModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate layer cut model")
 
