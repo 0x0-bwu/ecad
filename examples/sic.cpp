@@ -355,6 +355,13 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
             bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
         }
     }
+
+    std::vector<FPoint2D> kelvinBwPLocs{{-11.475, 8.15}, {-11.475, 3.6}, {-11.475, -0.72}};
+    for (size_t i = 0; i < kelvinBwPLocs.size(); ++i) {
+        auto bw = eDataMgr.CreateBondwire(botBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), GATE_BONDWIRE_RADIUS);
+        bw->SetStartComponent(dieComp[i], "D");
+        bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(kelvinBwPLocs.at(i)), false);
+    }
     return botBridgeLayout;
 }
 
