@@ -18,8 +18,8 @@ void SignalHandler(int signum)
 
 using namespace ecad;
 auto & eDataMgr = EDataMgr::Instance();
-inline static constexpr EFloat BONDWIRE_RADIUS = 0.25;
-inline static constexpr EFloat GATE_BONDWIRE_RADIUS = 0.15;
+inline static constexpr EFloat THIN_BONDWIRE_RADIUS = 0.0635;
+inline static constexpr EFloat THICK_BONDWIRE_RADIUS = 0.15;
 inline static constexpr std::string_view RES_GATE = "Rg";
 inline static constexpr std::string_view NET_GATE = "Gate";
 inline static constexpr std::string_view NET_DRAIN = "Drain";
@@ -102,6 +102,7 @@ Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
     eDataMgr.CreateComponentDefPin(sicDie, "A", {1.25, 1}, EPinIOType::Receiver);
     eDataMgr.CreateComponentDefPin(sicDie, "C", {1.25, 0}, EPinIOType::Receiver);
     eDataMgr.CreateComponentDefPin(sicDie, "E", {1.25, -1}, EPinIOType::Receiver);
+    eDataMgr.CreateComponentDefPin(sicDie, "K", {-2, -0.5}, EPinIOType::Receiver);
     return sicDie;
 }
 
@@ -194,48 +195,56 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
 
     };
     for (size_t i = 0; i < dPLoc.size(); ++i) {
-        auto bw1 = eDataMgr.CreateBondwire(baseLayout, "DS1_" + std::to_string(i + 1), ENetId::noNet, BONDWIRE_RADIUS);
+        auto bw1 = eDataMgr.CreateBondwire(baseLayout, "DS1_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);
         bw1->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
         bw1->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false); 
 
         dPLoc[i][1] *= -1; sPLoc[i][1] *= -1;
-        auto bw2 = eDataMgr.CreateBondwire(baseLayout, "DS2_" + std::to_string(i + 1), ENetId::noNet, BONDWIRE_RADIUS);
+        auto bw2 = eDataMgr.CreateBondwire(baseLayout, "DS2_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);
         bw2->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
         bw2->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false); 
     }
     std::vector<FPoint2D> gPLoc{{-3, 3}, {-3, 1.8}};
     for (size_t i = 0; i < gPLoc.size(); ++i) {
         const auto & p = gPLoc.at(i);
-        auto bw1 = eDataMgr.CreateBondwire(baseLayout, "G1_" + std::to_string(i + 1), ENetId::noNet, GATE_BONDWIRE_RADIUS);
+        auto bw1 = eDataMgr.CreateBondwire(baseLayout, "G1_" + std::to_string(i + 1), ENetId::noNet, THIN_BONDWIRE_RADIUS);
         bw1->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(p[0], p[1])), false);
         bw1->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(-p[0], p[1])), false); 
 
-        auto bw2 = eDataMgr.CreateBondwire(baseLayout, "G2_" + std::to_string(i + 1), ENetId::noNet, GATE_BONDWIRE_RADIUS);
+        auto bw2 = eDataMgr.CreateBondwire(baseLayout, "G2_" + std::to_string(i + 1), ENetId::noNet, THIN_BONDWIRE_RADIUS);
         bw2->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(p[0], -p[1])), false);
         bw2->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(-p[0], -p[1])), false); 
     }
 
-    auto KelvinBw = eDataMgr.CreateBondwire(baseLayout, "KelvinBw", nk->GetNetId(), GATE_BONDWIRE_RADIUS);
-    KelvinBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(29.225, 5.5)), false);
-    KelvinBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(29.225, -5.5)), false);
+    auto KelvinBw0 = eDataMgr.CreateBondwire(baseLayout, "KelvinBw0", nk->GetNetId(), THIN_BONDWIRE_RADIUS);
+    KelvinBw0->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(30.15, -5.95)), false);
+    KelvinBw0->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -5.95)), false);
 
-    auto gateBw = eDataMgr.CreateBondwire(baseLayout, "GateBw", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
-    gateBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(31.55, 5.5)), false);
-    gateBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(31.55, -5.5)), false);
+    auto KelvinBw = eDataMgr.CreateBondwire(baseLayout, "KelvinBw", nk->GetNetId(), THIN_BONDWIRE_RADIUS);
+    KelvinBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(30.15, 5)), false);
+    KelvinBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(30.15, -5)), false);
 
-    auto gateBw1 = eDataMgr.CreateBondwire(baseLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw0 = eDataMgr.CreateBondwire(baseLayout, "GateBw0", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
+    gateBw0->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32, -12.375)), false);
+    gateBw0->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -12.375)), false);
+
+    auto gateBw = eDataMgr.CreateBondwire(baseLayout, "GateBw", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
+    gateBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32, 5)), false);
+    gateBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32, -5)), false);
+
+    auto gateBw1 = eDataMgr.CreateBondwire(baseLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw1->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, 3.0)), false);
     gateBw1->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(41.3, 3.35)), false);
 
-    auto gateBw2 = eDataMgr.CreateBondwire(baseLayout, "GateBw2", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw2 = eDataMgr.CreateBondwire(baseLayout, "GateBw2", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw2->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, 1.8)), false);
-    gateBw2->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, 1.2375)), false);
+    gateBw2->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, 1.0375)), false);
 
-    auto gateBw3 = eDataMgr.CreateBondwire(baseLayout, "GateBw3", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw3 = eDataMgr.CreateBondwire(baseLayout, "GateBw3", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw3->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, -1.8)), false);
     gateBw3->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -0.3625)), false);
 
-    auto gateBw4 = eDataMgr.CreateBondwire(baseLayout, "GateBw4", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw4 = eDataMgr.CreateBondwire(baseLayout, "GateBw4", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw4->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, -3)), false);
     gateBw4->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -2.7)), false);
     return baseLayout;
@@ -312,8 +321,8 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-12.6, -8.8}, {12.35, -8.8}, {12.95, -8.4}, {15.45, -8.4},
         {15.45, -5.97}, {7.95, -5.97}, {7.95, 9.03}, {15.45, 9.03}, {15.45, 11.45}, {-9.75, 11.45}, {-9.75, -3.75}, {-12.6, -3.75}}, 0.25)
     );
-    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, -0.72}, {-12.9, -0.72}, {-12.9, 2.58}, {-13.65, 2.58}}, 0.25));
-    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, 3.6}, {-12.9, 3.6}, {-12.9, 6.9}, {-13.65, 6.9}}, 0.25));
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, -0.7}, {-12.9, -0.7}, {-12.9, 2.6}, {-13.65, 2.6}}, 0.25));
+    eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, 3.725}, {-12.9, 3.725}, {-12.9, 7.025}, {-13.65, 7.025}}, 0.25));
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-13.65, 8.15}, {-12.9, 8.15}, {-12.9, 11.45}, {-13.65, 11.45}}, 0.25));
 
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{9.5, -4.77}, {15.8, -4.77}, {15.8, 7.83}, {9.5, 7.83}}, 0.25));
@@ -342,25 +351,25 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     EFloat resP{0.1};
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
     eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false)->SetLossPower(resP);
-    eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 5.95}), false)->SetLossPower(resP);
-    eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.63}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 6.075}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.65}), false)->SetLossPower(resP);
 
-    auto gateBw1 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw1 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw1->SetStartComponent(dieComp[0], "G");
-    gateBw1->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 9.1}), false);
+    gateBw1->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 8.6}), false);
 
-    auto gateBw2 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw2", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw2 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw2", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw2->SetStartComponent(dieComp[1], "G");
-    gateBw2->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 4.55}), false);
+    gateBw2->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 4.05}), false);
 
-    auto gateBw3 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw3 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw3->SetStartComponent(dieComp[2], "G");
-    gateBw3->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 0.23}), false);
+    gateBw3->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, -0.27}), false);
 
     std::vector<std::string> iPins{"A", "B", "C", "D", "E"};
     for (size_t i = 0; i < dieComp.size(); ++i) {
         for (size_t j = 0; j < iPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, iPins.at(j), ns->GetNetId(), BONDWIRE_RADIUS);
+            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, iPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
             bw->SetStartComponent(dieComp[i], iPins.at(j));
             bw->SetEndComponent(diodeComp[i], iPins.at(j));
         }
@@ -374,7 +383,7 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     };
     for (size_t i = 0; i < diodePLocs.size(); ++i) {
         for (size_t j = 0; j < oPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, oPins.at(j), ns->GetNetId(), BONDWIRE_RADIUS);
+            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
             bw->SetStartComponent(diodeComp[i], oPins.at(j));
             bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
         }
@@ -382,8 +391,8 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
 
     std::vector<FPoint2D> kelvinBwPLocs{{-11.475, 8.15}, {-11.475, 3.6}, {-11.475, -0.72}};
     for (size_t i = 0; i < kelvinBwPLocs.size(); ++i) {
-        auto bw = eDataMgr.CreateBondwire(botBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), GATE_BONDWIRE_RADIUS);
-        bw->SetStartComponent(dieComp[i], "D");
+        auto bw = eDataMgr.CreateBondwire(botBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), THIN_BONDWIRE_RADIUS);
+        bw->SetStartComponent(dieComp[i], "K");
         bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(kelvinBwPLocs.at(i)), false);
     }
     return botBridgeLayout;
@@ -423,12 +432,13 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
         {9.75, 11.45}, {-7.95, 11.45}, {-7.95, 4.45}, {-15.45, 4.45}}, 0.25)
     );
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, 5.65}, {-9.15, 5.65}, {-9.15, 11.45}, {-15.45, 11.45}}, 0.25));
-    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{11.1, -8.5}, {11.85, -8.5}, {11.85, 11.45}, {11.1, 11.45}}, 0.25));
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{11.1, -8.5}, {12.9, -8.5}, {12.9, -6.55}, {11.85, -6.55},
+        {11.85, 11.45}, {11.1, 11.45}}, 0.25));
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, -5.5}, {13.65, -5.5}, {13.65, -2.2}, {12.9, -2.2}}, 0.25));
-    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, -0.7}, {13.65, -0.7}, {13.65, 2.6}, {12.9, 2.6}}, 0.25));
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, 0.95}, {13.65, 0.95}, {13.65, 4.25}, {12.9, 4.25}}, 0.25));
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9,  7.4}, {13.65,  7.4}, {13.65, 10.7}, {12.9, 10.7}}, 0.25));
-    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{12.9, -8.5}, {15.45, -8.5}, {15.45, 11.45}, {14.7, 11.45},
-        {14.7, -6.55}, {12.9, -6.55}}, 0.25)
+    eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{13.65, -8.5}, {15.45, -8.5}, {15.45, 11.45}, {14.7, 11.45},
+       {14.7, -0.125}, {13.65, -0.125}, {13.65, -1.125}, {14.7, -1.125}, {14.7, -6.55}, {13.65, -6.55}}, 0.25)
     );
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-16.25, -12}, {16.25, -12}, {16.25, 12}, {-16.25, 12}}, 0.25));
@@ -454,25 +464,25 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     EFloat resP{0.1};
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
     eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false)->SetLossPower(resP);
-    eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 0.25}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 1.9}), false)->SetLossPower(resP);
     eDataMgr.CreateComponent(topBridgeLayout, "R3", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, -4.55}), false)->SetLossPower(resP);
 
-    auto gateBw1 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw1 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw1->SetStartComponent(dieComp[0], "G");
-    gateBw1->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, 9.75}), false);
+    gateBw1->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, 10.25}), false);
 
-    auto gateBw2 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw2", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw2 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw2", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw2->SetStartComponent(dieComp[1], "G");
-    gateBw2->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, 1.65}), false);
+    gateBw2->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, 3.8}), false);
 
-    auto gateBw3 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    auto gateBw3 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw3->SetStartComponent(dieComp[2], "G");
-    gateBw3->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, -3.15}), false);
+    gateBw3->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, -2.65}), false);
 
     std::vector<std::string> pins{"A", "B", "C", "D", "E"};
     for (size_t i = 0; i < dieComp.size(); ++i) {
         for (size_t j = 0; j < pins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, pins.at(j), ns->GetNetId(), BONDWIRE_RADIUS);
+            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, pins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
             bw->SetStartComponent(dieComp[i], pins.at(j));
             bw->SetEndComponent(diodeComp[i], pins.at(j));
         }
@@ -486,15 +496,15 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     };
     for (size_t i = 0; i < diodePLocs.size(); ++i) {
         for (size_t j = 0; j < oPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, oPins.at(j), ns->GetNetId(), BONDWIRE_RADIUS);
+            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
             bw->SetStartComponent(diodeComp[i], oPins.at(j));
             bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
         }
     }
     std::vector<FPoint2D> kelvinBwPLocs{{11.475, 8.08}, {11.475, 1.33}, {11.475, -5.42}};
     for (size_t i = 0; i < kelvinBwPLocs.size(); ++i) {
-        auto bw = eDataMgr.CreateBondwire(topBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), GATE_BONDWIRE_RADIUS);
-        bw->SetStartComponent(dieComp[i], "D");
+        auto bw = eDataMgr.CreateBondwire(topBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), THIN_BONDWIRE_RADIUS);
+        bw->SetStartComponent(dieComp[i], "K");
         bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(kelvinBwPLocs.at(i)), false);
     }
     return topBridgeLayout;
@@ -512,7 +522,8 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
     ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
     database->SetCoordUnits(coordUnits);
 
-    auto bondwireSolderDef = CreateBondwireSolderJoints(database, "Source Solder Joints", BONDWIRE_RADIUS);
+    auto thinBwSolderDef = CreateBondwireSolderJoints(database, "Thin Solder Joints", THIN_BONDWIRE_RADIUS);
+    auto thickBwSolderDef = CreateBondwireSolderJoints(database, "Thick Solder Joins", THICK_BONDWIRE_RADIUS);
 
     //component
     CreateSicDieComponentDef(database);
@@ -556,7 +567,9 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
     while (auto * prim = primIter->Next()) {
         if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
             bw->SetBondwireType(EBondwireType::Simple);
-            bw->SetSolderJoints(bondwireSolderDef);
+            if (bw->GetRadius() > THIN_BONDWIRE_RADIUS)
+                bw->SetSolderJoints(thickBwSolderDef);
+            else bw->SetSolderJoints(thinBwSolderDef);
             bw->SetMaterial(MAT_AL.data());
             bw->SetHeight(0.5);
         }
