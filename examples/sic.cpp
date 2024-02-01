@@ -174,9 +174,10 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
     pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {-46.5,  24}, 3.85)->GetContour());
     baseLayout->SetBoundary(eDataMgr.CreateShapePolygonWithHoles(std::move(pwh)));
 
-    eDataMgr.CreateNet(baseLayout, "Gate");
-    eDataMgr.CreateNet(baseLayout, "Drain");
-    eDataMgr.CreateNet(baseLayout, "Source");
+    auto ng = eDataMgr.CreateNet(baseLayout, "Gate");
+    auto nd = eDataMgr.CreateNet(baseLayout, "Drain");
+    auto ns = eDataMgr.CreateNet(baseLayout, "Source");
+    auto nk = eDataMgr.CreateNet(baseLayout, "Kelvin");
 
     //base
     auto topCuLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCuLayer", ELayerType::ConductingLayer, 0, 0.3, MAT_CU.data(), MAT_AIR.data()));
@@ -213,7 +214,30 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
         bw2->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(p[0], -p[1])), false);
         bw2->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(-p[0], -p[1])), false); 
     }
-    
+
+    auto KelvinBw = eDataMgr.CreateBondwire(baseLayout, "KelvinBw", nk->GetNetId(), GATE_BONDWIRE_RADIUS);
+    KelvinBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(29.225, 5.5)), false);
+    KelvinBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(29.225, -5.5)), false);
+
+    auto gateBw = eDataMgr.CreateBondwire(baseLayout, "GateBw", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    gateBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(31.55, 5.5)), false);
+    gateBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(31.55, -5.5)), false);
+
+    auto gateBw1 = eDataMgr.CreateBondwire(baseLayout, "GateBw1", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    gateBw1->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, 3.0)), false);
+    gateBw1->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(41.3, 3.35)), false);
+
+    auto gateBw2 = eDataMgr.CreateBondwire(baseLayout, "GateBw2", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    gateBw2->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, 1.8)), false);
+    gateBw2->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, 1.2375)), false);
+
+    auto gateBw3 = eDataMgr.CreateBondwire(baseLayout, "GateBw3", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    gateBw3->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, -1.8)), false);
+    gateBw3->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -0.3625)), false);
+
+    auto gateBw4 = eDataMgr.CreateBondwire(baseLayout, "GateBw4", ng->GetNetId(), GATE_BONDWIRE_RADIUS);
+    gateBw4->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, -3)), false);
+    gateBw4->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -2.7)), false);
     return baseLayout;
 }
 
@@ -466,6 +490,12 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
             bw->SetStartComponent(diodeComp[i], oPins.at(j));
             bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
         }
+    }
+    std::vector<FPoint2D> kelvinBwPLocs{{11.475, 8.08}, {11.475, 1.33}, {11.475, -5.42}};
+    for (size_t i = 0; i < kelvinBwPLocs.size(); ++i) {
+        auto bw = eDataMgr.CreateBondwire(topBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), GATE_BONDWIRE_RADIUS);
+        bw->SetStartComponent(dieComp[i], "D");
+        bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(kelvinBwPLocs.at(i)), false);
     }
     return topBridgeLayout;
 }
