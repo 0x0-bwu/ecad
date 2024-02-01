@@ -60,6 +60,7 @@ struct ELayerCutModelExtractionSettings
     size_t layerCutPrecision = 6;
     EFloat layerTransitionRatio = 2;
     bool addCircleCenterAsSteinerPoints{false};
+    std::vector<FBox2D> imprintBox;
 };
 
 using ELayerCutModelBuildSettings = ELayerCutModelExtractionSettings;
@@ -76,6 +77,7 @@ struct EThermalBondaryCondition
 
 struct EThermalModelExtractionSettings
 {
+    using BCType = EThermalBondaryConditionType;
     using BlockBoundaryCondition = std::pair<FBox2D, EThermalBondaryCondition>;
     virtual ~EThermalModelExtractionSettings() = default;
     std::string workDir;
@@ -84,6 +86,14 @@ struct EThermalModelExtractionSettings
     std::vector<BlockBoundaryCondition> topBlockBC;
     std::vector<BlockBoundaryCondition> botBlokcBC;
     ETemperature envTemperature{25, ETemperatureUnit::Celsius};
+
+    virtual void AddBlockBC(EOrientation orient, FBox2D block, BCType type, EFloat value)
+    {
+        if (EOrientation::Top == orient)
+            topBlockBC.emplace_back(std::move(block), EThermalBondaryCondition(value, type));
+        if (EOrientation::Bot == orient)
+            botBlokcBC.emplace_back(std::move(block), EThermalBondaryCondition(value, type));
+    }
 protected:
     EThermalModelExtractionSettings() = default;
 };
@@ -102,6 +112,12 @@ struct EPrismaThermalModelExtractionSettings : public EThermalModelExtractionSet
     EPrismaMeshSettings meshSettings;
     ELayoutPolygonMergeSettings polygonMergeSettings;
     ELayerCutModelExtractionSettings layerCutSettings;
+
+    void AddBlockBC(EOrientation orient, FBox2D block, BCType type, EFloat value) override
+    {
+        EThermalModelExtractionSettings::AddBlockBC(orient, block, type, value);
+        layerCutSettings.imprintBox.emplace_back(std::move(block));
+    }
 };
 
 struct EThermalSimulationSetup

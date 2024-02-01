@@ -247,6 +247,7 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
     auto gateBw4 = eDataMgr.CreateBondwire(baseLayout, "GateBw4", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw4->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, -3)), false);
     gateBw4->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -2.7)), false);
+
     return baseLayout;
 }
 
@@ -286,7 +287,7 @@ Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
     eDataMgr.CreateGeometry2D(driverLayout, driverLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}, 0.25));
 
     auto r1 = eDataMgr.FindComponentDefByName(database, "R1");
-    eDataMgr.CreateComponent(driverLayout, "R1", r1, driverLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, math::Rad(90), {2.75, 9.125}), false)->SetLossPower(0);
+    eDataMgr.CreateComponent(driverLayout, "R1", r1, driverLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, math::Rad(90), {2.75, 9.125}), false);
 
     return driverLayout;
 }
@@ -348,11 +349,10 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     diodeComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Diode2", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, 1.33}), false);
     diodeComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Diode3", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, -5.42}), false);
 
-    EFloat resP{0.1};
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
-    eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false)->SetLossPower(resP);
-    eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 6.075}), false)->SetLossPower(resP);
-    eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.65}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false);
+    eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 6.075}), false);
+    eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.65}), false);
 
     auto gateBw1 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw1->SetStartComponent(dieComp[0], "G");
@@ -461,11 +461,10 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     diodeComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Diode2", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, 1.33}, EMirror2D::Y), false);
     diodeComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Diode3", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, -5.42}, EMirror2D::Y), false);
 
-    EFloat resP{0.1};
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
-    eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false)->SetLossPower(resP);
-    eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 1.9}), false)->SetLossPower(resP);
-    eDataMgr.CreateComponent(topBridgeLayout, "R3", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, -4.55}), false)->SetLossPower(resP);
+    eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false);
+    eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 1.9}), false);
+    eDataMgr.CreateComponent(topBridgeLayout, "R3", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, -4.55}), false);
 
     auto gateBw1 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
     gateBw1->SetStartComponent(dieComp[0], "G");
@@ -587,8 +586,17 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
-    prismaSettings.meshSettings.maxLen = 1;
+    prismaSettings.meshSettings.maxLen = 2;
     prismaSettings.meshSettings.tolerance = 1e-6;
+    prismaSettings.layerCutSettings.layerTransitionRatio = 3;
+
+    EFloat topHTC = 1e3;
+    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, -8.7}, {-20.35, -4.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, 11.5}, {9.75, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, -17}, {9.75, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, 11.5}, {-2.55, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, -17}, {-2.55, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
     return prismaSettings;
 }
 
@@ -615,11 +623,12 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.settings.duration = 1;
     setup.settings.step = 0.01;
     setup.settings.samplingWindow = 0.1;
-    setup.settings.minSamplingInterval = 0.0005;
+    setup.settings.minSamplingInterval = 0.0001;
     setup.settings.absoluteError = 1e-1;
     setup.settings.relativeError = 1e-1;
     EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::sin(generic::math::pi * t / 0.05)); };
     setup.settings.excitation = &excitation;
+    setup.settings.verbose = true;
     auto [minT, maxT] = layout->RunThermalSimulation(ExtractionSettings(workDir), setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }

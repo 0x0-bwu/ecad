@@ -122,7 +122,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         powerModel->GetTable().AddSample(settings.envTemperature.inKelvins(), std::move(gridData));
         model->AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
     }
-
+    
     //bc
     if (settings.topUniformBC.isValid())
         model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
@@ -227,7 +227,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
             ele.netId = compact->GetNetId(pid);
             auto iter = powerBlocks.find(pid);
             if (iter != powerBlocks.cend() &&
-                prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.first)) {
+                prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.high)) {
                 auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
                 ele.avePower = area * iter->second.powerDensity;
             }

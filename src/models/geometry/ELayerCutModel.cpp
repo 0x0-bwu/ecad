@@ -24,12 +24,14 @@ ECAD_INLINE void ELayerCutModel::BuildLayerPolygonLUT(EFloat vTransitionRatio)
     std::set<Height> heights;
     for (size_t i = 0; i < m_ranges.size(); ++i) {
         if (EMaterialId::noMaterial == m_materials.at(i)) continue;
-        heights.emplace(m_ranges.at(i).first);
-        heights.emplace(m_ranges.at(i).second);
+        const auto & range = m_ranges.at(i);
+        if (not range.isValid()) continue;
+        heights.emplace(range.high);
+        heights.emplace(range.low);
         auto iter = m_powerBlocks.find(i);
         if (iter != m_powerBlocks.cend()) {
-            heights.emplace(iter->second.range.first);
-            heights.emplace(iter->second.range.second);
+            heights.emplace(iter->second.range.high);
+            heights.emplace(iter->second.range.low);
         }
     }
     m_layerOrder = std::vector(heights.begin(), heights.end());
@@ -40,8 +42,9 @@ ECAD_INLINE void ELayerCutModel::BuildLayerPolygonLUT(EFloat vTransitionRatio)
     m_lyrPolygons.clear();
     for (size_t i = 0; i < m_polygons.size(); ++i) {
         const auto & range = m_ranges.at(i);
-        size_t sLayer = m_height2Index.at(range.first);
-        size_t eLayer = std::min(TotalLayers(), m_height2Index.at(range.second));
+        if (not range.isValid()) continue;
+        size_t sLayer = m_height2Index.at(range.high);
+        size_t eLayer = std::min(TotalLayers(), m_height2Index.at(range.low));
         for (size_t layer = sLayer; layer < eLayer; ++layer) {
             auto iter = m_lyrPolygons.find(layer);
             if (iter == m_lyrPolygons.cend())
@@ -62,8 +65,8 @@ ECAD_INLINE void ELayerCutModel::BuildLayerPolygonLUT(EFloat vTransitionRatio)
         m_layerOrder.clear();
         m_layerOrder.reserve(ranges.size() + 1);
         for (const auto & range : ranges)
-            m_layerOrder.emplace_back(range.first);
-        m_layerOrder.emplace_back(ranges.back().second);
+            m_layerOrder.emplace_back(range.high);
+        m_layerOrder.emplace_back(ranges.back().low);
         std::unordered_map<size_t, SPtr<std::vector<size_t>> > lyrPolygons;
         for (size_t i = 0; i < m_layerOrder.size() - 1; ++i) {
             auto iter = m_height2Index.find(m_layerOrder.at(i));
@@ -122,20 +125,20 @@ ECAD_INLINE bool ELayerCutModel::SliceOverheightLayers(std::list<LayerRange> & r
 {
     auto slice = [](const LayerRange & r)
     {
-        Height mid = std::round(0.5 * (r.first + r.second));
+        Height mid = std::round(0.5 * (r.high + r.low));
         auto res = std::make_pair(r, r);
-        res.first.second = mid;
-        res.second.first = mid;
+        res.first.low = mid;
+        res.second.high = mid;
         return res;
     };
 
     bool sliced = false;
     auto curr = ranges.begin();
     for (;curr != ranges.end();){
-        auto currH = Thickness(*curr); ECAD_ASSERT(currH > 0)
+        auto currH = curr->Thickness(); ECAD_ASSERT(currH > 0)
         if (curr != ranges.begin()) {
             auto prev = curr; prev--;
-            auto prevH = Thickness(*prev);
+            auto prevH = prev->Thickness();
             auto r = currH / (EFloat)prevH;
             if (generic::math::GT<EFloat>(r, ratio)){
                 auto [top, bot] = slice(*curr);
@@ -148,7 +151,7 @@ ECAD_INLINE bool ELayerCutModel::SliceOverheightLayers(std::list<LayerRange> & r
         }
         auto next = curr; next++;
         if (next != ranges.end()){
-            auto nextH = Thickness(*next); ECAD_ASSERT(nextH > 0)
+            auto nextH = next->Thickness(); ECAD_ASSERT(nextH > 0)
             auto r = currH / (EFloat)nextH;
             if (generic::math::GT<EFloat>(r, ratio)) {
                 auto [top, bot] = slice(*curr);

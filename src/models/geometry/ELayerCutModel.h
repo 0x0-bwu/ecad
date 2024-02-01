@@ -14,7 +14,16 @@ public:
     friend class utils::ELayerCutModelQuery;
     friend class utils::ELayerCutModelBuilder;
     using Height = int;
-    using LayerRange = std::pair<Height, Height>;
+    struct LayerRange
+    {
+        Height high = -std::numeric_limits<Height>::max();
+        Height low = std::numeric_limits<Height>::max();
+        LayerRange() = default;
+        LayerRange(Height high, Height low) : high(high), low(low) {}
+        bool isValid() const { return high > low; } 
+        Height Thickness() const { return high - low; }
+    };
+    
     struct PowerBlock
     {
         size_t polygon;
@@ -56,8 +65,6 @@ public:
 
     virtual EModelType GetModelType() const { return EModelType::LayerCut; }
 
-    static Height Thickness(const LayerRange & range) { return range.first - range.second; }
-    static bool isValid(const LayerRange & range) { return range.first > range.second; }
     static bool SliceOverheightLayers(std::list<LayerRange> & ranges, EFloat ratio);
 protected:
     //data

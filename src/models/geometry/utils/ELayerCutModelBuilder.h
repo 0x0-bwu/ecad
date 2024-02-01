@@ -26,6 +26,7 @@ public:
     bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat pwrPosition = 0.1, EFloat pwrThickness = 0.1);
     void AddComponent(CPtr<IComponent> component);
     void AddBondwire(ELayerCutModel::Bondwire bw);
+    void AddImprintBox(const EBox2D & box);
     CPtr<LayoutRetriever> GetLayoutRetriever() const; 
 
 protected:

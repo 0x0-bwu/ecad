@@ -35,9 +35,9 @@ ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILa
         builder.AddComponent(comp);
     }
     
-    const auto & coordUnit = layout->GetDatabase()->GetCoordUnits();
-    auto scale2Unit = coordUnit.Scale2Unit();
-    auto scale2Meter = coordUnit.toUnit(coordUnit.toCoord(1), ECoordUnits::Unit::Meter);
+    const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
+    auto scale2Unit = coordUnits.Scale2Unit();
+    auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     std::unordered_map<ELayerId, std::pair<EFloat, EFloat> > layerElevationThicknessMap;
     std::unordered_map<ELayerId, std::pair<EMaterialId, EMaterialId> > layerMaterialMap;
     auto primitives = layout->GetPrimitiveCollection();
@@ -130,6 +130,10 @@ ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILa
             builder.AddShape(netId, material->GetMaterialId(), material->GetMaterialId(), shape.get(), elevation, thickness);
         }
     }
+
+    //imprint box
+    for (const auto & box : settings.imprintBox)
+        builder.AddImprintBox(coordUnits.toCoord(box));
 
     model->BuildLayerPolygonLUT(settings.layerTransitionRatio);
     return std::unique_ptr<IModel>(model);

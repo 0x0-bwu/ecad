@@ -191,7 +191,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<
         if (not block.second.isValid()) return;
         auto value = block.second.value;
         if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type)
-            value /= block.first.Area();
+            value /= block.first.Area() * m_model.Scale2Meter() * m_model.Scale2Meter();
 
         for (size_t lyr = 0; lyr <  m_model.TotalLayers(); ++lyr) {
             query.SearchPrismaInstances(lyr, block.first, results);
@@ -201,11 +201,18 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<
                 auto nid = isTop ? EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX : 
                                    EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX ;
                 if (prisma.element->neighbors.at(nid) != noNeighbor) continue;
+                auto area = GetPrismaTopBotArea(result.second);
                 if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type) {
-                    auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(m_model.prismaTemplate, prisma.element->templateId);
-                    network->SetHF(result.second, value * area);
+                    auto heatFlow = value * area;
+                    network->SetHF(result.second, heatFlow);
+                    if (heatFlow > 0)
+                        summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
                 }
-                else network->SetHTC(result.second, value);
+                else { 
+                    network->SetHTC(result.second, value * area);
+                    summary.boundaryNodes += 1;
+                }
             }    
         }
     };

@@ -32,7 +32,7 @@ ECAD_INLINE void ELayerCutModelBuilder::AddShape(ENetId netId, EMaterialId solid
 ECAD_INLINE size_t ELayerCutModelBuilder::AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness)
 {
     auto layerRange = GetLayerRange(elevation, thickness);
-    if (not isValid(layerRange)) return invalidIndex;
+    if (not layerRange.isValid()) return invalidIndex;
     if (isHole == polygon.isCCW()) polygon.Reverse();
     m_model->m_ranges.emplace_back(std::move(layerRange));
     m_model->m_polygons.emplace_back(std::move(polygon));
@@ -75,6 +75,14 @@ ECAD_INLINE void ELayerCutModelBuilder::AddComponent(CPtr<IComponent> component)
 ECAD_INLINE void ELayerCutModelBuilder::AddBondwire(ELayerCutModel::Bondwire bw)
 {
     m_model->m_bondwires.emplace_back(std::move(bw));
+}
+
+ECAD_INLINE void ELayerCutModelBuilder::AddImprintBox(const EBox2D & box)
+{
+    m_model->m_ranges.emplace_back(ELayerCutModel::LayerRange());
+    m_model->m_polygons.emplace_back(generic::geometry::toPolygon(box));
+    m_model->m_materials.emplace_back(EMaterialId::noMaterial);
+    m_model->m_nets.emplace_back(ENetId::noNet);
 }
 
 ECAD_INLINE CPtr<ELayerCutModelBuilder::LayoutRetriever> ELayerCutModelBuilder::GetLayoutRetriever() const
