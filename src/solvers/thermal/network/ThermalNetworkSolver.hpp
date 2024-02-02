@@ -22,10 +22,9 @@ namespace thermal::solver {
     class ThermalNetworkSolver
     {
     public:
-        explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network, size_t threads)
+        explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network)
             : m_network(network)
         {
-            Eigen::setNbThreads(std::max<size_t>(1, threads));
         }
 
         virtual ~ThermalNetworkSolver() = default;
@@ -87,7 +86,7 @@ namespace thermal::solver {
                     const auto & probs = solver.Probs();
                     Sample<num_type> sample; sample.reserve(probs.size());
                     sample.emplace_back(t);
-                    for (auto p : probs) sample.emplace_back(x[p]);
+                    for (auto p : probs) sample.emplace_back(generic::unit::Kelvins2Celsius(x[p]));
                     if (verbose) {
                         ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
                     }
@@ -192,7 +191,7 @@ namespace thermal::solver {
         {
             if (initState.size() != StateSize()) return 0;
             using namespace boost::numeric::odeint;
-            using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
+            using ErrorStepperType = runge_kutta_dopri5<StateType>;
             return integrate_adaptive(make_controlled<ErrorStepperType>(absErr, relErr),
                                     Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, std::move(observer));
         }

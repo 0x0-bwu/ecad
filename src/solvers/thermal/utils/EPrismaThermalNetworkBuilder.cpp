@@ -76,7 +76,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
                 const auto & nb = m_model.GetPrisma(nid);
                 auto ctNb = GetPrismaCenterPoint2D(nid);
                 auto vec = ctNb - ct;
-                auto dist = vec.Norm2() * m_model.Scale2Meter();
+                auto dist = vec.Norm2() * m_model.UnitScale2Meter();
                 auto kxy = 0.5 * (k[0] + k[1]);
                 auto dist2edge = GetPrismaCenterDist2Side(i, ie);
                 auto r1 = dist2edge / kxy / vArea;
@@ -191,7 +191,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<
         if (not block.second.isValid()) return;
         auto value = block.second.value;
         if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type)
-            value /= block.first.Area() * m_model.Scale2Meter() * m_model.Scale2Meter();
+            value /= block.first.Area() * m_model.CoordScale2Meter(2);
 
         for (size_t lyr = 0; lyr <  m_model.TotalLayers(); ++lyr) {
             query.SearchPrismaInstances(lyr, block.first, results);
@@ -249,7 +249,7 @@ ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaCenterDist2Side(size_t
     auto p1 = GetPrismaVertexPoint2D(index, ie);
     auto p2 = GetPrismaVertexPoint2D(index, (ie + 1) % 3);
     auto distSq = generic::geometry::PointLineDistanceSq(ct, p1, p2);
-    return std::sqrt(distSq) * m_model.Scale2Meter();
+    return std::sqrt(distSq) * m_model.UnitScale2Meter();
 }
 
 ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaEdgeLength(size_t index, size_t ie) const
@@ -258,7 +258,7 @@ ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaEdgeLength(size_t inde
     auto p1 = GetPrismaVertexPoint2D(index, ie);
     auto p2 = GetPrismaVertexPoint2D(index, (ie + 1) % 3);
     auto dist = generic::geometry::Distance(p1, p2);
-    return dist * m_model.Scale2Meter();
+    return dist * m_model.UnitScale2Meter();
 }
 
 ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaSideArea(size_t index, size_t ie) const
@@ -273,7 +273,7 @@ ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaTopBotArea(size_t inde
     const auto & points = m_model.GetPoints();
     const auto & vs = m_model.GetPrisma(index).vertices;
     auto area = generic::geometry::Triangle3D<FCoord>(points.at(vs[0]), points.at(vs[1]), points.at(vs[2])).Area();
-    return area * m_model.Scale2Meter() * m_model.Scale2Meter();
+    return area * m_model.UnitScale2Meter(2);
 }
 
 ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaVolume(size_t index) const
@@ -283,7 +283,7 @@ ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaVolume(size_t index) c
 
 ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetPrismaHeight(size_t index) const
 {
-    return m_model.GetPrisma(index).layer->thickness * m_model.Scale2Meter();
+    return m_model.GetPrisma(index).layer->thickness * m_model.UnitScale2Meter();
 }
 
 ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineJouleHeat(size_t index, EFloat refT) const
@@ -303,13 +303,13 @@ ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineLength(size_t index) con
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     const auto & p1 = m_model.GetPoint(line.endPoints.front());
     const auto & p2 = m_model.GetPoint(line.endPoints.back());
-    return generic::geometry::Distance(p1, p2) * m_model.Scale2Meter();
+    return generic::geometry::Distance(p1, p2) * m_model.UnitScale2Meter();
 }
 
 ECAD_INLINE EFloat EPrismaThermalNetworkBuilder::GetLineArea(size_t index) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
-    return generic::math::pi * std::pow(line.radius * m_model.Scale2Meter(), 2);
+    return generic::math::pi * std::pow(line.radius * m_model.UnitScale2Meter(), 2);
 }
 
 ECAD_INLINE std::array<EFloat, 3> EPrismaThermalNetworkBuilder::GetMatThermalConductivity(EMaterialId matId, EFloat refT) const

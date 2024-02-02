@@ -97,7 +97,8 @@ public:
 
     void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
     void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm);
-    EFloat Scale2Meter() const;  
+    EFloat CoordScale2Meter(int order = 1) const;
+    EFloat UnitScale2Meter(int order = 1) const;  
     size_t TotalLayers() const;
     size_t TotalElements() const;
     size_t TotalLineElements() const;
@@ -131,9 +132,14 @@ protected:
     std::unordered_map<EOrientation, std::vector<BlockBC>> m_blockBCs;
 };
 
-ECAD_ALWAYS_INLINE EFloat EPrismaThermalModel::Scale2Meter() const
+ECAD_ALWAYS_INLINE EFloat EPrismaThermalModel::CoordScale2Meter(int order) const
 {
-    return m_scale2Meter;
+    return std::pow(m_scaleH2Unit * m_scale2Meter, order);
+}
+
+ECAD_ALWAYS_INLINE EFloat EPrismaThermalModel::UnitScale2Meter(int order) const
+{
+    return std::pow(m_scale2Meter, order);
 }
 
 ECAD_ALWAYS_INLINE size_t EPrismaThermalModel::TotalLayers() const

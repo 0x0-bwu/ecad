@@ -620,14 +620,15 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.settings.verbose = true;
     setup.settings.adaptive = true;
     setup.settings.dumpRawData = true;
-    setup.settings.duration = 1;
-    setup.settings.step = 0.01;
-    setup.settings.samplingWindow = 0.1;
-    setup.settings.minSamplingInterval = 0.0001;
-    setup.settings.absoluteError = 1e-1;
-    setup.settings.relativeError = 1e-1;
-    EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::sin(generic::math::pi * t / 0.05)); };
-    setup.settings.excitation = &excitation;
+    setup.settings.duration = 10;
+    setup.settings.step = 1e-5;
+    setup.settings.samplingWindow = 10;
+    setup.settings.minSamplingInterval = 1e-8;
+    setup.settings.absoluteError = 1e-2;
+    setup.settings.relativeError = 1e-3;
+    setup.settings.threads = eDataMgr.Threads();
+    EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::cos(generic::math::pi * t / 0.05)); };
+    // setup.settings.excitation = &excitation;
     setup.settings.verbose = true;
     auto [minT, maxT] = layout->RunThermalSimulation(ExtractionSettings(workDir), setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)

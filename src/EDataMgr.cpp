@@ -356,6 +356,9 @@ ECAD_INLINE void EDataMgr::Init(ELogLevel level, const std::string & workDir)
 {   
     //threads
     m_settings.threads = std::thread::hardware_concurrency();
+#ifdef ECAD_OPEN_MP_SUPPORT
+    Eigen::setNbThreads(m_settings.threads);
+#endif//ECAD_OPEN_MP_SUPPORT
 
     //log
     std::string logFile = workDir.empty() ? generic::fs::CurrentPath() : workDir + ECAD_SEPS + "ecad.log";

@@ -43,7 +43,7 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
         ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
 
         using namespace thermal::solver;
-        ThermalNetworkSolver<EFloat> solver(*network, settings.threads);
+        ThermalNetworkSolver<EFloat> solver(*network);
         solver.Solve(envT, results);
 
         residual = CalculateResidual(results, prevRes, settings.maximumRes);
@@ -80,7 +80,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
         ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
                 
-        ThermalNetworkSolver<EFloat> solver(*network, settings.threads);
+        ThermalNetworkSolver<EFloat> solver(*network);
         solver.Solve(envT, results);
 
         size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));

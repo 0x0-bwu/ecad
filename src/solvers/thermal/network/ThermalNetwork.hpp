@@ -14,6 +14,7 @@ template <typename num_type>
 class ThermalNetwork
 {
 public:
+    inline static constexpr num_type minR = std::numeric_limits<num_type>::epsilon();
     inline static constexpr num_type unknownT = std::numeric_limits<num_type>::max();
     struct Node
     {
@@ -130,6 +131,7 @@ public:
 
     void SetR(size_t node1, size_t node2, num_type r)
     {
+        r = std::max(r, minR);
         if (node1 > node2) std::swap(node1, node2);
         auto & n1 = m_nodes[node1];
         auto iter = n1.ns.find(node2);

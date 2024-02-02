@@ -10,7 +10,7 @@ namespace ecad {
 struct EDataMgrSettings
 {
     char hierSep = '/';
-    size_t threads = 8;
+    size_t threads = 1;
     size_t circleDiv = 16;
 };
 
