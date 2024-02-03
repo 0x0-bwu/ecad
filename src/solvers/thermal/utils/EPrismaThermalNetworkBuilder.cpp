@@ -90,7 +90,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
         auto height = GetPrismaHeight(i);
         auto hArea = GetPrismaTopBotArea(i);
         //top
-        auto nTop = neighbors.at(EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX);
+        auto nTop = neighbors.at(PrismaElement::TOP_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nTop) {
             if (nullptr != topBC && topBC->isValid()) {
                 if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
@@ -113,7 +113,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
             network->SetR(i, nTop, r);
         }
         //bot
-        auto nBot = neighbors.at(EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX);
+        auto nBot = neighbors.at(PrismaElement::BOT_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nBot) {
             if (nullptr != botBC && botBC->isValid()) {
                 if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
@@ -198,8 +198,8 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<
             if (results.empty()) continue;
             for (const auto & result : results) {
                 const auto & prisma = m_model.GetPrisma(result.second);
-                auto nid = isTop ? EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX : 
-                                   EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX ;
+                auto nid = isTop ? PrismaElement::TOP_NEIGHBOR_INDEX : 
+                                   PrismaElement::BOT_NEIGHBOR_INDEX ;
                 if (prisma.element->neighbors.at(nid) != noNeighbor) continue;
                 auto area = GetPrismaTopBotArea(result.second);
                 if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type) {

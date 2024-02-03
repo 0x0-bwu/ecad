@@ -1,10 +1,6 @@
 #pragma once
 
-#include "generic/geometry/BoostGeometryRegister.hpp"
 #include "generic/geometry/Triangulation.hpp"
-#include <boost/geometry/index/rtree.hpp>
-
-#include "models/geometry/ELayerCutModel.h"
 #include "EThermalModel.h"
 #include "EShape.h"
 
@@ -22,70 +18,74 @@ class ELayoutRetriever;
 
 namespace model {
 
+class ELayerCutModel;
 namespace utils { class EPrismaThermalModelQuery; }
+
+struct ECAD_API LineElement
+{
+    ENetId netId;
+    EMaterialId matId;
+    EFloat radius{0};
+    EFloat current{0};
+    size_t id{invalidIndex};
+    std::array<size_t, 2> endPoints;
+    std::array<std::vector<size_t>, 2> neighbors;//global index
+};
+
+struct PrismaElement
+{
+    ENetId netId;
+    EMaterialId matId;
+    EFloat avePower{0};
+    size_t id{invalidIndex};
+    size_t templateId{invalidIndex};
+    inline static constexpr size_t TOP_NEIGHBOR_INDEX = 3;
+    inline static constexpr size_t BOT_NEIGHBOR_INDEX = 4;
+    std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
+};
+
+struct PrismaLayer
+{
+    size_t id;
+    EFloat elevation;
+    EFloat thickness;
+    std::vector<PrismaElement> elements;
+    explicit PrismaLayer(size_t layer) : id(layer) {}
+    PrismaElement & operator[] (size_t index) { return elements[index]; }
+    const PrismaElement & operator[] (size_t index) const { return elements.at(index); }
+
+    PrismaElement & AddElement(size_t templateId)
+    {
+        auto & ele = elements.emplace_back(PrismaElement{});
+        ele.id = elements.size() - 1;
+        ele.templateId = templateId;
+        return ele;
+    }
+
+    size_t TotalElements() const { return elements.size(); }
+};
+
+struct PrismaInstance
+{
+    CPtr<PrismaLayer> layer{nullptr};
+    CPtr<PrismaElement> element{nullptr};
+    std::array<size_t, 6> vertices;//top, bot
+    std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
+};
 
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {
 public:
     friend class utils::EPrismaThermalModelQuery;
     using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
-    struct LineElement
-    {
-        ENetId netId;
-        EMaterialId matId;
-        EFloat radius{0};
-        EFloat current{0};
-        size_t id{invalidIndex};
-        std::array<size_t, 2> endPoints;
-        std::array<std::vector<size_t>, 2> neighbors;//global index
-    };
-
     using PrismaTemplate = tri::Triangulation<EPoint2D>;
-    struct PrismaElement
-    {
-        ENetId netId;
-        EMaterialId matId;
-        EFloat avePower{0};
-        size_t id{invalidIndex};
-        size_t templateId{invalidIndex};
-        inline static constexpr size_t TOP_NEIGHBOR_INDEX = 3;
-        inline static constexpr size_t BOT_NEIGHBOR_INDEX = 4;
-        std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
-    };
-
-    struct PrismaLayer
-    {
-        size_t id;
-        EFloat elevation;
-        EFloat thickness;
-        std::vector<PrismaElement> elements;
-        
-        PrismaElement & operator[] (size_t index) { return elements[index]; }
-        const PrismaElement & operator[] (size_t index) const { return elements.at(index); }
-
-        PrismaElement & AddElement(size_t templateId)
-        {
-            auto & ele = elements.emplace_back(PrismaElement{});
-            ele.id = elements.size() - 1;
-            ele.templateId = templateId;
-            return ele;
-        }
-
-        size_t TotalElements() const { return elements.size(); }
-    };
-
-    struct PrismaInstance
-    {
-        CPtr<PrismaLayer> layer{nullptr};
-        CPtr<PrismaElement> element{nullptr};
-        std::array<size_t, 6> vertices;//top, bot
-        std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
-    };
     
-    PrismaTemplate prismaTemplate;
     std::vector<PrismaLayer> layers;
     explicit EPrismaThermalModel(CPtr<ILayoutView> layout);
     virtual ~EPrismaThermalModel() = default;
+
+    void SetLayerPrismaTemplate(size_t layer, SPtr<PrismaTemplate> prismaTemplate);
+    SPtr<PrismaTemplate> GetLayerPrismaTemplate(size_t layer) const;
 
     CPtr<IMaterialDefCollection> GetMaterialLibrary() const;
 
@@ -95,7 +95,7 @@ public:
     PrismaLayer & AppendLayer(PrismaLayer layer);
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
 
-    void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
+    virtual void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
     void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm);
     EFloat CoordScale2Meter(int order = 1) const;
     EFloat UnitScale2Meter(int order = 1) const;  
@@ -120,7 +120,7 @@ public:
     size_t AddPoint(FPoint3D point);
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
 
-    EModelType GetModelType() const { return EModelType::ThermalPrisma; }
+    virtual EModelType GetModelType() const { return EModelType::ThermalPrisma; }
 protected:
     EFloat m_scaleH2Unit;
     EFloat m_scale2Meter;
@@ -130,6 +130,7 @@ protected:
     std::vector<PrismaInstance> m_prismas;
     std::vector<size_t> m_indexOffset;
     std::unordered_map<EOrientation, std::vector<BlockBC>> m_blockBCs;
+    std::unordered_map<size_t, SPtr<PrismaTemplate> > m_prismaTemplates;
 };
 
 ECAD_ALWAYS_INLINE EFloat EPrismaThermalModel::CoordScale2Meter(int order) const

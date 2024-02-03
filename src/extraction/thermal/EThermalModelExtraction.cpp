@@ -1,9 +1,11 @@
 #include "EThermalModelExtraction.h"
 
 #include "models/geometry/utils/ELayerCutModelQuery.h"
+#include "models/thermal/EStackupPrismaThermalModel.h"
 #include "models/thermal/io/EPrismaThermalModelIO.h"
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
+#include "models/geometry/ELayerCutModel.h"
 #include "utils/EMetalFractionMapping.h"
 #include "utils/ELayoutRetriever.h"
 #include "generic/tools/FileSystem.hpp"
@@ -15,13 +17,16 @@ namespace ecad::extraction {
 
 using namespace ecad::model;
 using namespace ecad::utils;
+using namespace generic::geometry;
 
 ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayoutView> layout, const EThermalModelExtractionSettings & settings)
 {
-    if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
-        return GenerateGridThermalModel(layout, *gridSettings);
+    if (auto stackupPrismaSettings = dynamic_cast<CPtr<EStackupPrismaThermalModelExtractionSettings>>(&settings); stackupPrismaSettings)
+        return GenerateStackupPrismaThermalModel(layout, *stackupPrismaSettings);
     else if (auto prismaSettings = dynamic_cast<CPtr<EPrismaThermalModelExtractionSettings>>(&settings); prismaSettings)
         return GeneratePrismaThermalModel(layout, *prismaSettings);
+    else if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
+        return GenerateGridThermalModel(layout, *gridSettings);
     return nullptr;
 }
 
@@ -74,7 +79,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
             const auto & start = bw->GetStartPt();
             const auto & end  = bw->GetEndPt();
-            auto l = coordUnits.toUnit(generic::geometry::Distance(start, end), ECoordUnits::Unit::Meter);
+            auto l = coordUnits.toUnit(Distance(start, end), ECoordUnits::Unit::Meter);
             auto r = coordUnits.toCoordF(bw->GetRadius());
             r = coordUnits.toUnit(r, ECoordUnits::Unit::Meter);
             auto alpha = generic::math::pi * r * r / l;
@@ -145,6 +150,27 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
     return std::unique_ptr<IModel>(model);
 }
 
+ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const std::vector<EPoint2D> & steinerPoints, const ECoordUnits & coordUnits, const EPrismaMeshSettings & meshSettings, tri::Triangulation<EPoint2D> & triangulation)
+{
+    using namespace emesh;
+    ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, tolerance: %4%, ite: %5%", 
+                meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.tolerance, meshSettings.iteration)
+    auto minAlpha = math::Rad(meshSettings.minAlpha);
+    auto minLen = coordUnits.toCoord(meshSettings.minLen);
+    auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
+    auto tolerance = coordUnits.toCoord(meshSettings.tolerance);
+    std::list<tri::IndexEdge> edges;
+    std::vector<Point2D<ECoord> > points;
+    std::vector<Segment2D<ECoord> > segments;
+    MeshFlow2D::ExtractIntersections(polygons, segments);
+    MeshFlow2D::ExtractTopology(segments, points, edges);
+    points.insert(points.end(), steinerPoints.begin(), steinerPoints.end());
+    MeshFlow2D::MergeClosePointsAndRemapEdge(points, edges, tolerance);
+    MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
+    MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
+    return true;
+}
+
 ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr<ILayoutView> layout, const EPrismaThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate prisma thermal model")
@@ -158,43 +184,19 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         compact->WriteImgView(filename, 3000);
     }
 
+    auto triangulation = std::make_shared<EPrismaThermalModel::PrismaTemplate>();
     const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
-
-    //todo wrapper to mesh
-    using namespace emesh;
-    using namespace generic;
-    using namespace generic::geometry;
-    const auto & meshSettings = settings.meshSettings;
-    ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, tolerance: %4%, ite: %5%", 
-                meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.tolerance, meshSettings.iteration)
-    auto minAlpha = math::Rad(meshSettings.minAlpha);
-    auto minLen = coordUnits.toCoord(meshSettings.minLen);
-    auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
-    auto tolerance = coordUnits.toCoord(meshSettings.tolerance);
-    std::list<tri::IndexEdge> edges;
-    std::vector<Point2D<ECoord> > points;
-    std::vector<Segment2D<ECoord> > segments;
-    auto & triangulation = model->prismaTemplate;
-    const auto & polygons = compact->GetAllPolygonData();
-    const auto & steinerPoints = compact->GetSteinerPoints();
-    MeshFlow2D::ExtractIntersections(polygons, segments);
-    MeshFlow2D::ExtractTopology(segments, points, edges);
-    points.insert(points.end(), steinerPoints.begin(), steinerPoints.end());
-    MeshFlow2D::MergeClosePointsAndRemapEdge(points, edges, tolerance);
-    MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
-    MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
+    GenerateMesh(compact->GetAllPolygonData(), compact->GetSteinerPoints(), coordUnits, settings.meshSettings, *triangulation);
     if (not settings.workDir.empty()) {
-        auto meshTemplateFile = settings.workDir + ECAD_SEPS + "mesh.png";
-        GeometryIO::WritePNG(meshTemplateFile, triangulation, 4096);
+        auto filename = settings.workDir + ECAD_SEPS + "mesh.png";
+        GeometryIO::WritePNG(filename, *triangulation, 4096);
     }
-    ECAD_TRACE("total elements: %1%", triangulation.triangles.size())
-
-    //todo wrapper to mesh
+    ECAD_TRACE("total elements: %1%", triangulation->triangles.size())
 
     ecad::utils::ELayoutRetriever retriever(layout);
     for (size_t layer = 0; layer < compact->TotalLayers(); ++layer) {
-        EPrismaThermalModel::PrismaLayer prismaLayer;
-        prismaLayer.id = layer;
+        model->SetLayerPrismaTemplate(layer, triangulation);
+        PrismaLayer prismaLayer(layer);
         [[maybe_unused]] auto check = compact->GetLayerHeightThickness(layer, prismaLayer.elevation, prismaLayer.thickness); { ECAD_ASSERT(check) }
         model->AppendLayer(std::move(prismaLayer));
     }
@@ -213,9 +215,10 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     auto buildOnePrismaLayer = [&](size_t index) {
         auto & prismaLayer = model->layers.at(index);
         auto & idMap = templateIdMap.emplace(prismaLayer.id, std::unordered_map<size_t, size_t>{}).first->second;    
-        for (size_t it = 0; it < triangulation.triangles.size(); ++it) {
+        auto triangulation = model->GetLayerPrismaTemplate(index);
+        for (size_t it = 0; it < triangulation->triangles.size(); ++it) {
             ECAD_ASSERT(compact->hasPolygon(prismaLayer.id))
-            auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
+            auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(*triangulation, it).Cast<ECoord>();
             auto pid = query.SearchPolygon(prismaLayer.id, ctPoint);
             if (pid == invalidIndex) continue;;
             if (fluidMaterials.count(compact->GetMaterialId(pid))) continue;
@@ -228,7 +231,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
             auto iter = powerBlocks.find(pid);
             if (iter != powerBlocks.cend() &&
                 prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.high)) {
-                auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(triangulation, it);
+                auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(*triangulation, it);
                 ele.avePower = area * iter->second.powerDensity;
             }
         }
@@ -245,7 +248,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         const auto & currIdMap = templateIdMap.at(layer.id);
         for (auto & ele : elements) {
             //layer neighbors
-            const auto & triangle = triangulation.triangles.at(ele.templateId);
+            const auto & triangle = triangulation->triangles.at(ele.templateId);
             for (size_t nid = 0; nid < triangle.neighbors.size(); ++nid) {
                 if (tri::noNeighbor == triangle.neighbors.at(nid)) continue;
                 auto iter = currIdMap.find(triangle.neighbors.at(nid));
@@ -260,8 +263,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
                 auto iter = lowerIdMap.find(ele.templateId);
                 if (iter != lowerIdMap.cend()) {
                     auto & lowerEle = lowerEles.at(iter->second);
-                    lowerEle.neighbors[EPrismaThermalModel::PrismaElement::TOP_NEIGHBOR_INDEX] = ele.id;
-                    ele.neighbors[EPrismaThermalModel::PrismaElement::BOT_NEIGHBOR_INDEX] = lowerEle.id;
+                    lowerEle.neighbors[PrismaElement::TOP_NEIGHBOR_INDEX] = ele.id;
+                    ele.neighbors[PrismaElement::BOT_NEIGHBOR_INDEX] = lowerEle.id;
                 }
             }
         }
@@ -294,6 +297,126 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     }
 
     return std::unique_ptr<IModel>(model);
+}
+
+ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalModel(Ptr<ILayoutView> layout, const EStackupPrismaThermalModelExtractionSettings & settings)
+{
+    ECAD_EFFICIENCY_TRACK("generate stackup prisma thermal model")
+    auto model = new EStackupPrismaThermalModel(layout);
+    auto lcModel = layout->ExtractLayerCutModel(settings.layerCutSettings);
+    auto compact = dynamic_cast<Ptr<ELayerCutModel>>(lcModel.get());
+    ECAD_ASSERT(compact)
+
+    if (not settings.workDir.empty() && settings.layerCutSettings.dumpSketchImg) {
+        std::string filename = settings.workDir + ECAD_SEPS + "LayerCut.png";
+        compact->WriteImgView(filename, 3000);
+    }
+
+    const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
+
+    //mesh, todo steiner points
+    using PrismaTemplate = typename EPrismaThermalModel::PrismaTemplate;
+    std::vector<std::vector<EPolygonData>> layerPolygons{compact->GetLayerPolygons(0)};
+    std::vector<SPtr<PrismaTemplate>> prismaTemplates{std::make_shared<PrismaTemplate>()};
+    std::unordered_map<size_t, size_t> layer2Template{{0, 0}};
+    for (size_t i = 1; i < compact->TotalLayers(); ++i) {
+        auto indices = compact->GetLayerPolygonIndices(i);
+        if (indices != compact->GetLayerPolygonIndices(i - 1)) {
+            layerPolygons.emplace_back(compact->GetLayerPolygons(i));
+            prismaTemplates.emplace_back(new PrismaTemplate);
+        }
+        layer2Template.emplace(i, prismaTemplates.size() - 1);
+    }
+    //todo multi-threads
+    for (size_t i = 0; i < prismaTemplates.size(); ++i) {
+        auto & triangulation = *prismaTemplates.at(i);
+        const auto & polygons = layerPolygons.at(i);
+        GenerateMesh(polygons, {}, coordUnits, settings.meshSettings, triangulation);
+        if (not settings.workDir.empty()) {
+            auto polygonFile = settings.workDir + ECAD_SEPS + "layer" + std::to_string(i + 1) + ".png";
+            auto meshFile = settings.workDir + ECAD_SEPS + "mesh" + std::to_string(i + 1) + ".png";
+            GeometryIO::WritePNG(polygonFile, polygons.begin(), polygons.end(), 2048);
+            GeometryIO::WritePNG(meshFile, triangulation, 4096);
+            ECAD_TRACE("layer %1% total elements: %2%", i, triangulation.triangles.size())
+        }
+    }
+
+    for (size_t i = 0; i < compact->TotalLayers(); ++i) {
+        model->SetLayerPrismaTemplate(i, prismaTemplates.at(layer2Template.at(i)));
+        PrismaLayer prismaLayer(i);
+        [[maybe_unused]] auto check = compact->GetLayerHeightThickness(i, prismaLayer.elevation, prismaLayer.thickness); { ECAD_ASSERT(check) }
+        model->AppendLayer(std::move(prismaLayer));
+    }
+
+    std::unordered_set<EMaterialId> fluidMaterials;
+    auto matIter = layout->GetDatabase()->GetMaterialDefIter();
+    while (auto * material = matIter->Next()) {
+        if (EMaterialType::Fluid == material->GetMaterialType())
+            fluidMaterials.emplace(material->GetMaterialId());
+    }
+
+    model::utils::ELayerCutModelQuery query(compact);
+    const auto & powerBlocks = compact->GetAllPowerBlocks();
+    std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;//[layer, [tempId, eleId]]
+
+    auto buildOnePrismaLayer = [&](size_t index) {
+        auto & prismaLayer = model->layers.at(index);
+        auto & idMap = templateIdMap.emplace(prismaLayer.id, std::unordered_map<size_t, size_t>{}).first->second;    
+        auto triangulation = model->GetLayerPrismaTemplate(index);
+        for (size_t it = 0; it < triangulation->triangles.size(); ++it) {
+            ECAD_ASSERT(compact->hasPolygon(prismaLayer.id))
+            auto ctPoint = tri::TriangulationUtility<EPoint2D>::GetCenter(*triangulation, it).Cast<ECoord>();
+            auto pid = query.SearchPolygon(prismaLayer.id, ctPoint);
+            if (pid == invalidIndex) continue;;
+            if (fluidMaterials.count(compact->GetMaterialId(pid))) continue;
+            if (EMaterialId::noMaterial == compact->GetMaterialId(pid)) continue;
+
+            auto & ele = prismaLayer.AddElement(it);
+            idMap.emplace(it, ele.id);
+            ele.matId = compact->GetMaterialId(pid);
+            ele.netId = compact->GetNetId(pid);
+            auto iter = powerBlocks.find(pid);
+            if (iter != powerBlocks.cend() &&
+                prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.high)) {
+                auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(*triangulation, it);
+                ele.avePower = area * iter->second.powerDensity;
+            }
+        }
+        ECAD_TRACE("layer %1%'s total elements: %2%", index, prismaLayer.elements.size())
+    };
+
+    for (size_t index = 0; index < model->TotalLayers(); ++index)
+        buildOnePrismaLayer(index);
+
+    //build connection
+    for (size_t index = 0; index < model->TotalLayers(); ++index) {
+        auto & layer = model->layers.at(index);
+        auto & elements = layer.elements;
+        const auto & currIdMap = templateIdMap.at(layer.id);
+        auto triangulation = model->GetLayerPrismaTemplate(index);
+        for (auto & ele : elements) {
+            //layer neighbors
+            const auto & triangle = triangulation->triangles.at(ele.templateId);
+            for (size_t nid = 0; nid < triangle.neighbors.size(); ++nid) {
+                if (tri::noNeighbor == triangle.neighbors.at(nid)) continue;
+                auto iter = currIdMap.find(triangle.neighbors.at(nid));
+                if (iter != currIdMap.cend()) ele.neighbors[nid] = iter->second;
+            }
+            ele.neighbors[PrismaElement::TOP_NEIGHBOR_INDEX] = ele.id;//todo
+            ele.neighbors[PrismaElement::BOT_NEIGHBOR_INDEX] = ele.id;//todo
+        }
+    }
+
+    auto scaleH2Unit = coordUnits.Scale2Unit();
+    auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
+    model->BuildPrismaModel(scaleH2Unit, scale2Meter);
+
+    if (not settings.workDir.empty()) { 
+        auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
+        io::GenerateVTKFile(meshFile, *model);
+    }
+    delete model;
+    return nullptr;
 }
 
 }//namespace ecad::extraction

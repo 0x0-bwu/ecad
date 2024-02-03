@@ -21,6 +21,7 @@ models/thermal/utils/EThermalModelReduction.cpp
 models/thermal/EChipThermalModel.cpp
 models/thermal/EGridThermalModel.cpp
 models/thermal/EPrismaThermalModel.cpp
+models/thermal/EStackupPrismaThermalModel.cpp
 models/thermal/EThermalModel.cpp
 simulation/thermal/EThermalSimulation.cpp
 solvers/thermal/utils/EGridThermalNetworkBuilder.cpp

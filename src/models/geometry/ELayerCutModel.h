@@ -57,11 +57,13 @@ public:
     const std::vector<EPolygonData> & GetAllPolygonData() const { return m_polygons; }
     const std::vector<EPoint2D> & GetSteinerPoints() const { return m_steinerPoints; }
     const std::vector<Bondwire> GetAllBondwires() const { return m_bondwires; }
+    SPtr<std::vector<size_t> > GetLayerPolygonIndices(size_t layer) const { return m_lyrPolygons.at(layer); }
     EMaterialId GetMaterialId(size_t pid) const { return m_materials.at(pid); }
     ENetId GetNetId(size_t pid) const { return m_nets.at(pid); }
 
     Height GetHeight(EFloat height) const;
     LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
+    std::vector<EPolygonData> GetLayerPolygons(size_t layer) const;
 
     virtual EModelType GetModelType() const { return EModelType::LayerCut; }
 

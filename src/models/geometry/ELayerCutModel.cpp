@@ -121,6 +121,14 @@ ECAD_INLINE ELayerCutModel::LayerRange ELayerCutModel::GetLayerRange(EFloat elev
     return LayerRange{GetHeight(elevation), GetHeight(elevation - thickness)};
 }
 
+ECAD_INLINE std::vector<EPolygonData> ELayerCutModel::GetLayerPolygons(size_t layer) const
+{
+    auto indices = GetLayerPolygonIndices(layer);
+    std::vector<EPolygonData> polygons; polygons.reserve(indices->size());
+    std::transform(indices->begin(), indices->end(), std::back_inserter(polygons), [&](auto i){ return m_polygons.at(i); });
+    return polygons;
+}
+
 ECAD_INLINE bool ELayerCutModel::SliceOverheightLayers(std::list<LayerRange> & ranges, EFloat ratio)
 {
     auto slice = [](const LayerRange & r)

@@ -224,6 +224,7 @@ enum class EModelType
     ThermalCTMv1 = 10,
     ThermalGrid = 11,
     ThermalPrisma = 12,
+    ThermalStackupPrisma = 13,
     // ThermalTet. //todo
 };
 
@@ -235,6 +236,7 @@ ECAD_ALWAYS_INLINE std::string toString(EModelType type)
         case EModelType::ThermalCTMv1 : return "ThermalCTMv1";
         case EModelType::ThermalGrid : return "ThermalGrid";
         case EModelType::ThermalPrisma : return "ThermalPrisma";
+        case EModelType::ThermalStackupPrisma : return "ThermalStackupPrisma";
         default : { ECAD_ASSERT(false) return std::string{}; }
     }
 }

@@ -112,12 +112,17 @@ struct EPrismaThermalModelExtractionSettings : public EThermalModelExtractionSet
     EPrismaMeshSettings meshSettings;
     ELayoutPolygonMergeSettings polygonMergeSettings;
     ELayerCutModelExtractionSettings layerCutSettings;
-
+    virtual ~EPrismaThermalModelExtractionSettings() = default;
     void AddBlockBC(EOrientation orient, FBox2D block, BCType type, EFloat value) override
     {
         EThermalModelExtractionSettings::AddBlockBC(orient, block, type, value);
         layerCutSettings.imprintBox.emplace_back(std::move(block));
     }
+};
+
+struct EStackupPrismaThermalModelExtractionSettings : public EPrismaThermalModelExtractionSettings
+{
+    virtual ~EStackupPrismaThermalModelExtractionSettings() = default;
 };
 
 struct EThermalSimulationSetup

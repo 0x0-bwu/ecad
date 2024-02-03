@@ -48,7 +48,7 @@ ECAD_INLINE CPtr<EPrismaThermalModelQuery::Rtree> EPrismaThermalModelQuery::Buil
     if (nullptr == m_rtree) {
         m_rtree.reset(new Rtree);
         const auto & prismas = m_model->m_prismas;
-        const auto & triangulation = m_model->prismaTemplate;
+        const auto & triangulation = *m_model->GetLayerPrismaTemplate(0);
         for (size_t i = 0; i < prismas.size(); ++i) {
             auto it = prismas.at(i).element->templateId;
             auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
@@ -64,7 +64,7 @@ ECAD_INLINE CPtr<EPrismaThermalModelQuery::Rtree> EPrismaThermalModelQuery::Buil
     auto & rtree = m_lyrRtrees.emplace(layer, std::make_shared<Rtree>()).first->second;
     const auto & prismas = m_model->m_prismas;
     const auto & indexOffset = m_model->m_indexOffset;
-    const auto & triangulation = m_model->prismaTemplate;
+    const auto & triangulation = *m_model->GetLayerPrismaTemplate(layer);
     for (size_t i = indexOffset.at(layer); i < indexOffset.at(layer + 1); ++i) {
         ECAD_ASSERT(layer == prismas.at(i).layer->id)
         auto it = prismas.at(i).element->templateId;

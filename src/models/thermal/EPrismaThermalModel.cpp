@@ -1,10 +1,9 @@
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/utils/EPrismaThermalModelQuery.h"
+#include "models/geometry/ELayerCutModel.h"
 #include "utils/ELayoutRetriever.h"
 #include "Interface.h"
 
-#include "generic/geometry/BoostGeometryRegister.hpp"
-#include "generic/geometry/Triangulation.hpp"
 #include "generic/geometry/GeometryIO.hpp"
 #include <queue>
 namespace ecad::model {
@@ -14,6 +13,16 @@ ECAD_INLINE EPrismaThermalModel::EPrismaThermalModel(CPtr<ILayoutView> layout)
 {
     m_blockBCs.emplace(EOrientation::Top, std::vector<BlockBC>{});
     m_blockBCs.emplace(EOrientation::Bot, std::vector<BlockBC>{});
+}
+
+ECAD_INLINE void EPrismaThermalModel::SetLayerPrismaTemplate(size_t layer, SPtr<PrismaTemplate> prismaTemplate)
+{
+    m_prismaTemplates.emplace(layer, prismaTemplate);
+}
+
+ECAD_INLINE SPtr<EPrismaThermalModel::PrismaTemplate> EPrismaThermalModel::GetLayerPrismaTemplate(size_t layer) const
+{
+    return m_prismaTemplates.at(layer);
 }
 
 CPtr<IMaterialDefCollection> EPrismaThermalModel::GetMaterialLibrary() const
@@ -26,12 +35,12 @@ ECAD_INLINE void EPrismaThermalModel::AddBlockBC(EOrientation orient, EBox2D blo
     m_blockBCs.at(orient).emplace_back(std::move(block), std::move(bc));
 }
 
-ECAD_INLINE EPrismaThermalModel::PrismaLayer & EPrismaThermalModel::AppendLayer(PrismaLayer layer)
+ECAD_INLINE PrismaLayer & EPrismaThermalModel::AppendLayer(PrismaLayer layer)
 {
     return layers.emplace_back(std::move(layer));
 }
 
-ECAD_INLINE EPrismaThermalModel::LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current)
+ECAD_INLINE LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current)
 {
     ECAD_ASSERT(TotalPrismaElements() > 0/*should add after build prisma model*/)
     LineElement & element = m_lines.emplace_back(LineElement{});
@@ -53,7 +62,7 @@ ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit, EFloa
     for (size_t i = 0; i < TotalLayers(); ++i)
         m_indexOffset.emplace_back(m_indexOffset.back() + layers.at(i).TotalElements());
     
-    const auto & triangles = prismaTemplate.triangles;
+    const auto & triangles = m_prismaTemplates.at(0)->triangles;
     std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;
     auto getPtIdxMap = [&templateIdMap](size_t lyrIdx) -> std::unordered_map<size_t, size_t> & {
         auto iter = templateIdMap.find(lyrIdx);
@@ -152,8 +161,8 @@ size_t EPrismaThermalModel::AddPoint(FPoint3D point)
 
 FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const
 {
-    const auto & points = prismaTemplate.points;
-    const auto & triangles = prismaTemplate.triangles;
+    const auto & points = GetLayerPrismaTemplate(0)->points;
+    const auto & triangles = GetLayerPrismaTemplate(0)->triangles;
     const auto & element = layers.at(lyrIndex).elements.at(eleIndex);
     const auto & triangle = triangles.at(element.templateId);
     EFloat height = vtxIndex < 3 ? layers.at(lyrIndex).elevation :
