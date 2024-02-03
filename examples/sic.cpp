@@ -658,9 +658,9 @@ int main(int argc, char * argv[])
 
     std::string workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto layout = SetupDesign("CREE62mm");
-    // StaticThermalFlow(layout, workDir);
+    StaticThermalFlow(layout, workDir);
     // TransientThermalFlow(layout, workDir);
-    Test(layout, workDir);
+    // Test(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

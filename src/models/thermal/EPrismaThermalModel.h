@@ -65,12 +65,20 @@ struct PrismaLayer
     size_t TotalElements() const { return elements.size(); }
 };
 
+struct ContactInstance
+{
+    size_t index{invalidIndex};
+    EFloat ratio{0};
+};
+
+using ContactInstances = std::vector<ContactInstance>;
 struct PrismaInstance
 {
     CPtr<PrismaLayer> layer{nullptr};
     CPtr<PrismaElement> element{nullptr};
     std::array<size_t, 6> vertices;//top, bot
     std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
+    std::array<ContactInstances, 2> contactInstances;//[top, bot], only used for stackup prisma model
 };
 
 class ECAD_API EPrismaThermalModel : public EThermalModel

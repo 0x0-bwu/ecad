@@ -1,5 +1,5 @@
 #include "EStackupPrismaThermalModel.h"
-
+#include "models/thermal/utils/EStackupPrismaThermalModelQuery.h"
 namespace ecad::model {
 
 ECAD_INLINE EStackupPrismaThermalModel::EStackupPrismaThermalModel(CPtr<ILayoutView> layout)
@@ -15,6 +15,7 @@ ECAD_INLINE void EStackupPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit
     for (size_t i = 0; i < TotalLayers(); ++i)
         m_indexOffset.emplace_back(m_indexOffset.back() + layers.at(i).TotalElements());
     
+
     auto total = TotalPrismaElements();
     m_prismas.resize(total);
     m_points.clear();
@@ -31,11 +32,30 @@ ECAD_INLINE void EStackupPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit
             instance.vertices[v + 3] = AddPoint(GetPoint(lyrIdx, eleIdx, v + 3));
         }
 
-        //neighbors
+        //side neighbors
         for (size_t n = 0; n < 3; ++n) {
             if (auto nid = instance.element->neighbors.at(n); noNeighbor != nid) {
                 auto nb = GlobalIndex(lyrIdx, instance.element->neighbors.at(n));
                 instance.neighbors[n] = nb;
+            }
+        }
+    }
+    //top/bot neighbors
+    utils::EStackupPrismaThermalModelQuery query(this);
+    using RtVal = model::utils::EStackupPrismaThermalModelQuery::RtVal;
+    for (size_t i = 0; i < total; ++i) {
+        auto & instance = m_prismas[i];
+        auto [lyrIdx, eleIdx] = PrismaLocalIndex(i);
+        const auto & triangulation = *GetLayerPrismaTemplate(lyrIdx);
+        auto it = instance.element->templateId;
+        auto triangle = tri::TriangulationUtility<EPoint2D>::GetTriangle(triangulation, it);
+        if (isTopLayer(lyrIdx)) instance.neighbors[PrismaElement::TOP_NEIGHBOR_INDEX] = noNeighbor;
+        else {
+            auto topLyr = lyrIdx - 1;
+            std::vector<RtVal> results;
+            query.IntersectsPrismaInstance(topLyr, i, results);
+            for (size_t j = 0; j < results.size(); ++j) {
+                //todo
             }
         }
     }

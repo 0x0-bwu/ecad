@@ -8,10 +8,11 @@ using namespace generic::geometry::tri;
 class ILayoutView;
 
 namespace model {
-
+namespace utils { class EStackupPrismaThermalModelQuery; }
 class ECAD_API EStackupPrismaThermalModel : public EPrismaThermalModel
 {
 public:
+    friend class utils::EStackupPrismaThermalModelQuery;
     explicit EStackupPrismaThermalModel(CPtr<ILayoutView> layout);
     virtual ~EStackupPrismaThermalModel() = default;
 
