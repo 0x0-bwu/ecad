@@ -80,6 +80,7 @@ struct EThermalModelExtractionSettings
     using BCType = EThermalBondaryConditionType;
     using BlockBoundaryCondition = std::pair<FBox2D, EThermalBondaryCondition>;
     virtual ~EThermalModelExtractionSettings() = default;
+    size_t threads;
     std::string workDir;
     EThermalBondaryCondition topUniformBC;
     EThermalBondaryCondition botUniformBC;

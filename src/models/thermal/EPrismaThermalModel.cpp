@@ -161,8 +161,8 @@ size_t EPrismaThermalModel::AddPoint(FPoint3D point)
 
 FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const
 {
-    const auto & points = GetLayerPrismaTemplate(0)->points;
-    const auto & triangles = GetLayerPrismaTemplate(0)->triangles;
+    const auto & points = GetLayerPrismaTemplate(lyrIndex)->points;
+    const auto & triangles = GetLayerPrismaTemplate(lyrIndex)->triangles;
     const auto & element = layers.at(lyrIndex).elements.at(eleIndex);
     const auto & triangle = triangles.at(element.templateId);
     EFloat height = vtxIndex < 3 ? layers.at(lyrIndex).elevation :

@@ -638,14 +638,15 @@ void Test(Ptr<ILayoutView> layout, const std::string & workDir)
 {
     EStackupPrismaThermalModelExtractionSettings prismaSettings;
     prismaSettings.workDir = workDir;
+    prismaSettings.threads = eDataMgr.Threads();
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
-    prismaSettings.meshSettings.maxLen = 2;
+    prismaSettings.meshSettings.maxLen = 10;
     prismaSettings.meshSettings.tolerance = 1e-6;
-    prismaSettings.layerCutSettings.layerTransitionRatio = 3;
+    prismaSettings.layerCutSettings.layerTransitionRatio = 0;
     layout->ExtractThermalModel(prismaSettings);
 }
 int main(int argc, char * argv[])
@@ -657,9 +658,9 @@ int main(int argc, char * argv[])
 
     std::string workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto layout = SetupDesign("CREE62mm");
-    StaticThermalFlow(layout, workDir);
+    // StaticThermalFlow(layout, workDir);
     // TransientThermalFlow(layout, workDir);
-    // Test(layout, workDir);
+    Test(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }
