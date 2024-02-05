@@ -1,5 +1,6 @@
 #pragma once
 #include "ECadConfig.h"
+#include "generic/geometry/Triangle.hpp"
 #include "generic/geometry/Box.hpp"
 #include "generic/tools/Log.hpp"
 #include <boost/uuid/uuid.hpp>
@@ -42,6 +43,9 @@ using EBox2D = generic::geometry::Box2D<ECoord>;
 using FBox2D = generic::geometry::Box2D<FCoord>;
 using EBox3D = generic::geometry::Box3D<ECoord>;
 using FBox3D = generic::geometry::Box3D<FCoord>;
+
+using ETriangle2D = generic::geometry::Triangle2D<ECoord>;
+using FTriangle2D = generic::geometry::Triangle2D<FCoord>;
 
 using EUuid = boost::uuids::uuid;
 

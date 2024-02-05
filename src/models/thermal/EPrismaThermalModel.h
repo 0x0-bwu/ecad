@@ -69,6 +69,7 @@ struct ContactInstance
 {
     size_t index{invalidIndex};
     EFloat ratio{0};
+    ContactInstance(size_t index, EFloat ratio) : index(index), ratio(ratio) {}
 };
 
 using ContactInstances = std::vector<ContactInstance>;

@@ -7,6 +7,18 @@ ECAD_INLINE EStackupPrismaThermalModelQuery::EStackupPrismaThermalModelQuery(CPt
 {
 }
 
+ECAD_INLINE EFloat EStackupPrismaThermalModelQuery::PrismaInstanceTopBotArea(size_t pIndex) const
+{
+    return GetPrismaInstanceTemplate(pIndex).Area();
+}
+
+ECAD_INLINE ETriangle2D EStackupPrismaThermalModelQuery::GetPrismaInstanceTemplate(size_t pIndex) const
+{
+    const auto & instance = m_model->GetPrisma(pIndex);
+    const auto & triangulation = *m_model->GetLayerPrismaTemplate(instance.layer->id);
+    return tri::TriangulationUtility<EPoint2D>::GetTriangle(triangulation, instance.element->templateId);
+}
+
 ECAD_INLINE void EStackupPrismaThermalModelQuery::IntersectsPrismaInstance(size_t layer, size_t pIndex, std::vector<RtVal> & results) const
 {
     results.clear();
