@@ -60,7 +60,7 @@ ECAD_INLINE void EStackupPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit
         else {
             auto topLyr = lyrIdx - 1;
             std::vector<RtVal> results;
-            query.IntersectsPrismaInstance(topLyr, i, results);
+            query.IntersectsPrismaInstances(topLyr, i, results);
             for (size_t j = 0; j < results.size(); ++j) {
                 auto triangle2 = query.GetPrismaInstanceTemplate(results.at(j).second);
                 if (auto area = getIntersectArea(triangle1, triangle2); area > 0)
@@ -75,7 +75,7 @@ ECAD_INLINE void EStackupPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit
         else {
             auto botLyr = lyrIdx + 1;
             std::vector<RtVal> results;
-            query.IntersectsPrismaInstance(botLyr, i, results);
+            query.IntersectsPrismaInstances(botLyr, i, results);
             for (size_t j = 0; j < results.size(); ++j) {
                 auto triangle2 = query.GetPrismaInstanceTemplate(results.at(j).second);
                 if (auto area = getIntersectArea(triangle1, triangle2); area > 0)

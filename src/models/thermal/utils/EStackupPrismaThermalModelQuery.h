@@ -17,7 +17,10 @@ public:
     
     EFloat PrismaInstanceTopBotArea(size_t pIndex) const;//in coords
     ETriangle2D GetPrismaInstanceTemplate(size_t pIndex) const;
-    void IntersectsPrismaInstance(size_t layer, size_t pIndex, std::vector<RtVal> & results) const;
+
+    void IntersectsPrismaInstances(size_t layer, size_t pIndex, std::vector<RtVal> & results) const;
+    void SearchPrismaInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const;
+
 protected:
     CPtr<Rtree> BuildLayerIndexTree(size_t layer) const;
 protected:

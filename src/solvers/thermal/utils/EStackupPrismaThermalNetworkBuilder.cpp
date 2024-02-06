@@ -7,8 +7,9 @@
 #include "generic/thread/ThreadPool.hpp"
 namespace ecad::solver {
 
+using namespace generic;
 using namespace ecad::model;
-ECAD_INLINE EStackupPrismaThermalNetworkBuilder::EPrismaThermalNetworkBuilder(const ModelType & model)
+ECAD_INLINE EStackupPrismaThermalNetworkBuilder::EStackupPrismaThermalNetworkBuilder(const ModelType & model)
  : m_model(model)
 {
 }
@@ -31,12 +32,12 @@ ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EStackupPrismaThermalNetworkBuilder::B
         size_t begin = 0;
         for(size_t i = 0; i < blocks && blockSize > 0; ++i){
             size_t end = begin + blockSize;
-            pool.Submit(std::bind(&EPrismaThermalNetworkBuilder::BuildPrismaElement, this, std::ref(iniT), network.get(), begin, end));
+            pool.Submit(std::bind(&EStackupPrismaThermalNetworkBuilder::BuildPrismaElement, this, std::ref(iniT), network.get(), begin, end));
             begin = end;
         }
         size_t end = size;
         if(begin != end)
-            pool.Submit(std::bind(&EPrismaThermalNetworkBuilder::BuildPrismaElement, this, std::ref(iniT), network.get(), begin, end));        
+            pool.Submit(std::bind(&EStackupPrismaThermalNetworkBuilder::BuildPrismaElement, this, std::ref(iniT), network.get(), begin, end));        
     }
     else BuildPrismaElement(iniT, network.get(), 0, m_model.TotalPrismaElements());
     
@@ -97,20 +98,43 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::BuildPrismaElement(const s
                     network->SetHTC(i, topBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlow == topBC->type) {
-                    network->SetHF(i, topBC->value);
-                    if (topBC->value > 0)
-                        summary.iHeatFlow += topBC->value;
-                    else summary.oHeatFlow += topBC->value;
+                else if (EThermalBondaryCondition::BCType::HeatFlux == topBC->type) {
+                    auto heatFlow = topBC->value * hArea;
+                    network->SetHF(i, heatFlow);
+                    if (heatFlow > 0)
+                        summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
                 }
             }
         }
-        else if (i < nTop) {
-            const auto & nb = m_model.GetPrisma(nTop);
-            auto hNb = GetPrismaHeight(nTop);
-            auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nTop));
-            auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
-            network->SetR(i, nTop, r);
+        else if (i == nTop) {
+            EFloat ratio = 1.0;
+            for (const auto & contact : inst.contactInstances.front()) {
+                if (contact.index < i) continue;
+                const auto & nb = m_model.GetPrisma(nTop);
+                auto area = hArea * contact.ratio;
+                auto hNb = GetPrismaHeight(nTop);
+                auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nTop));
+                auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
+                network->SetR(i, nTop, r);
+                ratio -= contact.ratio;
+            }
+            if (ratio > 0 && nullptr != topBC && topBC->isValid()) {
+                if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
+                    network->SetHTC(i, topBC->value * hArea * ratio);
+                    summary.boundaryNodes += 1;
+                }
+                else if (EThermalBondaryCondition::BCType::HeatFlux == topBC->type) {
+                    auto heatFlow = topBC->value * hArea * ratio;
+                    network->SetHF(i, heatFlow);
+                    if (heatFlow > 0)
+                        summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
+                }
+            }
+        }
+        else {
+            ECAD_ASSERT(false)
         }
         //bot
         auto nBot = neighbors.at(PrismaElement::BOT_NEIGHBOR_INDEX);
@@ -120,7 +144,7 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::BuildPrismaElement(const s
                     network->SetHTC(i, botBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlow == botBC->type) {
+                else if (EThermalBondaryCondition::BCType::HeatFlux == botBC->type) {
                     network->SetHF(i, botBC->value);
                     if (botBC->value > 0)
                         summary.iHeatFlow += botBC->value;
@@ -128,12 +152,34 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::BuildPrismaElement(const s
                 }
             }
         }
-        else if (i < nBot) {
-            const auto & nb = m_model.GetPrisma(nBot);
-            auto hNb = GetPrismaHeight(nBot);
-            auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nBot));
-            auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / hArea;
-            network->SetR(i, nBot, r);
+        else if (i == nBot) {
+            EFloat ratio = 1.0;
+            for (const auto & contact : inst.contactInstances.back()) {
+                if (contact.index < i) continue;
+                const auto & nb = m_model.GetPrisma(nBot);
+                auto area = hArea * contact.ratio;
+                auto hNb = GetPrismaHeight(nBot);
+                auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nBot));
+                auto r = (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
+                network->SetR(i, nBot, r);
+                ratio -= contact.ratio;
+            }
+            if (ratio > 0 && nullptr != botBC && botBC->isValid()) {
+                if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
+                    network->SetHTC(i, botBC->value * hArea * ratio);
+                    summary.boundaryNodes += 1;
+                }
+                else if (EThermalBondaryCondition::BCType::HeatFlux == botBC->type) {
+                    auto heatFlow = botBC->value * hArea * ratio;
+                    network->SetHF(i, heatFlow);
+                    if (heatFlow > 0)
+                        summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
+                }
+            }
+        }
+        else {
+            ECAD_ASSERT(false)
         }
     }
 }
@@ -182,15 +228,15 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalN
     const auto & botBCs = m_model.GetBlockBCs(EOrientation::Bot);
     if (topBCs.empty() && botBCs.empty()) return;
 
-    model::utils::EPrismaThermalModelQuery query(&m_model);
-    using RtVal = model::utils::EPrismaThermalModelQuery::RtVal;
+    model::utils::EStackupPrismaThermalModelQuery query(&m_model);
+    using RtVal = model::utils::EStackupPrismaThermalModelQuery::RtVal;
 
     auto applyBlockBC = [&](const auto & block, bool isTop)
     {
         std::vector<RtVal> results;
         if (not block.second.isValid()) return;
         auto value = block.second.value;
-        if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type)
+        if (EThermalBondaryCondition::BCType::HeatFlux == block.second.type)
             value /= block.first.Area() * m_model.CoordScale2Meter(2);
 
         for (size_t lyr = 0; lyr <  m_model.TotalLayers(); ++lyr) {
@@ -202,7 +248,7 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalN
                                    PrismaElement::BOT_NEIGHBOR_INDEX ;
                 if (prisma.element->neighbors.at(nid) != noNeighbor) continue;
                 auto area = GetPrismaTopBotArea(result.second);
-                if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type) {
+                if (EThermalBondaryCondition::BCType::HeatFlux == block.second.type) {
                     auto heatFlow = value * area;
                     network->SetHF(result.second, heatFlow);
                     if (heatFlow > 0)

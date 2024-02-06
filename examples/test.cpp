@@ -38,6 +38,21 @@ void SetupMaterials(Ptr<IDatabase> database)
     matCu->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreatePolynomialMaterialProp({{437.6, -0.165, 1.825e-4, -1.427e-7, 3.979e-11}}));
     matCu->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreatePolynomialMaterialProp({{342.8, 0.134, 5.535e-5, -1.971e-7, 1.141e-10}}));
     matCu->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(8850));
+
+    auto matSiC = eDataMgr.CreateMaterialDef(database, MAT_SIC.data());  
+    matSiC->SetProperty(EMaterialPropId::ThermalConductivity, eDataMgr.CreatePolynomialMaterialProp({{1860, -11.7, 0.03442, -4.869e-5, 2.675e-8}}));
+    matSiC->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreatePolynomialMaterialProp({{-3338, 33.12, -0.1037, 0.0001522, -8.553e-8}}));
+    matSiC->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(3210));
+}
+
+Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
+{
+    auto sicDie = eDataMgr.CreateComponentDef(database, "SicDie");
+    sicDie->SetSolderFillingMaterial(MAT_SAC305.data());
+    sicDie->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-2.545, -2.02), FPoint2D(2.545, 2.02)));
+    sicDie->SetMaterial(MAT_SIC.data());
+    sicDie->SetHeight(0.18);
+    return sicDie;
 }
 
 Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
@@ -51,6 +66,10 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
 
     auto topCuLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCuLayer", ELayerType::ConductingLayer, 0, 0.3, MAT_CU.data(), MAT_CU.data()));
 
+    auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
+    auto dieComp = eDataMgr.CreateComponent(baseLayout, "Die1", sicDie, topCuLayer, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {0, 0}), false);
+    dieComp->SetLossPower(50);
+
     return baseLayout;
 }
 
@@ -61,17 +80,20 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
 
     //material
     SetupMaterials(database);
-    
+
     //coord units
     ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
     database->SetCoordUnits(coordUnits);
 
+    //component def
+    CreateSicDieComponentDef(database);
+
     return CreateBaseLayout(database);
 }
 
-EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
+EStackupPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
 {
-    EPrismaThermalModelExtractionSettings prismaSettings;
+    EStackupPrismaThermalModelExtractionSettings prismaSettings;
     prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
@@ -80,9 +102,7 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.meshSettings.minLen = 1e-2;
     prismaSettings.meshSettings.maxLen = 100;
     prismaSettings.meshSettings.tolerance = 1e-6;
-    prismaSettings.layerCutSettings.layerTransitionRatio = 3;
-
-    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBondaryCondition::BCType::HeatFlow, 100);
+    prismaSettings.layerCutSettings.layerTransitionRatio = 0;
     return prismaSettings;
 }
 
@@ -129,7 +149,8 @@ int main(int argc, char * argv[])
 
     std::string workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto layout = SetupDesign("test");
-    TransientThermalFlow(layout, workDir);
+    StaticThermalFlow(layout, workDir);
+    // TransientThermalFlow(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

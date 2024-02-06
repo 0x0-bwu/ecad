@@ -1,4 +1,5 @@
 #pragma once
+#include "models/thermal/EStackupPrismaThermalModel.h"
 #include "models/thermal/EPrismaThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
 #include "ECadSettings.h"
@@ -88,6 +89,34 @@ public:
     using EThermalNetworkTransientSolver::settings;
     explicit EPrismaThermalNetworkTransientSolver(const EPrismaThermalModel & model);
     virtual ~EPrismaThermalNetworkTransientSolver() = default;
+    bool Solve(EFloat & minT, EFloat & maxT) override;
+};
+
+class ECAD_API EStackupPrismaThermalNetworkSolver
+{
+public:
+    virtual ~EStackupPrismaThermalNetworkSolver() = default;
+
+protected:
+    explicit EStackupPrismaThermalNetworkSolver(const EStackupPrismaThermalModel & model);
+    const EStackupPrismaThermalModel & m_model;
+};
+
+class ECAD_API EStackupPrismaThermalNetworkStaticSolver : public EStackupPrismaThermalNetworkSolver, EThermalNetworkStaticSolver
+{
+public:
+    using EThermalNetworkStaticSolver::settings;
+    explicit EStackupPrismaThermalNetworkStaticSolver(const EStackupPrismaThermalModel & model);
+    virtual ~EStackupPrismaThermalNetworkStaticSolver() = default;
+    bool Solve(EFloat & minT, EFloat & maxT) override;
+};
+
+class ECAD_API EStackupPrismaThermalNetworkTransientSolver : public EStackupPrismaThermalNetworkSolver, EThermalNetworkTransientSolver
+{
+public:
+    using EThermalNetworkTransientSolver::settings;
+    explicit EStackupPrismaThermalNetworkTransientSolver(const EStackupPrismaThermalModel & model);
+    virtual ~EStackupPrismaThermalNetworkTransientSolver() = default;
     bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 

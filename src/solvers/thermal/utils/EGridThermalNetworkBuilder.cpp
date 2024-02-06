@@ -86,7 +86,7 @@ ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EGridThermalNetworkBuilder::Build(cons
                 network->SetHF(node, model->totalPower);
                 if(model->totalPower > 0)
                     summary.iHeatFlow += model->totalPower;
-                else summary.oHeatFlow -= model->totalPower;
+                else summary.oHeatFlow += model->totalPower;
                 for (size_t x = model->ll.x; x <= model->ur.x; ++x) {
                     for (size_t y = model->ll.y; y <= model->ur.y; ++y) {
                         auto index = GetFlattenIndex(ESize3D(x, y, z));
@@ -122,7 +122,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyHeatFlowForLayer(const std::ve
             if (not success) continue;
   
             if(val > 0) summary.iHeatFlow += val;
-            else summary.oHeatFlow -= val;
+            else summary.oHeatFlow += val;
             network.SetHF(index, val);
         }
     }
@@ -131,10 +131,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyHeatFlowForLayer(const std::ve
 ECAD_INLINE void EGridThermalNetworkBuilder::ApplyUniformBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, ThermalNetwork<EFloat> & network) const
 {
     if (not bc.isValid()) return;
-    auto value = bc.value;
-    if (EThermalBondaryCondition::BCType::HeatFlow == bc.type)
-        value /= m_size.x * m_size.y;
-
+    auto value = bc.value;    
     for (size_t x = 0; x < m_size.x; ++x) {
         for (size_t y = 0; y < m_size.y; ++y) {
             auto grid = ESize3D(x, y, layer);
@@ -145,10 +142,11 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyUniformBoundaryConditionForLay
                     network.SetHTC(index, GetZGridArea() * value);
                     break;
                 }
-                case EThermalBondaryCondition::BCType::HeatFlow : {
-                    if(value > 0) summary.iHeatFlow += value;
-                    else summary.oHeatFlow -= value;
-                    network.SetHF(index, value);
+                case EThermalBondaryCondition::BCType::HeatFlux : {
+                    auto heatFlow = GetZGridArea() * value;
+                    if(heatFlow > 0) summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
+                    network.SetHF(index, heatFlow);
                     break;
                 }
                 default : {
@@ -163,9 +161,6 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyBlockBoundaryConditionForLayer
 {
     if (not bc.isValid()) return;
     auto value = bc.value;
-    if (EThermalBondaryCondition::BCType::HeatFlow == bc.type)
-        value /= (ur.x - ll.x + 1) * (ur.y - ll.y + 1);
-
     for (size_t x = ll.x; x <= ur.x; ++x) {
         for (size_t y = ll.y; y <= ur.y; ++y) {
             auto grid = ESize3D(x, y, layer);
@@ -176,10 +171,11 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyBlockBoundaryConditionForLayer
                     network.SetHTC(index, GetZGridArea() * value);
                     break;
                 }
-                case EThermalBondaryCondition::BCType::HeatFlow : {
-                    if(value > 0) summary.iHeatFlow += value;
-                    else summary.oHeatFlow -= value;
-                    network.SetHF(index, value);
+                case EThermalBondaryCondition::BCType::HeatFlux : {
+                    auto heatFlow = value * GetZGridArea();
+                    if(heatFlow > 0) summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
+                    network.SetHF(index, heatFlow);
                     break;
                 }
                 default : {

@@ -97,11 +97,12 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
                     network->SetHTC(i, topBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlow == topBC->type) {
-                    network->SetHF(i, topBC->value);
-                    if (topBC->value > 0)
-                        summary.iHeatFlow += topBC->value;
-                    else summary.oHeatFlow += topBC->value;
+                else if (EThermalBondaryCondition::BCType::HeatFlux == topBC->type) {
+                    auto heatFlow = botBC->value * hArea;
+                    network->SetHF(i, heatFlow);
+                    if (heatFlow > 0)
+                        summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
                 }
             }
         }
@@ -120,11 +121,12 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
                     network->SetHTC(i, botBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlow == botBC->type) {
-                    network->SetHF(i, botBC->value);
-                    if (botBC->value > 0)
-                        summary.iHeatFlow += botBC->value;
-                    else summary.oHeatFlow += botBC->value;
+                else if (EThermalBondaryCondition::BCType::HeatFlux == botBC->type) {
+                    auto heatFlow = botBC->value * hArea;
+                    network->SetHF(i, heatFlow);
+                    if (heatFlow > 0)
+                        summary.iHeatFlow += heatFlow;
+                    else summary.oHeatFlow += heatFlow;
                 }
             }
         }
@@ -190,9 +192,6 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<
         std::vector<RtVal> results;
         if (not block.second.isValid()) return;
         auto value = block.second.value;
-        if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type)
-            value /= block.first.Area() * m_model.CoordScale2Meter(2);
-
         for (size_t lyr = 0; lyr <  m_model.TotalLayers(); ++lyr) {
             query.SearchPrismaInstances(lyr, block.first, results);
             if (results.empty()) continue;
@@ -202,7 +201,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<
                                    PrismaElement::BOT_NEIGHBOR_INDEX ;
                 if (prisma.element->neighbors.at(nid) != noNeighbor) continue;
                 auto area = GetPrismaTopBotArea(result.second);
-                if (EThermalBondaryCondition::BCType::HeatFlow == block.second.type) {
+                if (EThermalBondaryCondition::BCType::HeatFlux == block.second.type) {
                     auto heatFlow = value * area;
                     network->SetHF(result.second, heatFlow);
                     if (heatFlow > 0)

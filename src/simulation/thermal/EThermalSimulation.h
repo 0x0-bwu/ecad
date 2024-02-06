@@ -6,6 +6,7 @@ class IModel;
 namespace model {
 class EGridThermalModel;
 class EPrismaThermalModel;
+class EStackupPrismaThermalModel;
 } // model
 
 namespace simulation {
@@ -50,6 +51,17 @@ class ECAD_API EPrismaThermalSimulator : public EThermalSimulator
 public:
     explicit EPrismaThermalSimulator(CPtr<EPrismaThermalModel> model, const EThermalSimulationSetup & setup);
     virtual ~EPrismaThermalSimulator() = default;
+
+protected:
+    bool RunStaticSimulation(EFloat & minT, EFloat & maxT) const override;
+    bool RunTransientSimulation(EFloat & minT, EFloat & maxT) const override;
+};
+
+class ECAD_API EStackupPrismaThermalSimulator : public EThermalSimulator
+{
+public:
+    explicit EStackupPrismaThermalSimulator(CPtr<EStackupPrismaThermalModel> model, const EThermalSimulationSetup & setup);
+    virtual ~EStackupPrismaThermalSimulator() = default;
 
 protected:
     bool RunStaticSimulation(EFloat & minT, EFloat & maxT) const override;

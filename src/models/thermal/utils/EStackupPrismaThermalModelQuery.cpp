@@ -19,13 +19,18 @@ ECAD_INLINE ETriangle2D EStackupPrismaThermalModelQuery::GetPrismaInstanceTempla
     return tri::TriangulationUtility<EPoint2D>::GetTriangle(triangulation, instance.element->templateId);
 }
 
-ECAD_INLINE void EStackupPrismaThermalModelQuery::IntersectsPrismaInstance(size_t layer, size_t pIndex, std::vector<RtVal> & results) const
+ECAD_INLINE void EStackupPrismaThermalModelQuery::IntersectsPrismaInstances(size_t layer, size_t pIndex, std::vector<RtVal> & results) const
+{
+    const auto & instance = m_model->GetPrisma(pIndex);
+    const auto & triangulation = *m_model->GetLayerPrismaTemplate(instance.layer->id);
+    auto area = tri::TriangulationUtility<EPoint2D>::GetBondBox(triangulation, instance.element->templateId);
+    return SearchPrismaInstances(layer, area, results);
+}
+
+ECAD_INLINE void EStackupPrismaThermalModelQuery::SearchPrismaInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const
 {
     results.clear();
     auto rtree = BuildLayerIndexTree(layer);
-    auto it = m_model->m_prismas.at(pIndex).element->templateId;
-    const auto & triangulation = *m_model->GetLayerPrismaTemplate(layer);
-    auto area = tri::TriangulationUtility<EPoint2D>::GetBondBox(triangulation, it);
     rtree->query(boost::geometry::index::intersects(area), std::back_inserter(results));
 }
 

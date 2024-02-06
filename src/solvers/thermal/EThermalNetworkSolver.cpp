@@ -3,6 +3,7 @@
 #include "solvers/thermal/network/utils/ThermalNetlistWriter.hpp"
 #include "solvers/thermal/network/ThermalNetworkSolver.hpp"
 #include "models/thermal/traits/EThermalModelTraits.hpp"
+#include "utils/EStackupPrismaThermalNetworkBuilder.h"
 #include "models/thermal/io/EPrismaThermalModelIO.h"
 #include "utils/EPrismaThermalNetworkBuilder.h"
 #include "utils/EGridThermalNetworkBuilder.h"
@@ -59,6 +60,7 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
 
 ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EGridThermalNetworkBuilder>(const EGridThermalModel & model, std::vector<EFloat> & results) const;
 ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EPrismaThermalNetworkBuilder>(const EPrismaThermalModel & model, std::vector<EFloat> & results) const;
+ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EStackupPrismaThermalNetworkBuilder>(const EStackupPrismaThermalModel & model, std::vector<EFloat> & results) const;
 
 template <typename ThermalNetworkBuilder>
 ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, EFloat & minT, EFloat & maxT) const
@@ -233,6 +235,44 @@ ECAD_INLINE bool EPrismaThermalNetworkTransientSolver::Solve(EFloat & minT, EFlo
 {
     ECAD_EFFICIENCY_TRACK("prisma thermal network transient solve")
     return EThermalNetworkTransientSolver::template Solve<EPrismaThermalNetworkBuilder>(m_model, minT, maxT);
+}
+
+ECAD_INLINE EStackupPrismaThermalNetworkSolver::EStackupPrismaThermalNetworkSolver(const EStackupPrismaThermalModel & model)
+ : m_model(model)
+{
+}
+
+ECAD_INLINE EStackupPrismaThermalNetworkStaticSolver::EStackupPrismaThermalNetworkStaticSolver(const EStackupPrismaThermalModel & model)
+ : EStackupPrismaThermalNetworkSolver(model)
+{
+}
+
+ECAD_INLINE bool EStackupPrismaThermalNetworkStaticSolver::Solve(EFloat & minT, EFloat & maxT)
+{
+    ECAD_EFFICIENCY_TRACK("stackup prisma thermal network static solve")
+
+    std::vector<EFloat> results;
+    auto res = EThermalNetworkStaticSolver::template Solve<EStackupPrismaThermalNetworkBuilder>(m_model, results);
+    minT = *std::min_element(results.begin(), results.end());
+    maxT = *std::max_element(results.begin(), results.end());
+
+    if (settings.dumpHotmaps) {
+        auto hotmapFile = settings.workDir + ECAD_SEPS + "hotmap.vtk";
+        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
+        res &= io::GenerateVTKFile(hotmapFile, m_model, &results);
+    }
+    return res;
+}
+
+ECAD_INLINE EStackupPrismaThermalNetworkTransientSolver::EStackupPrismaThermalNetworkTransientSolver(const EStackupPrismaThermalModel & model)
+ : EStackupPrismaThermalNetworkSolver(model)
+{
+}
+
+ECAD_INLINE bool EStackupPrismaThermalNetworkTransientSolver::Solve(EFloat & minT, EFloat & maxT)
+{
+    ECAD_EFFICIENCY_TRACK("prisma thermal network transient solve")
+    return EThermalNetworkTransientSolver::template Solve<EStackupPrismaThermalNetworkBuilder>(m_model, minT, maxT);
 }
 
 } //namespace ecad::solver

@@ -641,12 +641,21 @@ void Test(Ptr<ILayoutView> layout, const std::string & workDir)
     prismaSettings.threads = eDataMgr.Threads();
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
-    prismaSettings.meshSettings.iteration = 1e5;
+    prismaSettings.meshSettings.iteration = 1e4;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
     prismaSettings.meshSettings.maxLen = 10;
     prismaSettings.meshSettings.tolerance = 1e-6;
     prismaSettings.layerCutSettings.layerTransitionRatio = 0;
+
+    EThermalStaticSimulationSetup setup;
+    setup.settings.iteration = 10;
+    setup.settings.dumpHotmaps = true;
+    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
+    setup.workDir = workDir;
+    auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
+    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
+
     layout->ExtractThermalModel(prismaSettings);
 }
 int main(int argc, char * argv[])
