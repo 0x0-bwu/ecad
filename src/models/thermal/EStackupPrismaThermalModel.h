@@ -17,6 +17,7 @@ public:
     virtual ~EStackupPrismaThermalModel() = default;
 
     void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter) override;
+    void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm) override;
     EModelType GetModelType() const override { return EModelType::ThermalStackupPrisma; }
 };
 

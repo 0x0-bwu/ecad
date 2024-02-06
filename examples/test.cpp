@@ -91,9 +91,9 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
     return CreateBaseLayout(database);
 }
 
-EStackupPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
+EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
 {
-    EStackupPrismaThermalModelExtractionSettings prismaSettings;
+    EPrismaThermalModelExtractionSettings prismaSettings;
     prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;

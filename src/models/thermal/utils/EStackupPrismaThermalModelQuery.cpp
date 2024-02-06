@@ -50,4 +50,12 @@ ECAD_INLINE CPtr<EStackupPrismaThermalModelQuery::Rtree> EStackupPrismaThermalMo
     return rtree.get();
 }
 
+ECAD_INLINE void EStackupPrismaThermalModelQuery::SearchNearestPrismaInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const
+{
+    results.clear();
+    auto rtree = BuildLayerIndexTree(layer);
+    rtree->query(boost::geometry::index::nearest(pt, k), std::back_inserter(results));
+}
+
+
 } // namespace ecad::model::utils

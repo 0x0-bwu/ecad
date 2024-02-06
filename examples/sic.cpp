@@ -602,21 +602,27 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
 
 void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 {
+    auto extractionSettings = ExtractionSettings(workDir);
     EThermalStaticSimulationSetup setup;
     setup.settings.iteration = 10;
     setup.settings.dumpHotmaps = true;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = workDir;
-    auto [minT, maxT] = layout->RunThermalSimulation(ExtractionSettings(workDir), setup);    
+    auto [minT, maxT] = layout->RunThermalSimulation(extractionSettings, setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
 
 void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 {
+    auto extractionSettings = ExtractionSettings(workDir);
+    extractionSettings.meshSettings.stackupMesh = true;
+    extractionSettings.meshSettings.maxLen = 10;
+    extractionSettings.layerCutSettings.layerTransitionRatio = 0;
+
     EThermalTransientSimulationSetup setup;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = workDir;
-    setup.settings.mor = false;
+    setup.settings.mor = true;
     setup.settings.verbose = true;
     setup.settings.adaptive = true;
     setup.settings.dumpRawData = true;
@@ -630,30 +636,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::cos(generic::math::pi * t / 0.05)); };
     // setup.settings.excitation = &excitation;
     setup.settings.verbose = true;
-    auto [minT, maxT] = layout->RunThermalSimulation(ExtractionSettings(workDir), setup);    
-    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
-}
-
-void Test(Ptr<ILayoutView> layout, const std::string & workDir)
-{
-    EStackupPrismaThermalModelExtractionSettings prismaSettings;
-    prismaSettings.workDir = workDir;
-    prismaSettings.threads = eDataMgr.Threads();
-    prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
-    prismaSettings.botUniformBC.value = 2750;
-    prismaSettings.meshSettings.iteration = 1e4;
-    prismaSettings.meshSettings.minAlpha = 20;
-    prismaSettings.meshSettings.minLen = 1e-4;
-    prismaSettings.meshSettings.maxLen = 2;
-    prismaSettings.meshSettings.tolerance = 1e-6;
-    prismaSettings.layerCutSettings.layerTransitionRatio = 0;
-
-    EThermalStaticSimulationSetup setup;
-    setup.settings.iteration = 10;
-    setup.settings.dumpHotmaps = true;
-    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.workDir = workDir;
-    auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
+    auto [minT, maxT] = layout->RunThermalSimulation(extractionSettings, setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
 
@@ -668,7 +651,6 @@ int main(int argc, char * argv[])
     auto layout = SetupDesign("CREE62mm");
     StaticThermalFlow(layout, workDir);
     // TransientThermalFlow(layout, workDir);
-    // Test(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

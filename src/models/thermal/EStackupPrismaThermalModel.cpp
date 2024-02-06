@@ -1,6 +1,9 @@
 #include "EStackupPrismaThermalModel.h"
 #include "models/thermal/utils/EStackupPrismaThermalModelQuery.h"
+#include "models/geometry/ELayerCutModel.h"
+
 #include "generic/geometry/BooleanOperation.hpp"
+
 namespace ecad::model {
 
 ECAD_INLINE EStackupPrismaThermalModel::EStackupPrismaThermalModel(CPtr<ILayoutView> layout)
@@ -87,4 +90,40 @@ ECAD_INLINE void EStackupPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit
         }
     }
 }
+
+ECAD_INLINE void EStackupPrismaThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm)
+{
+    utils::EStackupPrismaThermalModelQuery query(this);
+    for (const auto & bondwire : lcm->GetAllBondwires()) {
+        const auto & pts = bondwire.pt2ds;
+        ECAD_ASSERT(pts.size() == bondwire.heights.size());
+        for (size_t curr = 0; curr < pts.size() - 1; ++curr) {
+            auto next = curr + 1;
+            auto p1 = FPoint3D(pts.at(curr)[0] * m_scaleH2Unit, pts.at(curr)[1] * m_scaleH2Unit, bondwire.heights.at(curr));
+            auto p2 = FPoint3D(pts.at(next)[0] * m_scaleH2Unit, pts.at(next)[1] * m_scaleH2Unit, bondwire.heights.at(next));
+            auto & line = AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current);
+            //connection
+            if (0 == curr) {
+                std::vector<utils::EStackupPrismaThermalModelQuery::RtVal> results;
+                auto layer = lcm->GetLayerIndexByHeight(lcm->GetHeight(bondwire.heights.front()));
+                query.SearchNearestPrismaInstances(layer, pts.at(curr), 1, results);
+                ECAD_ASSERT(results.size() == 1)
+                std::for_each(results.begin(), results.end(), [&](const auto & r) { line.neighbors.front().push_back(r.second); });
+            }
+            else {
+                auto & prevLine = m_lines.at(m_lines.size() - 2);
+                line.neighbors.front().emplace_back(prevLine.id);
+                prevLine.neighbors.back().emplace_back(line.id);
+            }
+            if (next == pts.size() - 1) {
+                std::vector<utils::EStackupPrismaThermalModelQuery::RtVal> results;
+                auto layer = lcm->GetLayerIndexByHeight(lcm->GetHeight(bondwire.heights.back()));
+                query.SearchNearestPrismaInstances(layer, pts.at(next), 1, results);
+                ECAD_ASSERT(results.size() == 1)
+                std::for_each(results.begin(), results.end(), [&](const auto & r) { line.neighbors.back().push_back(r.second); });
+            }
+        }
+    }
+}
+
 } //namespace ecad::model

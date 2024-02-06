@@ -52,6 +52,7 @@ struct EPrismaMeshSettings : public EMeshSettings
 {
     virtual ~EPrismaMeshSettings() = default;
     size_t iteration = 0;
+    bool stackupMesh = false;
 };
 
 struct ELayerCutModelExtractionSettings
@@ -119,11 +120,6 @@ struct EPrismaThermalModelExtractionSettings : public EThermalModelExtractionSet
         EThermalModelExtractionSettings::AddBlockBC(orient, block, type, value);
         layerCutSettings.imprintBox.emplace_back(std::move(block));
     }
-};
-
-struct EStackupPrismaThermalModelExtractionSettings : public EPrismaThermalModelExtractionSettings
-{
-    virtual ~EStackupPrismaThermalModelExtractionSettings() = default;
 };
 
 struct EThermalSimulationSetup

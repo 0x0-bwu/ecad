@@ -21,12 +21,13 @@ using namespace generic::geometry;
 
 ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayoutView> layout, const EThermalModelExtractionSettings & settings)
 {
-    if (auto stackupPrismaSettings = dynamic_cast<CPtr<EStackupPrismaThermalModelExtractionSettings>>(&settings); stackupPrismaSettings)
-        return GenerateStackupPrismaThermalModel(layout, *stackupPrismaSettings);
-    else if (auto prismaSettings = dynamic_cast<CPtr<EPrismaThermalModelExtractionSettings>>(&settings); prismaSettings)
-        return GeneratePrismaThermalModel(layout, *prismaSettings);
-    else if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
+    if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
         return GenerateGridThermalModel(layout, *gridSettings);
+    else if (auto prismaSettings = dynamic_cast<CPtr<EPrismaThermalModelExtractionSettings>>(&settings); prismaSettings) {
+        if (prismaSettings->meshSettings.stackupMesh)
+            return GenerateStackupPrismaThermalModel(layout, *prismaSettings);
+        else return GeneratePrismaThermalModel(layout, *prismaSettings);
+    }
     return nullptr;
 }
 
@@ -299,7 +300,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     return std::unique_ptr<IModel>(model);
 }
 
-ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalModel(Ptr<ILayoutView> layout, const EStackupPrismaThermalModelExtractionSettings & settings)
+ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalModel(Ptr<ILayoutView> layout, const EPrismaThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate stackup prisma thermal model")
     auto model = new EStackupPrismaThermalModel(layout);
@@ -432,7 +433,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
-    // model->AddBondWiresFromLayerCutModel(compact); //wbtest
+    model->AddBondWiresFromLayerCutModel(compact);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
     //bc
