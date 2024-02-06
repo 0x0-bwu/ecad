@@ -432,7 +432,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
-    model->AddBondWiresFromLayerCutModel(compact);
+    // model->AddBondWiresFromLayerCutModel(compact); //wbtest
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
     //bc

@@ -18,12 +18,12 @@ namespace thermal::solver {
     using namespace model;
     using namespace generic;
     using namespace generic::ckt;
-    template <typename num_type, bool direct = false>
+    template <typename num_type>
     class ThermalNetworkSolver
     {
     public:
-        explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network)
-            : m_network(network)
+        explicit ThermalNetworkSolver(ThermalNetwork<num_type> & network, int solverType = 2)
+            : m_network(network), m_solverType(solverType)
         {
         }
 
@@ -36,25 +36,40 @@ namespace thermal::solver {
             auto rhs = makeRhs(m_network, true, refT);
             result.resize(m_network.GetNodes().size(), refT);
             Eigen::Map<DenseVector<num_type>> x(result.data(), result.size());
-            if constexpr (direct) {
-                // Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver;
-                Eigen::SimplicialCholesky<Eigen::SparseMatrix<num_type> > solver;
-                solver.analyzePattern(m.G);
-                solver.factorize(m.G);
-                x = solver.solve(m.B * rhs);
-            }
-            else {
-                Eigen::ConjugateGradient<Eigen::SparseMatrix<num_type>, Eigen::Lower | Eigen::Upper> solver;
-                solver.compute(m.G);
-                x = m.L * solver.solve(m.B * rhs);
+            switch (m_solverType) {
+                case 0 : {
+                    Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver;
+                    solver.analyzePattern(m.G);
+                    solver.factorize(m.G);
+                    x = solver.solve(m.B * rhs);
+                    break;
+                }
+                case 1 : {
+                    Eigen::SimplicialCholesky<Eigen::SparseMatrix<num_type> > solver;
+                    solver.analyzePattern(m.G);
+                    solver.factorize(m.G);
+                    x = solver.solve(m.B * rhs);
+                    break;
+                }
+                case 2 : {
+                    Eigen::ConjugateGradient<Eigen::SparseMatrix<num_type>, Eigen::Lower | Eigen::Upper> solver;
+                    solver.compute(m.G);
+                    x = m.L * solver.solve(m.B * rhs);
 
-                ECAD_TRACE("#iterations: %1%", solver.iterations())
-                ECAD_TRACE("estimated error: %1%", solver.error())
+                    ECAD_TRACE("#iterations: %1%", solver.iterations())
+                    ECAD_TRACE("estimated error: %1%", solver.error())
+                    break;
+                }
+                default : {
+                    ECAD_ASSERT(false)
+                    break;
+                }
             }
         }
 
     private:
         ThermalNetwork<num_type> & m_network;
+        int m_solverType{2};
     };
 
     template <typename num_type>

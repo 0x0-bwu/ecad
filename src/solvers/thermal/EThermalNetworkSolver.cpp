@@ -44,7 +44,7 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
         ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
 
         using namespace thermal::solver;
-        ThermalNetworkSolver<EFloat> solver(*network);
+        ThermalNetworkSolver<EFloat> solver(*network, static_cast<int>(settings.solverType));
         solver.Solve(envT, results);
 
         residual = CalculateResidual(results, prevRes, settings.maximumRes);

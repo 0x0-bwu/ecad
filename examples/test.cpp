@@ -97,10 +97,10 @@ EStackupPrismaThermalModelExtractionSettings ExtractionSettings(const std::strin
     prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
-    prismaSettings.meshSettings.iteration = 10;
+    prismaSettings.meshSettings.iteration = 1e4;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-2;
-    prismaSettings.meshSettings.maxLen = 100;
+    prismaSettings.meshSettings.maxLen = 2;
     prismaSettings.meshSettings.tolerance = 1e-6;
     prismaSettings.layerCutSettings.layerTransitionRatio = 0;
     return prismaSettings;
@@ -112,6 +112,7 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.settings.iteration = 10;
     setup.settings.dumpHotmaps = true;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
+    setup.settings.solverType = EThermalNetworkStaticSolverType::SparseLU;
     setup.workDir = workDir;
     auto [minT, maxT] = layout->RunThermalSimulation(ExtractionSettings(workDir), setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)

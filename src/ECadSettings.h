@@ -134,6 +134,13 @@ protected:
     EThermalSimulationSetup() = default;
 };
 
+enum class EThermalNetworkStaticSolverType
+{
+    SparseLU = 0,
+    SimplicialCholesky = 1,
+    ConjugateGradient = 2,
+};
+
 struct EThermalStaticSettings
 {
     bool maximumRes = true;
@@ -142,6 +149,7 @@ struct EThermalStaticSettings
     size_t threads = 1;
     size_t iteration = 10;
     ETemperature envTemperature{25, ETemperatureUnit::Celsius};
+    EThermalNetworkStaticSolverType solverType = EThermalNetworkStaticSolverType::ConjugateGradient;
 };
 
 struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
