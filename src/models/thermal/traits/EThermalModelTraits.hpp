@@ -1,7 +1,7 @@
 #pragma once
 #include "models/thermal/EGridThermalModel.h"
 #include "models/thermal/EPrismaThermalModel.h"
-
+#include "models/thermal/EStackupPrismaThermalModel.h"
 namespace ecad::model::traits {
 
 template <typename Model>
@@ -25,4 +25,10 @@ struct EThermalModelTraits<EPrismaThermalModel>
     static bool NeedIteration(const EPrismaThermalModel & model) { return model.NeedIteration(); }
 };
 
+template <>
+struct EThermalModelTraits<EStackupPrismaThermalModel>
+{
+    static size_t Size(const EStackupPrismaThermalModel & model) { return model.TotalElements(); }
+    static bool NeedIteration(const EStackupPrismaThermalModel & model) { return model.NeedIteration(); }
+};
 }//namesapce ecad::model::traits

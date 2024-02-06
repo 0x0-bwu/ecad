@@ -432,12 +432,29 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
+    model->AddBondWiresFromLayerCutModel(compact);
+    ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
+
+    //bc
+    if (settings.topUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Top, settings.topUniformBC);
+    if (settings.botUniformBC.isValid())
+        model->SetUniformBC(EOrientation::Bot, settings.botUniformBC);
+        
+    for (const auto & block : settings.topBlockBC) {
+        if (not block.second.isValid()) continue;
+        model->AddBlockBC(EOrientation::Top, coordUnits.toCoord(block.first), block.second);
+    }
+    for (const auto & block : settings.botBlokcBC) {
+        if (not block.second.isValid()) continue;
+        model->AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
+    }
+        
     if (not settings.workDir.empty()) { 
         auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
         io::GenerateVTKFile(meshFile, *model);
     }
-    delete model;
-    return nullptr;
+    return std::unique_ptr<IModel>(model);
 }
 
 }//namespace ecad::extraction
