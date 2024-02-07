@@ -25,6 +25,7 @@ protected:
 protected:
     CPtr<EPrismaThermalModel> m_model{nullptr};
 
+    mutable std::mutex m_mutex;
     mutable UPtr<Rtree> m_rtree{nullptr};
     mutable std::unordered_map<size_t, SPtr<Rtree> > m_lyrRtrees;
 };

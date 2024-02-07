@@ -8,16 +8,18 @@ using namespace generic::geometry::tri;
 class ILayoutView;
 
 namespace model {
-namespace utils { class EStackupPrismaThermalModelQuery; }
+namespace utils { 
+class EStackupPrismaThermalModelQuery;
+class EStackupPrismaThermalModelBuilder;
+}
+
 class ECAD_API EStackupPrismaThermalModel : public EPrismaThermalModel
 {
 public:
     friend class utils::EStackupPrismaThermalModelQuery;
+    friend class utils::EStackupPrismaThermalModelBuilder;
     explicit EStackupPrismaThermalModel(CPtr<ILayoutView> layout);
     virtual ~EStackupPrismaThermalModel() = default;
-
-    void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter) override;
-    void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm) override;
     EModelType GetModelType() const override { return EModelType::ThermalStackupPrisma; }
 };
 

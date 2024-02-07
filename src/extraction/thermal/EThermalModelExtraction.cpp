@@ -1,5 +1,6 @@
 #include "EThermalModelExtraction.h"
 
+#include "models/thermal/utils/EStackupPrismaThermalModelBuilder.h"
 #include "models/geometry/utils/ELayerCutModelQuery.h"
 #include "models/thermal/EStackupPrismaThermalModel.h"
 #include "models/thermal/io/EPrismaThermalModelIO.h"
@@ -416,9 +417,11 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
 
     auto scaleH2Unit = coordUnits.Scale2Unit();
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
-    model->BuildPrismaModel(scaleH2Unit, scale2Meter);
 
-    model->AddBondWiresFromLayerCutModel(compact);
+    model::utils::EStackupPrismaThermalModelBuilder builder(model);
+    builder.BuildPrismaModel(scaleH2Unit, scale2Meter, settings.threads);
+
+    builder.AddBondWiresFromLayerCutModel(compact);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
 
     //bc

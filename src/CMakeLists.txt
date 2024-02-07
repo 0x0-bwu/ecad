@@ -17,6 +17,7 @@ models/thermal/io/EGridThermalModelIO.cpp
 models/thermal/io/EPrismaThermalModelIO.cpp
 models/thermal/io/EThermalModelIO.cpp
 models/thermal/utils/EPrismaThermalModelQuery.cpp
+models/thermal/utils/EStackupPrismaThermalModelBuilder.cpp
 models/thermal/utils/EStackupPrismaThermalModelQuery.cpp
 models/thermal/utils/EThermalModelReduction.cpp
 models/thermal/EChipThermalModel.cpp

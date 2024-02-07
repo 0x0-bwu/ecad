@@ -37,7 +37,10 @@ ECAD_INLINE void EStackupPrismaThermalModelQuery::SearchPrismaInstances(size_t l
 ECAD_INLINE CPtr<EStackupPrismaThermalModelQuery::Rtree> EStackupPrismaThermalModelQuery::BuildLayerIndexTree(size_t layer) const
 {
     if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();
-    auto & rtree = m_lyrRtrees.emplace(layer, std::make_shared<Rtree>()).first->second;
+    
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();
+    auto rtree = std::make_shared<Rtree>();
     const auto & prismas = m_model->m_prismas;
     const auto & indexOffset = m_model->m_indexOffset;
     const auto & triangulation = *m_model->GetLayerPrismaTemplate(layer);
@@ -46,8 +49,8 @@ ECAD_INLINE CPtr<EStackupPrismaThermalModelQuery::Rtree> EStackupPrismaThermalMo
         auto it = prismas.at(i).element->templateId;
         auto box = tri::TriangulationUtility<EPoint2D>::GetBondBox(triangulation, it);
         rtree->insert(std::make_pair(std::move(box), i));
-    }    
-    return rtree.get();
+    }
+    return m_lyrRtrees.emplace(layer, rtree).first->second.get();
 }
 
 ECAD_INLINE void EStackupPrismaThermalModelQuery::SearchNearestPrismaInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const

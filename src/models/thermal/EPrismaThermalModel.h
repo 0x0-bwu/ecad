@@ -104,8 +104,8 @@ public:
     PrismaLayer & AppendLayer(PrismaLayer layer);
     LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
 
-    virtual void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
-    virtual void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm);
+    void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
+    void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm);
     EFloat CoordScale2Meter(int order = 1) const;
     EFloat UnitScale2Meter(int order = 1) const;  
     size_t TotalLayers() const;

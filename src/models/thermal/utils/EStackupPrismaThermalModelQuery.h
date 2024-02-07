@@ -25,6 +25,7 @@ public:
 protected:
     CPtr<Rtree> BuildLayerIndexTree(size_t layer) const;
 protected:
+    mutable std::mutex m_mutex;
     CPtr<EStackupPrismaThermalModel> m_model{nullptr};
     mutable std::unordered_map<size_t, SPtr<Rtree> > m_lyrRtrees;//todo reuse imprint layer's tree
 };
