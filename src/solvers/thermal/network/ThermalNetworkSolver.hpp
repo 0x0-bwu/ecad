@@ -302,7 +302,8 @@ namespace thermal::solver {
                     solver.Im().State2Output(x, out);
                     Sample<num_type> sample; sample.reserve(out.size() + 1);
                     sample.emplace_back(t);
-                    sample.insert(sample.end(), out.begin(), out.end());
+                    for (const auto & o : out)
+                        sample.emplace_back(generic::unit::Kelvins2Celsius(o));
                     if (verbose) {
                         ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
                     }

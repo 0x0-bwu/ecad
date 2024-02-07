@@ -24,7 +24,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayo
     if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
         return GenerateGridThermalModel(layout, *gridSettings);
     else if (auto prismaSettings = dynamic_cast<CPtr<EPrismaThermalModelExtractionSettings>>(&settings); prismaSettings) {
-        if (prismaSettings->meshSettings.stackupMesh)
+        if (prismaSettings->meshSettings.genMeshByLayer)
             return GenerateStackupPrismaThermalModel(layout, *prismaSettings);
         else return GeneratePrismaThermalModel(layout, *prismaSettings);
     }
@@ -151,7 +151,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
     return std::unique_ptr<IModel>(model);
 }
 
-ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const std::vector<EPoint2D> & steinerPoints, const ECoordUnits & coordUnits, const EPrismaMeshSettings & meshSettings, tri::Triangulation<EPoint2D> & triangulation)
+ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const std::vector<EPoint2D> & steinerPoints, const ECoordUnits & coordUnits, const EPrismaMeshSettings & meshSettings, 
+                                tri::Triangulation<EPoint2D> & triangulation, std::string meshFile)
 {
     using namespace emesh;
     ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, tolerance: %4%, ite: %5%", 
@@ -169,6 +170,7 @@ ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const 
     MeshFlow2D::MergeClosePointsAndRemapEdge(points, edges, tolerance);
     MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
     MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
+    if (not meshFile.empty()) GeometryIO::WritePNG(meshFile, triangulation, 4096);
     return true;
 }
 
@@ -187,11 +189,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
 
     auto triangulation = std::make_shared<EPrismaThermalModel::PrismaTemplate>();
     const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
-    GenerateMesh(compact->GetAllPolygonData(), compact->GetSteinerPoints(), coordUnits, settings.meshSettings, *triangulation);
-    if (not settings.workDir.empty()) {
-        auto filename = settings.workDir + ECAD_SEPS + "mesh.png";
-        GeometryIO::WritePNG(filename, *triangulation, 4096);
-    }
+    std::string meshFile = settings.workDir.empty() ? std::string{} : settings.workDir + ECAD_SEPS + "mesh.png";
+    GenerateMesh(compact->GetAllPolygonData(), compact->GetSteinerPoints(), coordUnits, settings.meshSettings, *triangulation, meshFile);
     ECAD_TRACE("total elements: %1%", triangulation->triangles.size())
 
     ecad::utils::ELayoutRetriever retriever(layout);
@@ -328,39 +327,25 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
         }
         layer2Template.emplace(i, prismaTemplates.size() - 1);
     }
+    
+    std::vector<EPoint2D> steinerPoints;//todo, bwu
+    ECAD_TRACE("generate mesh for %1% layers", prismaTemplates.size())
+    if (settings.threads > 1) {
+        generic::thread::ThreadPool pool(settings.threads);
+        for (size_t i = 0; i < prismaTemplates.size(); ++i) {
+            std::string meshFile = settings.workDir.empty() ? std::string{} : settings.workDir + ECAD_SEPS + "mesh" + std::to_string(i + 1) + ".png";
+            pool.Submit(std::bind(GenerateMesh, std::ref(layerPolygons.at(i)), std::ref(steinerPoints), std::ref(coordUnits), 
+                        std::ref(settings.meshSettings), std::ref(*prismaTemplates.at(i)), meshFile));
+        }
 
-    // generic::thread::ThreadPool pool(settings.threads);
-    // for (size_t i = 0; i < prismaTemplates.size(); ++i) {
-    //     pool.Submit([&]{
-    //         auto layer = i;
-    //         const auto & polygons = layerPolygons.at(layer);
-    //         auto & triangulation = *prismaTemplates.at(layer);
-    //         GenerateMesh(polygons, {}, coordUnits, settings.meshSettings, triangulation);
-    //         if (not settings.workDir.empty()) {
-    //             auto polygonFile = settings.workDir + ECAD_SEPS + "layer" + std::to_string(layer + 1) + ".png";
-    //             auto meshFile = settings.workDir + ECAD_SEPS + "mesh" + std::to_string(layer + 1) + ".png";
-    //             GeometryIO::WritePNG(polygonFile, polygons.begin(), polygons.end(), 2048);
-    //             GeometryIO::WritePNG(meshFile, triangulation, 4096);
-    //             ECAD_TRACE("layer %1% total elements: %2%", layer, triangulation.triangles.size())
-    //         }
-    //     });
-    // }
-    // pool.Wait();
-    for (size_t i = 0; i < prismaTemplates.size(); ++i) {
-        auto genMesh = ([&]{
-            size_t layer = i;
-            const auto & polygons = layerPolygons.at(layer);
-            auto & triangulation = *prismaTemplates.at(layer);
-            GenerateMesh(polygons, {}, coordUnits, settings.meshSettings, triangulation);
-            if (not settings.workDir.empty()) {
-                auto polygonFile = settings.workDir + ECAD_SEPS + "layer" + std::to_string(layer + 1) + ".png";
-                auto meshFile = settings.workDir + ECAD_SEPS + "mesh" + std::to_string(layer + 1) + ".png";
-                GeometryIO::WritePNG(polygonFile, polygons.begin(), polygons.end(), 2048);
-                GeometryIO::WritePNG(meshFile, triangulation, 4096);
-                ECAD_TRACE("layer %1% total elements: %2%", layer, triangulation.triangles.size())
-            }
-        });
-        genMesh();
+    }
+    else {
+        for (size_t i = 0; i < prismaTemplates.size(); ++i) {
+            const auto & polygons = layerPolygons.at(i);
+            auto & triangulation = *prismaTemplates.at(i);
+            std::string meshFile = settings.workDir.empty() ? std::string{} : settings.workDir + ECAD_SEPS + "mesh" + std::to_string(i + 1) + ".png";
+            GenerateMesh(polygons, {}, coordUnits, settings.meshSettings, triangulation, meshFile);
+        }
     }
 
     for (size_t i = 0; i < compact->TotalLayers(); ++i) {

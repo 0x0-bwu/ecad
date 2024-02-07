@@ -580,9 +580,11 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
 EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
 {
     EPrismaThermalModelExtractionSettings prismaSettings;
+    prismaSettings.threads = eDataMgr.Threads();
     prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
+    prismaSettings.meshSettings.genMeshByLayer = false;
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
@@ -615,7 +617,7 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 {
     auto extractionSettings = ExtractionSettings(workDir);
-    extractionSettings.meshSettings.stackupMesh = true;
+    extractionSettings.meshSettings.genMeshByLayer = true;
     extractionSettings.meshSettings.maxLen = 10;
     extractionSettings.layerCutSettings.layerTransitionRatio = 0;
 

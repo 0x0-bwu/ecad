@@ -52,7 +52,7 @@ struct EPrismaMeshSettings : public EMeshSettings
 {
     virtual ~EPrismaMeshSettings() = default;
     size_t iteration = 0;
-    bool stackupMesh = false;
+    bool genMeshByLayer = false;
 };
 
 struct ELayerCutModelExtractionSettings
