@@ -110,14 +110,16 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::BuildPrismaElement(const s
         else if (i == nTop) {
             EFloat ratio = 1.0;
             for (const auto & contact : inst.contactInstances.front()) {
+                ratio -= contact.ratio;
                 if (contact.index < i) continue;
                 nTop = contact.index;
                 const auto & nb = m_model.GetPrisma(nTop);
                 auto hNb = GetPrismaHeight(nTop);
                 auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nTop));
-                auto r = 0.5 * height / k[2] / hArea + 0.5 * hNb / kNb[2] / GetPrismaTopBotArea(nTop);
+                auto area = hArea * contact.ratio;
+                auto r =  (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
+                // auto r = 0.5 * height / k[2] / hArea + 0.5 * hNb / kNb[2] / GetPrismaTopBotArea(nTop);
                 network->SetR(i, nTop, r);
-                ratio -= contact.ratio;
             }
             if (ratio > 0 && nullptr != topBC && topBC->isValid()) {
                 if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
@@ -155,14 +157,16 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::BuildPrismaElement(const s
         else if (i == nBot) {
             EFloat ratio = 1.0;
             for (const auto & contact : inst.contactInstances.back()) {
+                ratio -= contact.ratio;
                 if (contact.index < i) continue;
                 nBot = contact.index;
                 const auto & nb = m_model.GetPrisma(nBot);
                 auto hNb = GetPrismaHeight(nBot);
                 auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nBot));
-                auto r = 0.5 * height / k[2] / hArea + 0.5 * hNb / kNb[2] / GetPrismaTopBotArea(nBot);
+                auto area = hArea * contact.ratio;
+                auto r =  (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
+                // auto r = 0.5 * height / k[2] / hArea + 0.5 * hNb / kNb[2] / GetPrismaTopBotArea(nBot);
                 network->SetR(i, nBot, r);
-                ratio -= contact.ratio;
             }
             if (ratio > 0 && nullptr != botBC && botBC->isValid()) {
                 if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
