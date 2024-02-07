@@ -173,4 +173,18 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
     return FPoint3D{pt2d[0] * m_scaleH2Unit, pt2d[1] * m_scaleH2Unit, height};
 }
 
+void EPrismaThermalModel::SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const
+{
+    indices.resize(monitors.size());
+    utils::EPrismaThermalModelQuery query(this);
+    for (size_t i = 0; i < monitors.size(); ++i) {
+        const auto & point = monitors.at(i);
+        auto layer = query.NearestLayer(point[2]);
+        std::vector<typename utils::EPrismaThermalModelQuery::RtVal> results;
+        EPoint2D p(point[0] / m_scaleH2Unit, point[1] / m_scaleH2Unit);
+        query.SearchNearestPrismaInstances(layer, p, 1, results);
+        indices[i] = results.front().second;
+    }
+}
+
 } //namespace ecad::model

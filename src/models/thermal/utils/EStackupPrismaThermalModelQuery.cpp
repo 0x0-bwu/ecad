@@ -60,5 +60,18 @@ ECAD_INLINE void EStackupPrismaThermalModelQuery::SearchNearestPrismaInstances(s
     rtree->query(boost::geometry::index::nearest(pt, k), std::back_inserter(results));
 }
 
+ECAD_INLINE size_t EStackupPrismaThermalModelQuery::NearestLayer(EFloat height) const
+{
+    using namespace generic::math;
+    const auto & layers = m_model->layers;
+    if (GT(height, layers.front().elevation)) return 0;
+    for (size_t i = 0; i < layers.size(); ++i) {
+        auto top = layers.at(i).elevation;
+        auto bot = top - layers.at(i).thickness;
+        if (Within<LCRO>(height, bot, top)) return i;
+    }
+    return layers.size() - 1;
+}
+
 
 } // namespace ecad::model::utils

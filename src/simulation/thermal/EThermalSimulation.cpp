@@ -75,6 +75,7 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
     EGridThermalNetworkStaticSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
+    model->SearchElementIndices(setup->monitors, solver.settings.probs);
     return solver.Solve(minT, maxT);
 }
 
@@ -89,6 +90,7 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloa
     EGridThermalNetworkTransientSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
+    model->SearchElementIndices(setup->monitors, solver.settings.probs);
     return solver.Solve(minT, maxT);
 }
 
@@ -108,6 +110,7 @@ ECAD_API bool EPrismaThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat
     EPrismaThermalNetworkStaticSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
+    model->SearchElementIndices(setup->monitors, solver.settings.probs);
     return solver.Solve(minT, maxT);
 }
 
@@ -122,6 +125,7 @@ ECAD_API bool EPrismaThermalSimulator::RunTransientSimulation(EFloat & minT, EFl
     EPrismaThermalNetworkTransientSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
+    model->SearchElementIndices(setup->monitors, solver.settings.probs);
     return solver.Solve(minT, maxT);
 }
 
@@ -141,6 +145,7 @@ ECAD_API bool EStackupPrismaThermalSimulator::RunStaticSimulation(EFloat & minT,
     EStackupPrismaThermalNetworkStaticSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
+    model->SearchElementIndices(setup->monitors, solver.settings.probs);
     return solver.Solve(minT, maxT);
 }
 
@@ -155,6 +160,7 @@ ECAD_API bool EStackupPrismaThermalSimulator::RunTransientSimulation(EFloat & mi
     EStackupPrismaThermalNetworkTransientSolver solver(*model);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
+    model->SearchElementIndices(setup->monitors, solver.settings.probs);
     return solver.Solve(minT, maxT);
 }
 

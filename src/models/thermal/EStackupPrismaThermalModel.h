@@ -20,6 +20,7 @@ public:
     friend class utils::EStackupPrismaThermalModelBuilder;
     explicit EStackupPrismaThermalModel(CPtr<ILayoutView> layout);
     virtual ~EStackupPrismaThermalModel() = default;
+    void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const override;
     EModelType GetModelType() const override { return EModelType::ThermalStackupPrisma; }
 };
 

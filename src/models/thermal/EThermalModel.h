@@ -24,6 +24,7 @@ public:
     virtual void SetUniformBC(EOrientation orient, EThermalBondaryCondition bc);
     virtual CPtr<EThermalBondaryCondition> GetUniformBC(EOrientation orient) const;
 
+    virtual void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const {};
     virtual EModelType GetModelType() const = 0;
 
 protected:

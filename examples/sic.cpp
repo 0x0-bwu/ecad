@@ -5,8 +5,8 @@
 #include <csignal>
 
 #include "../test/TestData.hpp"
-#include "simulation/thermal/EThermalSimulation.h"
 #include "generic/tools/StringHelper.hpp"
+#include "utils/ELayoutRetriever.h"
 #include "EDataMgr.h"
 
 void SignalHandler(int signum)
@@ -554,10 +554,10 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
     auto topBridgeLayerMap = CreateDefaultLayerMap(database, topBridgeLayout, baseLayout, "TopBridgeLayerMap");
 
     //instance
-    auto topBridge1 = eDataMgr.CreateCellInst(baseLayout, "topBridge1", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, 13}));
+    auto topBridge1 = eDataMgr.CreateCellInst(baseLayout, "TopBridge1", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, 13}));
     topBridge1->SetLayerMap(topBridgeLayerMap);
 
-    auto topBridge2 = eDataMgr.CreateCellInst(baseLayout, "topBridge2", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, -13}, EMirror2D::X));
+    auto topBridge2 = eDataMgr.CreateCellInst(baseLayout, "TopBridge2", topBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {17.75, -13}, EMirror2D::X));
     topBridge2->SetLayerMap(topBridgeLayerMap);
 
     //flatten
@@ -577,6 +577,25 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
     return baseLayout;
 }
 
+std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
+{
+    std::vector<FPoint3D> monitors;
+    utils::ELayoutRetriever retriever(layout);
+    std::vector<std::string> cellInsts{"TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"};
+    std::vector<std::string> components{"Die1", "Die2", "Die3"};
+    for(const auto & cellInst : cellInsts) {
+        for (const auto & component : components) {
+            std::string name = cellInst + eDataMgr.HierSep() + component;
+            auto comp = layout->FindComponentByName(name);
+            EFloat elevation, thickness;
+            retriever.GetComponentHeightThickness(comp, elevation, thickness);
+            auto loc = layout->GetCoordUnits().toUnit(comp->GetBoundingBox().Center());
+            monitors.emplace_back(loc[0], loc[1], elevation - 0.1 * thickness);
+        }
+    }
+    return monitors;
+}
+
 EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
 {
     EPrismaThermalModelExtractionSettings prismaSettings;
@@ -584,7 +603,7 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
-    prismaSettings.meshSettings.genMeshByLayer = false;
+    prismaSettings.meshSettings.genMeshByLayer = true;
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
@@ -610,6 +629,7 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.settings.dumpHotmaps = true;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = workDir;
+    setup.monitors = GetDieMonitors(layout);
     auto [minT, maxT] = layout->RunThermalSimulation(extractionSettings, setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
@@ -627,7 +647,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.settings.mor = true;
     setup.settings.verbose = true;
     setup.settings.adaptive = true;
-    setup.settings.dumpRawData = true;
+    setup.settings.dumpResults = true;
     setup.settings.duration = 10;
     setup.settings.step = 1e-5;
     setup.settings.samplingWindow = 10;

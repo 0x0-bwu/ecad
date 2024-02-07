@@ -13,6 +13,17 @@ namespace ecad::solver {
 
 using namespace ecad::model;
 
+ECAD_INLINE std::pair<std::set<size_t>, std::vector<size_t> > GetProbsAndPermutation(const std::vector<size_t> & indices)
+{
+    size_t index{0};
+    std::set<size_t> probs(indices.begin(), indices.end());
+    std::unordered_map<size_t, size_t> indexMap;
+    for (auto prob : probs) indexMap.emplace(prob, index++);
+    std::vector<size_t> permutation; permutation.reserve(indices.size());
+    for (auto index : indices) permutation.emplace_back(indexMap.at(index));
+    return std::make_pair(probs, permutation);
+}
+
 ECAD_INLINE EFloat CalculateResidual(const std::vector<EFloat> & v1, const std::vector<EFloat> & v2, bool maximumRes)
 {
     ECAD_ASSERT(v1.size() == v2.size());
@@ -54,7 +65,17 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
 
     if (settings.envTemperature.unit == ETemperatureUnit::Celsius) 
         std::for_each(results.begin(), results.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
-
+    
+    if (settings.dumpResults && not settings.workDir.empty()) {
+        auto filename = settings.workDir + ECAD_SEPS + "static.txt";
+        std::ofstream out(filename);
+        if (out.is_open()) {
+            for (auto index : settings.probs)
+                out << results.at(index) << ',';
+            out << ECAD_EOL;
+            out.close();
+        }
+    }
     return true;   
 }
 
@@ -74,7 +95,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
     UPtr<ThermalNetwork<EFloat> > network;
     using Model = typename ThermalNetworkBuilder::ModelType;
     std::vector<EFloat> results(traits::EThermalModelTraits<Model>::Size(model), envT);
-    auto probs = settings.probs;
+    auto [probs, permutation] = GetProbsAndPermutation(settings.probs);
     if (probs.empty()) {
         network = builder.Build(results);
         if (nullptr == network) return false;
@@ -88,6 +109,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
         ECAD_TRACE("no input probs, will use static simulation hotspot id:%1% as prob!", maxId);
         probs.emplace(maxId);
+        permutation.emplace_back(0);
     }
     if (nullptr == network) network = builder.Build(results);
     
@@ -125,12 +147,16 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         minT = std::min(minT, *std::min_element(++sample.begin(), sample.end()));
         maxT = std::max(maxT, *std::max_element(++sample.begin(), sample.end()));
     }
-    if (settings.dumpRawData) {
+    if (settings.dumpResults && not settings.workDir.empty()) {
         auto filename = settings.workDir + ECAD_SEPS + "trans.txt";
         std::ofstream out(filename);
         if (out.is_open()) {
-            for (const auto & sample : samples)
-                out << generic::fmt::Fmt2Str(sample, ",") << ECAD_EOL;
+            for (const auto & sample : samples) {
+                out << sample.front() << ',';
+                for (auto perm : permutation)
+                    out << sample.at(perm + 1) << ',';
+                out << ECAD_EOL;
+            }
             out.close();
         }
     }

@@ -126,6 +126,7 @@ struct EThermalSimulationSetup
 {
     virtual ~EThermalSimulationSetup() = default;
     std::string workDir;
+    std::vector<FPoint3D> monitors;
 protected:
     EThermalSimulationSetup() = default;
 };
@@ -137,14 +138,20 @@ enum class EThermalNetworkStaticSolverType
     ConjugateGradient = 2,
 };
 
-struct EThermalStaticSettings
+struct EThermalSettings
+{
+    virtual ~EThermalSettings() = default;
+    bool dumpResults = true;
+    size_t threads = 1;
+    ETemperature envTemperature{25, ETemperatureUnit::Celsius};
+};
+
+struct EThermalStaticSettings : public EThermalSettings
 {
     bool maximumRes = true;
     bool dumpHotmaps = false;
     EFloat residual = 0.1;
-    size_t threads = 1;
     size_t iteration = 10;
-    ETemperature envTemperature{25, ETemperatureUnit::Celsius};
     EThermalNetworkStaticSolverType solverType = EThermalNetworkStaticSolverType::ConjugateGradient;
 };
 
@@ -155,15 +162,13 @@ struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
 
 using EThermalTransientExcitation = std::function<EFloat(EFloat)>;
 
-struct EThermalTransientSettings
+struct EThermalTransientSettings : public EThermalSettings
 {
     virtual ~EThermalTransientSettings() = default;
 
     bool mor{false};
     bool verbose{false};
     bool adaptive{true};
-    bool dumpRawData{false};
-    size_t threads = 1;
     EFloat step{1};
     EFloat duration{10};
     EFloat absoluteError{1e-6};
@@ -171,12 +176,10 @@ struct EThermalTransientSettings
     EFloat minSamplingInterval{0};
     EFloat samplingWindow{maxFloat};
     CPtr<EThermalTransientExcitation> excitation{nullptr};
-    ETemperature envTemperature{25, ETemperatureUnit::Celsius};
 };
 
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
 {
-    std::vector<FPoint3D> monitors; //todo
     EThermalTransientSettings settings;
 };
 
@@ -184,6 +187,7 @@ struct EThermalNetworkSolveSettings
 {
     virtual ~EThermalNetworkSolveSettings() = default;
     std::string workDir;
+    std::vector<size_t> probs;
 protected:
     EThermalNetworkSolveSettings() = default;
 };
@@ -198,7 +202,6 @@ struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings,
 
 struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettings, EThermalTransientSettings
 {
-    std::set<size_t> probs;
 
     void operator= (const EThermalTransientSettings & settings)
     {

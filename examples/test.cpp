@@ -126,7 +126,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.settings.mor = false;
     setup.settings.verbose = true;
     setup.settings.adaptive = false;
-    setup.settings.dumpRawData = true;
+    setup.settings.dumpResults = true;
     setup.settings.duration = 10;
     setup.settings.step = 1e-1;
     setup.settings.samplingWindow = 0.1;

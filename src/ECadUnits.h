@@ -8,6 +8,8 @@
 
 namespace ecad {
 
+using namespace  generic::geometry;
+
 struct ESize2D
 {
     size_t x = invalidIndex;
@@ -260,7 +262,8 @@ public:
         return points;
     }
 
-    FPoint2D toUnit(const EPoint2D & p) const
+    template <typename Coord>
+    FPoint2D toUnit(const Point2D<Coord> & p) const
     {
         return FPoint2D(toUnit(p[0]), toUnit(p[1]));
     }
