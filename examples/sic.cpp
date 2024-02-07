@@ -294,6 +294,7 @@ Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
 
 Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
 {
+    //placement area: {-9.65, -3.65}, {-2.5, -3.65}, {-2.5, -8.7}, {7.85, -8.7}, {7.85, 11.35}, {-9.65, 11.35}
     const auto & coordUnits = database->GetCoordUnits();
     auto botBridgeCell = eDataMgr.CreateCircuitCell(database, "BotBridgeCell");
     auto botBridgeLayout = botBridgeCell->GetLayoutView();
@@ -400,6 +401,7 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
 
 Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
 {
+    //placement area: {-7.85, -8.7}, {9.65, -8.7}, {9.65, 11.35}, {-7.85, 11.35}
     const auto & coordUnits = database->GetCoordUnits();
     auto topBridgeCell = eDataMgr.CreateCircuitCell(database, "TopBridgeCell");
     auto topBridgeLayout = topBridgeCell->GetLayoutView();

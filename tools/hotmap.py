@@ -43,7 +43,7 @@ def main():
     geometry_actor.GetProperty().EdgeVisibilityOn()
     geometry_actor.GetProperty().SetEdgeColor(0, 0, 0)
     geometry_actor.GetProperty().SetEdgeOpacity(0.5)
-    geometry_actor.SetScale(1.0, 1.0, 2)
+    geometry_actor.SetScale(1.0, 1.0, 1.0)
 
     context_view = vtk.vtkContextView()
 
