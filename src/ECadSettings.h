@@ -52,6 +52,7 @@ struct EPrismaMeshSettings : public EMeshSettings
 {
     virtual ~EPrismaMeshSettings() = default;
     size_t iteration = 0;
+    bool dumpMeshFile = false;
     bool genMeshByLayer = false;
 };
 

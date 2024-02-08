@@ -1,10 +1,15 @@
 #include "EStackupPrismaThermalModelQuery.h"
 #include "models/thermal/EStackupPrismaThermalModel.h"
-
+#include "EDataMgr.h"
 namespace ecad::model::utils {
-ECAD_INLINE EStackupPrismaThermalModelQuery::EStackupPrismaThermalModelQuery(CPtr<EStackupPrismaThermalModel> model)
+ECAD_INLINE EStackupPrismaThermalModelQuery::EStackupPrismaThermalModelQuery(CPtr<EStackupPrismaThermalModel> model, bool lazyBuild)
  : m_model(model)
 {
+    if (not lazyBuild) {
+        generic::thread::ThreadPool pool(EDataMgr::Instance().Threads());
+        for (size_t i = 0; i < m_model->TotalLayers(); ++i)
+            pool.Submit(std::bind(&EStackupPrismaThermalModelQuery::BuildLayerIndexTree, this, i));  
+    }
 }
 
 ECAD_INLINE EFloat EStackupPrismaThermalModelQuery::PrismaInstanceTopBotArea(size_t pIndex) const

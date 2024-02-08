@@ -12,7 +12,7 @@ class ECAD_API EPrismaThermalModelQuery
 public:
     using RtVal = std::pair<EPoint2D, size_t>;
     using Rtree = boost::geometry::index::rtree<RtVal, boost::geometry::index::rstar<8>>;
-    explicit EPrismaThermalModelQuery(CPtr<EPrismaThermalModel> model);
+    explicit EPrismaThermalModelQuery(CPtr<EPrismaThermalModel> model, bool lazyBuild = false);
     virtual ~EPrismaThermalModelQuery() = default;
     void SearchPrismaInstances(const EBox2D & area, std::vector<RtVal> & results) const;
     void SearchPrismaInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const;

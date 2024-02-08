@@ -17,7 +17,9 @@ void SignalHandler(int signum)
 }
 
 using namespace ecad;
+using namespace generic;
 auto & eDataMgr = EDataMgr::Instance();
+inline static constexpr EFloat AVERAGE_LOSS_POWER = 78.9;
 inline static constexpr EFloat THIN_BONDWIRE_RADIUS = 0.0635;
 inline static constexpr EFloat THICK_BONDWIRE_RADIUS = 0.15;
 inline static constexpr std::string_view RES_GATE = "Rg";
@@ -90,6 +92,7 @@ Ptr<IPadstackDef> CreateBondwireSolderJoints(Ptr<IDatabase> database, const std:
 Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
 {
     auto sicDie = eDataMgr.CreateComponentDef(database, "SicDie");
+    sicDie->SetComponentType(EComponentType::IC);
     sicDie->SetSolderBallBumpHeight(0.1);
     sicDie->SetSolderFillingMaterial(MAT_SAC305.data());
     sicDie->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-2.545, -2.02), FPoint2D(2.545, 2.02)));
@@ -109,6 +112,7 @@ Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
 Ptr<IComponentDef> CreateDiodeComponentDef(Ptr<IDatabase> database)
 {
     auto diode = eDataMgr.CreateComponentDef(database, "Diode");
+    diode->SetComponentType(EComponentType::IC);
     diode->SetSolderBallBumpHeight(0.1);
     diode->SetSolderFillingMaterial(MAT_SAC305.data());
     diode->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-2.25, -2.25), FPoint2D(2.25, 2.25)));
@@ -161,6 +165,7 @@ Ptr<ILayerMap> CreateDefaultLayerMap(Ptr<IDatabase> database, Ptr<ILayoutView> f
     }
     return layerMap;
 }
+
 Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
 {
     const auto & coordUnits = database->GetCoordUnits();
@@ -197,12 +202,14 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
     for (size_t i = 0; i < dPLoc.size(); ++i) {
         auto bw1 = eDataMgr.CreateBondwire(baseLayout, "DS1_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);
         bw1->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
-        bw1->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false); 
+        bw1->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false);
+        bw1->SetCurrent(15);
 
         dPLoc[i][1] *= -1; sPLoc[i][1] *= -1;
         auto bw2 = eDataMgr.CreateBondwire(baseLayout, "DS2_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);
         bw2->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
         bw2->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false); 
+        bw2->SetCurrent(15);
     }
     std::vector<FPoint2D> gPLoc{{-3, 3}, {-3, 1.8}};
     for (size_t i = 0; i < gPLoc.size(); ++i) {
@@ -336,13 +343,13 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     std::array<Ptr<IComponent>, 3> dieComp;
     auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
     dieComp[0] = eDataMgr.CreateComponent(botBridgeLayout, "Die1", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, 8.93}), false);
-    dieComp[0]->SetLossPower(50);
+    dieComp[0]->SetLossPower(AVERAGE_LOSS_POWER);
 
     dieComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Die2", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, 3.86}), false);
-    dieComp[1]->SetLossPower(50);
+    dieComp[1]->SetLossPower(AVERAGE_LOSS_POWER);
 
     dieComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Die3", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, -1.21}), false);
-    dieComp[2]->SetLossPower(50);
+    dieComp[2]->SetLossPower(AVERAGE_LOSS_POWER);
 
     std::array<Ptr<IComponent>, 3> diodeComp;
     auto diode = eDataMgr.FindComponentDefByName(database, "Diode");
@@ -387,9 +394,18 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
             auto bw = eDataMgr.CreateBondwire(botBridgeLayout, oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
             bw->SetStartComponent(diodeComp[i], oPins.at(j));
             bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
+            bw->SetCurrent(10);
         }
     }
-
+    for (size_t i = 0; i < diodeComp.size(); ++i) {
+        for (size_t j = 0; j < oPins.size(); ++j) {
+            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, iPins.at(j) + "-" + oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
+            bw->SetStartComponent(diodeComp[i], iPins.at(j));
+            bw->SetEndComponent(diodeComp[i], oPins.at(j));
+            bw->SetCurrent(10);
+            bw->SetHeight(0.1);
+        }
+    }
     std::vector<FPoint2D> kelvinBwPLocs{{-11.475, 8.15}, {-11.475, 3.6}, {-11.475, -0.72}};
     for (size_t i = 0; i < kelvinBwPLocs.size(); ++i) {
         auto bw = eDataMgr.CreateBondwire(botBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), THIN_BONDWIRE_RADIUS);
@@ -449,13 +465,13 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     std::array<Ptr<IComponent>, 3> dieComp; 
     auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
     dieComp[0] = eDataMgr.CreateComponent(topBridgeLayout, "Die1", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, 8.08}, EMirror2D::Y), false);
-    dieComp[0]->SetLossPower(50);
+    dieComp[0]->SetLossPower(AVERAGE_LOSS_POWER);
 
     dieComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Die2", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, 1.33}, EMirror2D::Y), false);
-    dieComp[1]->SetLossPower(50);
+    dieComp[1]->SetLossPower(AVERAGE_LOSS_POWER);
 
     dieComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Die3", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, -5.42}, EMirror2D::Y), false);
-    dieComp[2]->SetLossPower(50);
+    dieComp[2]->SetLossPower(AVERAGE_LOSS_POWER);
 
     std::array<Ptr<IComponent>, 3> diodeComp;
     auto diode = eDataMgr.FindComponentDefByName(database, "Diode");
@@ -480,12 +496,13 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     gateBw3->SetStartComponent(dieComp[2], "G");
     gateBw3->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, -2.65}), false);
 
-    std::vector<std::string> pins{"A", "B", "C", "D", "E"};
+    std::vector<std::string> iPins{"A", "B", "C", "D", "E"};
     for (size_t i = 0; i < dieComp.size(); ++i) {
-        for (size_t j = 0; j < pins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, pins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
-            bw->SetStartComponent(dieComp[i], pins.at(j));
-            bw->SetEndComponent(diodeComp[i], pins.at(j));
+        for (size_t j = 0; j < iPins.size(); ++j) {
+            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, iPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
+            bw->SetStartComponent(dieComp[i], iPins.at(j));
+            bw->SetEndComponent(diodeComp[i], iPins.at(j));
+            bw->SetCurrent(10);
         }
     }
 
@@ -500,6 +517,16 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
             auto bw = eDataMgr.CreateBondwire(topBridgeLayout, oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
             bw->SetStartComponent(diodeComp[i], oPins.at(j));
             bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
+            bw->SetCurrent(10);
+        }
+    }
+    for (size_t i = 0; i < diodeComp.size(); ++i) {
+        for (size_t j = 0; j < oPins.size(); ++j) {
+            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, iPins.at(j) + "-" + oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
+            bw->SetStartComponent(diodeComp[i], iPins.at(j));
+            bw->SetEndComponent(diodeComp[i], oPins.at(j));
+            bw->SetCurrent(10);
+            bw->SetHeight(0.1);
         }
     }
     std::vector<FPoint2D> kelvinBwPLocs{{11.475, 8.08}, {11.475, 1.33}, {11.475, -5.42}};
@@ -572,7 +599,8 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
                 bw->SetSolderJoints(thickBwSolderDef);
             else bw->SetSolderJoints(thinBwSolderDef);
             bw->SetMaterial(MAT_AL.data());
-            bw->SetHeight(0.5);
+            if (math::EQ<EFloat>(bw->GetHeight(), 0))
+                bw->SetHeight(0.5);
         }
     }
 
@@ -605,7 +633,7 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
-    prismaSettings.meshSettings.genMeshByLayer = true;
+    prismaSettings.meshSettings.genMeshByLayer = false;
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;

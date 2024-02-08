@@ -12,7 +12,7 @@ class ECAD_API EStackupPrismaThermalModelQuery
 public:
     using RtVal = std::pair<EBox2D, size_t>;
     using Rtree = boost::geometry::index::rtree<RtVal, boost::geometry::index::rstar<8>>;
-    explicit EStackupPrismaThermalModelQuery(CPtr<EStackupPrismaThermalModel> model);
+    explicit EStackupPrismaThermalModelQuery(CPtr<EStackupPrismaThermalModel> model, bool lazyBuild = false);
     virtual ~EStackupPrismaThermalModelQuery() = default;
     
     EFloat PrismaInstanceTopBotArea(size_t pIndex) const;//in coords

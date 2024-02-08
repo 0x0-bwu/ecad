@@ -190,7 +190,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
 
     auto triangulation = std::make_shared<EPrismaThermalModel::PrismaTemplate>();
     const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
-    std::string meshFile = settings.workDir.empty() ? std::string{} : settings.workDir + ECAD_SEPS + "mesh.png";
+    std::string meshFile = (settings.meshSettings.dumpMeshFile && not settings.workDir.empty()) ?
+        settings.workDir + ECAD_SEPS + "mesh.png" : std::string{};
     GenerateMesh(compact->GetAllPolygonData(), compact->GetSteinerPoints(), coordUnits, settings.meshSettings, *triangulation, meshFile);
     ECAD_TRACE("total elements: %1%", triangulation->triangles.size())
 
@@ -292,7 +293,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
         model->AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
     }
         
-    if (not settings.workDir.empty()) { 
+    if (not settings.workDir.empty() && settings.meshSettings.dumpMeshFile) { 
         auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
         io::GenerateVTKFile(meshFile, *model);
     }
@@ -334,7 +335,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
     if (settings.threads > 1) {
         generic::thread::ThreadPool pool(settings.threads);
         for (size_t i = 0; i < prismaTemplates.size(); ++i) {
-            std::string meshFile = settings.workDir.empty() ? std::string{} : settings.workDir + ECAD_SEPS + "mesh" + std::to_string(i + 1) + ".png";
+            std::string meshFile = (settings.meshSettings.dumpMeshFile && not settings.workDir.empty()) ?
+                settings.workDir + ECAD_SEPS + "mesh" + std::to_string(i + 1) + ".png" : std::string{};
             pool.Submit(std::bind(GenerateMesh, std::ref(layerPolygons.at(i)), std::ref(steinerPoints), std::ref(coordUnits), 
                         std::ref(settings.meshSettings), std::ref(*prismaTemplates.at(i)), meshFile));
         }
@@ -344,7 +346,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
         for (size_t i = 0; i < prismaTemplates.size(); ++i) {
             const auto & polygons = layerPolygons.at(i);
             auto & triangulation = *prismaTemplates.at(i);
-            std::string meshFile = settings.workDir.empty() ? std::string{} : settings.workDir + ECAD_SEPS + "mesh" + std::to_string(i + 1) + ".png";
+           std::string meshFile = (settings.meshSettings.dumpMeshFile && not settings.workDir.empty()) ?
+                settings.workDir + ECAD_SEPS + "mesh" + std::to_string(i + 1) + ".png" : std::string{};
             GenerateMesh(polygons, {}, coordUnits, settings.meshSettings, triangulation, meshFile);
         }
     }
@@ -439,7 +442,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
         model->AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
     }
         
-    if (not settings.workDir.empty()) { 
+    if (not settings.workDir.empty() && settings.meshSettings.dumpMeshFile) { 
         auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
         io::GenerateVTKFile(meshFile, *model);
     }

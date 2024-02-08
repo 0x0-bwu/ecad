@@ -1,12 +1,18 @@
 #include "EPrismaThermalModelQuery.h"
 #include "models/thermal/EPrismaThermalModel.h"
-
+#include "EDataMgr.h"
 namespace ecad {
 namespace model {
 namespace utils {
-ECAD_INLINE EPrismaThermalModelQuery::EPrismaThermalModelQuery(CPtr<EPrismaThermalModel> model)
+ECAD_INLINE EPrismaThermalModelQuery::EPrismaThermalModelQuery(CPtr<EPrismaThermalModel> model, bool lazyBuild)
  : m_model(model)
 {
+    if (not lazyBuild) {
+        generic::thread::ThreadPool pool(EDataMgr::Instance().Threads());
+        for (size_t i = 0; i < m_model->TotalLayers(); ++i)
+            pool.Submit(std::bind(&EPrismaThermalModelQuery::BuildLayerIndexTree, this, i));
+        pool.Submit(std::bind(&EPrismaThermalModelQuery::BuildIndexTree, this));
+    }
 }
 
 ECAD_INLINE void EPrismaThermalModelQuery::SearchPrismaInstances(const EBox2D & area, std::vector<RtVal> & results) const

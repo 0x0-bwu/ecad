@@ -200,7 +200,8 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::BuildLineElement(const std
 
         auto jh = GetLineJouleHeat(index, iniT.at(index));
         network->AddHF(index, jh);
-    
+        summary.iHeatFlow += jh;
+
         auto k = GetMatThermalConductivity(line.matId, iniT.at(index));
         auto aveK = (k[0] + k[1] + k[2]) / 3;
         auto area = GetLineArea(index);
@@ -339,6 +340,7 @@ ECAD_INLINE EFloat EStackupPrismaThermalNetworkBuilder::GetPrismaHeight(size_t i
 ECAD_INLINE EFloat EStackupPrismaThermalNetworkBuilder::GetLineJouleHeat(size_t index, EFloat refT) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
+    if (generic::math::EQ<EFloat>(line.current, 0)) return 0;
     auto rho = GetMatResistivity(line.matId, refT);
     return rho * GetLineLength(index) * line.current * line.current / GetLineArea(index);
 }
