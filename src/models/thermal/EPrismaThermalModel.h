@@ -12,6 +12,8 @@ class ILayoutView;
 class IMaterialDef;
 class IMaterialDefCollection;
 
+class ELookupTable1D;
+
 namespace utils {
 class ELayoutRetriever;
 } // namespace utils
@@ -36,9 +38,10 @@ struct PrismaElement
 {
     ENetId netId;
     EMaterialId matId;
-    EFloat avePower{0};
+    EFloat powerRatio{0};
     size_t id{invalidIndex};
     size_t templateId{invalidIndex};
+    SPtr<ELookupTable1D> powerLut{nullptr};
     inline static constexpr size_t TOP_NEIGHBOR_INDEX = 3;
     inline static constexpr size_t BOT_NEIGHBOR_INDEX = 4;
     std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];

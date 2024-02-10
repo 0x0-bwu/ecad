@@ -1,6 +1,7 @@
 #pragma once
 #include "interfaces/IComponent.h"
 #include "EHierarchyObj.h"
+#include "ELookupTable.h"
 namespace ecad {
 
 class ECAD_API EComponent : public EHierarchyObj, public IComponent
@@ -22,8 +23,10 @@ public:
     void SetTransform(const ETransform2D & trans) override;
     const ETransform2D & GetTransform() const override;
 
-    void SetLossPower(EFloat power) override;
-    EFloat GetLossPower() const override;
+    bool hasLossPower() const override;
+    void SetLossPower(EFloat kelvin, EFloat power) override;
+    EFloat GetLossPower(EFloat kelvin) const override;
+    const ELookupTable1D & GetLossPowerTable() const override;
 
     EBox2D GetBoundingBox() const override;
 
@@ -43,7 +46,7 @@ protected:
 protected:
     CPtr<IComponentDef> m_compDef;
     ELayerId m_placement{ELayerId::noLayer};
-    EFloat m_lossPower{0};
+    ELookupTable1D m_lossPower;
     bool m_flipped{false};
 };
 

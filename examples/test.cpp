@@ -68,7 +68,7 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
 
     auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
     auto dieComp = eDataMgr.CreateComponent(baseLayout, "Die1", sicDie, topCuLayer, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {0, 0}), false);
-    dieComp->SetLossPower(50);
+    dieComp->SetLossPower(ETemperature::Celsius2Kelvins(25), 50);
 
     return baseLayout;
 }

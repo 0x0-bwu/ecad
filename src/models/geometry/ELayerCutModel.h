@@ -1,5 +1,5 @@
 #pragma once
-#include "ECadCommon.h"
+#include "ELookupTable.h"
 #include "EShape.h"
 #include "interfaces/IModel.h"
 
@@ -28,8 +28,8 @@ public:
     {
         size_t polygon;
         LayerRange range;
-        EFloat powerDensity;
-        PowerBlock(size_t polygon, LayerRange range, EFloat powerDensity);
+        SPtr<ELookupTable1D> power;
+        PowerBlock(size_t polygon, LayerRange range, SPtr<ELookupTable1D> power);
     };
 
     struct Bondwire

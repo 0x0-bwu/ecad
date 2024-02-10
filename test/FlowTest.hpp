@@ -43,7 +43,7 @@ void t_thermal_static_flow1()
 
     auto comp1 = eDataMgr.CreateComponent(topLayout, "M1", compDef, iLyrTopCu, makeETransform2D(1, 0, EVector2D(coordUnits.toCoord(0) , coordUnits.toCoord(0))), false);
     BOOST_CHECK(comp1);
-    comp1->SetLossPower(33.8);
+    comp1->SetLossPower(ETemperature::Celsius2Kelvins(25), 33.8);
 
     //flatten
     database->Flatten(topCell);
@@ -173,8 +173,8 @@ void t_thermal_static_flow2()
     auto comp2 = eDataMgr.CreateComponent(sicLayout, "M2", compDef, iLyrWire, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {comp2x, comp2y}, EMirror2D::Y), flipped);
     BOOST_CHECK(comp1);
     BOOST_CHECK(comp2);
-    comp1->SetLossPower(33.8);
-    comp2->SetLossPower(31.9);
+    comp1->SetLossPower(ETemperature::Celsius2Kelvins(25), 33.8);
+    comp2->SetLossPower(ETemperature::Celsius2Kelvins(25), 31.9);
  
     //net
     auto gateNet = eDataMgr.CreateNet(sicLayout, "Gate"); BOOST_CHECK(gateNet);

@@ -1,5 +1,7 @@
 #include "EStackupPrismaThermalNetworkBuilder.h"
 #include "models/thermal/utils/EStackupPrismaThermalModelQuery.h"
+#include "ELookupTable.h"
+
 #include "interfaces/IMaterialDefCollection.h"
 #include "interfaces/IMaterialProp.h"
 #include "interfaces/IMaterialDef.h"
@@ -53,7 +55,9 @@ ECAD_INLINE void EStackupPrismaThermalNetworkBuilder::BuildPrismaElement(const s
     
     for (size_t i = start; i < end; ++i) {
         const auto & inst = m_model.GetPrisma(i);
-        if (auto p = inst.element->avePower; p > 0) {
+        if (const auto & lut = inst.element->powerLut; lut) {
+            auto p = lut->Lookup(iniT.at(i));
+            p *= inst.element->powerRatio;
             summary.iHeatFlow += p;
             network->AddHF(i, p);
         }

@@ -44,8 +44,9 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
     using Model = typename ThermalNetworkBuilder::ModelType;
     results.assign(traits::EThermalModelTraits<Model>::Size(model), envT);
 
-    EFloat residual = maxFloat;
-    size_t iteration = traits::EThermalModelTraits<Model>::NeedIteration(model) ? settings.iteration : 1;
+    EFloat residual = 0;
+    size_t iteration = 0;
+    size_t maxIteration = traits::EThermalModelTraits<Model>::NeedIteration(model) ? settings.iteration : 1;
     do {
         std::vector<EFloat> prevRes(results);
         auto network = builder.Build(prevRes);
@@ -59,9 +60,9 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
         solver.Solve(envT, results);
 
         residual = CalculateResidual(results, prevRes, settings.maximumRes);
-        ECAD_TRACE("Residual: %1%, Remain Iteration: %2%", residual, --iteration)
-        ECAD_TRACE("Max T: %1%C, ", ETemperature::Kelvins2Celsius(*std::max_element(results.begin(), results.end())))
-    } while (residual > settings.residual && iteration > 0);
+        ECAD_TRACE("P-T Iteration: %1%, Residual: %2%.", ++iteration, residual)
+        ECAD_TRACE("Max T: %1%C", ETemperature::Kelvins2Celsius(*std::max_element(results.begin(), results.end())))
+    } while (residual > settings.residual && --maxIteration > 0);
 
     if (settings.envTemperature.unit == ETemperatureUnit::Celsius) 
         std::for_each(results.begin(), results.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });

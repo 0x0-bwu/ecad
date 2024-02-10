@@ -41,27 +41,27 @@ ECAD_INLINE size_t ELayerCutModelBuilder::AddPolygon(ENetId netId, EMaterialId m
     return m_model->m_polygons.size() - 1;
 };
 
-ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat pwrPosition, EFloat pwrThickness)
+ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygonData polygon, SPtr<ELookupTable1D> power, EFloat elevation, EFloat thickness, EFloat pwrPosition, EFloat pwrThickness)
 {
-    auto area = polygon.Area();
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
     if (invalidIndex == index) return false;
     EFloat pe = elevation - thickness * pwrPosition;
     EFloat pt = std::min(thickness * pwrThickness, thickness - elevation + pe);
-    m_model->m_powerBlocks.emplace(index, ELayerCutModel::PowerBlock(index, GetLayerRange(pe, pt), totalP / area));
+    m_model->m_powerBlocks.emplace(index, ELayerCutModel::PowerBlock(index, GetLayerRange(pe, pt), power));
     return true;
 }
 
 ECAD_INLINE void ELayerCutModelBuilder::AddComponent(CPtr<IComponent> component)
 {
     EFloat elevation, thickness;
-    auto totalP = component->GetLossPower();
     auto boundary = generic::geometry::toPolygon(component->GetBoundingBox());
     auto material = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetMaterial()); { ECAD_ASSERT(material) }
     [[maybe_unused]] auto check = m_retriever->GetComponentHeightThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
 
-    if (totalP > 0)
-        AddPowerBlock(material->GetMaterialId(), boundary, totalP, elevation, thickness);
+    if (component->hasLossPower()) {
+        auto power = std::make_shared<ELookupTable1D>(component->GetLossPowerTable());
+        AddPowerBlock(material->GetMaterialId(), boundary, power, elevation, thickness);
+    }
     else AddPolygon(ENetId::noNet, material->GetMaterialId(), boundary, false, elevation, thickness);
 
     check = m_retriever->GetComponentBallBumpThickness(component, elevation, thickness); { ECAD_ASSERT(check) }

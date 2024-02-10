@@ -1,5 +1,5 @@
 #pragma once
-#include "ECadCommon.h"
+#include "ELookupTable.h"
 #include "Protocol.h"
 #include "ECadDef.h"
 #include <string>
@@ -25,8 +25,10 @@ public:
     virtual void SetTransform(const ETransform2D & trans) = 0;
     virtual const ETransform2D & GetTransform() const = 0;
 
-    virtual void SetLossPower(EFloat power) = 0;
-    virtual EFloat GetLossPower() const = 0;
+    virtual bool hasLossPower() const = 0;
+    virtual void SetLossPower(EFloat kelvin, EFloat power) = 0;
+    virtual EFloat GetLossPower(EFloat kelvin) const = 0;
+    virtual const ELookupTable1D & GetLossPowerTable() const = 0;
 
     virtual EBox2D GetBoundingBox() const = 0;
 

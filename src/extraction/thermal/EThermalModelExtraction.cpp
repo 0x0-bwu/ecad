@@ -91,11 +91,11 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         }
     }
 
-    constexpr bool useGridPower = true;
     auto compIter = layout->GetComponentIter();
-    std::unordered_map<size_t, EGridData> gridMap;
+    std::unordered_map<size_t, std::vector<EGridData> > gridMap;
+    std::vector<EFloat> temp{25, 50, 75, 100, 125};
     while (auto * component = compIter->Next()) {
-        if (auto power = component->GetLossPower(); power > 0) {
+        if (component->hasLossPower()) {
             auto layer = component->GetPlacementLayer();
             if (lyrMap.find(layer) == lyrMap.cend()) {
                 GENERIC_ASSERT(false)
@@ -109,24 +109,25 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
                 GENERIC_ASSERT(false)
                 continue;
             }
-            if constexpr (useGridPower) {
-                auto iter = gridMap.find(lyrId);
-                if (iter == gridMap.cend())
-                    iter = gridMap.emplace(lyrId, EGridData(nx, ny, 0)).first;
-                auto & gridData = iter->second;
-                auto totalTiles = (ur[1] - ll[1] + 1) * (ur[0] - ll[0] + 1);
-                power /= totalTiles;
+            
+            auto iter = gridMap.find(lyrId);
+            if (iter == gridMap.cend())
+                iter = gridMap.emplace(lyrId, std::vector<EGridData>(temp.size(), EGridData(nx, ny, 0))).first;
+            auto & gridData = iter->second;
+            auto totalTiles = (ur[1] - ll[1] + 1) * (ur[0] - ll[0] + 1);
+            for (size_t t = 0; t < temp.size(); ++t) {
+                auto power = component->GetLossPower(temp.at(t)) / totalTiles;
                 for (size_t i = ll[0]; i <= ur[0]; ++i)
                     for (size_t j = ll[1]; j <= ur[1]; ++j)
-                        gridData(i, j) += power;
+                        gridData[t](i, j) += power;
             }
-            else model->AddPowerModel(lyrMap.at(layer), std::shared_ptr<EThermalPowerModel>(new EBlockPowerModel(ll, ur, power)));
         }
     }
 
     for (auto & [lyrId, gridData] : gridMap) {
         auto powerModel = new EGridPowerModel(ESize2D(nx, ny));
-        powerModel->GetTable().AddSample(settings.envTemperature.inKelvins(), std::move(gridData));
+        for (size_t i = 0; i < gridData.size(); ++i)
+            powerModel->GetTable().AddSample(ETemperature::Celsius2Kelvins(temp.at(i)), std::move(gridData[i]));
         model->AddPowerModel(lyrId, std::shared_ptr<EThermalPowerModel>(powerModel));
     }
     
@@ -234,7 +235,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
             if (iter != powerBlocks.cend() &&
                 prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.high)) {
                 auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(*triangulation, it);
-                ele.avePower = area * iter->second.powerDensity;
+                ele.powerRatio = area / compact->GetAllPolygonData().at(pid).Area();
+                ele.powerLut = iter->second.power;
             }
         }
         ECAD_TRACE("layer %1%'s total elements: %2%", index, prismaLayer.elements.size())
@@ -390,7 +392,8 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
             if (iter != powerBlocks.cend() &&
                 prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.high)) {
                 auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(*triangulation, it);
-                ele.avePower = area * iter->second.powerDensity;
+                ele.powerRatio = area / compact->GetAllPolygonData().at(pid).Area();
+                ele.powerLut = iter->second.power;
             }
         }
         ECAD_TRACE("layer %1%'s total elements: %2%", index, prismaLayer.elements.size())

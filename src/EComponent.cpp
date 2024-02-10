@@ -85,12 +85,22 @@ ECAD_INLINE const ETransform2D & EComponent::GetTransform() const
     return EHierarchyObj::GetTransform();
 }
 
-ECAD_INLINE void EComponent::SetLossPower(EFloat power)
+ECAD_INLINE bool EComponent::hasLossPower() const
 {
-    m_lossPower = power;
+    return not m_lossPower.Empty();
 }
 
-ECAD_INLINE EFloat EComponent::GetLossPower() const
+ECAD_INLINE void EComponent::SetLossPower(EFloat kelvin, EFloat power)
+{
+    m_lossPower.AddSample(kelvin, power);
+}
+
+ECAD_INLINE EFloat EComponent::GetLossPower(EFloat kelvin) const
+{
+    return m_lossPower.Lookup(kelvin);
+}
+
+ECAD_INLINE const ELookupTable1D & EComponent::GetLossPowerTable() const
 {
     return m_lossPower;
 }
@@ -129,8 +139,8 @@ ECAD_INLINE void EComponent::PrintImp(std::ostream & os) const
 {
     os << "COMPONENT DEFINE: " << m_compDef->GetName() << ECAD_EOL;
     os << "PLACEMENT: " << m_placement << ECAD_EOL;
-    os << "LOSS POWER: " << m_lossPower << 'W' << ECAD_EOL;
     os << "FLIPPED: " << std::boolalpha << m_flipped << ECAD_EOL;
+    os << "LOSS POWER: " << m_lossPower << ECAD_EOL;
     EHierarchyObj::PrintImp(os);
 }
 

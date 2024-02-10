@@ -23,7 +23,7 @@ public:
 
     void AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness);
     size_t AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness);
-    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, EFloat totalP, EFloat elevation, EFloat thickness, EFloat pwrPosition = 0.1, EFloat pwrThickness = 0.1);
+    bool AddPowerBlock(EMaterialId matId, EPolygonData polygon, SPtr<ELookupTable1D> power, EFloat elevation, EFloat thickness, EFloat pwrPosition = 0.1, EFloat pwrThickness = 0.1);
     void AddComponent(CPtr<IComponent> component);
     void AddBondwire(ELayerCutModel::Bondwire bw);
     void AddImprintBox(const EBox2D & box);

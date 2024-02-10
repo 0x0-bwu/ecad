@@ -19,7 +19,7 @@ void SignalHandler(int signum)
 using namespace ecad;
 using namespace generic;
 auto & eDataMgr = EDataMgr::Instance();
-inline static constexpr EFloat AVERAGE_LOSS_POWER = 78.9;
+inline static constexpr EFloat AVERAGE_LOSS_POWER = 123.3333;
 inline static constexpr EFloat THIN_BONDWIRE_RADIUS = 0.0635;
 inline static constexpr EFloat THICK_BONDWIRE_RADIUS = 0.15;
 inline static constexpr std::string_view RES_GATE = "Rg";
@@ -33,6 +33,17 @@ inline static constexpr std::string_view MAT_AIR = "Air";
 inline static constexpr std::string_view MAT_ALN = "AlN";
 inline static constexpr std::string_view MAT_SIC = "SiC";
 inline static constexpr std::string_view MAT_SAC305 = "SAC305";
+
+std::vector<std::pair<EFloat, EFloat>> GetSicDieTemperatureAndPowerConfig()
+{
+    std::vector<EFloat> caseT{-50, -25, 0, 25, 50, 75, 100, 125};
+    std::vector<std::pair<EFloat, EFloat> > results;
+    for (auto tc : caseT) {
+        // auto p = -14.28 * tc + 2143;
+        results.emplace_back(ETemperature::Celsius2Kelvins(tc), AVERAGE_LOSS_POWER);
+    }
+    return results;
+}
 
 void SetupMaterials(Ptr<IDatabase> database)
 {
@@ -79,11 +90,13 @@ Ptr<IPadstackDef> CreateBondwireSolderJoints(Ptr<IDatabase> database, const std:
     defData->SetBotSolderBallMaterial(MAT_SAC305.data());
     
     auto bumpR = bwRadius * 1.1;
-    auto topBump = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
-    defData->SetTopSolderBumpParameters(std::move(topBump), 0.1);
+    // auto topBump = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
+    auto topBump = eDataMgr.CreateShapeRectangle(coordUnits, {-bumpR, -bumpR}, {bumpR, bumpR});
+    defData->SetTopSolderBumpParameters(std::move(topBump), 0.05);
     
-    auto botBall = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
-    defData->SetBotSolderBallParameters(std::move(botBall), 0.1);
+    // auto botBall = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
+    auto botBall = eDataMgr.CreateShapeRectangle(coordUnits, {-bumpR, -bumpR}, {bumpR, bumpR});
+    defData->SetBotSolderBallParameters(std::move(botBall), 0.05);
 
     def->SetPadstackDefData(std::move(defData));   
     return def;
@@ -299,7 +312,7 @@ Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
     return driverLayout;
 }
 
-Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
+Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vector<FPoint2D> & locations)
 {
     //placement area: {-9.65, -3.65}, {-2.5, -3.65}, {-2.5, -8.7}, {7.85, -8.7}, {7.85, 11.35}, {-9.65, 11.35}
     const auto & coordUnits = database->GetCoordUnits();
@@ -342,20 +355,19 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
 
     std::array<Ptr<IComponent>, 3> dieComp;
     auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
-    dieComp[0] = eDataMgr.CreateComponent(botBridgeLayout, "Die1", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, 8.93}), false);
-    dieComp[0]->SetLossPower(AVERAGE_LOSS_POWER);
-
-    dieComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Die2", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, 3.86}), false);
-    dieComp[1]->SetLossPower(AVERAGE_LOSS_POWER);
-
-    dieComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Die3", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-5.23, -1.21}), false);
-    dieComp[2]->SetLossPower(AVERAGE_LOSS_POWER);
+    dieComp[0] = eDataMgr.CreateComponent(botBridgeLayout, "Die1", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(0)), false);
+    dieComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Die2", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(1)), false);
+    dieComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Die3", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(2)), false);
+    for (auto [t, p] :  GetSicDieTemperatureAndPowerConfig()) {
+        for (auto die : dieComp)
+            die->SetLossPower(t, p);
+    }
 
     std::array<Ptr<IComponent>, 3> diodeComp;
     auto diode = eDataMgr.FindComponentDefByName(database, "Diode");
-    diodeComp[0] = eDataMgr.CreateComponent(botBridgeLayout, "Diode1", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, 8.08}), false);
-    diodeComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Diode2", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, 1.33}), false);
-    diodeComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Diode3", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {3.71, -5.42}), false);
+    diodeComp[0] = eDataMgr.CreateComponent(botBridgeLayout, "Diode1", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(3)), false);
+    diodeComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Diode2", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(4)), false);
+    diodeComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Diode3", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(5)), false);
 
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
     eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false);
@@ -415,7 +427,7 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database)
     return botBridgeLayout;
 }
 
-Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
+Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vector<FPoint2D> & locations)
 {
     //placement area: {-7.85, -8.7}, {9.65, -8.7}, {9.65, 11.35}, {-7.85, 11.35}
     const auto & coordUnits = database->GetCoordUnits();
@@ -464,20 +476,19 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
 
     std::array<Ptr<IComponent>, 3> dieComp; 
     auto sicDie = eDataMgr.FindComponentDefByName(database, "SicDie");
-    dieComp[0] = eDataMgr.CreateComponent(topBridgeLayout, "Die1", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, 8.08}, EMirror2D::Y), false);
-    dieComp[0]->SetLossPower(AVERAGE_LOSS_POWER);
-
-    dieComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Die2", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, 1.33}, EMirror2D::Y), false);
-    dieComp[1]->SetLossPower(AVERAGE_LOSS_POWER);
-
-    dieComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Die3", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {5.23, -5.42}, EMirror2D::Y), false);
-    dieComp[2]->SetLossPower(AVERAGE_LOSS_POWER);
+    dieComp[0] = eDataMgr.CreateComponent(topBridgeLayout, "Die1", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(0), EMirror2D::Y), false);
+    dieComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Die2", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(1), EMirror2D::Y), false);
+    dieComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Die3", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(2), EMirror2D::Y), false);
+    for (auto [t, p] :  GetSicDieTemperatureAndPowerConfig()) {
+        for (auto die : dieComp)
+            die->SetLossPower(t, p);
+    }
 
     std::array<Ptr<IComponent>, 3> diodeComp;
     auto diode = eDataMgr.FindComponentDefByName(database, "Diode");
-    diodeComp[0] = eDataMgr.CreateComponent(topBridgeLayout, "Diode1", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, 8.08}, EMirror2D::Y), false);
-    diodeComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Diode2", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, 1.33}, EMirror2D::Y), false);
-    diodeComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Diode3", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-3.7, -5.42}, EMirror2D::Y), false);
+    diodeComp[0] = eDataMgr.CreateComponent(topBridgeLayout, "Diode1", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(3), EMirror2D::Y), false);
+    diodeComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Diode2", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(4), EMirror2D::Y), false);
+    diodeComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Diode3", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(5), EMirror2D::Y), false);
 
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
     eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false);
@@ -538,9 +549,10 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database)
     return topBridgeLayout;
 }
 
-Ptr<ILayoutView> SetupDesign(const std::string & name)
+Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat> & parameters)
 {
     //database
+    eDataMgr.RemoveDatabase(name);
     auto database = eDataMgr.CreateDatabase(name);
 
     //material
@@ -569,7 +581,10 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
     auto driverR = eDataMgr.CreateCellInst(baseLayout, "DriverR", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {44, 0}, EMirror2D::XY));
     driverR->SetLayerMap( driverLayerMap);
 
-    auto botBridgeLayout = CreateBotBridgeLayout(database);
+    std::vector<FPoint2D> botCompLoc;
+    for (size_t i = 0; i < 6; ++i)
+        botCompLoc.emplace_back(FPoint2D(parameters.at(i * 2), parameters.at(i * 2 + 1)));
+    auto botBridgeLayout = CreateBotBridgeLayout(database, botCompLoc);
     auto botBridgeLayerMap = CreateDefaultLayerMap(database, botBridgeLayout, baseLayout, "BotBridgeLayerMap");
 
     //instance
@@ -579,7 +594,10 @@ Ptr<ILayoutView> SetupDesign(const std::string & name)
     auto botBridge2 = eDataMgr.CreateCellInst(baseLayout, "BotBridge2", botBridgeLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-17.75, -13}, EMirror2D::X));
     botBridge2->SetLayerMap(botBridgeLayerMap);
 
-    auto topBridgeLayout = CreateTopBridgeLayout(database);
+    std::vector<FPoint2D> topCompLoc;
+    for (size_t i = 0; i < 6; ++i)
+        topCompLoc.emplace_back(FPoint2D(parameters.at(i * 2 + 12), parameters.at(i * 2 + 13)));
+    auto topBridgeLayout = CreateTopBridgeLayout(database, topCompLoc);
     auto topBridgeLayerMap = CreateDefaultLayerMap(database, topBridgeLayout, baseLayout, "TopBridgeLayerMap");
 
     //instance
@@ -637,9 +655,12 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
-    prismaSettings.meshSettings.maxLen = 2;
+    prismaSettings.meshSettings.maxLen = 1;
     prismaSettings.meshSettings.tolerance = 1e-6;
     prismaSettings.layerCutSettings.layerTransitionRatio = 3;
+    prismaSettings.meshSettings.dumpMeshFile = true;
+    prismaSettings.layerCutSettings.dumpSketchImg = true;
+    prismaSettings.layerCutSettings.layerTransitionRatio = 0;
 
     EFloat topHTC = 1e3;
     prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
@@ -655,7 +676,7 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 {
     auto extractionSettings = ExtractionSettings(workDir);
     EThermalStaticSimulationSetup setup;
-    setup.settings.iteration = 10;
+    setup.settings.iteration = 100;
     setup.settings.dumpHotmaps = true;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = workDir;
@@ -700,7 +721,8 @@ int main(int argc, char * argv[])
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
 
     std::string workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    auto layout = SetupDesign("CREE62mm");
+    std::vector<EFloat> parameters{-5.28567,8.71075,-2.74413,3.66734,-5.11722,-1.0521,3.59522,7.21218,5.19589,1.69307,1.5553,-4.52975,4.9841,8.19302,5.90878,3.66795,6.4255,-5.00371,-3.70274,7.93932,-3.86449,0.442597,-4.93669,-4.93856};
+    auto layout = SetupDesign("CREE62mm", parameters);
     StaticThermalFlow(layout, workDir);
     // TransientThermalFlow(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();

@@ -56,6 +56,8 @@ using ELogLevel = generic::log::Level;
 
 using ETemperatureUnit = generic::unit::Temperature;
 
+using EScenarioId = size_t;
+
 ECAD_ALWAYS_INLINE static constexpr char sPadstack[] = "padstack";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";

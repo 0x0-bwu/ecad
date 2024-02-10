@@ -50,19 +50,9 @@ ECAD_INLINE void EStackupPrismaThermalModelBuilder::BuildPrismaModel(EFloat scal
 
     if (threads > 1) {
         generic::thread::ThreadPool pool(threads);
-        size_t size = m_model->TotalPrismaElements();
-        size_t blocks = pool.Threads();
-        size_t blockSize = size / blocks;
-
-        size_t begin = 0;
-        for(size_t i = 0; i < blocks && blockSize > 0; ++i){
-            size_t end = begin + blockSize;
-            pool.Submit(std::bind(&EStackupPrismaThermalModelBuilder::BuildPrismaInstanceTopBotNeighbors, this, begin, end));
-            begin = end;
-        }
-        size_t end = size;
-        if(begin != end)
-            pool.Submit(std::bind(&EStackupPrismaThermalModelBuilder::BuildPrismaInstanceTopBotNeighbors, this, begin, end));        
+        const auto & offset = m_model->m_indexOffset;
+        for (size_t i = 0; i < offset.size() - 1; ++i)
+            pool.Submit(std::bind(&EStackupPrismaThermalModelBuilder::BuildPrismaInstanceTopBotNeighbors, this, offset.at(i), offset.at(i + 1)));
     }
     else BuildPrismaInstanceTopBotNeighbors(0, m_model->TotalPrismaElements());
 }
