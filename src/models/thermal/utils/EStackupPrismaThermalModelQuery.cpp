@@ -41,8 +41,6 @@ ECAD_INLINE void EStackupPrismaThermalModelQuery::SearchPrismaInstances(size_t l
 
 ECAD_INLINE CPtr<EStackupPrismaThermalModelQuery::Rtree> EStackupPrismaThermalModelQuery::BuildLayerIndexTree(size_t layer) const
 {
-    if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();
-    
     std::lock_guard<std::mutex> lock(m_mutex);
     if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();
     auto rtree = std::make_shared<Rtree>();
@@ -69,7 +67,7 @@ ECAD_INLINE size_t EStackupPrismaThermalModelQuery::NearestLayer(EFloat height) 
 {
     using namespace generic::math;
     const auto & layers = m_model->layers;
-    if (GT(height, layers.front().elevation)) return 0;
+    if (GE(height, layers.front().elevation)) return 0;
     for (size_t i = 0; i < layers.size(); ++i) {
         auto top = layers.at(i).elevation;
         auto bot = top - layers.at(i).thickness;

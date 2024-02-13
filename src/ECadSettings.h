@@ -161,7 +161,7 @@ struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
     EThermalStaticSettings settings;
 };
 
-using EThermalTransientExcitation = std::function<EFloat(EFloat)>;
+using EThermalTransientExcitation = std::function<EFloat(EFloat, size_t)>;//power = f(t, scenario)
 
 struct EThermalTransientSettings : public EThermalSettings
 {
@@ -170,12 +170,13 @@ struct EThermalTransientSettings : public EThermalSettings
     bool mor{false};
     bool verbose{false};
     bool adaptive{true};
+    bool temperatureDepend{true};
     EFloat step{1};
     EFloat duration{10};
     EFloat absoluteError{1e-6};
     EFloat relativeError{1e-6};
     EFloat minSamplingInterval{0};
-    EFloat samplingWindow{maxFloat};
+    EFloat samplingWindow{0};
     CPtr<EThermalTransientExcitation> excitation{nullptr};
 };
 

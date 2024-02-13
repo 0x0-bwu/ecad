@@ -16,8 +16,10 @@ class ThermalNetwork
 public:
     inline static constexpr num_type minR = std::numeric_limits<num_type>::epsilon();
     inline static constexpr num_type unknownT = std::numeric_limits<num_type>::max();
+    inline static constexpr num_type invalid = std::numeric_limits<size_t>::max();
     struct Node
     {
+        size_t scen = invalid;
         num_type t = unknownT;//unit: K
         num_type c = 0;
         num_type hf = 0;//unit: W
@@ -82,6 +84,11 @@ public:
         m_nodes.push_back(Node());
         m_nodes.back().t = t;
         return index;
+    }
+
+    void SetScenario(size_t node, size_t scen)
+    {
+        m_nodes[node].scen = scen;
     }
 
     void SetT(size_t node, num_type t)

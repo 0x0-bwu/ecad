@@ -89,6 +89,9 @@ public:
     virtual void SetCurrent(EFloat current) = 0;
     virtual EFloat GetCurrent() const = 0;
 
+    virtual void SetDynamicPowerScenario(EScenarioId id) = 0;
+    virtual EScenarioId GetDynamicPowerScenario() const = 0;
+
     virtual void Transform(const ETransform2D & transform) = 0;
 };
 

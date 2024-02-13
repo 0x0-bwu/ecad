@@ -236,6 +236,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
                 prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.high)) {
                 auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(*triangulation, it);
                 ele.powerRatio = area / compact->GetAllPolygonData().at(pid).Area();
+                ele.powerScenario = iter->second.scen;
                 ele.powerLut = iter->second.power;
             }
         }
@@ -393,6 +394,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
                 prismaLayer.id == compact->GetLayerIndexByHeight(iter->second.range.high)) {
                 auto area = tri::TriangulationUtility<EPoint2D>::GetTriangleArea(*triangulation, it);
                 ele.powerRatio = area / compact->GetAllPolygonData().at(pid).Area();
+                ele.powerScenario = iter->second.scen;
                 ele.powerLut = iter->second.power;
             }
         }

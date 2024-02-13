@@ -30,6 +30,7 @@ struct ECAD_API LineElement
     EFloat radius{0};
     EFloat current{0};
     size_t id{invalidIndex};
+    size_t scenario{invalidIndex};
     std::array<size_t, 2> endPoints;
     std::array<std::vector<size_t>, 2> neighbors;//global index
 };
@@ -41,6 +42,7 @@ struct PrismaElement
     EFloat powerRatio{0};
     size_t id{invalidIndex};
     size_t templateId{invalidIndex};
+    size_t powerScenario{invalidIndex};
     SPtr<ELookupTable1D> powerLut{nullptr};
     inline static constexpr size_t TOP_NEIGHBOR_INDEX = 3;
     inline static constexpr size_t BOT_NEIGHBOR_INDEX = 4;
@@ -105,7 +107,7 @@ public:
     const std::vector<BlockBC> & GetBlockBCs(EOrientation orient) const { return m_blockBCs.at(orient); }
 
     PrismaLayer & AppendLayer(PrismaLayer layer);
-    LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current);
+    LineElement & AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current, size_t scenario);
 
     void BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter);
     void AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm);

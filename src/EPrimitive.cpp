@@ -219,6 +219,7 @@ ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
     ar & boost::serialization::make_nvp("current", m_current);
+    ar & boost::serialization::make_nvp("scenario", m_scenario);
     ar & boost::serialization::make_nvp("solder_joints", m_solderJoints);
     ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
@@ -238,6 +239,7 @@ ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("radius", m_radius);
     ar & boost::serialization::make_nvp("height", m_height);
     ar & boost::serialization::make_nvp("current", m_current);
+    ar & boost::serialization::make_nvp("scenario", m_scenario);
     ar & boost::serialization::make_nvp("solder_joints", m_solderJoints);
     ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
 }
@@ -421,6 +423,16 @@ ECAD_INLINE void EBondwire::SetCurrent(EFloat current)
 ECAD_INLINE EFloat EBondwire::GetCurrent() const
 {
     return m_current;
+}
+
+ECAD_INLINE void EBondwire::SetDynamicPowerScenario(EScenarioId id)
+{
+    m_scenario = id;
+}
+
+ECAD_INLINE EScenarioId EBondwire::GetDynamicPowerScenario() const
+{
+    return m_scenario;
 }
 
 ECAD_INLINE void EBondwire::Transform(const ETransform2D & transform)

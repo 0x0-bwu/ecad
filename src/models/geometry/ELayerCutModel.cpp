@@ -4,8 +4,8 @@
 
 namespace ecad::model {
 
-ECAD_INLINE ELayerCutModel::PowerBlock::PowerBlock(size_t polygon, LayerRange range, SPtr<ELookupTable1D> power)
- : polygon(polygon), range(std::move(range)), power(power)
+ECAD_INLINE ELayerCutModel::PowerBlock::PowerBlock(size_t polygon, LayerRange range, EScenarioId scen, SPtr<ELookupTable1D> power)
+ : polygon(polygon), range(std::move(range)), scen(scen), power(power)
 {
 }
 

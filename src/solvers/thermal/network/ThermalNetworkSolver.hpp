@@ -76,7 +76,30 @@ namespace thermal::solver {
     using Sample = std::vector<num_type>;
 
     template <typename num_type>
-    using Samples = std::list<Sample<num_type>>;
+    using Samples = std::vector<Sample<num_type>>;
+
+    template <typename num_type>
+    struct TimeWindow
+    {
+        num_type start{0};
+        num_type end{0};
+        num_type interval{std::numeric_limits<num_type>::max()};
+        TimeWindow(num_type start, num_type end, num_type interval)
+            : start(start), end(end), interval(interval)
+        {
+            assert(start < end);
+        }
+
+        bool isInside(num_type t) const
+        {
+            return math::Within<math::Close>(t, start, end);
+        }
+
+        size_t EsitimateSamples() const
+        {
+            return (end - start) / interval;
+        }
+    };
 
     template <typename num_type>
     class ThermalNetworkTransientSolver
@@ -85,56 +108,42 @@ namespace thermal::solver {
         using StateType = std::vector<num_type>;
         struct Sampler
         {
-            bool verbose{false};
+            num_type endT{0};
             num_type prev{0};
             num_type count{0};
-            num_type window{0};
-            num_type interval{0};
+            bool verbose{false};
+            StateType & lastState;
             Samples<num_type> & samples;
+            TimeWindow<num_type> window;
             const ThermalNetworkTransientSolver & solver;
-            Sampler(const ThermalNetworkTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval, bool verbose)
-                : verbose(verbose), window(window), interval(interval), samples(samples), solver(solver) {}
+            Sampler(const ThermalNetworkTransientSolver & solver, Samples<num_type> & samples, StateType & lastState, TimeWindow<num_type> window, num_type endT, bool verbose)
+             : endT(endT), verbose(verbose), lastState(lastState), samples(samples), window(std::move(window)), solver(solver)
+            {
+                if (not samples.empty())
+                    prev = samples.back().front();
+                samples.reserve(window.EsitimateSamples());
+            }
             virtual ~Sampler() = default;
             void operator() (const StateType & x, num_type t)
             {
-                if (count += t - prev; count > interval) {
-                    const auto & probs = solver.Probs();
-                    Sample<num_type> sample; sample.reserve(probs.size());
-                    sample.emplace_back(t);
-                    for (auto p : probs) sample.emplace_back(generic::unit::Kelvins2Celsius(x[p]));
-                    if (verbose) {
-                        ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                if (window.isInside(t)) {
+                    if (count += t - prev; count > window.interval) {
+                        const auto & probs = solver.Probs();
+                        Sample<num_type> sample; sample.reserve(probs.size() + 1);
+                        sample.emplace_back(t);
+                        for (auto p : probs) sample.emplace_back(x[p]);
+                        if (verbose) {
+                            auto res = sample;
+                            auto begin = res.begin(); begin++;
+                            std::for_each(begin, res.end(), [](auto & t){ t = generic::unit::Kelvins2Celsius(t); });
+                            ECAD_TRACE(generic::fmt::Fmt2Str(res, ","))
+                        }
+                        samples.emplace_back(std::move(sample));
+                        count = 0;
                     }
-                    samples.emplace_back(std::move(sample));
-                    while (t - samples.front().front() > window) {
-                        samples.pop_front();
-                    }
-                    count = 0;
+                    prev = t;
                 }
-                prev = t;
-            }
-        };
-
-        struct FileRecorder
-        {
-            num_type prev{0};
-            num_type count{0};
-            num_type interval;
-            std::ostream & os;
-            const ThermalNetworkTransientSolver & solver;
-            FileRecorder(const ThermalNetworkTransientSolver & solver, std::ostream & os, num_type interval)
-                : interval(interval), os(os), solver(solver) {}
-            virtual ~FileRecorder() = default;
-            void operator() (const StateType & x, num_type t)
-            {
-                if (count += t - prev; count > interval) {
-                    os << t;
-                    for (auto p : solver.Probs())
-                        os << ',' << x[p];
-                    os << GENERIC_DEFAULT_EOL;
-                    count = 0;
-                }
-                prev = t;
+                if (math::GE<num_type>(t, endT)) lastState = x;
             }
         };
     
@@ -142,6 +151,7 @@ namespace thermal::solver {
         {
             num_type refT = 25;
             DenseVector<num_type> hf;
+            DenseVector<num_type> scen;
             SparseMatrix<num_type> hfP;
             SparseMatrix<num_type> htcM;
             SparseMatrix<num_type> coeff;
@@ -155,9 +165,12 @@ namespace thermal::solver {
 
                 htcM = invC * makeBondsRhs(network, refT);
                 hfP = invC * makeSourceProjMatrix(network, rhs2Nodes);
+                scen = DenseVector<num_type>(rhs2Nodes.size());
                 hf = DenseVector<num_type>(rhs2Nodes.size());
-                for (auto [rhs, node] : rhs2Nodes)
+                for (auto [rhs, node] : rhs2Nodes) {
+                    scen[rhs] = network[node].scen;
                     hf[rhs] = network[node].hf;
+                }
             }
             virtual ~Intermidiate() = default;
             size_t StateSize() const { return coeff.cols(); }
@@ -177,9 +190,10 @@ namespace thermal::solver {
                 using VectorType = Eigen::Matrix<num_type, Eigen::Dynamic, 1>;
                 Eigen::Map<const VectorType> xM(x.data(), x.size());
                 Eigen::Map<VectorType> dxdtM(dxdt.data(), dxdt.size());
-                num_type excitation = e ? (*e)(t) : 1;
-                for (int i = 0; i < im.hf.size(); ++i)
+                for (int i = 0; i < im.hf.size(); ++i) {
+                    num_type excitation = e ? (*e)(t, im.scen[i]) : 1;
                     hf[i] = im.hf[i] * excitation;
+                }
                 dxdtM = im.coeff * xM + im.htcM + im.hfP * hf;
             }
         };
@@ -192,14 +206,6 @@ namespace thermal::solver {
 
         virtual ~ThermalNetworkTransientSolver() = default;
         size_t StateSize() const { return m_im->StateSize(); }
-
-        template <typename Observer = Sampler, typename Excitation>
-        size_t Solve(StateType & initState, num_type t0, num_type duration, num_type dt, Observer observer, const Excitation * e = nullptr)
-        {
-            if (initState.size() != StateSize()) return 0;
-            using namespace boost::numeric::odeint;
-            return integrate_const(runge_kutta4<StateType>{}, Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, std::move(observer));
-        }
 
         template <typename Observer = Sampler, typename Excitation>
         size_t SolveAdaptive(StateType & initState, num_type t0, num_type duration, num_type dt, num_type absErr, num_type relErr, Observer observer, const Excitation * e = nullptr)
@@ -286,62 +292,43 @@ namespace thermal::solver {
         struct Sampler
         {
             StateType out;
-            bool verbose{false};
+            num_type endT{0};
             num_type prev{0};
             num_type count{0};
-            num_type window{0};
-            num_type interval{0};
+            bool verbose{false};
+            StateType & lastState;
+            TimeWindow<num_type> window;
             Samples<num_type> & samples;
             const ThermalNetworkReducedTransientSolver & solver;
-            Sampler(const ThermalNetworkReducedTransientSolver & solver, Samples<num_type> & samples, num_type window, num_type interval, bool verbose)
-                : verbose(verbose), window(window), interval(interval), samples(samples), solver(solver) {}
+            Sampler(const ThermalNetworkReducedTransientSolver & solver, Samples<num_type> & samples, StateType & lastState, TimeWindow<num_type> window, num_type endT, bool verbose)
+             : endT(endT), verbose(verbose), lastState(lastState), window(std::move(window)), samples(samples), solver(solver)
+            {
+                if (not samples.empty())
+                    prev = samples.back().front();
+                samples.reserve(window.EsitimateSamples());
+            }
             virtual ~Sampler() = default;
             void operator() (const StateType & x, num_type t)
             {
-                if (count += t - prev; count > interval) {
-                    solver.Im().State2Output(x, out);
-                    Sample<num_type> sample; sample.reserve(out.size() + 1);
-                    sample.emplace_back(t);
-                    for (const auto & o : out)
-                        sample.emplace_back(generic::unit::Kelvins2Celsius(o));
-                    if (verbose) {
-                        ECAD_TRACE(generic::fmt::Fmt2Str(sample, ","))
+                if (window.isInside(t)) {
+                    if (count += t - prev; count > window.interval) {
+                        solver.Im().State2Output(x, out);
+                        Sample<num_type> sample; sample.reserve(out.size() + 1);
+                        sample.emplace_back(t);
+                        for (const auto & o : out)
+                            sample.emplace_back(o);
+                        if (verbose) {
+                            auto res = sample;
+                            auto begin = res.begin(); begin++;
+                            std::for_each(begin, res.end(), [](auto & t){ t = generic::unit::Kelvins2Celsius(t); });
+                            ECAD_TRACE(generic::fmt::Fmt2Str(res, ","))
+                        }
+                        samples.emplace_back(std::move(sample));
+                        count = 0;
                     }
-                    samples.emplace_back(std::move(sample));
-                    while (t - samples.front().front() > window) {
-                        samples.pop_front();
-                    }
-                    count = 0;
+                    prev = t;
                 }
-                prev = t;
-            }
-        };
-
-        struct FileRecorder
-        {
-            StateType out;
-            num_type prev{0};
-            num_type count{0};
-            num_type interval;
-            std::ostream & os;
-            const ThermalNetworkReducedTransientSolver & solver;
-            FileRecorder(const ThermalNetworkReducedTransientSolver & solver, std::ostream & os, num_type interval)
-                : interval(interval), os(os), solver(solver) {}
-
-            virtual ~FileRecorder() = default;
-
-            void operator()(const StateType & x, num_type t)
-            {   
-                if (count += t - prev; count > interval)
-                {
-                    os << t;
-                    solver.Im().State2Output(x, out);
-                    for (auto o : out)
-                        os << ',' << o;
-                    os << GENERIC_DEFAULT_EOL;
-                    count = 0;
-                }
-                prev = t;
+                if (math::GE<num_type>(t, endT)) lastState = x;
             }
         };
 
@@ -354,10 +341,10 @@ namespace thermal::solver {
             virtual ~Solver() = default;
             void operator() (const StateType & x, StateType & dxdt, num_type t)
             {
-                num_type excitation = e ? (*e)(t) : 1;
                 const size_t nodes = im.network.Size();
                 for (size_t i = 0, s = 0; i < nodes; ++i) {
                     const auto & node = im.network[i];
+                    num_type excitation = e ? (*e)(t, node.scen) : 1;
                     if (node.hf != 0 || (im.includeBonds && node.htc != 0))
                         im.uh[s++] = node.hf * excitation + node.htc * im.refT;
                 }
@@ -377,22 +364,9 @@ namespace thermal::solver {
 
         virtual ~ThermalNetworkReducedTransientSolver() = default;
 
-        template <typename Observer = FileRecorder, typename Excitation>
-        size_t Solve(StateType & initT, num_type t0, num_type duration, num_type dt, Observer observer, const Excitation * e = nullptr)
+        template <typename Observer = Sampler, typename Excitation>
+        size_t SolveAdaptive(StateType & initState, num_type t0, num_type duration, num_type dt, num_type absErr, num_type relErr, Observer observer, const Excitation * e = nullptr)
         {
-            StateType initState;
-            if (not m_im->Input2State(initT, initState)) return 0;
-
-            using namespace boost::numeric::odeint;
-            return integrate_const(runge_kutta4<StateType>{}, Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
-        }
-
-        template <typename Observer = FileRecorder, typename Excitation>
-        size_t SolveAdaptive(StateType & initT, num_type t0, num_type duration, num_type dt, num_type absErr, num_type relErr, Observer observer, const Excitation * e = nullptr)
-        {
-            StateType initState;
-            if (not m_im->Input2State(initT, initState)) return 0;
-
             using namespace boost::numeric::odeint;
             using ErrorStepperType = runge_kutta_cash_karp54<StateType>;
             return integrate_adaptive(make_controlled<ErrorStepperType>(absErr, relErr),

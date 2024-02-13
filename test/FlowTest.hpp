@@ -79,7 +79,7 @@ void t_thermal_static_flow1()
 
 void t_thermal_static_flow2()
 {
-    EDataMgr::Instance().Init();
+    EDataMgr::Instance().Init(ELogLevel::Trace);//wbtest
     auto & eDataMgr = EDataMgr::Instance();
 
     //database
@@ -182,7 +182,7 @@ void t_thermal_static_flow2()
     auto sourceNet = eDataMgr.CreateNet(sicLayout, "Source"); BOOST_CHECK(sourceNet);
 
     //wire
-    EFloat bwRadius = 250;//um
+    EFloat bwRadius = 150;//um
     std::vector<FPoint2D> ps1 {{0, 0}, {14200, 0}, {14200, 3500}, {5750, 3500}, {5750, 9150}, {0, 9150}};
     BOOST_CHECK(eDataMgr.CreateGeometry2D(sicLayout, iLyrWire, sourceNet->GetNetId(), eDataMgr.CreateShapePolygon(coordUnits, std::move(ps1))));
 
@@ -219,14 +219,14 @@ void t_thermal_static_flow2()
     sourceBW1->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW1->SetStartComponent(comp1, "Source1");
     sourceBW1->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{2500, 8700}), false);
-    sourceBW1->SetCurrent(20);
+    sourceBW1->SetCurrent(10);
 
     auto sourceBW2 = eDataMgr.CreateBondwire(sicLayout, "SourceBW2", sourceNet->GetNetId(), bwRadius);
     BOOST_CHECK(sourceBW2);
     sourceBW2->SetBondwireType(EBondwireType::JEDEC4);
     sourceBW2->SetStartComponent(comp1, "Source2");
     sourceBW2->SetEndLayer(iLyrWire, coordUnits.toCoord(FPoint2D{3500, 8700}), false);
-    sourceBW2->SetCurrent(20);
+    sourceBW2->SetCurrent(10);
 
     auto sourceBW3 = eDataMgr.CreateBondwire(sicLayout, "SourceBW3", sourceNet->GetNetId(), bwRadius);
     BOOST_CHECK(sourceBW3);
@@ -283,11 +283,11 @@ void t_thermal_static_flow2()
     bondwireSolderDefData->SetTopSolderBumpMaterial(matSolder->GetName());
     bondwireSolderDefData->SetBotSolderBallMaterial(matSolder->GetName());
     
-    auto bumpR = bwRadius * 1.2 * 1e3;
-    auto topBump = eDataMgr.CreateShapeCircle({0, 0}, bumpR); BOOST_CHECK(topBump);
+    auto bumpR = bwRadius * 1.1;
+    auto topBump = eDataMgr.CreateShapeCircle(coordUnits,{0, 0}, bumpR); BOOST_CHECK(topBump);
     bondwireSolderDefData->SetTopSolderBumpParameters(std::move(topBump), 100);
     
-    auto botBall = eDataMgr.CreateShapeCircle({0, 0}, bumpR); BOOST_CHECK(botBall);
+    auto botBall = eDataMgr.CreateShapeCircle(coordUnits,{0, 0}, bumpR); BOOST_CHECK(botBall);
     bondwireSolderDefData->SetBotSolderBallParameters(std::move(botBall), 100);
 
     bondwireSolderDef->SetPadstackDefData(std::move(bondwireSolderDefData));

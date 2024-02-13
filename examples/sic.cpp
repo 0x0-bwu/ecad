@@ -146,15 +146,6 @@ Ptr<IComponentDef> CreateDiodeComponentDef(Ptr<IDatabase> database)
     return diode;
 }
 
-Ptr<IComponentDef> CreateR1ComponentDef(Ptr<IDatabase> database)
-{
-    auto r1 = eDataMgr.CreateComponentDef(database, "R1");
-    r1->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-1.1, -0.7), FPoint2D(1.1, 0.7)));
-    r1->SetMaterial(MAT_SIC.data());//wbtest
-    r1->SetHeight(0.5);
-    return r1;
-}
-
 Ptr<IComponentDef> CreateGateResistanceComponentDef(Ptr<IDatabase> database)
 {  
     auto r = eDataMgr.CreateComponentDef(database, RES_GATE.data());
@@ -217,12 +208,14 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
         bw1->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
         bw1->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false);
         bw1->SetCurrent(15);
+        bw1->SetDynamicPowerScenario(0);
 
         dPLoc[i][1] *= -1; sPLoc[i][1] *= -1;
         auto bw2 = eDataMgr.CreateBondwire(baseLayout, "DS2_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);
         bw2->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
         bw2->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false); 
         bw2->SetCurrent(15);
+        bw1->SetDynamicPowerScenario(0);
     }
     std::vector<FPoint2D> gPLoc{{-3, 3}, {-3, 1.8}};
     for (size_t i = 0; i < gPLoc.size(); ++i) {
@@ -292,28 +285,25 @@ Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
     eDataMgr.CreateNet(driverLayout, "Source");
 
     //wire
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, 9.625}, {4.7, 9.625}, {4.7, 13.925}, {-4.7, 13.925}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, 4.325}, {4.7, 4.325}, {4.7,  8.625}, {-4.7,  8.625}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, -13.925}, {4.7, -13.925}, {4.7, 1.075}, {3.2, 1.075},
-        {3.2, -1.775}, {4.2, -1.775}, {4.2, -4.925}, {3.2, -4.925}, {3.2, -7.025}, {4.2, -7.025}, {4.2, -11.425}, {-1.5, -11.425}, {-1.5, -9.725}, {-4.7, -9.725}}, 0.25)
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7,   9.625}, {4.7,   9.625}, {4.7, 13.925}, {1.7, 13.925}}, 0.25));
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7,   4.325}, {4.7,   4.325}, {4.7,  8.625}, {1.7,  8.625}}, 0.25));
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7, -13.925}, {4.7, -13.925}, {4.7,  1.075}, {3.2,  1.075},
+        {3.2, -1.775}, {4.2, -1.775}, {4.2, -4.925}, {3.2, -4.925}, {3.2, -7.025}, {4.2, -7.025}, {4.2, -11.425}, {1.7, -11.425}}, 0.25)
     );
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, -8.525}, {1.7, -8.525}, {1.7, -10.325}, {3.2, -10.325},
-        {3.2, -8.225}, {2.2, -8.225}, {2.2, -3.875}, {3.2, -3.875}, {3.2, -2.825}, {2.2, -2.825}, {2.2, 2.175}, {4.7, 2.175}, {4.7, 3.225}, {1.7, 3.225}, {1.7, -4.325}, {-4.7, -4.325}}, 0.25)
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7, -10.325}, {3.2, -10.325},
+        {3.2, -8.225}, {2.2, -8.225}, {2.2, -3.875}, {3.2, -3.875}, {3.2, -2.825}, {2.2, -2.825}, {2.2, 2.175}, {4.7, 2.175}, {4.7, 3.225}, {1.7, 3.225}}, 0.25)
     );
 
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}, 0.25));
-    // eDataMgr.CreateGeometry2D(driverLayout, driverLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-4.7, -13.925}, {4.7, -13.925}, {4.7, 13.925}, {-4.7, 13.925}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5, -14.225}, {5, -14.225}, {5, 14.225}, {-5, 14.225}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}, 0.25));
-
-    auto r1 = eDataMgr.FindComponentDefByName(database, "R1");
-    eDataMgr.CreateComponent(driverLayout, "R1", r1, driverLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, math::Rad(90), {2.75, 9.125}), false);
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{0.9, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {0.9, 14.725}}, 0.25));
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.4, -14.225}, {5.0, -14.225}, {5.0, 14.225}, {1.4, 14.225}}, 0.25));
+    eDataMgr.CreateGeometry2D(driverLayout, driverLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{0.9, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {0.9, 14.725}}, 0.25));
 
     return driverLayout;
 }
 
 Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vector<FPoint2D> & locations)
 {
+    constexpr size_t scenarioId = 0;
     //placement area: {-9.65, -3.65}, {-2.5, -3.65}, {-2.5, -8.7}, {7.85, -8.7}, {7.85, 11.35}, {-9.65, 11.35}
     const auto & coordUnits = database->GetCoordUnits();
     auto botBridgeCell = eDataMgr.CreateCircuitCell(database, "BotBridgeCell");
@@ -359,8 +349,10 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vecto
     dieComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Die2", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(1)), false);
     dieComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Die3", sicDie, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(2)), false);
     for (auto [t, p] :  GetSicDieTemperatureAndPowerConfig()) {
-        for (auto die : dieComp)
+        for (auto die : dieComp) {
             die->SetLossPower(t, p);
+            die->SetDynamicPowerScenario(scenarioId);
+        }
     }
 
     std::array<Ptr<IComponent>, 3> diodeComp;
@@ -407,6 +399,7 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vecto
             bw->SetStartComponent(diodeComp[i], oPins.at(j));
             bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
             bw->SetCurrent(10);
+            bw->SetDynamicPowerScenario(scenarioId);
         }
     }
     for (size_t i = 0; i < diodeComp.size(); ++i) {
@@ -415,6 +408,7 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vecto
             bw->SetStartComponent(diodeComp[i], iPins.at(j));
             bw->SetEndComponent(diodeComp[i], oPins.at(j));
             bw->SetCurrent(10);
+            bw->SetDynamicPowerScenario(scenarioId);
             bw->SetHeight(0.1);
         }
     }
@@ -429,6 +423,7 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vecto
 
 Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vector<FPoint2D> & locations)
 {
+    constexpr size_t scenarioId = 1;
     //placement area: {-7.85, -8.7}, {9.65, -8.7}, {9.65, 11.35}, {-7.85, 11.35}
     const auto & coordUnits = database->GetCoordUnits();
     auto topBridgeCell = eDataMgr.CreateCircuitCell(database, "TopBridgeCell");
@@ -480,8 +475,10 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vecto
     dieComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Die2", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(1), EMirror2D::Y), false);
     dieComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Die3", sicDie, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(2), EMirror2D::Y), false);
     for (auto [t, p] :  GetSicDieTemperatureAndPowerConfig()) {
-        for (auto die : dieComp)
+        for (auto die : dieComp) {
             die->SetLossPower(t, p);
+            die->SetDynamicPowerScenario(scenarioId);
+        }
     }
 
     std::array<Ptr<IComponent>, 3> diodeComp;
@@ -514,6 +511,7 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vecto
             bw->SetStartComponent(dieComp[i], iPins.at(j));
             bw->SetEndComponent(diodeComp[i], iPins.at(j));
             bw->SetCurrent(10);
+            bw->SetDynamicPowerScenario(scenarioId);
         }
     }
 
@@ -529,6 +527,7 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vecto
             bw->SetStartComponent(diodeComp[i], oPins.at(j));
             bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
             bw->SetCurrent(10);
+            bw->SetDynamicPowerScenario(scenarioId);
         }
     }
     for (size_t i = 0; i < diodeComp.size(); ++i) {
@@ -537,6 +536,7 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vecto
             bw->SetStartComponent(diodeComp[i], iPins.at(j));
             bw->SetEndComponent(diodeComp[i], oPins.at(j));
             bw->SetCurrent(10);
+            bw->SetDynamicPowerScenario(scenarioId);
             bw->SetHeight(0.1);
         }
     }
@@ -568,7 +568,6 @@ Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat>
     //component
     CreateSicDieComponentDef(database);
     CreateDiodeComponentDef(database);
-    CreateR1ComponentDef(database);
     CreateGateResistanceComponentDef(database);
 
     auto baseLayout = CreateBaseLayout(database);
@@ -576,10 +575,8 @@ Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat>
     auto driverLayerMap = CreateDefaultLayerMap(database, driverLayout, baseLayout, "DriverLayerMap");
     
     //instance
-    auto driverL = eDataMgr.CreateCellInst(baseLayout, "DriverL", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-44, 0}));
-    driverL->SetLayerMap(driverLayerMap);
-    auto driverR = eDataMgr.CreateCellInst(baseLayout, "DriverR", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {44, 0}, EMirror2D::XY));
-    driverR->SetLayerMap( driverLayerMap);
+    auto driver = eDataMgr.CreateCellInst(baseLayout, "Driver", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {44, 0}, EMirror2D::XY));
+    driver->SetLayerMap( driverLayerMap);
 
     std::vector<FPoint2D> botCompLoc;
     for (size_t i = 0; i < 6; ++i)
@@ -655,7 +652,7 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.meshSettings.iteration = 1e5;
     prismaSettings.meshSettings.minAlpha = 20;
     prismaSettings.meshSettings.minLen = 1e-4;
-    prismaSettings.meshSettings.maxLen = 1;
+    prismaSettings.meshSettings.maxLen = 2.5;
     prismaSettings.meshSettings.tolerance = 1e-6;
     prismaSettings.layerCutSettings.layerTransitionRatio = 3;
     prismaSettings.meshSettings.dumpMeshFile = true;
@@ -689,26 +686,34 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 {
     auto extractionSettings = ExtractionSettings(workDir);
     extractionSettings.meshSettings.genMeshByLayer = true;
-    extractionSettings.meshSettings.maxLen = 10;
+    extractionSettings.meshSettings.maxLen = 2;
+    extractionSettings.meshSettings.minAlpha = 20;
     extractionSettings.layerCutSettings.layerTransitionRatio = 0;
 
     EThermalTransientSimulationSetup setup;
-    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = workDir;
-    setup.settings.mor = true;
-    setup.settings.verbose = true;
-    setup.settings.adaptive = true;
+    setup.monitors = GetDieMonitors(layout);
+    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
+    setup.settings.mor = false;
+    setup.settings.verbose = false;
     setup.settings.dumpResults = true;
-    setup.settings.duration = 10;
-    setup.settings.step = 1e-5;
-    setup.settings.samplingWindow = 10;
-    setup.settings.minSamplingInterval = 1e-8;
-    setup.settings.absoluteError = 1e-2;
-    setup.settings.relativeError = 1e-3;
+    setup.settings.duration = 20;
+    setup.settings.step = 0.1;
+    setup.settings.temperatureDepend = true;
+    setup.settings.samplingWindow = 1;
+    setup.settings.minSamplingInterval = 1e-6;
+    setup.settings.absoluteError = 1e-5;
+    setup.settings.relativeError = 1e-5;
     setup.settings.threads = eDataMgr.Threads();
-    EThermalTransientExcitation excitation = [](EFloat t){ return std::abs(std::cos(generic::math::pi * t / 0.05)); };
-    // setup.settings.excitation = &excitation;
-    setup.settings.verbose = true;
+    EThermalTransientExcitation excitation = [](EFloat t, size_t scen) -> EFloat { 
+        constexpr EFloat period = 1e-4;
+        switch (scen) {
+            case 0 : return std::max<EFloat>(0,  std::sin(generic::math::pi * t / period));
+            case 1 : return std::max<EFloat>(0, -std::sin(generic::math::pi * t / period));
+            default : { ECAD_ASSERT(false); return 0; }
+        }
+    };
+    setup.settings.excitation = &excitation;
     auto [minT, maxT] = layout->RunThermalSimulation(extractionSettings, setup);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
@@ -721,7 +726,11 @@ int main(int argc, char * argv[])
     ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
 
     std::string workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    std::vector<EFloat> parameters{-5.28567,8.71075,-2.74413,3.66734,-5.11722,-1.0521,3.59522,7.21218,5.19589,1.69307,1.5553,-4.52975,4.9841,8.19302,5.90878,3.66795,6.4255,-5.00371,-3.70274,7.93932,-3.86449,0.442597,-4.93669,-4.93856};
+    std::vector<EFloat> parameters = {
+        -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
+        5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,
+    };
+    // std::vector<EFloat> parameters{-6.28323,9.1159,-6.13371,3.41274,-4.54684,-1.35806,4.60621,8.17798,3.8993,1.42668,2.64954,-4.95307,4.75943,8.76399,4.25377,0.922324,5.61007,-5.06671,-4.21649,7.63576,-4.1069,2.27594,-3.74797,-5.25336,};
     auto layout = SetupDesign("CREE62mm", parameters);
     StaticThermalFlow(layout, workDir);
     // TransientThermalFlow(layout, workDir);

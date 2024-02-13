@@ -106,7 +106,7 @@ ECAD_INLINE void EStackupPrismaThermalModelBuilder::AddBondWiresFromLayerCutMode
             auto next = curr + 1;
             auto p1 = FPoint3D(pts.at(curr)[0] * m_model->m_scaleH2Unit, pts.at(curr)[1] * m_model->m_scaleH2Unit, bondwire.heights.at(curr));
             auto p2 = FPoint3D(pts.at(next)[0] * m_model->m_scaleH2Unit, pts.at(next)[1] * m_model->m_scaleH2Unit, bondwire.heights.at(next));
-            auto & line = m_model->AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current);
+            auto & line = m_model->AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current, bondwire.scenario);
             //connection
             if (0 == curr) {
                 std::vector<utils::EStackupPrismaThermalModelQuery::RtVal> results;

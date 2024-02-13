@@ -40,7 +40,7 @@ ECAD_INLINE PrismaLayer & EPrismaThermalModel::AppendLayer(PrismaLayer layer)
     return layers.emplace_back(std::move(layer));
 }
 
-ECAD_INLINE LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current)
+ECAD_INLINE LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current, size_t scenario)
 {
     ECAD_ASSERT(TotalPrismaElements() > 0/*should add after build prisma model*/)
     LineElement & element = m_lines.emplace_back(LineElement{});
@@ -48,6 +48,7 @@ ECAD_INLINE LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FP
     element.endPoints.front() = AddPoint(std::move(start));
     element.endPoints.back() = AddPoint(std::move(end));
     element.current = current;
+    element.scenario = scenario;
     element.radius = radius;
     element.matId = matId;
     element.netId = netId;
@@ -128,7 +129,7 @@ ECAD_INLINE void EPrismaThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerC
             auto next = curr + 1;
             auto p1 = FPoint3D(pts.at(curr)[0] * m_scaleH2Unit, pts.at(curr)[1] * m_scaleH2Unit, bondwire.heights.at(curr));
             auto p2 = FPoint3D(pts.at(next)[0] * m_scaleH2Unit, pts.at(next)[1] * m_scaleH2Unit, bondwire.heights.at(next));
-            auto & line = AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current);
+            auto & line = AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current, bondwire.scenario);
             //connection
             if (0 == curr) {
                 std::vector<utils::EPrismaThermalModelQuery::RtVal> results;

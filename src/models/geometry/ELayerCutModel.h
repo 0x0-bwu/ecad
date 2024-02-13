@@ -28,8 +28,9 @@ public:
     {
         size_t polygon;
         LayerRange range;
+        EScenarioId scen;
         SPtr<ELookupTable1D> power;
-        PowerBlock(size_t polygon, LayerRange range, SPtr<ELookupTable1D> power);
+        PowerBlock(size_t polygon, LayerRange range, EScenarioId scen, SPtr<ELookupTable1D> power);
     };
 
     struct Bondwire
@@ -38,6 +39,7 @@ public:
         EFloat radius{0};
         EMaterialId matId;
         EFloat current{0};
+        size_t scenario{invalidIndex};
         std::vector<EFloat> heights;
         std::vector<EPoint2D> pt2ds;
     };

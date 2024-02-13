@@ -30,6 +30,9 @@ public:
     virtual EFloat GetLossPower(EFloat kelvin) const = 0;
     virtual const ELookupTable1D & GetLossPowerTable() const = 0;
 
+    virtual void SetDynamicPowerScenario(EScenarioId id) = 0;
+    virtual EScenarioId GetDynamicPowerScenario() const = 0;
+
     virtual EBox2D GetBoundingBox() const = 0;
 
     virtual void SetFlipped(bool flipped) = 0;

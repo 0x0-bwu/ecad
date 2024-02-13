@@ -59,6 +59,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildPrismaElement(const std::vec
             p *= inst.element->powerRatio;
             summary.iHeatFlow += p;
             network->AddHF(i, p);
+            network->SetScenario(i, inst.element->powerScenario);
         }
 
         auto c = GetMatSpecificHeat(inst.element->matId, iniT.at(i));
@@ -156,6 +157,7 @@ ECAD_INLINE void EPrismaThermalNetworkBuilder::BuildLineElement(const std::vecto
 
         auto jh = GetLineJouleHeat(index, iniT.at(index));
         network->AddHF(index, jh);
+        network->SetScenario(index, line.scenario);
         summary.iHeatFlow += jh;
         
         auto k = GetMatThermalConductivity(line.matId, iniT.at(index));

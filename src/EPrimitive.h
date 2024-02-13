@@ -117,6 +117,9 @@ public:
     void SetCurrent(EFloat current) override;
     EFloat GetCurrent() const override;
 
+    void SetDynamicPowerScenario(EScenarioId id) override;
+    EScenarioId GetDynamicPowerScenario() const override;
+
     void Transform(const ETransform2D & transform) override;
 
 protected:
@@ -133,6 +136,7 @@ protected:
     EFloat m_radius{0};
     EFloat m_height{0};
     EFloat m_current{0};
+    EScenarioId m_scenario{invalidIndex};
     CPtr<IPadstackDef> m_solderJoints{nullptr};
     EBondwireType m_bondwireType{EBondwireType::Simple};
 };

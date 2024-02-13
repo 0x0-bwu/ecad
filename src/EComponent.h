@@ -28,6 +28,9 @@ public:
     EFloat GetLossPower(EFloat kelvin) const override;
     const ELookupTable1D & GetLossPowerTable() const override;
 
+    void SetDynamicPowerScenario(EScenarioId id) override;
+    EScenarioId GetDynamicPowerScenario() const override;
+
     EBox2D GetBoundingBox() const override;
 
     void SetFlipped(bool flipped) override;
@@ -47,6 +50,7 @@ protected:
     CPtr<IComponentDef> m_compDef;
     ELayerId m_placement{ELayerId::noLayer};
     ELookupTable1D m_lossPower;
+    EScenarioId m_scenario{invalidIndex};
     bool m_flipped{false};
 };
 

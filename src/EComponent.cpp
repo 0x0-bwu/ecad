@@ -19,6 +19,7 @@ ECAD_INLINE void EComponent::save(Archive & ar, const unsigned int version) cons
     ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("loss_power", m_lossPower);
     ar & boost::serialization::make_nvp("flipped", m_flipped);
+    ar & boost::serialization::make_nvp("scenario", m_scenario);
 }
 
 template <typename Archive>
@@ -31,6 +32,7 @@ ECAD_INLINE void EComponent::load(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("placement", m_placement);
     ar & boost::serialization::make_nvp("loss_power", m_lossPower);
     ar & boost::serialization::make_nvp("flipped", m_flipped);
+    ar & boost::serialization::make_nvp("scenario", m_scenario);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponent)
@@ -103,6 +105,16 @@ ECAD_INLINE EFloat EComponent::GetLossPower(EFloat kelvin) const
 ECAD_INLINE const ELookupTable1D & EComponent::GetLossPowerTable() const
 {
     return m_lossPower;
+}
+
+ECAD_INLINE void EComponent::SetDynamicPowerScenario(EScenarioId id)
+{
+    m_scenario = id;
+}
+
+ECAD_INLINE EScenarioId EComponent::GetDynamicPowerScenario() const
+{
+    return m_scenario;
 }
 
 ECAD_INLINE EBox2D EComponent::GetBoundingBox() const

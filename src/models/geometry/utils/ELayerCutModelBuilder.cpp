@@ -41,13 +41,13 @@ ECAD_INLINE size_t ELayerCutModelBuilder::AddPolygon(ENetId netId, EMaterialId m
     return m_model->m_polygons.size() - 1;
 };
 
-ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygonData polygon, SPtr<ELookupTable1D> power, EFloat elevation, EFloat thickness, EFloat pwrPosition, EFloat pwrThickness)
+ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EScenarioId scen, SPtr<ELookupTable1D> power, EFloat elevation, EFloat thickness, EFloat pwrPosition, EFloat pwrThickness)
 {
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
     if (invalidIndex == index) return false;
     EFloat pe = elevation - thickness * pwrPosition;
     EFloat pt = std::min(thickness * pwrThickness, thickness - elevation + pe);
-    m_model->m_powerBlocks.emplace(index, ELayerCutModel::PowerBlock(index, GetLayerRange(pe, pt), power));
+    m_model->m_powerBlocks.emplace(index, ELayerCutModel::PowerBlock(index, GetLayerRange(pe, pt), scen, power));
     return true;
 }
 
@@ -59,8 +59,9 @@ ECAD_INLINE void ELayerCutModelBuilder::AddComponent(CPtr<IComponent> component)
     [[maybe_unused]] auto check = m_retriever->GetComponentHeightThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
 
     if (component->hasLossPower()) {
+        auto scen = component->GetDynamicPowerScenario();
         auto power = std::make_shared<ELookupTable1D>(component->GetLossPowerTable());
-        AddPowerBlock(material->GetMaterialId(), boundary, power, elevation, thickness);
+        AddPowerBlock(material->GetMaterialId(), boundary, scen, power, elevation, thickness);
     }
     else AddPolygon(ENetId::noNet, material->GetMaterialId(), boundary, false, elevation, thickness);
 

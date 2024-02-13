@@ -46,22 +46,20 @@ ECAD_INLINE size_t EPrismaThermalModelQuery::NearestLayer(EFloat height) const
         auto bot = top - layers.at(i).thickness;
         if (Within<LCRO>(height, bot, top)) return i;
     }
-    return layers.size();
+    return layers.size() - 1;
 }
 
 ECAD_INLINE CPtr<EPrismaThermalModelQuery::Rtree> EPrismaThermalModelQuery::BuildIndexTree() const
 {
+    std::lock_guard<std::mutex> lock(m_mutex);
     if (nullptr == m_rtree) {
-        std::lock_guard<std::mutex> lock(m_mutex);
-        if (nullptr == m_rtree) {
-            m_rtree.reset(new Rtree);
-            const auto & prismas = m_model->m_prismas;
-            const auto & triangulation = *m_model->GetLayerPrismaTemplate(0);
-            for (size_t i = 0; i < prismas.size(); ++i) {
-                auto it = prismas.at(i).element->templateId;
-                auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
-                m_rtree->insert(std::make_pair(point, i));
-            }
+        m_rtree.reset(new Rtree);
+        const auto & prismas = m_model->m_prismas;
+        const auto & triangulation = *m_model->GetLayerPrismaTemplate(0);
+        for (size_t i = 0; i < prismas.size(); ++i) {
+            auto it = prismas.at(i).element->templateId;
+            auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
+            m_rtree->insert(std::make_pair(point, i));
         }
     }
     return m_rtree.get();
@@ -69,10 +67,9 @@ ECAD_INLINE CPtr<EPrismaThermalModelQuery::Rtree> EPrismaThermalModelQuery::Buil
 
 ECAD_INLINE CPtr<EPrismaThermalModelQuery::Rtree> EPrismaThermalModelQuery::BuildLayerIndexTree(size_t layer) const
 {
-    if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();
-    
     std::lock_guard<std::mutex> lock(m_mutex);
     if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();
+
     auto rtree = std::make_shared<Rtree>();
     const auto & prismas = m_model->m_prismas;
     const auto & indexOffset = m_model->m_indexOffset;

@@ -95,58 +95,75 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
     ThermalNetworkBuilder builder(model);
     UPtr<ThermalNetwork<EFloat> > network;
     using Model = typename ThermalNetworkBuilder::ModelType;
-    std::vector<EFloat> results(traits::EThermalModelTraits<Model>::Size(model), envT);
     auto [probs, permutation] = GetProbsAndPermutation(settings.probs);
-    if (probs.empty()) {
-        network = builder.Build(results);
-        if (nullptr == network) return false;
-        ECAD_TRACE("total nodes: %1%", network->Size())
-        ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
-        ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
-                
-        ThermalNetworkSolver<EFloat> solver(*network);
-        solver.Solve(envT, results);
-
-        size_t maxId = std::distance(results.begin(), std::max_element(results.begin(), results.end()));
-        ECAD_TRACE("no input probs, will use static simulation hotspot id:%1% as prob!", maxId);
-        probs.emplace(maxId);
-        permutation.emplace_back(0);
-    }
-    if (nullptr == network) network = builder.Build(results);
+    if (probs.empty()) return false;
     
-    size_t steps;
+    size_t steps{0};
     Samples<EFloat> samples;
+    TimeWindow<EFloat> window(settings.duration - settings.samplingWindow, settings.duration, settings.minSamplingInterval);
+    ECAD_TRACE("duration: %1%, step: %2%, abs error: %3%, rel error: %4%", settings.duration, settings.step, settings.absoluteError, settings.relativeError);
     if (not settings.mor) {
         ECAD_EFFICIENCY_TRACK("transient orig")
         using TransSolver = ThermalNetworkTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
         using Sampler = typename TransSolver::Sampler;
-        TransSolver solver(*network, envT, probs);
-        Sampler sampler(solver, samples, settings.samplingWindow, settings.minSamplingInterval, settings.verbose);
-        StateType initState(solver.StateSize(), envT);
-        ECAD_TRACE("duration: %1%, step: %2%, abs error: %3%, rel error: %4%", settings.duration, settings.step, settings.absoluteError, settings.relativeError);
-        if (settings.adaptive)
-            steps = solver.SolveAdaptive(initState, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
-        else steps = solver.Solve(initState, EFloat{0}, settings.duration, settings.step, std::move(sampler), settings.excitation);
+        StateType initT(traits::EThermalModelTraits<Model>::Size(model), envT);
+        if (settings.temperatureDepend) {
+            EFloat time = 0;
+            while (time < settings.duration) {
+                if (settings.verbose)
+                    ECAD_TRACE("time:%1%/%2%", time, settings.duration)
+                auto network = builder.Build(initT);
+                TransSolver solver(*network, envT, probs);
+                Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
+                steps += solver.SolveAdaptive(initT, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+                time += settings.step;
+            }
+        }
+        else {
+            auto network = builder.Build(initT);
+            TransSolver solver(*network, envT, probs);
+            Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
+            steps = solver.SolveAdaptive(initT, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+        }
     }
     else {
         ECAD_EFFICIENCY_TRACK("transient mor")
         using TransSolver = ThermalNetworkReducedTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
         using Sampler = typename TransSolver::Sampler;
-        StateType initT(network->Size(), envT);
-        TransSolver solver(*network, envT, probs);
-        Sampler sampler(solver, samples, settings.samplingWindow, settings.minSamplingInterval, settings.verbose);
-        if (settings.adaptive)
-            steps = solver.SolveAdaptive(initT, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
-        else steps = solver.Solve(initT, EFloat{0}, settings.duration, settings.step, std::move(sampler), settings.excitation);
+        StateType initT(traits::EThermalModelTraits<Model>::Size(model), envT);
+        if (settings.temperatureDepend) {
+            EFloat time = 0;
+            while (time < settings.duration) {
+                ECAD_TRACE("time:%1%/%2%", time, settings.duration)
+                StateType initState;
+                auto network = builder.Build(initT);
+                TransSolver solver(*network, envT, probs);
+                if (not solver.Im().Input2State(initT, initState)) return false;
+                Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
+                steps += solver.SolveAdaptive(initState, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+                solver.Im().State2Output(initState, initT);
+                time += settings.step;
+            }
+        }
+        else {
+            StateType initState;
+            auto network = builder.Build(initT);
+            TransSolver solver(*network, envT, probs);
+            if (not solver.Im().Input2State(initT, initState)) return false;
+            Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
+            steps = solver.SolveAdaptive(initState, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+        }
     }
     for (auto & sample : samples) {
-        if (settings.envTemperature.unit == ETemperatureUnit::Celsius)
-            std::for_each(sample.begin(), sample.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
+        auto begin = sample.begin(); begin++;
+        if (settings.envTemperature.unit == ETemperatureUnit::Celsius) {
+            std::for_each(begin, sample.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
+        }
        
-        minT = std::min(minT, *std::min_element(++sample.begin(), sample.end()));
-        maxT = std::max(maxT, *std::max_element(++sample.begin(), sample.end()));
+        minT = std::min(minT, *std::min_element(begin, sample.end()));
+        maxT = std::max(maxT, *std::max_element(begin, sample.end()));
     }
     if (settings.dumpResults && not settings.workDir.empty()) {
         auto filename = settings.workDir + ECAD_SEPS + "trans.txt";
