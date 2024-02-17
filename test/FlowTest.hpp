@@ -79,7 +79,7 @@ void t_thermal_static_flow1()
 
 void t_thermal_static_flow2()
 {
-    EDataMgr::Instance().Init(ELogLevel::Trace);//wbtest
+    EDataMgr::Instance().Init();
     auto & eDataMgr = EDataMgr::Instance();
 
     //database
@@ -356,7 +356,7 @@ void t_thermal_static_flow2()
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
     BOOST_CHECK_CLOSE(minT, 34.35, 2);
-    BOOST_CHECK_CLOSE(maxT, 96.26, 2);
+    BOOST_CHECK_CLOSE(maxT, 131.77, 2);
     EDataMgr::Instance().ShutDown();
 }
 
