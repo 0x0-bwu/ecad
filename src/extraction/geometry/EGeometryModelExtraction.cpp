@@ -62,8 +62,6 @@ ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILa
                 if (auto current = bondwire->GetCurrent(); current > 0) {
                     EFloat resistivity;
                     check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }//wbtest, T
-                    auto polygon = shape->GetContour();//wbtest
-                    auto area = polygon.Area();//wbtest
                     auto r = resistivity * thickness / (shape->GetContour().Area() * scale2Unit * scale2Unit * scale2Meter);
                     ELookupTable1D table; table.AddSample(ETemperature::Celsius2Kelvins(25), current * current * r);
                     builder.AddPowerBlock(sjMat->GetMaterialId(), shape->GetContour(), bw.scenario, std::make_shared<ELookupTable1D>(table), elevation, thickness, 0.5);
@@ -78,8 +76,6 @@ ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILa
                 if (auto current = bondwire->GetCurrent(); current > 0) {
                     EFloat resistivity;
                     check = sjMat->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(25, resistivity); { ECAD_ASSERT(check) }//wbtest, T
-                    auto polygon = shape->GetContour();//wbtest
-                    auto area = polygon.Area();//wbtest
                     auto r = resistivity * thickness / (shape->GetContour().Area() * scale2Unit * scale2Unit * scale2Meter);
                     ELookupTable1D table; table.AddSample(ETemperature::Celsius2Kelvins(25), current * current * r);
                     builder.AddPowerBlock(sjMat->GetMaterialId(), shape->GetContour(), bw.scenario, std::make_shared<ELookupTable1D>(table), elevation, thickness, 0.5);
