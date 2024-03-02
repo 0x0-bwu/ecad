@@ -36,13 +36,20 @@ inline static constexpr std::string_view MAT_SAC305 = "SAC305";
 
 std::vector<std::pair<EFloat, EFloat>> GetSicDieTemperatureAndPowerConfig()
 {
-    std::vector<EFloat> caseT{-50, -25, 0, 25, 50, 75, 100, 125};
-    std::vector<std::pair<EFloat, EFloat> > results;
-    for (auto tc : caseT) {
-        // auto p = -14.28 * tc + 2143;
-        results.emplace_back(ETemperature::Celsius2Kelvins(tc), AVERAGE_LOSS_POWER);
-    }
-    return results;
+    return {
+        {ETemperature::Celsius2Kelvins(25), 108.0},
+        {ETemperature::Celsius2Kelvins(125), 124.0},
+        {ETemperature::Celsius2Kelvins(150), 126.5}
+    };
+}
+
+std::vector<std::pair<EFloat, EFloat>> GetDiodeTemperatureAndPowerConfig()
+{
+    return {
+        {ETemperature::Celsius2Kelvins(25), 20.4},
+        {ETemperature::Celsius2Kelvins(125), 21.7},
+        {ETemperature::Celsius2Kelvins(150), 21.8}
+    };
 }
 
 void SetupMaterials(Ptr<IDatabase> database)
@@ -361,6 +368,12 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vecto
     diodeComp[1] = eDataMgr.CreateComponent(botBridgeLayout, "Diode2", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(4)), false);
     diodeComp[2] = eDataMgr.CreateComponent(botBridgeLayout, "Diode3", diode, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(5)), false);
 
+    for (auto [t, p] :  GetDiodeTemperatureAndPowerConfig()) {
+        for (auto diode : diodeComp) {
+            diode->SetLossPower(t, p);
+        }
+    }
+
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
     eDataMgr.CreateComponent(botBridgeLayout, "R1", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 10.5}), false);
     eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 6.075}), false);
@@ -486,6 +499,12 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vecto
     diodeComp[0] = eDataMgr.CreateComponent(topBridgeLayout, "Diode1", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(3), EMirror2D::Y), false);
     diodeComp[1] = eDataMgr.CreateComponent(topBridgeLayout, "Diode2", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(4), EMirror2D::Y), false);
     diodeComp[2] = eDataMgr.CreateComponent(topBridgeLayout, "Diode3", diode, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, locations.at(5), EMirror2D::Y), false);
+
+    for (auto [t, p] :  GetDiodeTemperatureAndPowerConfig()) {
+        for (auto diode : diodeComp) {
+            diode->SetLossPower(t, p);
+        }
+    }
 
     auto resGate = eDataMgr.FindComponentDefByName(database, RES_GATE.data());
     eDataMgr.CreateComponent(topBridgeLayout, "R1", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 8.35}), false);
@@ -649,11 +668,13 @@ EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & wor
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismaSettings.botUniformBC.value = 2750;
     prismaSettings.meshSettings.genMeshByLayer = false;
-    prismaSettings.meshSettings.iteration = 1e5;
-    prismaSettings.meshSettings.minAlpha = 20;
+    if (prismaSettings.meshSettings.genMeshByLayer)
+        prismaSettings.meshSettings.imprintUpperLayer = true;
+    prismaSettings.meshSettings.iteration = 5e4;
+    prismaSettings.meshSettings.minAlpha = 18;
     prismaSettings.meshSettings.minLen = 1e-4;
     prismaSettings.meshSettings.maxLen = 2.5;
-    prismaSettings.meshSettings.tolerance = 1e-6;
+    prismaSettings.meshSettings.tolerance = 0;
     prismaSettings.layerCutSettings.layerTransitionRatio = 3;
     prismaSettings.meshSettings.dumpMeshFile = true;
     prismaSettings.layerCutSettings.dumpSketchImg = true;
