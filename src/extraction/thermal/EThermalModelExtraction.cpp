@@ -327,7 +327,12 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
     for (size_t i = 1; i < compact->TotalLayers(); ++i) {
         auto indices = compact->GetLayerPolygonIndices(i);
         if (indices != compact->GetLayerPolygonIndices(i - 1)) {
-            layerPolygons.emplace_back(compact->GetLayerPolygons(i));
+            auto polygons = compact->GetLayerPolygons(i);
+            if (settings.meshSettings.imprintUpperLayer) {
+                const auto & upperLyr = layerPolygons.back();
+                polygons.insert(polygons.end(), upperLyr.begin(), upperLyr.end());
+            }
+            layerPolygons.emplace_back(std::move(polygons));
             prismaTemplates.emplace_back(new PrismaTemplate);
         }
         layer2Template.emplace(i, prismaTemplates.size() - 1);

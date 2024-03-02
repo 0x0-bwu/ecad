@@ -54,6 +54,7 @@ struct EPrismaMeshSettings : public EMeshSettings
     size_t iteration = 0;
     bool dumpMeshFile = false;
     bool genMeshByLayer = false;
+    bool imprintUpperLayer = false;
 };
 
 struct ELayerCutModelExtractionSettings
