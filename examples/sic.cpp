@@ -662,25 +662,26 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
 
 EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
 {
+    EFloat htc = 5000;
     EPrismaThermalModelExtractionSettings prismaSettings;
     prismaSettings.threads = eDataMgr.Threads();
     prismaSettings.workDir = workDir;
     prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
-    prismaSettings.botUniformBC.value = 2750;
+    prismaSettings.botUniformBC.value = htc;
     prismaSettings.meshSettings.genMeshByLayer = false;
     if (prismaSettings.meshSettings.genMeshByLayer)
         prismaSettings.meshSettings.imprintUpperLayer = true;
-    prismaSettings.meshSettings.iteration = 5e4;
-    prismaSettings.meshSettings.minAlpha = 18;
-    prismaSettings.meshSettings.minLen = 1e-4;
-    prismaSettings.meshSettings.maxLen = 2.5;
+    prismaSettings.meshSettings.iteration = 1e5;
+    prismaSettings.meshSettings.minAlpha = 20;
+    prismaSettings.meshSettings.minLen = 1e-5;
+    prismaSettings.meshSettings.maxLen = 1;
     prismaSettings.meshSettings.tolerance = 0;
     prismaSettings.layerCutSettings.layerTransitionRatio = 3;
     prismaSettings.meshSettings.dumpMeshFile = true;
     prismaSettings.layerCutSettings.dumpSketchImg = true;
     prismaSettings.layerCutSettings.layerTransitionRatio = 0;
 
-    EFloat topHTC = 1e3;
+    EFloat topHTC = htc;
     prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
     prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, -8.7}, {-20.35, -4.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
     prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, 11.5}, {9.75, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
