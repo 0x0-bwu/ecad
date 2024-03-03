@@ -56,7 +56,7 @@ ECAD_ALWAYS_INLINE EFloat ELookupTable1D::Lookup(EFloat key) const
     if (m_data.size() == 1) return m_data.begin()->second;
     if (key < m_data.begin()->first) return m_data.begin()->second;
     if (key > m_data.rbegin()->first) return m_data.rbegin()->second;
-    auto h = m_data.lower_bound(key); 
+    auto h = m_data.lower_bound(key); if (h == m_data.begin()) return h->second;
     auto l = h; l--;
     return l->second + (key - l->first) * (h->second - l->second) / (h->first - l->first);
 }
