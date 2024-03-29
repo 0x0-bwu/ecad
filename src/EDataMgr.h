@@ -25,6 +25,7 @@ public:
 
     ///Thirdpart
     Ptr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap = std::string{});
+    Ptr<IDatabase> CreateDatabaseFromKiCad(const std::string & name, const std::string & kicad);
     Ptr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl);
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

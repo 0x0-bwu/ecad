@@ -5,6 +5,8 @@ extension/gds/ECadExtGdsHandler.cpp
 extension/gds/EGdsFileIO.cpp
 extension/gds/EGdsLayerMap.cpp
 extension/gds/EGdsParser.cpp
+extension/kicad/ECadExtKiCadHandler.cpp
+extension/kicad/EKiCadParser.cpp
 extension/xfl/ECadExtXflHandler.cpp
 extension/ECadExtension.cpp
 extraction/geometry/EGeometryModelExtraction.cpp

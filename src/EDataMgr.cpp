@@ -54,6 +54,11 @@ ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & n
     return ext::CreateDatabaseFromGds(name, gds, lyrMap);
 }
 
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromKiCad(const std::string & name, const std::string & kicad)
+{
+    return ext::CreateDatabaseFromKiCad(name, kicad);
+}
+
 ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & name, const std::string & xfl)
 {
     return ext::CreateDatabaseFromXfl(name, xfl);
