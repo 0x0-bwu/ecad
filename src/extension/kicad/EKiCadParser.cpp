@@ -15,7 +15,7 @@ ECAD_INLINE bool EKiCadParser::operator() (std::string_view filename, Tree & tre
     }
 
     tree = ReadTree(in);
-    std::cout << tree.m_branches.size() << std::endl;//wbtest
+    std::cout << tree.branches.size() << std::endl;//wbtest
     return true;
 }
 
@@ -34,16 +34,16 @@ Tree EKiCadParser::ReadTree(std::istream & in)
             break;
         }
         if (b == '(') {
-            t.m_branches.emplace_back(ReadTree(in));
+            t.branches.emplace_back(ReadTree(in));
             continue;
         }
         if (b == '"') {
             in.get(c);
-            t.m_branches.emplace_back(ReadQuotedString(in));
+            t.branches.emplace_back(ReadQuotedString(in));
             in.get(c);
             continue;
         }
-        t.m_branches.emplace_back(ReadString(in));
+        t.branches.emplace_back(ReadString(in));
     }
     return t;
 }
