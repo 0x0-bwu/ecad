@@ -194,7 +194,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     std::string meshFile = (settings.meshSettings.dumpMeshFile && not settings.workDir.empty()) ?
         settings.workDir + ECAD_SEPS + "mesh.png" : std::string{};
     GenerateMesh(compact->GetAllPolygonData(), compact->GetSteinerPoints(), coordUnits, settings.meshSettings, *triangulation, meshFile);
-    ECAD_TRACE("total elements: %1%", triangulation->triangles.size())
+    ECAD_TRACE("total mesh elements: %1%", triangulation->triangles.size())
 
     ecad::utils::ELayoutRetriever retriever(layout);
     for (size_t layer = 0; layer < compact->TotalLayers(); ++layer) {
@@ -277,6 +277,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismaThermalModel(Ptr
     auto scaleH2Unit = coordUnits.Scale2Unit();
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismaModel(scaleH2Unit, scale2Meter);
+    ECAD_TRACE("total prisma elements: %1%", model->TotalPrismaElements())
 
     model->AddBondWiresFromLayerCutModel(compact);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
@@ -433,6 +434,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismaThermalMo
 
     model::utils::EStackupPrismaThermalModelBuilder builder(model);
     builder.BuildPrismaModel(scaleH2Unit, scale2Meter, settings.threads);
+    ECAD_TRACE("total prisma elements: %1%", model->TotalPrismaElements())
 
     builder.AddBondWiresFromLayerCutModel(compact);
     ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
