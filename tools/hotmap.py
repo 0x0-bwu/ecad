@@ -22,14 +22,16 @@ def main():
     scalar_bar = vtk.vtkScalarBarActor()
     scalar_bar.SetLookupTable(scalar_lut)  # Link to the mapper's LUT
     scalar_bar.SetTitle("Temperature")
-    scalar_bar.SetHeight(0.4)  # Adjust height as needed (0-1)
+    scalar_bar.SetHeight(0.5)  # Adjust height as needed (0-1)
     scalar_bar.SetWidth(0.05)  # Adjust width as needed (0-1)
 
     title_prop = scalar_bar.GetTitleTextProperty()
-    title_prop.SetFontSize(5)
+    title_prop.SetFontSize(3)
+    title_prop.SetColor(colors.GetColor3d('Black'))
 
     label_prop = scalar_bar.GetLabelTextProperty()
-    label_prop.SetFontSize(5)
+    label_prop.SetColor(colors.GetColor3d('Black'))
+    label_prop.SetFontSize(3)
 
     scalar_range = scalar.GetRange()
     geometry_mapper = vtk.vtkDataSetMapper()
@@ -55,8 +57,8 @@ def main():
     render_window_interactor.SetRenderWindow(render_window)
 
     renderer.AddActor(geometry_actor)
-    renderer.SetBackground(colors.GetColor3d('SlateGray'))
-    # renderer.SetBackground(colors.GetColor3d('Black'))
+    renderer.SetBackground(colors.GetColor3d('White'))
+    # renderer.SetBackground(colors.GetColor3d('SlateGray'))
     renderer.AddActor(scalar_bar)
 
     camera = vtk.vtkCamera()
