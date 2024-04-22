@@ -1,6 +1,7 @@
 #include "EPrimitive.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPrimitive)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EGeometry2D)
+ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EBondwire)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EText)
 
 #include "interfaces/IPadstackDef.h"

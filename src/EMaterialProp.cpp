@@ -2,6 +2,7 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialProp)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialPropValue)
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialPropTable)
+ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialPropPolynomial)
 
 namespace ecad {
 
