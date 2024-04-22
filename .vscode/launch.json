@@ -26,10 +26,10 @@
             ]
         },
         {
-            "name": "sic",
+            "name": "WolfSpeed_SetupDesign",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build.debug/bin/sic.exe",
+            "program": "${workspaceFolder}/build.debug/bin/WolfSpeed_SetupDesign.exe",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build.debug",
