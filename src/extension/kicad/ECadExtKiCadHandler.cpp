@@ -23,6 +23,23 @@ ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string
         if(err) *err = fmt::Fmt2Str("Error: failed to parse %1%.", m_filename);
         return nullptr; 
     }
+    
+    for (const auto & sub : tree.branches) {
+        if ("layers" == sub.value) {
+            for (const auto & lyr : sub.branches) {
+                auto name = lyr.branches[0].value;
+                auto type = lyr.branches[1].value;
+                if ("signal" == type || "power" == type) {
+                    m_layer2IndexMap.emplace(name, std::stoi(lyr.value));
+                    m_index2LayerMap.emplace(std::stoi(lyr.value), name);
+                }
+            }
+            break;
+        }
+        else if ("net" == sub.value) {
+            auto netId = 0;
+        }
+    }
 
     m_database= eMgr.CreateDatabase(name);
     if(nullptr == m_database) return nullptr;
