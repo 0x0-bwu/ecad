@@ -67,14 +67,22 @@ ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & n
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 ECAD_INLINE bool EDataMgr::SaveDatabase(CPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
 {
-    if(nullptr == database) return false;
+    ECAD_ASSERT(database)
     return database->Save(archive, fmt);
 }
     
-ECAD_INLINE bool EDataMgr::LoadDatabase(Ptr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
+ECAD_INLINE bool EDataMgr::LoadDatabase(Ptr<IDatabase> & database, const std::string & archive, EArchiveFormat fmt)
 {
-    if(nullptr == database) return false;
-    return database->Load(archive, fmt);
+    auto noname = "";
+    database = CreateDatabase(noname);
+    if (not database->Load(archive, fmt)) {
+        RemoveDatabase(noname);
+        return false;
+    }
+    auto node = m_databases.extract(noname);
+    node.key() = database->GetName();
+    m_databases.insert(std::move(node));
+    return true;
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 

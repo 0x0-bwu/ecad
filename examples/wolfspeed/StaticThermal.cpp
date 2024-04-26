@@ -82,56 +82,26 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
 
-void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, EFloat period, EFloat duty)
-{
-    auto extractionSettings = ExtractionSettings(workDir);
-    extractionSettings.meshSettings.genMeshByLayer = true;
-    extractionSettings.meshSettings.imprintUpperLayer = true;
-    extractionSettings.meshSettings.maxLen = 2;
-    extractionSettings.meshSettings.minAlpha = 20;
-    extractionSettings.layerCutSettings.layerTransitionRatio = 0;
-
-    EThermalTransientSimulationSetup setup;
-    setup.workDir = workDir;
-    setup.monitors = GetDieMonitors(layout);
-    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.settings.mor = false;
-    setup.settings.verbose = true;
-    setup.settings.dumpResults = true;
-    setup.settings.duration = 10;
-    setup.settings.step = period * duty / 10;
-    setup.settings.temperatureDepend = true;
-    setup.settings.samplingWindow = setup.settings.duration;
-    setup.settings.minSamplingInterval = period * duty / 10;
-    setup.settings.absoluteError = 1e-5;
-    setup.settings.relativeError = 1e-5;
-    setup.settings.threads = eDataMgr.Threads();
-    EThermalTransientExcitation excitation = [period, duty](EFloat t, size_t scen) -> EFloat { 
-        EFloat tm = std::fmod(t, period); 
-        switch (scen) {
-            case 0 : return 1;
-            case 1 : return tm < duty * period ? 1 : 0;
-            case 2 : return 0.5 * period < tm && tm < (duty + 0.5) * period ? 1 : 0; 
-            default : { ECAD_ASSERT(false); return 0; }
-        }
-    };
-    setup.settings.excitation = &excitation;
-    auto [minT, maxT] = layout->RunThermalSimulation(extractionSettings, setup);    
-    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
-}
-
 int main(int argc, char * argv[])
 {
     ::signal(SIGSEGV, &SignalHandler);
     ::signal(SIGABRT, &SignalHandler);
 
-    ecad::EDataMgr::Instance().Init(ecad::ELogLevel::Trace);
+    eDataMgr.Init(ecad::ELogLevel::Trace);
 
     std::string filename = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "design" + ECAD_SEPS + "CAS300M12BM2.ecad";
 
-    eDataMgr.Load
+    Ptr<IDatabase> database;
+    if (not eDataMgr.LoadDatabase(database, filename)) return EXIT_FAILURE;
+    auto cell = database->FindCellByName("Base");
+    std::string workDir = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "simulation" + ECAD_SEPS + "static";
+    auto layout = cell->GetFlattenedLayoutView();
+    std::cout << layout->GetName() << std::endl;
+    auto iter = layout->GetComponentIter();
+    while (auto * comp = iter->Next()) {
+        std::cout << comp->GetName() << std::endl;
+    }
     StaticThermalFlow(layout, workDir);
-    // TransientThermalFlow(layout, workDir, 1, 0.5);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

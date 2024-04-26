@@ -105,7 +105,7 @@ ECAD_INLINE EMaterialPropValue::EMaterialPropValue(EFloat value)
 
 ECAD_INLINE EMaterialPropValue::EMaterialPropValue()
 {
-    ECAD_ASSERT(false)
+    m_values.assign(1, invalidFloat);
 }
 
 ECAD_INLINE Ptr<IMaterialPropValue> EMaterialPropValue::GetPropValue()
@@ -231,7 +231,6 @@ ECAD_INLINE EMaterialPropPolynomial::EMaterialPropPolynomial(std::vector<std::ve
 
 ECAD_INLINE EMaterialPropPolynomial::EMaterialPropPolynomial()
 {
-    ECAD_ASSERT(false)
 }
 
 ECAD_INLINE Ptr<IMaterialPropPolynomial> EMaterialPropPolynomial::GetPropPolynomial()

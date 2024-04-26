@@ -1059,7 +1059,7 @@ namespace {
             .def("save_database", &EDataMgr::SaveDatabase)
             .def("save_database", static_cast<bool(EDataMgr::*)(CPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::SaveDatabase), EDataMgrSaveDatabaseBin())
             .def("load_database", &EDataMgr::LoadDatabase)
-            .def("load_database", static_cast<bool(EDataMgr::*)(Ptr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseBin())
+            .def("load_database", static_cast<bool(EDataMgr::*)(Ptr<IDatabase> &, const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseBin())
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("create_circuit_cell", &EDataMgr::CreateCircuitCell, return_internal_reference<>())
             .def("find_cell_by_name", &EDataMgr::FindCellByName, return_internal_reference<>())

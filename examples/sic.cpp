@@ -739,7 +739,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
             case 0 : return 1;
             case 1 : return tm < duty * period ? 1 : 0;
             case 2 : return 0.5 * period < tm && tm < (duty + 0.5) * period ? 1 : 0; 
-            default : { ECAD_ASSERT(false); return 0; }
+            default : { ECAD_ASSERT(false) return 0; }
         }
     };
     setup.settings.excitation = &excitation;
