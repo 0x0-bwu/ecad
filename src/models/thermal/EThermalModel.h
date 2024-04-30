@@ -18,6 +18,7 @@ using namespace generic::geometry;
 
 class ECAD_API EThermalModel : public IModel
 {
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     virtual ~EThermalModel() = default;
 
@@ -106,3 +107,4 @@ public:
 
 }//namesapce model
 }//namespace ecad
+ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::model::EThermalModel)

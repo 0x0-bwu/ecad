@@ -15,6 +15,8 @@ class EStackupPrismaThermalModelBuilder;
 
 class ECAD_API EStackupPrismaThermalModel : public EPrismaThermalModel
 {
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+    EStackupPrismaThermalModel() = default;
 public:
     friend class utils::EStackupPrismaThermalModelQuery;
     friend class utils::EStackupPrismaThermalModelBuilder;
@@ -25,4 +27,5 @@ public:
 };
 
 } // namespace model
-} // namespace model
+} // namespace ecad
+ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::model::EStackupPrismaThermalModel)

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "generic/geometry/Triangulation.hpp"
 #include "EThermalModel.h"
 #include "EShape.h"
 
+#include "generic/geometry/Triangulation.hpp"
 namespace ecad {
 
 using namespace generic::geometry::tri;
@@ -25,6 +25,22 @@ namespace utils { class EPrismaThermalModelQuery; }
 
 struct ECAD_API LineElement
 {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("net_id", netId);
+        ar & boost::serialization::make_nvp("material_id", matId);
+        ar & boost::serialization::make_nvp("radius", radius);
+        ar & boost::serialization::make_nvp("current", current);
+        ar & boost::serialization::make_nvp("id", id);
+        ar & boost::serialization::make_nvp("scenario", scenario);
+        ar & boost::serialization::make_nvp("end_points", endPoints);
+        ar & boost::serialization::make_nvp("neighbors", neighbors);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
     ENetId netId;
     EMaterialId matId;
     EFloat radius{0};
@@ -37,6 +53,22 @@ struct ECAD_API LineElement
 
 struct PrismaElement
 {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("net_id", netId);
+        ar & boost::serialization::make_nvp("material_id", matId);
+        ar & boost::serialization::make_nvp("power_ratio", powerRatio);
+        ar & boost::serialization::make_nvp("id", id);
+        ar & boost::serialization::make_nvp("template_id", templateId);
+        ar & boost::serialization::make_nvp("power_scenario", powerScenario);
+        ar & boost::serialization::make_nvp("power_lut", powerLut);
+        ar & boost::serialization::make_nvp("neighbors", neighbors);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
     ENetId netId;
     EMaterialId matId;
     EFloat powerRatio{0};
@@ -51,6 +83,19 @@ struct PrismaElement
 
 struct PrismaLayer
 {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("id", id);
+        ar & boost::serialization::make_nvp("elevation", elevation);
+        ar & boost::serialization::make_nvp("thickness", thickness);
+        ar & boost::serialization::make_nvp("elements", elements);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+
     size_t id;
     EFloat elevation;
     EFloat thickness;
@@ -68,18 +113,44 @@ struct PrismaLayer
     }
 
     size_t TotalElements() const { return elements.size(); }
+protected:
+    PrismaLayer() = default;
 };
 
 struct ContactInstance
 {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("index", index);
+        ar & boost::serialization::make_nvp("ratio", ratio);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
     size_t index{invalidIndex};
     EFloat ratio{0};
+    ContactInstance() = default;
     ContactInstance(size_t index, EFloat ratio) : index(index), ratio(ratio) {}
 };
 
 using ContactInstances = std::vector<ContactInstance>;
 struct PrismaInstance
 {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("layer", layer);
+        ar & boost::serialization::make_nvp("element", element);
+        ar & boost::serialization::make_nvp("vertices", vertices);
+        ar & boost::serialization::make_nvp("neighbors", neighbors);
+        ar & boost::serialization::make_nvp("contact_instances", contactInstances);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
     CPtr<PrismaLayer> layer{nullptr};
     CPtr<PrismaElement> element{nullptr};
     std::array<size_t, 6> vertices;//top, bot
@@ -89,6 +160,9 @@ struct PrismaInstance
 
 class ECAD_API EPrismaThermalModel : public EThermalModel
 {
+protected:
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
+    EPrismaThermalModel() = default;
 public:
     friend class utils::EPrismaThermalModelQuery;
     using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
@@ -139,7 +213,7 @@ public:
 protected:
     EFloat m_scaleH2Unit;
     EFloat m_scale2Meter;
-    CPtr<ILayoutView> m_layout;
+    CPtr<ILayoutView> m_layout{nullptr};
     std::vector<FPoint3D> m_points;
     std::vector<LineElement> m_lines;
     std::vector<PrismaInstance> m_prismas;
@@ -218,3 +292,5 @@ ECAD_ALWAYS_INLINE bool EPrismaThermalModel::isBotLayer(size_t lyrIndex) const
 
 } // namespace model
 } // namespace ecad
+
+ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::model::EPrismaThermalModel)

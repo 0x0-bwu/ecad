@@ -70,6 +70,17 @@ using ELayerCutModelBuildSettings = ELayerCutModelExtractionSettings;
 
 struct EThermalBondaryCondition
 {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("type", type);
+        ar & boost::serialization::make_nvp("value", value);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+
     using BCType = EThermalBondaryConditionType;
     BCType type{BCType::HTC};
     EFloat value{invalidFloat};

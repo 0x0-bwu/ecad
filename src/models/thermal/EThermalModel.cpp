@@ -1,7 +1,29 @@
 #include "EThermalModel.h"
+ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::model::EThermalModel)
 
 namespace ecad {
 namespace model {
+
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    
+template <typename Archive>
+ECAD_INLINE void EThermalModel::save(Archive & ar, const unsigned int version) const
+{
+    ECAD_UNUSED(version)
+    boost::serialization::void_cast_register<EThermalModel, IModel>();
+    ar & boost::serialization::make_nvp("uniform_BC", m_uniformBC);
+}
+
+template <typename Archive>
+ECAD_INLINE void EThermalModel::load(Archive & ar, const unsigned int version)
+{
+    ECAD_UNUSED(version)
+    boost::serialization::void_cast_register<EThermalModel, IModel>();
+    ar & boost::serialization::make_nvp("uniform_BC", m_uniformBC);
+}
+    
+ECAD_SERIALIZATION_FUNCTIONS_IMP(EThermalModel)
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EGridPowerModel::EGridPowerModel(const ESize2D & size)
 {

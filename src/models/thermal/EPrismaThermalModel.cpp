@@ -1,4 +1,6 @@
 #include "models/thermal/EPrismaThermalModel.h"
+ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::model::EPrismaThermalModel)
+
 #include "models/thermal/utils/EPrismaThermalModelQuery.h"
 #include "models/geometry/ELayerCutModel.h"
 #include "utils/ELayoutRetriever.h"
@@ -7,6 +9,45 @@
 #include "generic/geometry/GeometryIO.hpp"
 #include <queue>
 namespace ecad::model {
+
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    
+template <typename Archive>
+ECAD_INLINE void EPrismaThermalModel::save(Archive & ar, const unsigned int version) const
+{
+    ECAD_UNUSED(version)
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EThermalModel);
+    ar & boost::serialization::make_nvp("layers", layers);
+    ar & boost::serialization::make_nvp("scale_h_to_unit", m_scaleH2Unit);
+    ar & boost::serialization::make_nvp("scale_to_meter", m_scale2Meter);
+    ar & boost::serialization::make_nvp("layout", m_layout);
+    ar & boost::serialization::make_nvp("points", m_points);
+    ar & boost::serialization::make_nvp("lines", m_lines);
+    ar & boost::serialization::make_nvp("prismas", m_prismas);
+    ar & boost::serialization::make_nvp("index_offset", m_indexOffset);
+    ar & boost::serialization::make_nvp("block_BCs", m_blockBCs);
+    ar & boost::serialization::make_nvp("prisma_template", m_prismaTemplates);
+}
+
+template <typename Archive>
+ECAD_INLINE void EPrismaThermalModel::load(Archive & ar, const unsigned int version)
+{
+    ECAD_UNUSED(version)
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EThermalModel);
+    ar & boost::serialization::make_nvp("layers", layers);
+    ar & boost::serialization::make_nvp("scale_h_to_unit", m_scaleH2Unit);
+    ar & boost::serialization::make_nvp("scale_to_meter", m_scale2Meter);
+    ar & boost::serialization::make_nvp("layout", m_layout);
+    ar & boost::serialization::make_nvp("points", m_points);
+    ar & boost::serialization::make_nvp("lines", m_lines);
+    ar & boost::serialization::make_nvp("prismas", m_prismas);
+    ar & boost::serialization::make_nvp("index_offset", m_indexOffset);
+    ar & boost::serialization::make_nvp("block_BCs", m_blockBCs);
+    ar & boost::serialization::make_nvp("prisma_template", m_prismaTemplates);
+}
+    
+ECAD_SERIALIZATION_FUNCTIONS_IMP(EPrismaThermalModel)
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EPrismaThermalModel::EPrismaThermalModel(CPtr<ILayoutView> layout)
  : m_layout(layout)

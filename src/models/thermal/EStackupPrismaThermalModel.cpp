@@ -1,9 +1,29 @@
 #include "EStackupPrismaThermalModel.h"
+ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::model::EStackupPrismaThermalModel)
+
 #include "models/thermal/utils/EStackupPrismaThermalModelQuery.h"
 #include "models/geometry/ELayerCutModel.h"
 
-
 namespace ecad::model {
+
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    
+template <typename Archive>
+ECAD_INLINE void EStackupPrismaThermalModel::save(Archive & ar, const unsigned int version) const
+{
+    ECAD_UNUSED(version)
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrismaThermalModel);
+}
+
+template <typename Archive>
+ECAD_INLINE void EStackupPrismaThermalModel::load(Archive & ar, const unsigned int version)
+{
+    ECAD_UNUSED(version)
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrismaThermalModel);
+}
+    
+ECAD_SERIALIZATION_FUNCTIONS_IMP(EStackupPrismaThermalModel)
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE EStackupPrismaThermalModel::EStackupPrismaThermalModel(CPtr<ILayoutView> layout)
  : EPrismaThermalModel(layout)
