@@ -5,8 +5,8 @@ namespace ecad {
 class IModel;
 namespace model {
 class EGridThermalModel;
-class EPrismaThermalModel;
-class EStackupPrismaThermalModel;
+class EPrismThermalModel;
+class EStackupPrismThermalModel;
 } // model
 
 namespace simulation {
@@ -46,22 +46,22 @@ protected:
     bool RunTransientSimulation(EFloat & minT, EFloat & maxT) const override;
 };
 
-class ECAD_API EPrismaThermalSimulator : public EThermalSimulator
+class ECAD_API EPrismThermalSimulator : public EThermalSimulator
 {
 public:
-    explicit EPrismaThermalSimulator(CPtr<EPrismaThermalModel> model, const EThermalSimulationSetup & setup);
-    virtual ~EPrismaThermalSimulator() = default;
+    explicit EPrismThermalSimulator(CPtr<EPrismThermalModel> model, const EThermalSimulationSetup & setup);
+    virtual ~EPrismThermalSimulator() = default;
 
 protected:
     bool RunStaticSimulation(EFloat & minT, EFloat & maxT) const override;
     bool RunTransientSimulation(EFloat & minT, EFloat & maxT) const override;
 };
 
-class ECAD_API EStackupPrismaThermalSimulator : public EThermalSimulator
+class ECAD_API EStackupPrismThermalSimulator : public EThermalSimulator
 {
 public:
-    explicit EStackupPrismaThermalSimulator(CPtr<EStackupPrismaThermalModel> model, const EThermalSimulationSetup & setup);
-    virtual ~EStackupPrismaThermalSimulator() = default;
+    explicit EStackupPrismThermalSimulator(CPtr<EStackupPrismThermalModel> model, const EThermalSimulationSetup & setup);
+    virtual ~EStackupPrismThermalSimulator() = default;
 
 protected:
     bool RunStaticSimulation(EFloat & minT, EFloat & maxT) const override;

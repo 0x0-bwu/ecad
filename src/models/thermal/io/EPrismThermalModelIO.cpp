@@ -1,8 +1,8 @@
-#include "EPrismaThermalModelIO.h"
+#include "EPrismThermalModelIO.h"
 #include "generic/tools/Color.hpp"
 namespace ecad::model::io {
 
-ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermalModel & model, const std::vector<EFloat> * temperature, std::string * err)
+ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismThermalModel & model, const std::vector<EFloat> * temperature, std::string * err)
 {
     if (not fs::CreateDir(fs::DirName(filename))) {
         if (err) *err = "Error: fail to create folder " + fs::DirName(filename).string();
@@ -28,11 +28,11 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermal
     }
 
     out << ECAD_EOL; 
-    out << "CELLS" << sp << model.TotalElements() << sp << model.TotalPrismaElements() * 7 + model.TotalLineElements() * 3 << ECAD_EOL;
-    for (size_t i = 0; i < model.TotalPrismaElements(); ++i) {
-        const auto & prisma = model.GetPrisma(i);
+    out << "CELLS" << sp << model.TotalElements() << sp << model.TotalPrismElements() * 7 + model.TotalLineElements() * 3 << ECAD_EOL;
+    for (size_t i = 0; i < model.TotalPrismElements(); ++i) {
+        const auto & prism = model.GetPrism(i);
         out << '6';
-        for (auto vertex : prisma.vertices)
+        for (auto vertex : prism.vertices)
             out << sp << vertex;
         out << ECAD_EOL; 
     }
@@ -44,7 +44,7 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismaThermal
     out << ECAD_EOL;
 
     out << "CELL_TYPES" << sp << model.TotalElements() << ECAD_EOL;
-    for (size_t i = 0; i < model.TotalPrismaElements(); ++i) out << "13" << ECAD_EOL;
+    for (size_t i = 0; i < model.TotalPrismElements(); ++i) out << "13" << ECAD_EOL;
     for (size_t i = 0; i < model.TotalLineElements(); ++i) out << "3" << ECAD_EOL;
 
     if (temperature && temperature->size() == model.TotalElements()) {

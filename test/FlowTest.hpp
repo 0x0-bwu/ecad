@@ -71,9 +71,9 @@ void t_thermal_static_flow1()
     gridSettings.botUniformBC.value = 2750;
     auto model1 = layout->ExtractThermalModel(gridSettings); BOOST_CHECK(model1);
 
-    EPrismaThermalModelExtractionSettings prismaSettings;
-    prismaSettings.workDir = gridSettings.workDir;
-    auto model2 = layout->ExtractThermalModel(prismaSettings); BOOST_CHECK(model2);
+    EPrismThermalModelExtractionSettings prismSettings;
+    prismSettings.workDir = gridSettings.workDir;
+    auto model2 = layout->ExtractThermalModel(prismSettings); BOOST_CHECK(model2);
     EDataMgr::Instance().ShutDown();
 }
 
@@ -341,20 +341,20 @@ void t_thermal_static_flow2()
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     BOOST_CHECK(layout->MergeLayerPolygons(mergeSettings));
 
-    EPrismaThermalModelExtractionSettings prismaSettings;
-    prismaSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    prismaSettings.meshSettings.iteration = 1e5;
-    prismaSettings.meshSettings.minAlpha = 20;
-    prismaSettings.meshSettings.minLen = 1e-2;
-    prismaSettings.meshSettings.maxLen = 500;
-    prismaSettings.botUniformBC.type = EThermalBondaryConditionType::HTC;
-    prismaSettings.botUniformBC.value = 2750;
+    EPrismThermalModelExtractionSettings prismSettings;
+    prismSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    prismSettings.meshSettings.iteration = 1e5;
+    prismSettings.meshSettings.minAlpha = 20;
+    prismSettings.meshSettings.minLen = 1e-2;
+    prismSettings.meshSettings.maxLen = 500;
+    prismSettings.botUniformBC.type = EThermalBondaryConditionType::HTC;
+    prismSettings.botUniformBC.value = 2750;
 
     EThermalStaticSimulationSetup setup;
     setup.settings.iteration = 10;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    auto [minT, maxT] = layout->RunThermalSimulation(prismaSettings, setup);    
+    auto [minT, maxT] = layout->RunThermalSimulation(prismSettings, setup);    
     BOOST_CHECK_CLOSE(minT, 34.35, 2);
     BOOST_CHECK_CLOSE(maxT, 131.77, 2);
     EDataMgr::Instance().ShutDown();

@@ -39,34 +39,34 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
     return monitors;
 }
 
-EPrismaThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
+EPrismThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
 {
     EFloat htc = 5000;
-    EPrismaThermalModelExtractionSettings prismaSettings;
-    prismaSettings.threads = eDataMgr.Threads();
-    prismaSettings.workDir = workDir;
-    prismaSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
-    prismaSettings.botUniformBC.value = htc;
-    prismaSettings.meshSettings.genMeshByLayer = false;
-    if (prismaSettings.meshSettings.genMeshByLayer)
-        prismaSettings.meshSettings.imprintUpperLayer = true;
-    prismaSettings.meshSettings.iteration = 1e5;
-    prismaSettings.meshSettings.minAlpha = 20;
-    prismaSettings.meshSettings.minLen = 1e-5;
-    prismaSettings.meshSettings.maxLen = 1;
-    prismaSettings.meshSettings.tolerance = 0;
-    prismaSettings.layerCutSettings.layerTransitionRatio = 3;
-    prismaSettings.meshSettings.dumpMeshFile = true;
-    prismaSettings.layerCutSettings.dumpSketchImg = true;
+    EPrismThermalModelExtractionSettings prismSettings;
+    prismSettings.threads = eDataMgr.Threads();
+    prismSettings.workDir = workDir;
+    prismSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
+    prismSettings.botUniformBC.value = htc;
+    prismSettings.meshSettings.genMeshByLayer = false;
+    if (prismSettings.meshSettings.genMeshByLayer)
+        prismSettings.meshSettings.imprintUpperLayer = true;
+    prismSettings.meshSettings.iteration = 1e5;
+    prismSettings.meshSettings.minAlpha = 20;
+    prismSettings.meshSettings.minLen = 1e-5;
+    prismSettings.meshSettings.maxLen = 1;
+    prismSettings.meshSettings.tolerance = 0;
+    prismSettings.layerCutSettings.layerTransitionRatio = 3;
+    prismSettings.meshSettings.dumpMeshFile = true;
+    prismSettings.layerCutSettings.dumpSketchImg = true;
 
     EFloat topHTC = htc;
-    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, -8.7}, {-20.35, -4.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, 11.5}, {9.75, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, -17}, {9.75, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, 11.5}, {-2.55, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismaSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, -17}, {-2.55, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    return prismaSettings;
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, -8.7}, {-20.35, -4.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, 11.5}, {9.75, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, -17}, {9.75, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, 11.5}, {-2.55, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, -17}, {-2.55, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    return prismSettings;
 }
 
 void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
@@ -90,9 +90,8 @@ int main(int argc, char * argv[])
     eDataMgr.Init(ecad::ELogLevel::Trace);
 
     std::string filename = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "design" + ECAD_SEPS + "CAS300M12BM2.ecad";
-
-    Ptr<IDatabase> database;
-    if (not eDataMgr.LoadDatabase(database, filename)) return EXIT_FAILURE;
+    auto database = eDataMgr.LoadDatabase(filename);
+    if (nullptr == database) return EXIT_FAILURE;
     auto cell = database->FindCellByName("Base");
     std::string workDir = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "simulation" + ECAD_SEPS + "static";
     auto layout = cell->GetFlattenedLayoutView();

@@ -1,6 +1,6 @@
 #pragma once
-#include "models/thermal/EStackupPrismaThermalModel.h"
-#include "models/thermal/EPrismaThermalModel.h"
+#include "models/thermal/EStackupPrismThermalModel.h"
+#include "models/thermal/EPrismThermalModel.h"
 #include "models/thermal/EGridThermalModel.h"
 #include "ECadSettings.h"
 #include "ECadCommon.h"
@@ -64,59 +64,59 @@ public:
     bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
-class ECAD_API EPrismaThermalNetworkSolver
+class ECAD_API EPrismThermalNetworkSolver
 {
 public:
-    virtual ~EPrismaThermalNetworkSolver() = default;
+    virtual ~EPrismThermalNetworkSolver() = default;
 
 protected:
-    explicit EPrismaThermalNetworkSolver(const EPrismaThermalModel & model);
-    const EPrismaThermalModel & m_model;
+    explicit EPrismThermalNetworkSolver(const EPrismThermalModel & model);
+    const EPrismThermalModel & m_model;
 };
 
-class ECAD_API EPrismaThermalNetworkStaticSolver : public EPrismaThermalNetworkSolver, EThermalNetworkStaticSolver
+class ECAD_API EPrismThermalNetworkStaticSolver : public EPrismThermalNetworkSolver, EThermalNetworkStaticSolver
 {
 public:
     using EThermalNetworkStaticSolver::settings;
-    explicit EPrismaThermalNetworkStaticSolver(const EPrismaThermalModel & model);
-    virtual ~EPrismaThermalNetworkStaticSolver() = default;
+    explicit EPrismThermalNetworkStaticSolver(const EPrismThermalModel & model);
+    virtual ~EPrismThermalNetworkStaticSolver() = default;
     bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
-class ECAD_API EPrismaThermalNetworkTransientSolver : public EPrismaThermalNetworkSolver, EThermalNetworkTransientSolver
+class ECAD_API EPrismThermalNetworkTransientSolver : public EPrismThermalNetworkSolver, EThermalNetworkTransientSolver
 {
 public:
     using EThermalNetworkTransientSolver::settings;
-    explicit EPrismaThermalNetworkTransientSolver(const EPrismaThermalModel & model);
-    virtual ~EPrismaThermalNetworkTransientSolver() = default;
+    explicit EPrismThermalNetworkTransientSolver(const EPrismThermalModel & model);
+    virtual ~EPrismThermalNetworkTransientSolver() = default;
     bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
-class ECAD_API EStackupPrismaThermalNetworkSolver
+class ECAD_API EStackupPrismThermalNetworkSolver
 {
 public:
-    virtual ~EStackupPrismaThermalNetworkSolver() = default;
+    virtual ~EStackupPrismThermalNetworkSolver() = default;
 
 protected:
-    explicit EStackupPrismaThermalNetworkSolver(const EStackupPrismaThermalModel & model);
-    const EStackupPrismaThermalModel & m_model;
+    explicit EStackupPrismThermalNetworkSolver(const EStackupPrismThermalModel & model);
+    const EStackupPrismThermalModel & m_model;
 };
 
-class ECAD_API EStackupPrismaThermalNetworkStaticSolver : public EStackupPrismaThermalNetworkSolver, EThermalNetworkStaticSolver
+class ECAD_API EStackupPrismThermalNetworkStaticSolver : public EStackupPrismThermalNetworkSolver, EThermalNetworkStaticSolver
 {
 public:
     using EThermalNetworkStaticSolver::settings;
-    explicit EStackupPrismaThermalNetworkStaticSolver(const EStackupPrismaThermalModel & model);
-    virtual ~EStackupPrismaThermalNetworkStaticSolver() = default;
+    explicit EStackupPrismThermalNetworkStaticSolver(const EStackupPrismThermalModel & model);
+    virtual ~EStackupPrismThermalNetworkStaticSolver() = default;
     bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 
-class ECAD_API EStackupPrismaThermalNetworkTransientSolver : public EStackupPrismaThermalNetworkSolver, EThermalNetworkTransientSolver
+class ECAD_API EStackupPrismThermalNetworkTransientSolver : public EStackupPrismThermalNetworkSolver, EThermalNetworkTransientSolver
 {
 public:
     using EThermalNetworkTransientSolver::settings;
-    explicit EStackupPrismaThermalNetworkTransientSolver(const EStackupPrismaThermalModel & model);
-    virtual ~EStackupPrismaThermalNetworkTransientSolver() = default;
+    explicit EStackupPrismThermalNetworkTransientSolver(const EStackupPrismThermalModel & model);
+    virtual ~EStackupPrismThermalNetworkTransientSolver() = default;
     bool Solve(EFloat & minT, EFloat & maxT) override;
 };
 

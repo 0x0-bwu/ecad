@@ -48,9 +48,9 @@ struct EMeshSettings
     EFloat tolerance{0};
 };
 
-struct EPrismaMeshSettings : public EMeshSettings
+struct EPrismMeshSettings : public EMeshSettings
 {
-    virtual ~EPrismaMeshSettings() = default;
+    virtual ~EPrismMeshSettings() = default;
     size_t iteration = 0;
     bool dumpMeshFile = false;
     bool genMeshByLayer = false;
@@ -122,12 +122,12 @@ struct EGridThermalModelExtractionSettings : public EThermalModelExtractionSetti
     EMetalFractionMappingSettings metalFractionMappingSettings;
 };
 
-struct EPrismaThermalModelExtractionSettings : public EThermalModelExtractionSettings
+struct EPrismThermalModelExtractionSettings : public EThermalModelExtractionSettings
 {
-    EPrismaMeshSettings meshSettings;
+    EPrismMeshSettings meshSettings;
     ELayoutPolygonMergeSettings polygonMergeSettings;
     ELayerCutModelExtractionSettings layerCutSettings;
-    virtual ~EPrismaThermalModelExtractionSettings() = default;
+    virtual ~EPrismThermalModelExtractionSettings() = default;
     void AddBlockBC(EOrientation orient, FBox2D block, BCType type, EFloat value) override
     {
         EThermalModelExtractionSettings::AddBlockBC(orient, block, type, value);

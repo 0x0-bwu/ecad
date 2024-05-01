@@ -1,7 +1,7 @@
-#include "models/thermal/EPrismaThermalModel.h"
-ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::model::EPrismaThermalModel)
+#include "models/thermal/EPrismThermalModel.h"
+ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::model::EPrismThermalModel)
 
-#include "models/thermal/utils/EPrismaThermalModelQuery.h"
+#include "models/thermal/utils/EPrismThermalModelQuery.h"
 #include "models/geometry/ELayerCutModel.h"
 #include "utils/ELayoutRetriever.h"
 #include "Interface.h"
@@ -13,7 +13,7 @@ namespace ecad::model {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EPrismaThermalModel::save(Archive & ar, const unsigned int version) const
+ECAD_INLINE void EPrismThermalModel::save(Archive & ar, const unsigned int version) const
 {
     ECAD_UNUSED(version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EThermalModel);
@@ -23,14 +23,14 @@ ECAD_INLINE void EPrismaThermalModel::save(Archive & ar, const unsigned int vers
     ar & boost::serialization::make_nvp("layout", m_layout);
     ar & boost::serialization::make_nvp("points", m_points);
     ar & boost::serialization::make_nvp("lines", m_lines);
-    ar & boost::serialization::make_nvp("prismas", m_prismas);
+    ar & boost::serialization::make_nvp("prisms", m_prisms);
     ar & boost::serialization::make_nvp("index_offset", m_indexOffset);
     ar & boost::serialization::make_nvp("block_BCs", m_blockBCs);
-    ar & boost::serialization::make_nvp("prisma_template", m_prismaTemplates);
+    ar & boost::serialization::make_nvp("prism_template", m_prismTemplates);
 }
 
 template <typename Archive>
-ECAD_INLINE void EPrismaThermalModel::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPrismThermalModel::load(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EThermalModel);
@@ -40,52 +40,52 @@ ECAD_INLINE void EPrismaThermalModel::load(Archive & ar, const unsigned int vers
     ar & boost::serialization::make_nvp("layout", m_layout);
     ar & boost::serialization::make_nvp("points", m_points);
     ar & boost::serialization::make_nvp("lines", m_lines);
-    ar & boost::serialization::make_nvp("prismas", m_prismas);
+    ar & boost::serialization::make_nvp("prisms", m_prisms);
     ar & boost::serialization::make_nvp("index_offset", m_indexOffset);
     ar & boost::serialization::make_nvp("block_BCs", m_blockBCs);
-    ar & boost::serialization::make_nvp("prisma_template", m_prismaTemplates);
+    ar & boost::serialization::make_nvp("prism_template", m_prismTemplates);
 }
     
-ECAD_SERIALIZATION_FUNCTIONS_IMP(EPrismaThermalModel)
+ECAD_SERIALIZATION_FUNCTIONS_IMP(EPrismThermalModel)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EPrismaThermalModel::EPrismaThermalModel(CPtr<ILayoutView> layout)
+ECAD_INLINE EPrismThermalModel::EPrismThermalModel(CPtr<ILayoutView> layout)
  : m_layout(layout)
 {
     m_blockBCs.emplace(EOrientation::Top, std::vector<BlockBC>{});
     m_blockBCs.emplace(EOrientation::Bot, std::vector<BlockBC>{});
 }
 
-ECAD_INLINE void EPrismaThermalModel::SetLayerPrismaTemplate(size_t layer, SPtr<PrismaTemplate> prismaTemplate)
+ECAD_INLINE void EPrismThermalModel::SetLayerPrismTemplate(size_t layer, SPtr<PrismTemplate> prismTemplate)
 {
-    m_prismaTemplates.emplace(layer, prismaTemplate);
+    m_prismTemplates.emplace(layer, prismTemplate);
 }
 
-ECAD_INLINE SPtr<EPrismaThermalModel::PrismaTemplate> EPrismaThermalModel::GetLayerPrismaTemplate(size_t layer) const
+ECAD_INLINE SPtr<EPrismThermalModel::PrismTemplate> EPrismThermalModel::GetLayerPrismTemplate(size_t layer) const
 {
-    return m_prismaTemplates.at(layer);
+    return m_prismTemplates.at(layer);
 }
 
-CPtr<IMaterialDefCollection> EPrismaThermalModel::GetMaterialLibrary() const
+CPtr<IMaterialDefCollection> EPrismThermalModel::GetMaterialLibrary() const
 {
     return m_layout->GetDatabase()->GetMaterialDefCollection();
 }
 
-ECAD_INLINE void EPrismaThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc)
+ECAD_INLINE void EPrismThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc)
 {
     m_blockBCs.at(orient).emplace_back(std::move(block), std::move(bc));
 }
 
-ECAD_INLINE PrismaLayer & EPrismaThermalModel::AppendLayer(PrismaLayer layer)
+ECAD_INLINE PrismLayer & EPrismThermalModel::AppendLayer(PrismLayer layer)
 {
     return layers.emplace_back(std::move(layer));
 }
 
-ECAD_INLINE LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current, size_t scenario)
+ECAD_INLINE LineElement & EPrismThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current, size_t scenario)
 {
-    ECAD_ASSERT(TotalPrismaElements() > 0/*should add after build prisma model*/)
+    ECAD_ASSERT(TotalPrismElements() > 0/*should add after build prism model*/)
     LineElement & element = m_lines.emplace_back(LineElement{});
-    element.id = TotalPrismaElements() + m_lines.size() - 1;
+    element.id = TotalPrismElements() + m_lines.size() - 1;
     element.endPoints.front() = AddPoint(std::move(start));
     element.endPoints.back() = AddPoint(std::move(end));
     element.current = current;
@@ -96,7 +96,7 @@ ECAD_INLINE LineElement & EPrismaThermalModel::AddLineElement(FPoint3D start, FP
     return element;
 }
 
-ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit, EFloat scale2Meter)
+ECAD_INLINE void EPrismThermalModel::BuildPrismModel(EFloat scaleH2Unit, EFloat scale2Meter)
 {
     m_scaleH2Unit = scaleH2Unit;
     m_scale2Meter = scale2Meter;
@@ -104,7 +104,7 @@ ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit, EFloa
     for (size_t i = 0; i < TotalLayers(); ++i)
         m_indexOffset.emplace_back(m_indexOffset.back() + layers.at(i).TotalElements());
     
-    const auto & triangles = m_prismaTemplates.at(0)->triangles;
+    const auto & triangles = m_prismTemplates.at(0)->triangles;
     std::unordered_map<size_t, std::unordered_map<size_t, size_t> > templateIdMap;
     auto getPtIdxMap = [&templateIdMap](size_t lyrIdx) -> std::unordered_map<size_t, size_t> & {
         auto iter = templateIdMap.find(lyrIdx);
@@ -113,12 +113,12 @@ ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit, EFloa
         return iter->second;
     };
     
-    auto total = TotalPrismaElements();
-    m_prismas.resize(total);
+    auto total = TotalPrismElements();
+    m_prisms.resize(total);
     m_points.clear();
     for (size_t i = 0; i < total; ++i) {
-        auto & instance = m_prismas[i];
-        auto [lyrIdx, eleIdx] = PrismaLocalIndex(i);
+        auto & instance = m_prisms[i];
+        auto [lyrIdx, eleIdx] = PrismLocalIndex(i);
         instance.layer = &layers.at(lyrIdx);
         instance.element = &instance.layer->elements.at(eleIdx);    
         //points
@@ -148,21 +148,21 @@ ECAD_INLINE void EPrismaThermalModel::BuildPrismaModel(EFloat scaleH2Unit, EFloa
             }
         }
         ///top
-        if (auto nid = instance.element->neighbors.at(PrismaElement::TOP_NEIGHBOR_INDEX); noNeighbor != nid) {
+        if (auto nid = instance.element->neighbors.at(PrismElement::TOP_NEIGHBOR_INDEX); noNeighbor != nid) {
             auto nb = GlobalIndex(lyrIdx - 1, nid);
-            instance.neighbors[PrismaElement::TOP_NEIGHBOR_INDEX] = nb;
+            instance.neighbors[PrismElement::TOP_NEIGHBOR_INDEX] = nb;
         }
         ///bot
-        if (auto nid = instance.element->neighbors.at(PrismaElement::BOT_NEIGHBOR_INDEX); noNeighbor != nid) {
+        if (auto nid = instance.element->neighbors.at(PrismElement::BOT_NEIGHBOR_INDEX); noNeighbor != nid) {
             auto nb = GlobalIndex(lyrIdx + 1, nid);
-            instance.neighbors[PrismaElement::BOT_NEIGHBOR_INDEX] = nb;
+            instance.neighbors[PrismElement::BOT_NEIGHBOR_INDEX] = nb;
         }
     }
 }
 
-ECAD_INLINE void EPrismaThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm)
+ECAD_INLINE void EPrismThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm)
 {
-    utils::EPrismaThermalModelQuery query(this);
+    utils::EPrismThermalModelQuery query(this);
     for (const auto & bondwire : lcm->GetAllBondwires()) {
         const auto & pts = bondwire.pt2ds;
         ECAD_ASSERT(pts.size() == bondwire.heights.size());
@@ -173,9 +173,9 @@ ECAD_INLINE void EPrismaThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerC
             auto & line = AddLineElement(std::move(p1), std::move(p2), bondwire.netId, bondwire.matId, bondwire.radius, bondwire.current, bondwire.scenario);
             //connection
             if (0 == curr) {
-                std::vector<utils::EPrismaThermalModelQuery::RtVal> results;
+                std::vector<utils::EPrismThermalModelQuery::RtVal> results;
                 auto layer = lcm->GetLayerIndexByHeight(lcm->GetHeight(bondwire.heights.front()));
-                query.SearchNearestPrismaInstances(layer, pts.at(curr), 1, results);
+                query.SearchNearestPrismInstances(layer, pts.at(curr), 1, results);
                 ECAD_ASSERT(results.size() == 1)
                 std::for_each(results.begin(), results.end(), [&](const auto & r) { line.neighbors.front().push_back(r.second); });
             }
@@ -185,9 +185,9 @@ ECAD_INLINE void EPrismaThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerC
                 prevLine.neighbors.back().emplace_back(line.id);
             }
             if (next == pts.size() - 1) {
-                std::vector<utils::EPrismaThermalModelQuery::RtVal> results;
+                std::vector<utils::EPrismThermalModelQuery::RtVal> results;
                 auto layer = lcm->GetLayerIndexByHeight(lcm->GetHeight(bondwire.heights.back()));
-                query.SearchNearestPrismaInstances(layer, pts.at(next), 1, results);
+                query.SearchNearestPrismInstances(layer, pts.at(next), 1, results);
                 ECAD_ASSERT(results.size() == 1)
                 std::for_each(results.begin(), results.end(), [&](const auto & r) { line.neighbors.back().push_back(r.second); });
             }
@@ -195,16 +195,16 @@ ECAD_INLINE void EPrismaThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerC
     }
 }
 
-size_t EPrismaThermalModel::AddPoint(FPoint3D point)
+size_t EPrismThermalModel::AddPoint(FPoint3D point)
 {
     m_points.emplace_back(std::move(point));
     return m_points.size() - 1;
 }
 
-FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const
+FPoint3D EPrismThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const
 {
-    const auto & points = GetLayerPrismaTemplate(lyrIndex)->points;
-    const auto & triangles = GetLayerPrismaTemplate(lyrIndex)->triangles;
+    const auto & points = GetLayerPrismTemplate(lyrIndex)->points;
+    const auto & triangles = GetLayerPrismTemplate(lyrIndex)->triangles;
     const auto & element = layers.at(lyrIndex).elements.at(eleIndex);
     const auto & triangle = triangles.at(element.templateId);
     EFloat height = vtxIndex < 3 ? layers.at(lyrIndex).elevation :
@@ -215,16 +215,16 @@ FPoint3D EPrismaThermalModel::GetPoint(size_t lyrIndex, size_t eleIndex, size_t 
     return FPoint3D{pt2d[0] * m_scaleH2Unit, pt2d[1] * m_scaleH2Unit, height};
 }
 
-void EPrismaThermalModel::SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const
+void EPrismThermalModel::SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const
 {
     indices.resize(monitors.size());
-    utils::EPrismaThermalModelQuery query(this);
+    utils::EPrismThermalModelQuery query(this);
     for (size_t i = 0; i < monitors.size(); ++i) {
         const auto & point = monitors.at(i);
         auto layer = query.NearestLayer(point[2]);
-        std::vector<typename utils::EPrismaThermalModelQuery::RtVal> results;
+        std::vector<typename utils::EPrismThermalModelQuery::RtVal> results;
         EPoint2D p(point[0] / m_scaleH2Unit, point[1] / m_scaleH2Unit);
-        query.SearchNearestPrismaInstances(layer, p, 1, results);
+        query.SearchNearestPrismInstances(layer, p, 1, results);
         indices[i] = results.front().second;
     }
 }
