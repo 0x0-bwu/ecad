@@ -25,20 +25,19 @@ ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabase(const std::string & name)
     if (m_databases.count(name)) return nullptr;
 
     auto database = std::make_shared<EDatabase>(name);
-    m_databases.insert(std::make_pair(name, database));
-    return database.get();
+    return m_databases.emplace(name, database).first->second.get();
 }
 
 ECAD_INLINE Ptr<IDatabase> EDataMgr::OpenDatabase(const std::string & name)
 {
-    if (not m_databases.count(name)) return nullptr;
-    //todo, add is open flag
-    return m_databases.at(name).get();
+    auto iter = m_databases.find(name);
+    if (iter == m_databases.cend()) return nullptr;
+    return iter->second.get();
 }
 
 ECAD_INLINE bool EDataMgr::RemoveDatabase(const std::string & name)
 {
-    return m_databases.erase(name) > 0;
+    return m_databases.erase(std::string(name)) > 0;
 }
 
 ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
@@ -71,18 +70,12 @@ ECAD_INLINE bool EDataMgr::SaveDatabase(CPtr<IDatabase> database, const std::str
     return database->Save(archive, fmt);
 }
     
-ECAD_INLINE bool EDataMgr::LoadDatabase(Ptr<IDatabase> & database, const std::string & archive, EArchiveFormat fmt)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::LoadDatabase(const std::string & archive, EArchiveFormat fmt)
 {
-    auto noname = "";
-    database = CreateDatabase(noname);
-    if (not database->Load(archive, fmt)) {
-        RemoveDatabase(noname);
-        return false;
-    }
-    auto node = m_databases.extract(noname);
-    node.key() = database->GetName();
-    m_databases.insert(std::move(node));
-    return true;
+    auto database = std::make_shared<EDatabase>("");
+    if (not database->Load(archive, fmt)) return nullptr;
+    if (m_databases.count(database->GetName())) return nullptr;
+    return m_databases.emplace(database->GetName(), database).first->second.get();
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 

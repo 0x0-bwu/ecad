@@ -24,6 +24,7 @@ ECAD_INLINE void EDatabase::save(Archive & ar, const unsigned int version) const
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EDatabase, IDatabase>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinitionCollection);
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
     ar & boost::serialization::make_nvp("coord_units", m_coordUnits);
 }
 
@@ -35,6 +36,7 @@ ECAD_INLINE void EDatabase::load(Archive & ar, const unsigned int version)
     Clear();
     boost::serialization::void_cast_register<EDatabase, IDatabase>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinitionCollection);
+    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
     ar & boost::serialization::make_nvp("coord_units", m_coordUnits);
 
     //need set cell's ref since EDatabase may not come from serialization
@@ -94,7 +96,6 @@ ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt
     std::ofstream ofs(archive);
     if (not ofs.is_open()) return false;
 
-    
     unsigned int version = toInt(CURRENT_VERSION);
     if (fmt == EArchiveFormat::TXT) {
         boost::archive::text_oarchive oa(ofs);

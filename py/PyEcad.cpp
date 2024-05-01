@@ -346,7 +346,7 @@ namespace {
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDatabaseLoadBin, EDatabase::Load, 1, 2)
 
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrSaveDatabaseBin, EDataMgr::SaveDatabase, 2, 3)
-    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrLoadDatabaseBin, EDataMgr::LoadDatabase, 2, 3)
+    BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrLoadDatabaseBin, EDataMgr::LoadDatabase, 1, 2)
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrShutDownWithAutoSave, EDataMgr::ShutDown, 0, 1)
     BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(EDataMgrCreateDatabaseFromGdsWithoutLayrMap, EDataMgr::CreateDatabaseFromGds, 2, 3)
 
@@ -1058,8 +1058,8 @@ namespace {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("save_database", &EDataMgr::SaveDatabase)
             .def("save_database", static_cast<bool(EDataMgr::*)(CPtr<IDatabase>, const std::string &, EArchiveFormat)>(&EDataMgr::SaveDatabase), EDataMgrSaveDatabaseBin())
-            .def("load_database", &EDataMgr::LoadDatabase)
-            .def("load_database", static_cast<bool(EDataMgr::*)(Ptr<IDatabase> &, const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseBin())
+            .def("load_database", &EDataMgr::LoadDatabase, return_internal_reference<>())
+            .def("load_database", static_cast<Ptr<IDatabase>(EDataMgr::*)(const std::string &, EArchiveFormat)>(&EDataMgr::LoadDatabase), EDataMgrLoadDatabaseBin()[return_internal_reference<>()])
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
             .def("create_circuit_cell", &EDataMgr::CreateCircuitCell, return_internal_reference<>())
             .def("find_cell_by_name", &EDataMgr::FindCellByName, return_internal_reference<>())

@@ -30,7 +30,7 @@ public:
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     bool SaveDatabase(CPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
-    bool LoadDatabase(Ptr<IDatabase> & database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
+    Ptr<IDatabase> LoadDatabase(const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
     ///Cell

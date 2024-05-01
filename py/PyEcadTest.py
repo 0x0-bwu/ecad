@@ -46,10 +46,15 @@ def test_data_mgr() :
     assert(mgr.save_database(database, xml_file, ecad.EArchiveFormat.XML))
     assert(os.path.isfile(xml_file) == True)
 
-    #load database
-    assert(mgr.load_database(database, bin_file))
-    assert(mgr.load_database(database, xml_file, ecad.EArchiveFormat.XML))
+    # load database
+    assert(mgr.remove_database(db_name))
+    database = mgr.load_database(bin_file)
+    assert(database != None)
     os.remove(bin_file)
+
+    assert(mgr.remove_database(db_name))
+    database = mgr.load_database(xml_file, ecad.EArchiveFormat.XML)
+    assert(database != None)
     os.remove(xml_file)
 
     #create cell
