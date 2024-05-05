@@ -1,17 +1,17 @@
 #include "EThermalSimulation.h"
-#include "models/thermal/EStackupPrismThermalModel.h"
-#include "models/thermal/io/EPrismThermalModelIO.h"
-#include "solvers/thermal/EThermalNetworkSolver.h"
-#include "models/thermal/EPrismThermalModel.h"
-#include "models/thermal/EGridThermalModel.h"
-#include "models/thermal/EThermalModel.h"
-#include "utils/EMetalFractionMapping.h"
-#include "utils/ELayoutRetriever.h"
+#include "model/thermal/EStackupPrismThermalModel.h"
+#include "model/thermal/io/EPrismThermalModelIO.h"
+#include "solver/thermal/EThermalNetworkSolver.h"
+#include "model/thermal/EPrismThermalModel.h"
+#include "model/thermal/EGridThermalModel.h"
+#include "model/thermal/EThermalModel.h"
+#include "utility/EMetalFractionMapping.h"
+#include "utility/ELayoutRetriever.h"
 
 #include "generic/tools/FileSystem.hpp"
 
 #include "Mesher2D.h"
-#include "Interface.h"
+#include "interface/Interface.h"
 
 namespace ecad::simulation {
 

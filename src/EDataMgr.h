@@ -1,7 +1,6 @@
 #pragma once
-#include "ECadSettings.h"
-#include "Interface.h"
-#include "EShape.h"
+#include "basic/ECadSettings.h"
+#include "interface/Interface.h"
 
 #include <unordered_map>
 #include <memory>
@@ -10,6 +9,7 @@ namespace ecad {
 
 using namespace generic::geometry;
 
+class EShape;
 class ECAD_API EDataMgr
 {
 public:

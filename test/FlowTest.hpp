@@ -46,7 +46,7 @@ void t_thermal_static_flow1()
     comp1->SetLossPower(ETemperature::Celsius2Kelvins(25), 33.8);
 
     //flatten
-    database->Flatten(topCell);
+    database->Flatten(topCell, 1);
     auto layout = topCell->GetFlattenedLayoutView(); BOOST_CHECK(layout);
 
     ELayoutViewRendererSettings rendererSettings;
@@ -320,7 +320,7 @@ void t_thermal_static_flow2()
     inst3->SetLayerMap(layerMap);
 
     //flatten
-    database->Flatten(topCell);
+    database->Flatten(topCell, 1);
     auto layout = topCell->GetFlattenedLayoutView();
     BOOST_CHECK(layout);
 

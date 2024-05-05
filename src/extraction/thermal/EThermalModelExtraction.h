@@ -1,6 +1,5 @@
 #pragma once
-#include "ECadSettings.h"
-#include "ECadCommon.h"
+#include "basic/ECadSettings.h"
 namespace ecad {
 class IModel;
 class ILayoutView;

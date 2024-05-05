@@ -1,15 +1,15 @@
 #include "EDataMgr.h"
 
 #include "extension/ECadExtension.h"
-#include "EPadstackDefData.h"
-#include "EComponentDef.h"
-#include "EMaterialProp.h"
-#include "ELayoutView.h"
-#include "EDatabase.h"
-#include "ELayerMap.h"
-#include "ELayer.h"
-#include "EShape.h"
-#include "ECell.h"
+#include "design/EPadstackDefData.h"
+#include "design/EComponentDef.h"
+#include "design/EMaterialProp.h"
+#include "design/ELayoutView.h"
+#include "design/EDatabase.h"
+#include "design/ELayerMap.h"
+#include "design/ELayer.h"
+#include "design/ECell.h"
+#include "basic/EShape.h"
 namespace ecad {
 
 ECAD_INLINE EDataMgr::EDataMgr()

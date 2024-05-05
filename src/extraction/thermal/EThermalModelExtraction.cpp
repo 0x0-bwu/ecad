@@ -1,18 +1,18 @@
 #include "EThermalModelExtraction.h"
 
-#include "models/thermal/utils/EStackupPrismThermalModelBuilder.h"
-#include "models/geometry/utils/ELayerCutModelQuery.h"
-#include "models/thermal/EStackupPrismThermalModel.h"
-#include "models/thermal/io/EPrismThermalModelIO.h"
-#include "models/thermal/EPrismThermalModel.h"
-#include "models/thermal/EGridThermalModel.h"
-#include "models/geometry/ELayerCutModel.h"
-#include "utils/EMetalFractionMapping.h"
-#include "utils/ELayoutRetriever.h"
+#include "model/thermal/utils/EStackupPrismThermalModelBuilder.h"
+#include "model/geometry/utils/ELayerCutModelQuery.h"
+#include "model/thermal/EStackupPrismThermalModel.h"
+#include "model/thermal/io/EPrismThermalModelIO.h"
+#include "model/thermal/EPrismThermalModel.h"
+#include "model/thermal/EGridThermalModel.h"
+#include "model/geometry/ELayerCutModel.h"
+#include "utility/EMetalFractionMapping.h"
+#include "utility/ELayoutRetriever.h"
 #include "generic/tools/FileSystem.hpp"
 
 #include "Mesher2D.h"
-#include "Interface.h"
+#include "interface/Interface.h"
 
 namespace ecad::extraction {
 

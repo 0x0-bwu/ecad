@@ -1,9 +1,9 @@
 #include "EGeometryModelExtraction.h"
 
-#include "models/geometry/utils/ELayerCutModelBuilder.h"
-#include "models/geometry/ELayerCutModel.h"
-#include "utils/ELayoutRetriever.h"
-#include "Interface.h"
+#include "model/geometry/utils/ELayerCutModelBuilder.h"
+#include "model/geometry/ELayerCutModel.h"
+#include "utility/ELayoutRetriever.h"
+#include "interface/Interface.h"
 
 #include "generic/tools/FileSystem.hpp"
 

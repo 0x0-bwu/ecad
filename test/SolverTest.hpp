@@ -4,10 +4,10 @@
 #include <boost/test/test_tools.hpp>
 #include "generic/tools/Format.hpp"
 #include "generic/tools/FileSystem.hpp"
-#include "solvers/thermal/EThermalNetworkSolver.h"
-#include "models/thermal/io/EThermalModelIO.h"
-#include "models/thermal/io/EGridThermalModelIO.h"
-#include "models/thermal/utils/EThermalModelReduction.h"
+#include "solver/thermal/EThermalNetworkSolver.h"
+#include "model/thermal/io/EThermalModelIO.h"
+#include "model/thermal/io/EGridThermalModelIO.h"
+#include "model/thermal/utils/EThermalModelReduction.h"
 #include "TestData.hpp"
 using namespace boost::unit_test;
 using namespace ecad;

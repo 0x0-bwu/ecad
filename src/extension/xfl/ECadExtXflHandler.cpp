@@ -2,9 +2,9 @@
 
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/Format.hpp"
-#include "EMaterialProp.h"
+#include "design/EMaterialProp.h"
+#include "basic/ETransform.h"
 #include "EXflParser.h"
-#include "ETransform.h"
 #include "EDataMgr.h"
 namespace ecad {
 namespace ext {

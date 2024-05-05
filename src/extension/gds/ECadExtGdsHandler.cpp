@@ -4,8 +4,8 @@
 #include "extension/gds/EGdsFileIO.h"
 #include "generic/geometry/Utility.hpp"
 #include "generic/tools/Format.hpp"
-#include "ETransform.h"
-#include "ELayerMap.h"
+#include "basic/ETransform.h"
+#include "design/ELayerMap.h"
 #include "EDataMgr.h"
 namespace ecad {
 namespace ext {

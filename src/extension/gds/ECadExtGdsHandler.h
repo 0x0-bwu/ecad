@@ -1,7 +1,7 @@
 #pragma once
 #define ECAD_EXT_GDS_DEBUG_MODE
-#include "extension/gds/EGdsObjects.h"
-#include "ECadCommon.h"
+#include "basic/ECadCommon.h"
+#include "EGdsObjects.h"
 #include <map>
 namespace ecad {
 

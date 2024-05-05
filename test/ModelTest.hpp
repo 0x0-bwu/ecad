@@ -3,7 +3,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
 #include "generic/tools/FileSystem.hpp"
-#include "models/thermal/io/EChipThermalModelIO.h"
+#include "model/thermal/io/EChipThermalModelIO.h"
 #include "TestData.hpp"
 using namespace boost::unit_test;
 using namespace ecad;

@@ -6,7 +6,7 @@
 
 #include "../test/TestData.hpp"
 #include "generic/tools/StringHelper.hpp"
-#include "utils/ELayoutRetriever.h"
+#include "utility/ELayoutRetriever.h"
 #include "EDataMgr.h"
 
 void SignalHandler(int signum)

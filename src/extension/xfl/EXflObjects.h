@@ -1,7 +1,7 @@
 #pragma once
+#include "basic/ECadCommon.h"
+#include "basic/EShape.h"
 #include "generic/geometry/Utility.hpp"
-#include "ECadCommon.h"
-#include "EShape.h"
 #include <boost/variant.hpp>
 #include <unordered_map>
 namespace ecad {

@@ -1,7 +1,7 @@
 #pragma once
 #include "generic/geometry/Box.hpp"
-#include "ECadCommon.h"
-#include "EShape.h"
+#include "basic/ECadCommon.h"
+#include "basic/EShape.h"
 namespace ecad {
 
 class IDatabase;

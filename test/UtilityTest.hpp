@@ -27,7 +27,7 @@ void t_flatten_utility()
     BOOST_CHECK(cells.size() == 9);
 
     auto topCell = topCells.front();
-    auto res = database->Flatten(topCell);
+    auto res = database->Flatten(topCell, 1);
     BOOST_CHECK(res);
 
     EDataMgr::Instance().ShutDown();
