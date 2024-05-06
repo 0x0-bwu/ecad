@@ -199,7 +199,7 @@ def test_database() :
     assert(len(top_cells) == 1)
     
     #flatten
-    assert(database.flatten(top_cells[0]))
+    assert(database.flatten(top_cells[0], 1))
 
     #get layer map collection
     layer_map_collection = database.get_layer_map_collection()
