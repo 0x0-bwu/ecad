@@ -3,7 +3,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EPrimitiveCollection)
 
 #include "interface/ILayerMap.h"
 #include "interface/INet.h"
-#include "EPrimitive.h"
+#include "design/EPrimitive.h"
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

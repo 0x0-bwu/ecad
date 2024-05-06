@@ -22,6 +22,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayoutView)
 #include "interface/ICellInstCollection.h"
 #include "interface/IConnObjCollection.h"
 #include "interface/ILayerCollection.h"
+#include "interface/IModelCollection.h"
 #include "interface/INetCollection.h"
 #include "interface/IComponent.h"
 #include "interface/IPrimitive.h"
@@ -262,6 +263,11 @@ ECAD_INLINE Ptr<ILayerCollection> ELayoutView::GetLayerCollection() const
     return ECollectionCollection::LayerCollection();
 }
 
+ECAD_INLINE Ptr<IModelCollection> ELayoutView::GetModelCollection() const
+{
+    return ECollectionCollection::ModelCollection();
+}
+
 ECAD_INLINE Ptr<IConnObjCollection> ELayoutView::GetConnObjCollection() const
 {
     return ECollectionCollection::ConnObjCollection();
@@ -330,9 +336,13 @@ ECAD_INLINE bool ELayoutView::MergeLayerPolygons(const ELayoutPolygonMergeSettin
     return true;
 }
 
-ECAD_INLINE UPtr<IModel> ELayoutView::ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings)
+ECAD_INLINE CPtr<IModel> ELayoutView::ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings)
 {
-    return extraction::EGeometryModelExtraction::GenerateLayerCutModel(this, settings);
+    auto collection = GetModelCollection();
+    auto model = collection->FindModel(EModelType::LayerCut);
+    if (model && model->Match(settings)) return model;
+    collection->AddModel(extraction::EGeometryModelExtraction::GenerateLayerCutModel(this, settings));
+    return collection->FindModel(EModelType::LayerCut);
 }
 
 ECAD_INLINE UPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExtractionSettings & settings)

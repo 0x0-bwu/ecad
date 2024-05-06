@@ -8,6 +8,7 @@ class ICell;
 class IText;
 class IModel;
 class ILayer;
+class IModel;
 class EShape;
 class EPolygon;
 class IBondwire;
@@ -21,6 +22,7 @@ class IStackupLayer;
 class IPadstackInst;
 class INetCollection;
 class ILayerCollection;
+class IModelCollection;
 class IConnObjCollection;
 class ICellInstCollection;
 class IComponentCollection;
@@ -89,6 +91,7 @@ public:
     ///Collection
     virtual Ptr<INetCollection> GetNetCollection() const = 0;
     virtual Ptr<ILayerCollection> GetLayerCollection() const = 0;
+    virtual Ptr<IModelCollection> GetModelCollection() const = 0;
     virtual Ptr<IConnObjCollection> GetConnObjCollection() const = 0;
     virtual Ptr<ICellInstCollection> GetCellInstCollection() const = 0;
     virtual Ptr<IComponentCollection> GetComponentCollection() const = 0;
@@ -116,7 +119,7 @@ public:
     virtual bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) = 0;
 
     ///Geometry Model Extraction
-    virtual UPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) = 0;
+    virtual CPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) = 0;
     
     ///Thermal Model Extraction
     virtual UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) = 0;

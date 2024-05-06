@@ -1,6 +1,6 @@
 #pragma once
 #include "interface/IComponentDef.h"
-#include "ECollectionCollection.h"
+#include "collection/ECollectionCollection.h"
 #include "EDefinition.h"
 namespace ecad {
 

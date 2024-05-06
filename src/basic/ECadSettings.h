@@ -1,11 +1,22 @@
 #pragma once
 #include "ECadCommon.h"
-#include "ECadDef.h"
 #include <unordered_set>
 #include <functional>
 #include <array>
 #include <set>
 namespace ecad {
+
+struct ECadSettings
+{
+    virtual bool operator== (const ECadSettings & settings) const = 0;
+    bool operator != (const ECadSettings & settings) const
+    {
+        return not (*this == settings);
+    }
+
+protected:
+    ECadSettings() = default;
+};
 
 struct EDataMgrSettings
 {
@@ -57,13 +68,24 @@ struct EPrismMeshSettings : public EMeshSettings
     bool imprintUpperLayer = false;
 };
 
-struct ELayerCutModelExtractionSettings
+struct ELayerCutModelExtractionSettings : public ECadSettings
 {
     bool dumpSketchImg = true;
     size_t layerCutPrecision = 6;
     EFloat layerTransitionRatio = 2;
     bool addCircleCenterAsSteinerPoints{false};
     std::vector<FBox2D> imprintBox;
+
+    bool operator== (const ECadSettings & settings) const override
+    {
+        auto ps = dynamic_cast<CPtr<ELayerCutModelExtractionSettings>>(&settings);
+        if (nullptr == ps) return false;
+        if (layerCutPrecision != ps->layerCutPrecision ||
+            layerTransitionRatio != ps->layerTransitionRatio ||
+            addCircleCenterAsSteinerPoints != ps->addCircleCenterAsSteinerPoints ||
+            imprintBox != ps->imprintBox) return false;
+        return true;
+    }
 };
 
 using ELayerCutModelBuildSettings = ELayerCutModelExtractionSettings;

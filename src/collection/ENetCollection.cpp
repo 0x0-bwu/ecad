@@ -1,7 +1,7 @@
 #include "ENetCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ENetCollection)
 
-#include "ENet.h"
+#include "design/ENet.h"
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

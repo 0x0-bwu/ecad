@@ -6,15 +6,16 @@
 namespace ecad::model::utils {
 
 ECAD_INLINE ELayerCutModelBuilder::ELayerCutModelBuilder(CPtr<ILayoutView> layout, Ptr<ELayerCutModel> model, ELayerCutModelBuildSettings settings)
- : m_layout(layout), m_model(model), m_settings(std::move(settings))
+ : m_layout(layout), m_model(model)
 {
-    m_model->m_vScale2Int = std::pow(10, m_settings.layerCutPrecision);
+    m_model->m_settings = std::move(settings);
+    m_model->m_vScale2Int = std::pow(10, m_model->m_settings.layerCutPrecision);
     m_retriever = std::make_unique<ecad::utils::ELayoutRetriever>(m_layout);
 }
 
 ECAD_INLINE void ELayerCutModelBuilder::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness)
 {
-    if (m_settings.addCircleCenterAsSteinerPoints) {
+    if (m_model->m_settings.addCircleCenterAsSteinerPoints) {
         if (EShapeType::Circle == shape->GetShapeType()) {
             auto circle = dynamic_cast<CPtr<ECircle>>(shape);
             m_model->m_steinerPoints.emplace_back(circle->o);

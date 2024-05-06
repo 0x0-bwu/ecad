@@ -19,6 +19,7 @@ enum class ECollectionType
     Net,
     Cell,
     Layer,
+    Model,
     ConnObj,
     CellInst,
     LayerMap,
@@ -42,6 +43,7 @@ ECAD_ALWAYS_INLINE std::string toString(ECollectionType type)
         case ECollectionType::Net : return "Net";
         case ECollectionType::Cell : return "Cell";
         case ECollectionType::Layer : return "Layer";
+        case ECollectionType::Model : return "Model";
         case ECollectionType::ConnObj : return "Connect Object";
         case ECollectionType::CellInst : return "Cell Instance";
         case ECollectionType::LayerMap : return "LayerMap";

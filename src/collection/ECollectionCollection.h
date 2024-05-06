@@ -6,6 +6,7 @@ namespace ecad {
 class INetCollection;
 class ICellCollection;
 class ILayerCollection;
+class IModelCollection;
 class IConnObjCollection;
 class ICellInstCollection;
 class ILayerMapCollection;
@@ -37,6 +38,7 @@ public:
     Ptr<INetCollection> NetCollection() const;
     Ptr<ICellCollection> CellCollection() const;
     Ptr<ILayerCollection> LayerCollection() const;
+    Ptr<IModelCollection> ModelCollection() const;
     Ptr<IConnObjCollection> ConnObjCollection() const;
     Ptr<ICellInstCollection> CellInstCollection() const;
     Ptr<ILayerMapCollection> LayerMapCollection() const;

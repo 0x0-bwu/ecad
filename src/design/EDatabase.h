@@ -1,6 +1,6 @@
 #pragma once
 #include "interface/IDatabase.h"
-#include "EDefinitionCollection.h"
+#include "collection/EDefinitionCollection.h"
 #include "EObject.h"
 #include <string>
 namespace ecad {

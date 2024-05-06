@@ -105,6 +105,10 @@ public:
 
     EModelType GetModelType() const { return EModelType::ThermalGrid; }
 
+protected:
+    ///Copy
+    virtual Ptr<EGridThermalModel> CloneImp() const override { return new EGridThermalModel(*this); }
+
 private:
     ESize2D m_size;
     FPoint2D m_ref;

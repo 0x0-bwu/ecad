@@ -1,10 +1,10 @@
 #include "EDatabase.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 
-#include "design/EComponentDefCollection.h"
-#include "design/EMaterialDefCollection.h"
-#include "design/EPadstackDefCollection.h"
-#include "design/ELayerMapCollection.h"
+#include "collection/EComponentDefCollection.h"
+#include "collection/EMaterialDefCollection.h"
+#include "collection/EPadstackDefCollection.h"
+#include "collection/ELayerMapCollection.h"
 #include "design/EComponentDef.h"
 #include "design/EMaterialDef.h"
 #include "design/EPadstackDef.h"

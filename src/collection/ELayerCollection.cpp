@@ -2,7 +2,7 @@
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayerCollection)
 
 #include "interface/ILayer.h"
-#include "ELayerMap.h"
+#include "design/ELayerMap.h"
 #include "EDataMgr.h"
 namespace ecad {
 

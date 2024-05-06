@@ -19,20 +19,4 @@ add_library(Edesign
     EPadstackDefData.cpp
     EPadstackInst.cpp
     EPrimitive.cpp
-    ECellCollection.cpp
-    ECellInstCollection.cpp
-    ECollectionCollection.cpp
-    EComponentCollection.cpp
-    EComponentDefCollection.cpp
-    EComponentDefPinCollection.cpp
-    EConnObjCollection.cpp
-    EDefinitionCollection.cpp
-    EHierarchyObjCollection.cpp
-    ELayerCollection.cpp
-    ENetCollection.cpp
-    ELayerMapCollection.cpp
-    EMaterialDefCollection.cpp
-    EPadstackDefCollection.cpp
-    EPadstackInstCollection.cpp
-    EPrimitiveCollection.cpp
 )

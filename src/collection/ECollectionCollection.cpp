@@ -14,6 +14,7 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECollectionCollection)
 #include "ECellInstCollection.h"
 #include "EConnObjCollection.h"
 #include "ELayerCollection.h"
+#include "EModelCollection.h"
 #include "ECellCollection.h"
 #include "ENetCollection.h"
 
@@ -112,6 +113,10 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::AddCollection(ECollectionTyp
             collection = new EConnObjCollection;
             break;
         }
+        case ECollectionType::Model : {
+            collection = new EModelCollection;
+            break;
+        }
         case ECollectionType::Layer : {
             collection = new ELayerCollection;
             break;
@@ -135,7 +140,7 @@ ECAD_INLINE Ptr<ICollection> ECollectionCollection::AddCollection(ECollectionTyp
 
 ECAD_INLINE Ptr<ICollection> ECollectionCollection::GetCollection(ECollectionType type) const
 {
-    if(!Count(type)) return nullptr;
+    if (not Count(type)) return nullptr;
     return At(type).get();
 }
 
@@ -155,6 +160,12 @@ ECAD_INLINE Ptr<ILayerCollection> ECollectionCollection::LayerCollection() const
 {
     auto res = GetCollection(ECollectionType::Layer);
     return dynamic_cast<Ptr<ILayerCollection> >(res);
+}
+
+ECAD_INLINE Ptr<IModelCollection> ECollectionCollection::ModelCollection() const
+{
+    auto res = GetCollection(ECollectionType::Model);
+    return dynamic_cast<Ptr<IModelCollection> >(res);   
 }
 
 ECAD_INLINE Ptr<IConnObjCollection> ECollectionCollection::ConnObjCollection() const

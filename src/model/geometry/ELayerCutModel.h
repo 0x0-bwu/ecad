@@ -45,6 +45,7 @@ public:
     };
     
     virtual ~ELayerCutModel() = default;
+
     bool WriteImgView(std::string_view filename, size_t width = 512) const;
 
     void BuildLayerPolygonLUT(EFloat vTransitionRatio);
@@ -68,10 +69,17 @@ public:
     std::vector<EPolygonData> GetLayerPolygons(size_t layer) const;
 
     virtual EModelType GetModelType() const { return EModelType::LayerCut; }
+    bool Match(const ECadSettings & settings) const override { return m_settings == settings; }
 
     static bool SliceOverheightLayers(std::list<LayerRange> & ranges, EFloat ratio);
+
+protected:
+    ///Copy
+    virtual Ptr<ELayerCutModel> CloneImp() const override { return new ELayerCutModel(*this); }
+
 protected:
     //data
+    ELayerCutModelExtractionSettings m_settings;
     std::vector<ENetId> m_nets;
     std::vector<LayerRange> m_ranges; 
     std::vector<Bondwire> m_bondwires;

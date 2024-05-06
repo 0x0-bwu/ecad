@@ -108,8 +108,9 @@ public:
     bool Count(const Key & key) const { return m_collection.count(key); }
 
     template <typename key_t, typename value_t>
-    bool Insert(key_t && key, value_t && value)
+    bool Insert(key_t && key, value_t && value, bool force = false)
     { 
+        if (force && m_collection.count(key)) m_collection.erase(key);
         return m_collection.emplace(std::forward<key_t>(key), std::forward<value_t>(value)).second;
     }
 

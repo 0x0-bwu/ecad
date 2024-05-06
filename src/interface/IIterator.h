@@ -7,6 +7,7 @@ namespace ecad {
 class INet;
 class ICell;
 class ILayer;
+class IModel;
 class IConnObj;
 class ICellInst;
 class ILayerMap;
@@ -32,6 +33,7 @@ public:
 using NetIter = UPtr<IIterator<INet> >;
 using CellIter = UPtr<IIterator<ICell> >;
 using LayerIter = UPtr<IIterator<ILayer> >;
+using ModelIter = UPtr<IIterator<IModel> >;
 using ConnObjIter = UPtr<IIterator<IConnObj> >;
 using CellInstIter = UPtr<IIterator<ICellInst> >;
 using LayerMapIter = UPtr<IIterator<ILayerMap> >;

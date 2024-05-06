@@ -17,7 +17,7 @@ public:
     ECell(const ECell & other);
     ECell & operator= (const ECell & other);
 
-    virtual const ECoordUnits & GetCoordUnits() const override;
+    const ECoordUnits & GetCoordUnits() const override;
 
     void SetDatabase(CPtr<IDatabase> database) override;
     CPtr<IDatabase> GetDatabase() const override;

@@ -36,7 +36,6 @@ protected:
 protected:
     CPtr<ILayoutView> m_layout{nullptr};
     Ptr<ELayerCutModel> m_model{nullptr};
-    ELayerCutModelBuildSettings m_settings;
     UPtr<LayoutRetriever> m_retriever;
 };
 } // namespace model::utils

@@ -1,7 +1,7 @@
 #include "EComponentCollection.h"
 ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentCollection)
 
-#include "EComponent.h"
+#include "design/EComponent.h"
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

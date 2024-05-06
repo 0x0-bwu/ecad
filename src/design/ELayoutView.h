@@ -1,7 +1,7 @@
 #pragma once
 #include "interface/ILayoutView.h"
 #include "interface/IIterator.h"
-#include "ECollectionCollection.h"
+#include "collection/ECollectionCollection.h"
 #include "EObject.h"
 #include <array>
 namespace ecad {
@@ -9,9 +9,10 @@ namespace ecad {
 class ICell;
 class ECAD_API ELayoutView : public ECollectionCollection, public EObject, public ILayoutView
 {
-    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 4> m_collectionTypes = { ECollectionType::HierarchyObj,
+    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 5> m_collectionTypes = { ECollectionType::HierarchyObj,
                                                                                              ECollectionType::ConnObj,
                                                                                              ECollectionType::Layer,
+                                                                                             ECollectionType::Model,
                                                                                              ECollectionType::Net };
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     ELayoutView();
@@ -81,6 +82,7 @@ public:
     ///ECollectionCollection
     Ptr<INetCollection> GetNetCollection() const override;
     Ptr<ILayerCollection> GetLayerCollection() const override;
+    Ptr<IModelCollection> GetModelCollection() const override;
     Ptr<IConnObjCollection> GetConnObjCollection() const override;
     Ptr<ICellInstCollection> GetCellInstCollection() const override;
     Ptr<IComponentCollection> GetComponentCollection() const override;
@@ -105,7 +107,7 @@ public:
     bool MergeLayerPolygons(const ELayoutPolygonMergeSettings & settings) override;
 
     ///Geometry Model Extraction
-    UPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) override;
+    CPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) override;
 
     ///Thermal Model Extraction
     UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) override;

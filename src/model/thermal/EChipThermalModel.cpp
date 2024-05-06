@@ -22,7 +22,7 @@ ECAD_INLINE EChipThermalModelV1 & EChipThermalModelV1::operator= (const EChipThe
     header = other.header;
     powers = other.powers;
     densities = other.densities;
-    if(other.m_layerStackup)
+    if (other.m_layerStackup)
         m_layerStackup = std::make_unique<ECTMv1LayerStackup>(*(other.m_layerStackup));
     return *this;
 }

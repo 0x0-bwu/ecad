@@ -71,7 +71,11 @@ public:
     CPtr<ECTMv1LayerStackup> GetLayerStackup(std::string * info = nullptr) const;
 
     EModelType GetModelType() const { return EModelType::ThermalCTMv1; }
-    
+
+protected:
+    ///Copy
+    virtual Ptr<EChipThermalModelV1> CloneImp() const override { return new EChipThermalModelV1(*this); }
+
 private:
     bool isMetalLayer(const std::string & name) const;
     void BuildLayerStackup(std::string * info = nullptr) const;

@@ -181,7 +181,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
     ECAD_EFFICIENCY_TRACK("generate prism thermal model")
     auto model = new EPrismThermalModel(layout);
     auto lcModel = layout->ExtractLayerCutModel(settings.layerCutSettings);
-    auto compact = dynamic_cast<Ptr<ELayerCutModel>>(lcModel.get());
+    auto compact = dynamic_cast<CPtr<ELayerCutModel>>(lcModel);
     ECAD_ASSERT(compact)
 
     if (not settings.workDir.empty() && settings.layerCutSettings.dumpSketchImg) {
@@ -310,7 +310,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalMod
     ECAD_EFFICIENCY_TRACK("generate stackup prism thermal model")
     auto model = new EStackupPrismThermalModel(layout);
     auto lcModel = layout->ExtractLayerCutModel(settings.layerCutSettings);
-    auto compact = dynamic_cast<Ptr<ELayerCutModel>>(lcModel.get());
+    auto compact = dynamic_cast<CPtr<ELayerCutModel>>(lcModel);
     ECAD_ASSERT(compact)
 
     if (not settings.workDir.empty() && settings.layerCutSettings.dumpSketchImg) {

@@ -1,0 +1,19 @@
+add_library(Ecollection
+    ECellCollection.cpp
+    ECellInstCollection.cpp
+    ECollectionCollection.cpp
+    EComponentCollection.cpp
+    EComponentDefCollection.cpp
+    EComponentDefPinCollection.cpp
+    EConnObjCollection.cpp
+    EDefinitionCollection.cpp
+    EHierarchyObjCollection.cpp
+    ELayerCollection.cpp
+    EModelCollection.cpp
+    ENetCollection.cpp
+    ELayerMapCollection.cpp
+    EMaterialDefCollection.cpp
+    EPadstackDefCollection.cpp
+    EPadstackInstCollection.cpp
+    EPrimitiveCollection.cpp
+)

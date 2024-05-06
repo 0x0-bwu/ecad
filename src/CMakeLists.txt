@@ -1,5 +1,6 @@
 
 add_subdirectory(basic)
+add_subdirectory(collection)
 add_subdirectory(design)
 add_subdirectory(utility)
 add_subdirectory(model)
@@ -14,6 +15,7 @@ EDataMgr.cpp
 
 target_link_libraries(Ecad
     Ebasic
+    Ecollection
     Edesign
     Eutility
     Emodel
