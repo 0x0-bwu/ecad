@@ -27,7 +27,6 @@ public:
 
     virtual void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const {};
     virtual bool Match(const ECadSettings & settings) const override { return false; }//tmp
-    virtual EModelType GetModelType() const = 0;
 
 protected:
     std::unordered_map<EOrientation, EThermalBondaryCondition> m_uniformBC;

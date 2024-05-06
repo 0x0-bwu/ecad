@@ -103,7 +103,7 @@ public:
 
     bool NeedIteration() const;
 
-    EModelType GetModelType() const { return EModelType::ThermalGrid; }
+    EModelType GetModelType() const override { return EModelType::ThermalGrid; }
 
 protected:
     ///Copy

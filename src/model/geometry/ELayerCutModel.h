@@ -68,7 +68,7 @@ public:
     LayerRange GetLayerRange(EFloat elevation, EFloat thickness) const;
     std::vector<EPolygonData> GetLayerPolygons(size_t layer) const;
 
-    virtual EModelType GetModelType() const { return EModelType::LayerCut; }
+    virtual EModelType GetModelType() const override { return EModelType::LayerCut; }
     bool Match(const ECadSettings & settings) const override { return m_settings == settings; }
 
     static bool SliceOverheightLayers(std::list<LayerRange> & ranges, EFloat ratio);

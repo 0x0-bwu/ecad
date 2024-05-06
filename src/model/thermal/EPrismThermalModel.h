@@ -207,8 +207,8 @@ public:
     size_t AddPoint(FPoint3D point);
     FPoint3D GetPoint(size_t lyrIndex, size_t eleIndex, size_t vtxIndex) const;
 
-    virtual void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const;
-    virtual EModelType GetModelType() const { return EModelType::ThermalPrism; }
+    virtual void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const override;
+    virtual EModelType GetModelType() const override { return EModelType::ThermalPrism; }
 
 protected:
     ///Copy
