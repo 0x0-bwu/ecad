@@ -1,0 +1,11 @@
+add_library(Eextension
+    dmcdom/ECadExtDmcDomHandler.cpp
+    gds/ECadExtGdsHandler.cpp
+    gds/EGdsFileIO.cpp
+    gds/EGdsLayerMap.cpp
+    gds/EGdsParser.cpp
+    kicad/ECadExtKiCadHandler.cpp
+    kicad/EKiCadParser.cpp
+    xfl/ECadExtXflHandler.cpp
+    ECadExtension.cpp
+)

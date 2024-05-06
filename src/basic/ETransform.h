@@ -1,7 +1,7 @@
 #pragma once
+#include "ECadCommon.h"
 #include "generic/geometry/Transform.hpp"
 #include "generic/math/MathUtility.hpp"
-#include "ECadCommon.h"
 #include <list>
 namespace ecad {
 

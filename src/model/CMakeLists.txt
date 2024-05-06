@@ -1,0 +1,18 @@
+add_library(Emodel
+    geometry/utils/ELayerCutModelBuilder.cpp
+    geometry/utils/ELayerCutModelQuery.cpp
+    geometry/ELayerCutModel.cpp
+    thermal/io/EChipThermalModelIO.cpp
+    thermal/io/EGridThermalModelIO.cpp
+    thermal/io/EPrismThermalModelIO.cpp
+    thermal/io/EThermalModelIO.cpp
+    thermal/utils/EPrismThermalModelQuery.cpp
+    thermal/utils/EStackupPrismThermalModelBuilder.cpp
+    thermal/utils/EStackupPrismThermalModelQuery.cpp
+    thermal/utils/EThermalModelReduction.cpp
+    thermal/EChipThermalModel.cpp
+    thermal/EGridThermalModel.cpp
+    thermal/EPrismThermalModel.cpp
+    thermal/EStackupPrismThermalModel.cpp
+    thermal/EThermalModel.cpp
+)

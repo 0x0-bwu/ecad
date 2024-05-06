@@ -1,84 +1,27 @@
 
+add_subdirectory(basic)
+add_subdirectory(design)
+add_subdirectory(utility)
+add_subdirectory(model)
+add_subdirectory(extension)
+add_subdirectory(extraction)
+add_subdirectory(solver)
+add_subdirectory(simulation)
+
 add_library(Ecad SHARED
 EDataMgr.cpp
-basic/EShape.cpp
-design/ECell.cpp
-design/ECellInst.cpp
-design/EComponent.cpp
-design/EComponentDef.cpp
-design/EComponentDefPin.cpp
-design/EConnObj.cpp
-design/EDatabase.cpp
-design/EDefinition.cpp
-design/EHierarchyObj.cpp
-design/ELayer.cpp
-design/ELayerMap.cpp
-design/ELayoutView.cpp
-design/EMaterialDef.cpp
-design/EMaterialProp.cpp
-design/ENet.cpp
-design/EObject.cpp
-design/EPadstackDef.cpp
-design/EPadstackDefData.cpp
-design/EPadstackInst.cpp
-design/EPrimitive.cpp
-design/ECellCollection.cpp
-design/ECellInstCollection.cpp
-design/ECollectionCollection.cpp
-design/EComponentCollection.cpp
-design/EComponentDefCollection.cpp
-design/EComponentDefPinCollection.cpp
-design/EConnObjCollection.cpp
-design/EDefinitionCollection.cpp
-design/EHierarchyObjCollection.cpp
-design/ELayerCollection.cpp
-design/ENetCollection.cpp
-design/ELayerMapCollection.cpp
-design/EMaterialDefCollection.cpp
-design/EPadstackDefCollection.cpp
-design/EPadstackInstCollection.cpp
-design/EPrimitiveCollection.cpp
-extension/dmcdom/ECadExtDmcDomHandler.cpp
-extension/gds/ECadExtGdsHandler.cpp
-extension/gds/EGdsFileIO.cpp
-extension/gds/EGdsLayerMap.cpp
-extension/gds/EGdsParser.cpp
-extension/kicad/ECadExtKiCadHandler.cpp
-extension/kicad/EKiCadParser.cpp
-extension/xfl/ECadExtXflHandler.cpp
-extension/ECadExtension.cpp
-extraction/geometry/EGeometryModelExtraction.cpp
-extraction/thermal/EThermalModelExtraction.cpp
-model/geometry/utils/ELayerCutModelBuilder.cpp
-model/geometry/utils/ELayerCutModelQuery.cpp
-model/geometry/ELayerCutModel.cpp
-model/thermal/io/EChipThermalModelIO.cpp
-model/thermal/io/EGridThermalModelIO.cpp
-model/thermal/io/EPrismThermalModelIO.cpp
-model/thermal/io/EThermalModelIO.cpp
-model/thermal/utils/EPrismThermalModelQuery.cpp
-model/thermal/utils/EStackupPrismThermalModelBuilder.cpp
-model/thermal/utils/EStackupPrismThermalModelQuery.cpp
-model/thermal/utils/EThermalModelReduction.cpp
-model/thermal/EChipThermalModel.cpp
-model/thermal/EGridThermalModel.cpp
-model/thermal/EPrismThermalModel.cpp
-model/thermal/EStackupPrismThermalModel.cpp
-model/thermal/EThermalModel.cpp
-simulation/thermal/EThermalSimulation.cpp
-solver/thermal/utils/EGridThermalNetworkBuilder.cpp
-solver/thermal/utils/EPrismThermalNetworkBuilder.cpp
-solver/thermal/utils/EStackupPrismThermalNetworkBuilder.cpp
-solver/thermal/EThermalNetworkSolver.cpp
-utility/EFlattenUtility.cpp
-utility/ELayout2CtmUtility.cpp
-utility/ELayoutConnectivity.cpp
-utility/ELayoutMergeUtility.cpp
-utility/ELayoutModifier.cpp
-utility/ELayoutPolygonMerger.cpp
-utility/ELayoutRetriever.cpp
-utility/ELayoutViewRenderer.cpp
-utility/EMetalFractionMapping.cpp
 )
 
-target_link_libraries(Ecad Emesh ${PNG_LIBRARY} boost_serialization)
+target_link_libraries(Ecad
+    Ebasic
+    Edesign
+    Eutility
+    Emodel
+    Eextension
+    Eextraction
+    Esolver
+    Esimulation
+    Emesh 
+    ${PNG_LIBRARY} 
+    boost_serialization
+)
