@@ -51,21 +51,14 @@ class ECAD_API ETransform2D
 {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
-    template<class Archive>
-    void save(Archive & ar, const unsigned int version) const
-    {
-        ECAD_UNUSED(version)
-        ar & boost::serialization::make_nvp("sequence", m_sequence);
-    }
 
     template<class Archive>
-    void load(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         m_sequence.clear();
         ar & boost::serialization::make_nvp("sequence", m_sequence);
     }
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
     using Transform = ETransformData2D::Transform;

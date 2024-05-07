@@ -38,17 +38,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ELayoutView::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ELayoutView, ILayoutView>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
-    ar & boost::serialization::make_nvp("boundary", m_boundary);
-    ar & boost::serialization::make_nvp("cell", m_cell);
-}
-
-template <typename Archive>
-ECAD_INLINE void ELayoutView::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ELayoutView::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ELayoutView, ILayoutView>();
@@ -340,24 +330,35 @@ ECAD_INLINE CPtr<IModel> ELayoutView::ExtractLayerCutModel(const ELayerCutModelE
 {
     auto collection = GetModelCollection();
     auto model = collection->FindModel(EModelType::LayerCut);
-    if (model && model->Match(settings)) return model;
+    if (model && model->Match(settings)) {
+        ECAD_TRACE("reuse exist layer cut model");
+        return model;
+    }
     collection->AddModel(extraction::EGeometryModelExtraction::GenerateLayerCutModel(this, settings));
     return collection->FindModel(EModelType::LayerCut);
 }
 
-ECAD_INLINE UPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExtractionSettings & settings)
+ECAD_INLINE CPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExtractionSettings & settings)
 {
-    return extraction::EThermalModelExtraction::GenerateThermalModel(this, settings);
+    auto modelType = settings.GetModelType();
+    auto collection = GetModelCollection();
+    auto model = collection->FindModel(modelType);
+    if (model && model->Match(settings)) {
+        ECAD_TRACE("reuse exist %1% model", toString(modelType));
+        return model;
+    }
+    collection->AddModel(extraction::EThermalModelExtraction::GenerateThermalModel(this, settings));
+    return collection->FindModel(modelType);
 }
 
 ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup)
 {
     EPair<EFloat, EFloat> temperature{invalidFloat, invalidFloat};
     auto model = ExtractThermalModel(extractionSettings);
-    if (nullptr == model.get()) return temperature;
+    if (nullptr == model) return temperature;
 
     simulation::EThermalSimulation sim(simulationSetup);
-    [[maybe_unused]] auto check = sim.Run(model.get(), temperature.first, temperature.second); { ECAD_ASSERT(check) }
+    [[maybe_unused]] auto check = sim.Run(model, temperature.first, temperature.second); { ECAD_ASSERT(check) }
     return temperature;
 }
 

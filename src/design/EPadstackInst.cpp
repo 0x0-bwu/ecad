@@ -10,21 +10,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EPadstackInst::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EPadstackInst, IPadstackInst>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EConnObj);
-    ar & boost::serialization::make_nvp("padstack_def", m_def);
-    ar & boost::serialization::make_nvp("layer_map", m_layerMap);
-    ar & boost::serialization::make_nvp("top_layer", m_topLyr);
-    ar & boost::serialization::make_nvp("bot_layer", m_botLyr);
-    ar & boost::serialization::make_nvp("transform", m_transform);
-    ar & boost::serialization::make_nvp("is_layout_pin", m_isLayoutPin);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPadstackInst::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPadstackInst::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPadstackInst, IPadstackInst>();

@@ -17,17 +17,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EPrimitive::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EPrimitive, IPrimitive>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EConnObj);
-    ar & boost::serialization::make_nvp("layer", m_layer);
-    ar & boost::serialization::make_nvp("type", m_type);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPrimitive::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPrimitive::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPrimitive, IPrimitive>();
@@ -128,16 +118,7 @@ ECAD_INLINE void EPrimitive::PrintImp(std::ostream & os) const
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EGeometry2D::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EGeometry2D, IGeometry2D>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrimitive);
-    ar & boost::serialization::make_nvp("shape", m_shape);
-}
-
-template <typename Archive>
-ECAD_INLINE void EGeometry2D::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EGeometry2D::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EGeometry2D, IGeometry2D>();
@@ -206,27 +187,7 @@ ECAD_INLINE void EGeometry2D::PrintImp(std::ostream & os) const
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EBondwire::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EBondwire, IBondwire>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrimitive);
-    ar & boost::serialization::make_nvp("material", m_material);
-    ar & boost::serialization::make_nvp("end_layer", m_endLayer);
-    ar & boost::serialization::make_nvp("mount_component", m_mountComp);
-    ar & boost::serialization::make_nvp("connected_pin", m_connectedPin);
-    ar & boost::serialization::make_nvp("location", m_location);
-    ar & boost::serialization::make_nvp("flipped", m_flipped);
-    ar & boost::serialization::make_nvp("radius", m_radius);
-    ar & boost::serialization::make_nvp("height", m_height);
-    ar & boost::serialization::make_nvp("current", m_current);
-    ar & boost::serialization::make_nvp("scenario", m_scenario);
-    ar & boost::serialization::make_nvp("solder_joints", m_solderJoints);
-    ar & boost::serialization::make_nvp("bondwire_type", m_bondwireType);
-}
-
-template <typename Archive>
-ECAD_INLINE void EBondwire::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EBondwire::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EBondwire, IBondwire>();
@@ -456,17 +417,7 @@ ECAD_INLINE void EBondwire::PrintImp(std::ostream & os) const
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EText::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EText, IText>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrimitive);
-    ar & boost::serialization::make_nvp("text", m_text);
-    ar & boost::serialization::make_nvp("transform", m_transform);
-}
-
-template <typename Archive>
-ECAD_INLINE void EText::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EText::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EText, IText>();

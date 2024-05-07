@@ -13,7 +13,7 @@ namespace ecad::model {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EPrismThermalModel::save(Archive & ar, const unsigned int version) const
+ECAD_INLINE void EPrismThermalModel::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EThermalModel);
@@ -21,23 +21,7 @@ ECAD_INLINE void EPrismThermalModel::save(Archive & ar, const unsigned int versi
     ar & boost::serialization::make_nvp("scale_h_to_unit", m_scaleH2Unit);
     ar & boost::serialization::make_nvp("scale_to_meter", m_scale2Meter);
     ar & boost::serialization::make_nvp("layout", m_layout);
-    ar & boost::serialization::make_nvp("points", m_points);
-    ar & boost::serialization::make_nvp("lines", m_lines);
-    ar & boost::serialization::make_nvp("prisms", m_prisms);
-    ar & boost::serialization::make_nvp("index_offset", m_indexOffset);
-    ar & boost::serialization::make_nvp("block_BCs", m_blockBCs);
-    ar & boost::serialization::make_nvp("prism_template", m_prismTemplates);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPrismThermalModel::load(Archive & ar, const unsigned int version)
-{
-    ECAD_UNUSED(version)
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EThermalModel);
-    ar & boost::serialization::make_nvp("layers", layers);
-    ar & boost::serialization::make_nvp("scale_h_to_unit", m_scaleH2Unit);
-    ar & boost::serialization::make_nvp("scale_to_meter", m_scale2Meter);
-    ar & boost::serialization::make_nvp("layout", m_layout);
+    ar & boost::serialization::make_nvp("settings", m_settings);
     ar & boost::serialization::make_nvp("points", m_points);
     ar & boost::serialization::make_nvp("lines", m_lines);
     ar & boost::serialization::make_nvp("prisms", m_prisms);
@@ -49,8 +33,8 @@ ECAD_INLINE void EPrismThermalModel::load(Archive & ar, const unsigned int versi
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPrismThermalModel)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EPrismThermalModel::EPrismThermalModel(CPtr<ILayoutView> layout)
- : m_layout(layout)
+ECAD_INLINE EPrismThermalModel::EPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings)
+ : m_layout(layout), m_settings(std::move(settings))
 {
     m_blockBCs.emplace(EOrientation::Top, std::vector<BlockBC>{});
     m_blockBCs.emplace(EOrientation::Bot, std::vector<BlockBC>{});

@@ -7,16 +7,9 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EMaterialPropPolynomial)
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    
-template <typename Archive>
-ECAD_INLINE void EMaterialProp::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EMaterialProp, IMaterialProp>();
-}
 
 template <typename Archive>
-ECAD_INLINE void EMaterialProp::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EMaterialProp::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialProp, IMaterialProp>();
@@ -25,16 +18,7 @@ ECAD_INLINE void EMaterialProp::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialProp)
 
 template <typename Archive>
-ECAD_INLINE void EMaterialPropValue::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EMaterialPropValue, IMaterialPropValue>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EMaterialProp);
-    ar & boost::serialization::make_nvp("value", m_values);
-}
-
-template <typename Archive>
-ECAD_INLINE void EMaterialPropValue::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EMaterialPropValue::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialPropValue, IMaterialPropValue>();
@@ -45,17 +29,7 @@ ECAD_INLINE void EMaterialPropValue::load(Archive & ar, const unsigned int versi
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropValue)
 
 template <typename Archive>
-ECAD_INLINE void EMaterialPropTable::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EMaterialPropTable, IMaterialPropTable>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EMaterialProp);
-    ar & boost::serialization::make_nvp("denpdency", m_dependency);
-    ar & boost::serialization::make_nvp("value", m_values);
-}
-
-template <typename Archive>
-ECAD_INLINE void EMaterialPropTable::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EMaterialPropTable::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialPropTable, IMaterialPropTable>();
@@ -67,16 +41,7 @@ ECAD_INLINE void EMaterialPropTable::load(Archive & ar, const unsigned int versi
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropTable)
 
 template <typename Archive>
-ECAD_INLINE void EMaterialPropPolynomial::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EMaterialPropPolynomial, IMaterialPropPolynomial>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EMaterialProp);
-    ar & boost::serialization::make_nvp("coefficients", m_coefficients);
-}
-
-template <typename Archive>
-ECAD_INLINE void EMaterialPropPolynomial::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EMaterialPropPolynomial::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialPropPolynomial, IMaterialPropPolynomial>();

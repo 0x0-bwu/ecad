@@ -23,14 +23,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ECollectionCollection::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BaseCollection);
-}
-
-template <typename Archive>
-ECAD_INLINE void ECollectionCollection::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ECollectionCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BaseCollection);

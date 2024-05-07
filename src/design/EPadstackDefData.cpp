@@ -10,16 +10,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EVia::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("rotation", rotation);
-    ar & boost::serialization::make_nvp("offset", offset);
-    ar & boost::serialization::make_nvp("shape", shape);
-}
-
-template <typename Archive>
-ECAD_INLINE void EVia::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EVia::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & boost::serialization::make_nvp("rotation", rotation);
@@ -30,17 +21,7 @@ ECAD_INLINE void EVia::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EVia)
 
 template <typename Archive>
-ECAD_INLINE void EPad::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("layer", lyr);
-    ar & boost::serialization::make_nvp("rotation", rotation);
-    ar & boost::serialization::make_nvp("offset", offset);
-    ar & boost::serialization::make_nvp("shape", shape);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPad::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPad::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & boost::serialization::make_nvp("layer", lyr);
@@ -52,16 +33,7 @@ ECAD_INLINE void EPad::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPad)
 
 template <typename Archive>
-ECAD_INLINE void EBump::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("thickness", thickness);
-    ar & boost::serialization::make_nvp("shape", shape);
-    ar & boost::serialization::make_nvp("material", material);
-}
-
-template <typename Archive>
-ECAD_INLINE void EBump::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EBump::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & boost::serialization::make_nvp("thickness", thickness);
@@ -72,18 +44,7 @@ ECAD_INLINE void EBump::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EBump)
 
 template <typename Archive>
-ECAD_INLINE void EPadstackDefData::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EPadstackDefData, IPadstackDefData>();
-    ar & boost::serialization::make_nvp("material", m_material);
-    ar & boost::serialization::make_nvp("bump_ball", m_solderBumpBall);
-    ar & boost::serialization::make_nvp("pads", m_pads);
-    ar & boost::serialization::make_nvp("via", m_via);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPadstackDefData::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPadstackDefData::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPadstackDefData, IPadstackDefData>();

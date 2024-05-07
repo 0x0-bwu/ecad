@@ -168,7 +168,7 @@ public:
     using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
     using PrismTemplate = tri::Triangulation<EPoint2D>;
     
-    explicit EPrismThermalModel(CPtr<ILayoutView> layout);
+    explicit EPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings);
     virtual ~EPrismThermalModel() = default;
 
     void SetLayerPrismTemplate(size_t layer, SPtr<PrismTemplate> prismTemplate);
@@ -209,18 +209,18 @@ public:
 
     virtual void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const override;
     virtual EModelType GetModelType() const override { return EModelType::ThermalPrism; }
-
+    virtual bool Match(const ECadSettings & settings) const override { return m_settings == settings; }
 protected:
     ///Copy
     virtual Ptr<EPrismThermalModel> CloneImp() const override { return new EPrismThermalModel(*this); }
 
 public:
     std::vector<PrismLayer> layers;
-
 protected:
     EFloat m_scaleH2Unit;
     EFloat m_scale2Meter;
     CPtr<ILayoutView> m_layout{nullptr};
+    EPrismThermalModelExtractionSettings m_settings;
     std::vector<FPoint3D> m_points;
     std::vector<LineElement> m_lines;
     std::vector<PrismInstance> m_prisms;

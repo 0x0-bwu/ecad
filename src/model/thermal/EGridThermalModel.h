@@ -64,7 +64,7 @@ class ECAD_API EGridThermalModel : public EThermalModel
     friend class utils::EGridThermalModelReduction;
 public:
     using BlockBC = EPair<std::array<ESize2D, 2>, EThermalBondaryCondition>;
-    explicit EGridThermalModel(const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), EFloat elevation = 0);
+    explicit EGridThermalModel(EGridThermalModelExtractionSettings settings, const ESize2D & size, const FPoint2D & ref = FPoint2D(0, 0), EFloat elevation = 0);
     virtual ~EGridThermalModel();
 
     EFloat TotalThickness() const;
@@ -103,7 +103,8 @@ public:
 
     bool NeedIteration() const;
 
-    EModelType GetModelType() const override { return EModelType::ThermalGrid; }
+    virtual EModelType GetModelType() const override { return EModelType::ThermalGrid; }
+    virtual bool Match(const ECadSettings & settings) const override { return m_settings == settings; }
 
 protected:
     ///Copy
@@ -119,6 +120,7 @@ private:
     std::vector<std::tuple<ESize3D, ESize3D, EFloat> > m_jumpConnects;
     std::vector<BlockBC> m_topBlockBCs;
     std::vector<BlockBC> m_botBlockBCs;
+    EGridThermalModelExtractionSettings m_settings;
 };
 
 ECAD_ALWAYS_INLINE size_t EGridThermalModel::GetFlattenIndex(const ESize3D & index) const

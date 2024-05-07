@@ -10,23 +10,13 @@ class ECAD_API EUidGenerator
     friend class boost::serialization::access;
     
     template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
-    {
-        ECAD_UNUSED(version)
-        EUid uid = m_uid.load();
-        ar & boost::serialization::make_nvp("uid", uid);
-    }
-
-    template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         EUid uid;
         ar & boost::serialization::make_nvp("uid", uid);
         m_uid.store(uid);
     }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
     EUid GetNextUid() { return m_uid++; }

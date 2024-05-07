@@ -9,22 +9,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EComponentDef::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EComponentDef, IComponentDef>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
-    ar & boost::serialization::make_nvp("type", m_type);
-    ar & boost::serialization::make_nvp("bounding_box", m_bondingBox);
-    ar & boost::serialization::make_nvp("height", m_height);
-    ar & boost::serialization::make_nvp("solder_height", m_solderHeight);
-    ar & boost::serialization::make_nvp("material", m_material);
-    ar & boost::serialization::make_nvp("solder_filling_material", m_solderFillingMaterial);
-}
-
-template <typename Archive>
-ECAD_INLINE void EComponentDef::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EComponentDef::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDef, IComponentDef>();

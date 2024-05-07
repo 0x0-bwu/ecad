@@ -110,7 +110,7 @@ public:
     CPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) override;
 
     ///Thermal Model Extraction
-    UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) override;
+    CPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) override;
 
     ///Simulation
     EPair<EFloat, EFloat> RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup) override;

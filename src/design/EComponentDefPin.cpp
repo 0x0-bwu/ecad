@@ -5,21 +5,9 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EComponentDefPin)
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    
-template <typename Archive>
-ECAD_INLINE void EComponentDefPin::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EComponentDefPin, IComponentDefPin>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
-    ar & boost::serialization::make_nvp("type", m_type);
-    ar & boost::serialization::make_nvp("location", m_location);
-    ar & boost::serialization::make_nvp("padstack_def", m_padstackDef);
-    ar & boost::serialization::make_nvp("layer", m_layer);
-}
 
 template <typename Archive>
-ECAD_INLINE void EComponentDefPin::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EComponentDefPin::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDefPin, IComponentDefPin>();

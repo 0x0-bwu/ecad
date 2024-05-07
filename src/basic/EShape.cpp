@@ -16,15 +16,7 @@ using namespace generic::geometry;
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void ERectangle::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ERectangle, EShape>();
-    ar & boost::serialization::make_nvp("shape", shape);
-}
-
-template <typename Archive>
-ECAD_INLINE void ERectangle::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ERectangle::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ERectangle, EShape>();
@@ -34,17 +26,7 @@ ECAD_INLINE void ERectangle::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ERectangle)
 
 template <typename Archive>
-ECAD_INLINE void EPath::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EPath, EShape>();
-    ar & boost::serialization::make_nvp("shape", shape);
-    ar & boost::serialization::make_nvp("type", m_type);
-    ar & boost::serialization::make_nvp("width", m_width);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPath::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPath::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPath, EShape>();
@@ -56,17 +38,7 @@ ECAD_INLINE void EPath::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPath)
 
 template <typename Archive>
-ECAD_INLINE void ECircle::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ECircle, EShape>();
-    ar & boost::serialization::make_nvp("o", o);
-    ar & boost::serialization::make_nvp("r", r);
-    ar & boost::serialization::make_nvp("div", div);
-}
-
-template <typename Archive>
-ECAD_INLINE void ECircle::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ECircle::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ECircle, EShape>();
@@ -78,15 +50,7 @@ ECAD_INLINE void ECircle::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ECircle)
 
 template <typename Archive>
-ECAD_INLINE void EPolygon::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EPolygon, EShape>();
-    ar & boost::serialization::make_nvp("shape", shape);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPolygon::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPolygon::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPolygon, EShape>();
@@ -96,15 +60,7 @@ ECAD_INLINE void EPolygon::load(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPolygon)
 
 template <typename Archive>
-ECAD_INLINE void EPolygonWithHoles::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EPolygonWithHoles, EShape>();
-    ar & boost::serialization::make_nvp("shape", shape);
-}
-
-template <typename Archive>
-ECAD_INLINE void EPolygonWithHoles::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EPolygonWithHoles::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPolygonWithHoles, EShape>();
@@ -114,16 +70,7 @@ ECAD_INLINE void EPolygonWithHoles::load(Archive & ar, const unsigned int versio
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPolygonWithHoles)
 
 template <typename Archive>
-ECAD_INLINE void EShapeFromTemplate::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EShapeFromTemplate, EShape>();
-    ar & boost::serialization::make_nvp("template", m_template);
-    ar & boost::serialization::make_nvp("transform", m_transform);
-}
-
-template <typename Archive>
-ECAD_INLINE void EShapeFromTemplate::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EShapeFromTemplate::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EShapeFromTemplate, EShape>();

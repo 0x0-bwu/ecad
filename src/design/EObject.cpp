@@ -6,17 +6,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EObject::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    ar & boost::serialization::make_nvp("name", m_name);
-#ifdef ECAD_BOOST_SERIALIZATION_INCLUDE_UUID
-    ar & boost::serialization::make_nvp("uuid", m_uuid);
-#endif//ECAD_BOOST_SERIALIZATION_INCLUDE_UUID
-}
-
-template <typename Archive>
-ECAD_INLINE void EObject::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EObject::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & boost::serialization::make_nvp("name", m_name);

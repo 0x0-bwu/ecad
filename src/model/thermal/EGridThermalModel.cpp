@@ -232,8 +232,8 @@ ECAD_INLINE ESize2D EGridThermalLayer::GetSize() const
     return ESize2D(m_metalFraction->Width(), m_metalFraction->Height());
 }
 
-ECAD_INLINE EGridThermalModel::EGridThermalModel(const ESize2D & size, const FPoint2D & ref, EFloat elevation)
- : m_size(size), m_ref(ref), m_elevation(elevation)
+ECAD_INLINE EGridThermalModel::EGridThermalModel(EGridThermalModelExtractionSettings settings, const ESize2D & size, const FPoint2D & ref, EFloat elevation)
+ : m_size(size), m_ref(ref), m_elevation(elevation), m_settings(std::move(settings))
 {
 
 }

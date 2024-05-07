@@ -46,22 +46,14 @@ struct ESize2D
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
-    template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
-    {
-        ECAD_UNUSED(version)
-        ar & boost::serialization::make_nvp("x", x);
-        ar & boost::serialization::make_nvp("y", y);
-    }
 
     template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         ar & boost::serialization::make_nvp("x", x);
         ar & boost::serialization::make_nvp("y", y);
     }
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 };
 
@@ -105,24 +97,15 @@ struct ESize3D
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
-    template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
-    {
-        ECAD_UNUSED(version)
-        ar & boost::serialization::make_nvp("x", x);
-        ar & boost::serialization::make_nvp("y", y);
-        ar & boost::serialization::make_nvp("z", z);
-    }
 
     template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         ar & boost::serialization::make_nvp("x", x);
         ar & boost::serialization::make_nvp("y", y);
         ar & boost::serialization::make_nvp("z", z);
     }
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 };
 
@@ -135,24 +118,26 @@ struct ETemperature
     static EFloat Kelvins2Celsius(EFloat t) { return generic::unit::Kelvins2Celsius(t); }
     static EFloat Celsius2Kelvins(EFloat t) { return generic::unit::Celsius2Kelvins(t); }
 
-#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    friend class boost::serialization::access;
-    template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
+    bool operator== (const ETemperature & t) const
     {
-        ECAD_UNUSED(version)
-        ar & boost::serialization::make_nvp("value", value);
-        ar & boost::serialization::make_nvp("unit", unit);
+        return math::EQ(value, t.value) && unit == t.unit;
     }
 
+    bool operator!= (const ETemperature & t) const
+    {
+        return not (*this == t);
+    }
+
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+
     template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         ar & boost::serialization::make_nvp("value", value);
         ar & boost::serialization::make_nvp("unit", unit);
     }
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 };
 
@@ -162,22 +147,14 @@ class ECoordUnits
     EFloat precision = 1e-9;
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
-    template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
-    {
-        ECAD_UNUSED(version)
-        ar & boost::serialization::make_nvp("unit", unit);
-        ar & boost::serialization::make_nvp("precision", precision);
-    }
 
     template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         ar & boost::serialization::make_nvp("unit", unit);
         ar & boost::serialization::make_nvp("precision", precision);
     }
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
     using Unit = generic::unit::Length;

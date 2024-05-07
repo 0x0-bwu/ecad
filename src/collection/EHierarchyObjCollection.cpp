@@ -10,16 +10,9 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EHierarchyObjCollection)
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-template <typename Archive>
-ECAD_INLINE void EHierarchyObjCollection::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EHierarchyObjCollection, IHierarchyObjCollection>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
-}
 
 template <typename Archive>
-ECAD_INLINE void EHierarchyObjCollection::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EHierarchyObjCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EHierarchyObjCollection, IHierarchyObjCollection>();

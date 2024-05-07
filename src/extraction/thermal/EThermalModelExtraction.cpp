@@ -51,7 +51,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
     const auto & coordUnits = layout->GetCoordUnits();
 
     auto [nx, ny] = mfInfo->grid;
-    auto model = new EGridThermalModel(ESize2D(nx, ny));
+    auto model = new EGridThermalModel(settings, ESize2D(nx, ny));
 
     auto rx = coordUnits.toUnit(mfInfo->stride[0], ECoordUnits::Unit::Meter);
     auto ry = coordUnits.toUnit(mfInfo->stride[1], ECoordUnits::Unit::Meter);
@@ -179,7 +179,7 @@ ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const 
 ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<ILayoutView> layout, const EPrismThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate prism thermal model")
-    auto model = new EPrismThermalModel(layout);
+    auto model = new EPrismThermalModel(layout, settings);
     auto lcModel = layout->ExtractLayerCutModel(settings.layerCutSettings);
     auto compact = dynamic_cast<CPtr<ELayerCutModel>>(lcModel);
     ECAD_ASSERT(compact)
@@ -308,7 +308,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
 ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalModel(Ptr<ILayoutView> layout, const EPrismThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate stackup prism thermal model")
-    auto model = new EStackupPrismThermalModel(layout);
+    auto model = new EStackupPrismThermalModel(layout, settings);
     auto lcModel = layout->ExtractLayerCutModel(settings.layerCutSettings);
     auto compact = dynamic_cast<CPtr<ELayerCutModel>>(lcModel);
     ECAD_ASSERT(compact)

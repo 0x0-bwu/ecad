@@ -62,7 +62,9 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
     if(nullptr == mf) return false;
 
     using namespace ecad::model;
-    auto gridModel = std::make_unique<EGridThermalModel>(ESize2D(nx, ny));
+    EGridThermalModelExtractionSettings settings;
+    settings.metalFractionMappingSettings = mfSettings;
+    auto gridModel = std::make_unique<EGridThermalModel>(settings, ESize2D(nx, ny));
     auto rx = coordUnits.toUnit(stride, ECoordUnits::Unit::Meter), ry = rx;
     gridModel->SetResolution(rx, ry);
 

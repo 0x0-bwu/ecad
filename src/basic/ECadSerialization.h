@@ -10,9 +10,7 @@
     #define ECAD_SERIALIZATION_ABSTRACT_CLASS(T) BOOST_SERIALIZATION_ASSUME_ABSTRACT(T)
     #define ECAD_SERIALIZATION_FUNCTIONS_DECLARATION                                \
     friend class boost::serialization::access;                                      \
-    template <typename Archive> void save(Archive &, const unsigned int) const;     \
-    template <typename Archive> void load(Archive &, const unsigned int);           \
-    BOOST_SERIALIZATION_SPLIT_MEMBER()                                              \
+    template <typename Archive> void serialize(Archive &, const unsigned int);      \
     /**/
     #define ECAD_SERIALIZATION_ABSTRACT_CLASS_FUNCTIONS_DECLARATION                 \
     friend class boost::serialization::access;                                      \
@@ -23,12 +21,12 @@
         #define ECAD_SERIALIZATION_CLASS_EXPORT_KEY(T) BOOST_CLASS_EXPORT_KEY(T)
         #define ECAD_SERIALIZATION_CLASS_EXPORT_IMP(T) BOOST_CLASS_EXPORT_IMPLEMENT(T)
         #define ECAD_SERIALIZATION_FUNCTIONS_IMP(T)                                                                         \
-        template void T::save<boost::archive::text_oarchive>(boost::archive::text_oarchive &, const unsigned int) const;    \
-        template void T::save<boost::archive::xml_oarchive>(boost::archive::xml_oarchive &, const unsigned int) const;      \
-        template void T::save<boost::archive::binary_oarchive>(boost::archive::binary_oarchive &, const unsigned int) const;\
-        template void T::load<boost::archive::text_iarchive>(boost::archive::text_iarchive &, const unsigned int);          \
-        template void T::load<boost::archive::xml_iarchive>(boost::archive::xml_iarchive &, const unsigned int);            \
-        template void T::load<boost::archive::binary_iarchive>(boost::archive::binary_iarchive &, const unsigned int);      \
+        template void T::serialize<boost::archive::text_iarchive>(boost::archive::text_iarchive &, const unsigned int);     \
+        template void T::serialize<boost::archive::xml_iarchive>(boost::archive::xml_iarchive &, const unsigned int);       \
+        template void T::serialize<boost::archive::binary_iarchive>(boost::archive::binary_iarchive &, const unsigned int); \
+        template void T::serialize<boost::archive::text_oarchive>(boost::archive::text_oarchive &, const unsigned int);     \
+        template void T::serialize<boost::archive::xml_oarchive>(boost::archive::xml_oarchive &, const unsigned int);       \
+        template void T::serialize<boost::archive::binary_oarchive>(boost::archive::binary_oarchive &, const unsigned int); \
         /**/
     #else
         #define ECAD_SERIALIZATION_CLASS_EXPORT(T) BOOST_CLASS_EXPORT(T)

@@ -6,16 +6,9 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDefinitionCollection)
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-template <typename Archive>
-ECAD_INLINE void EDefinitionCollection::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EDefinitionCollection, IDefinitionCollection>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
-}
 
 template <typename Archive>
-ECAD_INLINE void EDefinitionCollection::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EDefinitionCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EDefinitionCollection, IDefinitionCollection>();

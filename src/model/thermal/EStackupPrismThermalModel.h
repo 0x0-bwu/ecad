@@ -20,7 +20,7 @@ class ECAD_API EStackupPrismThermalModel : public EPrismThermalModel
 public:
     friend class utils::EStackupPrismThermalModelQuery;
     friend class utils::EStackupPrismThermalModelBuilder;
-    explicit EStackupPrismThermalModel(CPtr<ILayoutView> layout);
+    explicit EStackupPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings);
     virtual ~EStackupPrismThermalModel() = default;
     void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const override;
     EModelType GetModelType() const override { return EModelType::ThermalStackupPrism; }

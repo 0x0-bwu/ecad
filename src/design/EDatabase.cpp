@@ -18,31 +18,24 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::EDatabase)
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-template <typename Archive>
-ECAD_INLINE void EDatabase::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EDatabase, IDatabase>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinitionCollection);
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
-    ar & boost::serialization::make_nvp("coord_units", m_coordUnits);
-}
 
 template <typename Archive>
-ECAD_INLINE void EDatabase::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EDatabase::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
 
-    Clear();
+    if (Archive::is_loading::value) Clear();
     boost::serialization::void_cast_register<EDatabase, IDatabase>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinitionCollection);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
     ar & boost::serialization::make_nvp("coord_units", m_coordUnits);
 
-    //need set cell's ref since EDatabase may not come from serialization
-    auto cellIter = GetCellIter();
-    while(auto cell = cellIter->Next()){
-        cell->SetDatabase(this);
+    if (Archive::is_loading::value) {
+        //need set cell's ref since EDatabase may not come from serialization
+        auto cellIter = GetCellIter();
+        while(auto cell = cellIter->Next()){
+            cell->SetDatabase(this);
+        }
     }
 }
 

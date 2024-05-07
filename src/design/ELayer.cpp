@@ -8,17 +8,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ELayer::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ELayer, ILayer>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
-    ar & boost::serialization::make_nvp("layer_id", m_layerId);
-    ar & boost::serialization::make_nvp("layer_type", m_layerType);
-}
-
-template <typename Archive>
-ECAD_INLINE void ELayer::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ELayer::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ELayer, ILayer>();
@@ -74,19 +64,7 @@ ECAD_INLINE Ptr<IViaLayer> ELayer::GetViaLayerFromLayer()
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EStackupLayer::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EStackupLayer, IStackupLayer>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ELayer);
-    ar & boost::serialization::make_nvp("elevation", m_elevation);
-    ar & boost::serialization::make_nvp("thickness", m_thickness);
-    ar & boost::serialization::make_nvp("conducting_mat", m_conductingMat);
-    ar & boost::serialization::make_nvp("dielectric_mat", m_dielectricMat);
-}
-
-template <typename Archive>
-ECAD_INLINE void EStackupLayer::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EStackupLayer::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EStackupLayer, IStackupLayer>();
@@ -175,19 +153,9 @@ ECAD_INLINE const std::string & EStackupLayer::GetDielectricMaterial() const
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    
-template <typename Archive>
-ECAD_INLINE void EViaLayer::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EViaLayer, IViaLayer>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ELayer);
-    ar & boost::serialization::make_nvp("upper_ref_layer", m_upperRefLyr);
-    ar & boost::serialization::make_nvp("lower_ref_layer", m_lowerRefLyr);
-}
 
 template <typename Archive>
-ECAD_INLINE void EViaLayer::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EViaLayer::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EViaLayer, IViaLayer>();

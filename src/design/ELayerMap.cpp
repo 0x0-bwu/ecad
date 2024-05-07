@@ -5,19 +5,9 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ELayerMap)
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    
-template <typename Archive>
-ECAD_INLINE void ELayerMap::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ELayerMap, ILayerMap>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
-    ar & boost::serialization::make_nvp("layer_map", m_layerIdMap);
-    ar & boost::serialization::make_nvp("database", m_database);
-}
 
 template <typename Archive>
-ECAD_INLINE void ELayerMap::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ELayerMap::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ELayerMap, ILayerMap>();

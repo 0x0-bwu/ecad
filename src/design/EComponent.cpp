@@ -10,20 +10,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EComponent::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EComponent, IComponent>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EHierarchyObj);
-    ar & boost::serialization::make_nvp("component_def", m_compDef);
-    ar & boost::serialization::make_nvp("placement", m_placement);
-    ar & boost::serialization::make_nvp("loss_power", m_lossPower);
-    ar & boost::serialization::make_nvp("flipped", m_flipped);
-    ar & boost::serialization::make_nvp("scenario", m_scenario);
-}
-
-template <typename Archive>
-ECAD_INLINE void EComponent::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EComponent::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponent, IComponent>();

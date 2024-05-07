@@ -11,22 +11,13 @@ class ECAD_API ECollection : public ICollection
     friend class boost::serialization::access;
     
     template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         boost::serialization::void_cast_register<ECollection, ICollection>();
         ar & boost::serialization::make_nvp("type", m_type);
     }
 
-    template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
-    {
-        ECAD_UNUSED(version)
-        boost::serialization::void_cast_register<ECollection, ICollection>();
-        ar & boost::serialization::make_nvp("type", m_type);
-    }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
     ECollection() : m_type(ECollectionType::Invalid) {}
@@ -62,24 +53,15 @@ class ECAD_API EUnorderedMapCollection : public ECollection
 {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
-    
+
     template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollection);
         ar & boost::serialization::make_nvp("collection", m_collection);
     }
 
-    template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
-    {
-        ECAD_UNUSED(version)
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollection);
-        ar & boost::serialization::make_nvp("collection", m_collection);
-    }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
     using CollectionObject = T;
@@ -269,22 +251,13 @@ class ECAD_API EVectorCollection : public ECollection
     friend class boost::serialization::access;
     
     template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollection);
         ar & boost::serialization::make_nvp("collection", m_collection);
     }
 
-    template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
-    {
-        ECAD_UNUSED(version)
-        ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollection);
-        ar & boost::serialization::make_nvp("collection", m_collection);
-    }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
     using CollectionObject = T;

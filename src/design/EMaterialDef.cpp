@@ -6,18 +6,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EMaterialDef::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EMaterialDef, IMaterialDef>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
-    ar & boost::serialization::make_nvp("id", m_id);
-    ar & boost::serialization::make_nvp("type", m_type);
-    ar & boost::serialization::make_nvp("properties", m_properties);
-}
-
-template <typename Archive>
-ECAD_INLINE void EMaterialDef::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EMaterialDef::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialDef, IMaterialDef>();

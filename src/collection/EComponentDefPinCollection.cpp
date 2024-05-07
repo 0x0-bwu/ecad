@@ -7,15 +7,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EComponentDefPinCollection::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<EComponentDefPinCollection, IComponentDefPinCollection>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(BaseCollection);
-}
-
-template <typename Archive>
-ECAD_INLINE void EComponentDefPinCollection::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void EComponentDefPinCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDefPinCollection, IComponentDefPinCollection>();

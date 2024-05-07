@@ -34,7 +34,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const ECh
     if(devLyr.empty()) return nullptr;
 
     const auto & tiles = pCtm->header.tiles;
-    auto model = std::make_unique<EGridThermalModel>(tiles);
+    auto model = std::make_unique<EGridThermalModel>(EGridThermalModelExtractionSettings{}, tiles);
 
     for(size_t i = 0; i < stackup->layers.size(); ++i) {
         const auto & layer = stackup->layers.at(i);

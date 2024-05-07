@@ -10,20 +10,12 @@ class ELookupTable1D : public Printable
     friend class boost::serialization::access;
     
     template <typename Archive>
-    void save(Archive & ar, const unsigned int version) const
+    void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
         ar & boost::serialization::make_nvp("data", m_data);
     }
 
-    template <typename Archive>
-    void load(Archive & ar, const unsigned int version)
-    {
-        ECAD_UNUSED(version)
-        ar & boost::serialization::make_nvp("data", m_data);
-    }
-
-    BOOST_SERIALIZATION_SPLIT_MEMBER()
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
     using DataType = std::map<EFloat, EFloat>;
 public:

@@ -7,18 +7,9 @@ ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::ECircuitCell)
 namespace ecad {
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-template <typename Archive>
-ECAD_INLINE void ECell::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    boost::serialization::void_cast_register<ECell, ICell>();
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
-    ar & boost::serialization::make_nvp("cell_type", m_cellType);
-    ar & boost::serialization::make_nvp("layout_view", m_layoutView);
-}
 
 template <typename Archive>
-ECAD_INLINE void ECell::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ECell::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ECell, ICell>();
@@ -89,15 +80,9 @@ ECAD_INLINE EDefinitionType ECell::GetDefinitionType() const
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-template <typename Archive>
-ECAD_INLINE void ECircuitCell::save(Archive & ar, const unsigned int version) const
-{
-    ECAD_UNUSED(version)
-    ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECell);
-}
 
 template <typename Archive>
-ECAD_INLINE void ECircuitCell::load(Archive & ar, const unsigned int version)
+ECAD_INLINE void ECircuitCell::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECell);

@@ -122,7 +122,7 @@ public:
     virtual CPtr<IModel> ExtractLayerCutModel(const ELayerCutModelExtractionSettings & settings) = 0;
     
     ///Thermal Model Extraction
-    virtual UPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) = 0;
+    virtual CPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) = 0;
 
     ///Thermal Simulation
     virtual EPair<EFloat, EFloat> RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetupp) = 0;
