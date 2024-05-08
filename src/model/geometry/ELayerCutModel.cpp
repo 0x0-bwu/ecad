@@ -1,8 +1,33 @@
 #include "ELayerCutModel.h"
+ECAD_SERIALIZATION_CLASS_EXPORT_IMP(ecad::model::ELayerCutModel)
 
 #include "generic/geometry/GeometryIO.hpp"
 
 namespace ecad::model {
+
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    
+template <typename Archive>
+ECAD_INLINE void ELayerCutModel::serialize(Archive & ar, const unsigned int version)
+{
+    ECAD_UNUSED(version)
+    boost::serialization::void_cast_register<ELayerCutModel, IModel>();
+    ar & boost::serialization::make_nvp("settings", m_settings);
+    ar & boost::serialization::make_nvp("nets", m_nets);
+    ar & boost::serialization::make_nvp("ranges", m_ranges);
+    ar & boost::serialization::make_nvp("bondwires", m_bondwires);
+    ar & boost::serialization::make_nvp("materials", m_materials);
+    ar & boost::serialization::make_nvp("polygons", m_polygons);
+    ar & boost::serialization::make_nvp("steiner_points", m_steinerPoints);
+    ar & boost::serialization::make_nvp("power_blocks", m_powerBlocks);
+    ar & boost::serialization::make_nvp("layer_polygons", m_lyrPolygons);
+    ar & boost::serialization::make_nvp("height_to_index", m_height2Index);
+    ar & boost::serialization::make_nvp("layer_order", m_layerOrder);
+    ar & boost::serialization::make_nvp("vertical_scale_to_int", m_vScale2Int);
+}
+    
+ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayerCutModel)
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
 ECAD_INLINE ELayerCutModel::PowerBlock::PowerBlock(size_t polygon, LayerRange range, EScenarioId scen, SPtr<ELookupTable1D> power)
  : polygon(polygon), range(std::move(range)), scen(scen), power(power)

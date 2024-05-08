@@ -10,12 +10,23 @@ class ELayerCutModelBuilder;
 } // namespace utils
 class ECAD_API ELayerCutModel : public IModel
 {
+    ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     friend class utils::ELayerCutModelQuery;
     friend class utils::ELayerCutModelBuilder;
     using Height = int;
     struct LayerRange
     {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("high", high);
+        ar & boost::serialization::make_nvp("low", low);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
         Height high = -std::numeric_limits<Height>::max();
         Height low = std::numeric_limits<Height>::max();
         LayerRange() = default;
@@ -26,15 +37,43 @@ public:
     
     struct PowerBlock
     {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("polygon", polygon);
+        ar & boost::serialization::make_nvp("range", range);
+        ar & boost::serialization::make_nvp("scenario", scen);
+        ar & boost::serialization::make_nvp("power", power);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
         size_t polygon;
         LayerRange range;
         EScenarioId scen;
-        SPtr<ELookupTable1D> power;
+        SPtr<ELookupTable1D> power{nullptr};
         PowerBlock(size_t polygon, LayerRange range, EScenarioId scen, SPtr<ELookupTable1D> power);
+        PowerBlock() = default;
     };
 
     struct Bondwire
     {
+#ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
+    friend class boost::serialization::access;
+    template <typename Archive>
+    void serialize(Archive & ar, const unsigned int version)
+    {
+        ECAD_UNUSED(version)
+        ar & boost::serialization::make_nvp("net_id", netId);
+        ar & boost::serialization::make_nvp("radius", radius);
+        ar & boost::serialization::make_nvp("material_id", matId);
+        ar & boost::serialization::make_nvp("current", current);
+        ar & boost::serialization::make_nvp("scenario", scenario);
+        ar & boost::serialization::make_nvp("heights", heights);
+        ar & boost::serialization::make_nvp("point2ds", pt2ds);
+    }
+#endif//ECAD_BOOST_SERIALIZATION_SUPPORT
         ENetId netId;
         EFloat radius{0};
         EMaterialId matId;
@@ -94,3 +133,4 @@ protected:
     EFloat m_vScale2Int;
 };
 } // namespace ecad::model 
+ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::model::ELayerCutModel)
