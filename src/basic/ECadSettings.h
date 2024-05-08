@@ -176,7 +176,7 @@ struct EPrismMeshSettings : public EMeshSettings
         if (nullptr == ps) return false;
     
         if (not EMeshSettings::operator==(settings)) return false;
-        if (iteration != ps->minAlpha ||
+        if (iteration != ps->iteration ||
             genMeshByLayer != ps->genMeshByLayer ||
             imprintUpperLayer != ps->imprintUpperLayer) return false;
         return true;
