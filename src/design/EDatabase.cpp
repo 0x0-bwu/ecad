@@ -93,17 +93,17 @@ ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt
     if (fmt == EArchiveFormat::TXT) {
         boost::archive::text_oarchive oa(ofs);
         oa & boost::serialization::make_nvp("version", version);
-        save(oa, version);
+        const_cast<Ptr<EDatabase>>(this)->serialize(oa, version);
     }
     else if (fmt == EArchiveFormat::XML) {
         boost::archive::xml_oarchive oa(ofs);
         oa & boost::serialization::make_nvp("version", version);
-        save(oa, version);
+        const_cast<Ptr<EDatabase>>(this)->serialize(oa, version);
     }
     else if (fmt == EArchiveFormat::BIN) {
         boost::archive::binary_oarchive oa(ofs);
         oa & boost::serialization::make_nvp("version", version);
-        save(oa, version);
+        const_cast<Ptr<EDatabase>>(this)->serialize(oa, version);
     }
 
     return true;
@@ -118,17 +118,17 @@ ECAD_INLINE bool EDatabase::Load(const std::string & archive, EArchiveFormat fmt
     if(fmt == EArchiveFormat::TXT){
         boost::archive::text_iarchive ia(ifs);
         ia & boost::serialization::make_nvp("version", version);
-        load(ia, version);
+        serialize(ia, version);
     }
     else if(fmt == EArchiveFormat::XML){
         boost::archive::xml_iarchive ia(ifs);
         ia & boost::serialization::make_nvp("version", version);
-        load(ia, version);
+        serialize(ia, version);
     }
     else if(fmt == EArchiveFormat::BIN){
         boost::archive::binary_iarchive ia(ifs);
         ia & boost::serialization::make_nvp("version", version);
-        load(ia, version);
+        serialize(ia, version);
     }
 
     return true;
