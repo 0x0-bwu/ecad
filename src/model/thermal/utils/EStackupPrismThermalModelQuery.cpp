@@ -20,15 +20,15 @@ ECAD_INLINE EFloat EStackupPrismThermalModelQuery::PrismInstanceTopBotArea(size_
 ECAD_INLINE ETriangle2D EStackupPrismThermalModelQuery::GetPrismInstanceTemplate(size_t pIndex) const
 {
     const auto & instance = m_model->GetPrism(pIndex);
-    const auto & triangulation = *m_model->GetLayerPrismTemplate(instance.layer->id);
-    return tri::TriangulationUtility<EPoint2D>::GetTriangle(triangulation, instance.element->templateId);
+    const auto & triangulation = *m_model->GetLayerPrismTemplate(instance.layer);
+    return tri::TriangulationUtility<EPoint2D>::GetTriangle(triangulation, m_model->GetPrismElement(instance.layer, instance.element).templateId);
 }
 
 ECAD_INLINE void EStackupPrismThermalModelQuery::IntersectsPrismInstances(size_t layer, size_t pIndex, std::vector<RtVal> & results) const
 {
     const auto & instance = m_model->GetPrism(pIndex);
-    const auto & triangulation = *m_model->GetLayerPrismTemplate(instance.layer->id);
-    auto area = tri::TriangulationUtility<EPoint2D>::GetBondBox(triangulation, instance.element->templateId);
+    const auto & triangulation = *m_model->GetLayerPrismTemplate(instance.layer);
+    auto area = tri::TriangulationUtility<EPoint2D>::GetBondBox(triangulation, m_model->GetPrismElement(instance.layer, instance.element).templateId);
     return SearchPrismInstances(layer, area, results);
 }
 
@@ -48,9 +48,9 @@ ECAD_INLINE CPtr<EStackupPrismThermalModelQuery::Rtree> EStackupPrismThermalMode
     const auto & indexOffset = m_model->m_indexOffset;
     const auto & triangulation = *m_model->GetLayerPrismTemplate(layer);
     for (size_t i = indexOffset.at(layer); i < indexOffset.at(layer + 1); ++i) {
-        ECAD_ASSERT(layer == prisms.at(i).layer->id)
-        auto it = prisms.at(i).element->templateId;
-        auto box = tri::TriangulationUtility<EPoint2D>::GetBondBox(triangulation, it);
+        const auto & prism = prisms.at(i); { ECAD_ASSERT(layer == prism.layer) }
+        const auto & element = m_model->GetPrismElement(prism.layer, prism.element);
+        auto box = tri::TriangulationUtility<EPoint2D>::GetBondBox(triangulation, element.templateId);
         rtree->insert(std::make_pair(std::move(box), i));
     }
     return m_lyrRtrees.emplace(layer, rtree).first->second.get();

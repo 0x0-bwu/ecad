@@ -26,13 +26,12 @@ ECAD_INLINE void EStackupPrismThermalModelBuilder::BuildPrismModel(EFloat scaleH
         m_model->m_indexOffset.emplace_back(m_model->m_indexOffset.back() + m_model->layers.at(i).TotalElements());
     
     auto total = m_model->TotalPrismElements();
-    m_model->m_prisms.resize(total);
+    m_model->m_prisms.reserve(total);
     m_model->m_points.resize(total * 6);
     for (size_t i = 0; i < total; ++i) {
-        auto & instance = m_model->m_prisms[i];
         auto [lyrIdx, eleIdx] = m_model->PrismLocalIndex(i);
-        instance.layer = &m_model->layers.at(lyrIdx);
-        instance.element = &instance.layer->elements.at(eleIdx);    
+        auto & instance = m_model->m_prisms.emplace_back(lyrIdx, eleIdx);
+  
         //points
         for (size_t v = 0; v < 6; ++v) {
             m_model->m_points[6 * i + v] = m_model->GetPoint(lyrIdx, eleIdx, v);
@@ -40,9 +39,10 @@ ECAD_INLINE void EStackupPrismThermalModelBuilder::BuildPrismModel(EFloat scaleH
         }
 
         //side neighbors
+        const auto & element = m_model->GetPrismElement(lyrIdx, eleIdx);
         for (size_t n = 0; n < 3; ++n) {
-            if (auto nid = instance.element->neighbors.at(n); noNeighbor != nid) {
-                auto nb = m_model->GlobalIndex(lyrIdx, instance.element->neighbors.at(n));
+            if (auto nid = element.neighbors.at(n); noNeighbor != nid) {
+                auto nb = m_model->GlobalIndex(lyrIdx, element.neighbors.at(n));
                 instance.neighbors[n] = nb;
             }
         }

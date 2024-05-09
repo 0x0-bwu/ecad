@@ -57,8 +57,9 @@ ECAD_INLINE CPtr<EPrismThermalModelQuery::Rtree> EPrismThermalModelQuery::BuildI
         const auto & prisms = m_model->m_prisms;
         const auto & triangulation = *m_model->GetLayerPrismTemplate(0);
         for (size_t i = 0; i < prisms.size(); ++i) {
-            auto it = prisms.at(i).element->templateId;
-            auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
+            const auto & prism = prisms.at(i);
+            const auto & element = m_model->GetPrismElement(prism.layer, prism.element);
+            auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, element.templateId).Cast<ECoord>();
             m_rtree->insert(std::make_pair(point, i));
         }
     }
@@ -75,9 +76,9 @@ ECAD_INLINE CPtr<EPrismThermalModelQuery::Rtree> EPrismThermalModelQuery::BuildL
     const auto & indexOffset = m_model->m_indexOffset;
     const auto & triangulation = *m_model->GetLayerPrismTemplate(layer);
     for (size_t i = indexOffset.at(layer); i < indexOffset.at(layer + 1); ++i) {
-        ECAD_ASSERT(layer == prisms.at(i).layer->id)
-        auto it = prisms.at(i).element->templateId;
-        auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, it).Cast<ECoord>();
+        const auto & prism = prisms.at(i); { ECAD_ASSERT(layer == prisms.layer); }
+        const auto & element = m_model->GetPrismElement(layer, prism.element);
+        auto point = tri::TriangulationUtility<EPoint2D>::GetCenter(triangulation, element.templateId).Cast<ECoord>();
         rtree->insert(std::make_pair(point, i));
     }
     return m_lyrRtrees.emplace(layer, rtree).first->second.get();

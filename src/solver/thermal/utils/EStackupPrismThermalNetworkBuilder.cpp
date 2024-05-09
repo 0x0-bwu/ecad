@@ -55,20 +55,21 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildPrismElement(const std
     
     for (size_t i = start; i < end; ++i) {
         const auto & inst = m_model.GetPrism(i);
-        if (const auto & lut = inst.element->powerLut; lut) {
+        const auto & element = m_model.GetPrismElement(inst.layer, inst.element);
+        if (const auto & lut = element.powerLut; lut) {
             auto p = lut->Lookup(iniT.at(i));
-            p *= inst.element->powerRatio;
+            p *= element.powerRatio;
             summary.iHeatFlow += p;
             network->AddHF(i, p);
-            network->SetScenario(i, inst.element->powerScenario);
+            network->SetScenario(i, element.powerScenario);
         }
 
-        auto c = GetMatSpecificHeat(inst.element->matId, iniT.at(i));
-        auto rho = GetMatMassDensity(inst.element->matId, iniT.at(i));
+        auto c = GetMatSpecificHeat(element.matId, iniT.at(i));
+        auto rho = GetMatMassDensity(element.matId, iniT.at(i));
         auto vol = GetPrismVolume(i);
         network->SetC(i, c * rho * vol);
 
-        auto k = GetMatThermalConductivity(inst.element->matId, iniT.at(i));
+        auto k = GetMatThermalConductivity(element.matId, iniT.at(i));
         auto ct = GetPrismCenterPoint2D(i);
 
         const auto & neighbors = inst.neighbors;
@@ -80,6 +81,7 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildPrismElement(const std
             }
             else if (i < nid) { //one way
                 const auto & nb = m_model.GetPrism(nid);
+                const auto & nbEle = m_model.GetPrismElement(nb.layer, nb.element);
                 auto ctNb = GetPrismCenterPoint2D(nid);
                 auto vec = ctNb - ct;
                 auto dist = vec.Norm2() * m_model.UnitScale2Meter();
@@ -87,7 +89,7 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildPrismElement(const std
                 auto dist2edge = GetPrismCenterDist2Side(i, ie);
                 auto r1 = dist2edge / kxy / vArea;
 
-                auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nid));
+                auto kNb = GetMatThermalConductivity(nbEle.matId, iniT.at(nid));
                 auto kNbxy = 0.5 * (kNb[0] + kNb[1]);
                 auto r2 = (dist - dist2edge) / kNbxy / vArea;
                 network->SetR(i, nid, r1 + r2);
@@ -119,8 +121,9 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildPrismElement(const std
                 if (contact.index < i) continue;
                 nTop = contact.index;
                 const auto & nb = m_model.GetPrism(nTop);
+                const auto & nbEle = m_model.GetPrismElement(nb.layer, nb.element);
                 auto hNb = GetPrismHeight(nTop);
-                auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nTop));
+                auto kNb = GetMatThermalConductivity(nbEle.matId, iniT.at(nTop));
                 auto area = hArea * contact.ratio;
                 auto r =  (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
                 // auto r = 0.5 * height / k[2] / hArea + 0.5 * hNb / kNb[2] / GetPrismTopBotArea(nTop);
@@ -166,8 +169,9 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildPrismElement(const std
                 if (contact.index < i) continue;
                 nBot = contact.index;
                 const auto & nb = m_model.GetPrism(nBot);
+                const auto & nbEle = m_model.GetPrismElement(nb.layer, nb.element);
                 auto hNb = GetPrismHeight(nBot);
-                auto kNb = GetMatThermalConductivity(nb.element->matId, iniT.at(nBot));
+                auto kNb = GetMatThermalConductivity(nbEle.matId, iniT.at(nBot));
                 auto area = hArea * contact.ratio;
                 auto r =  (0.5 * height / k[2] + 0.5 * hNb / kNb[2]) / area;
                 // auto r = 0.5 * height / k[2] / hArea + 0.5 * hNb / kNb[2] / GetPrismTopBotArea(nBot);
@@ -255,9 +259,10 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNe
             if (results.empty()) continue;
             for (const auto & result : results) {
                 const auto & prism = m_model.GetPrism(result.second);
+                const auto & element = m_model.GetPrismElement(prism.layer, prism.element);
                 auto nid = isTop ? PrismElement::TOP_NEIGHBOR_INDEX : 
                                    PrismElement::BOT_NEIGHBOR_INDEX ;
-                if (prism.element->neighbors.at(nid) != noNeighbor) continue;
+                if (element.neighbors.at(nid) != noNeighbor) continue;
                 auto area = GetPrismTopBotArea(result.second);
                 if (EThermalBondaryCondition::BCType::HeatFlux == block.second.type) {
                     auto heatFlow = value * area;
@@ -340,7 +345,8 @@ ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismVolume(size_t ind
 
 ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismHeight(size_t index) const
 {
-    return m_model.GetPrism(index).layer->thickness * m_model.UnitScale2Meter();
+    const auto & prism = m_model.GetPrism(index);
+    return m_model.layers.at(prism.layer).thickness * m_model.UnitScale2Meter();
 }
 
 ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetLineJouleHeat(size_t index, EFloat refT) const

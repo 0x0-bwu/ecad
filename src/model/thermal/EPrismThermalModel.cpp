@@ -98,17 +98,17 @@ ECAD_INLINE void EPrismThermalModel::BuildPrismModel(EFloat scaleH2Unit, EFloat 
     };
     
     auto total = TotalPrismElements();
-    m_prisms.resize(total);
     m_points.clear();
+    m_prisms.reserve(total);
     for (size_t i = 0; i < total; ++i) {
-        auto & instance = m_prisms[i];
         auto [lyrIdx, eleIdx] = PrismLocalIndex(i);
-        instance.layer = &layers.at(lyrIdx);
-        instance.element = &instance.layer->elements.at(eleIdx);    
+        const auto & element = GetPrismElement(lyrIdx, eleIdx);
+        auto & instance = m_prisms.emplace_back(lyrIdx, eleIdx);
+ 
         //points
         auto & topPtIdxMap = getPtIdxMap(lyrIdx);
         auto & botPtIdxMap = getPtIdxMap(lyrIdx + 1);
-        const auto & vertices = triangles.at(instance.element->templateId).vertices;
+        const auto & vertices = triangles.at(element.templateId).vertices;
         for (size_t v = 0; v < vertices.size(); ++v) {
             auto topVtxIter = topPtIdxMap.find(vertices.at(v));
             if (topVtxIter == topPtIdxMap.cend()) {
@@ -126,18 +126,18 @@ ECAD_INLINE void EPrismThermalModel::BuildPrismModel(EFloat scaleH2Unit, EFloat 
 
         //neighbors
         for (size_t n = 0; n < 3; ++n) {
-            if (auto nid = instance.element->neighbors.at(n); noNeighbor != nid) {
-                auto nb = GlobalIndex(lyrIdx, instance.element->neighbors.at(n));
+            if (auto nid = element.neighbors.at(n); noNeighbor != nid) {
+                auto nb = GlobalIndex(lyrIdx, element.neighbors.at(n));
                 instance.neighbors[n] = nb;
             }
         }
         ///top
-        if (auto nid = instance.element->neighbors.at(PrismElement::TOP_NEIGHBOR_INDEX); noNeighbor != nid) {
+        if (auto nid = element.neighbors.at(PrismElement::TOP_NEIGHBOR_INDEX); noNeighbor != nid) {
             auto nb = GlobalIndex(lyrIdx - 1, nid);
             instance.neighbors[PrismElement::TOP_NEIGHBOR_INDEX] = nb;
         }
         ///bot
-        if (auto nid = instance.element->neighbors.at(PrismElement::BOT_NEIGHBOR_INDEX); noNeighbor != nid) {
+        if (auto nid = element.neighbors.at(PrismElement::BOT_NEIGHBOR_INDEX); noNeighbor != nid) {
             auto nb = GlobalIndex(lyrIdx + 1, nid);
             instance.neighbors[PrismElement::BOT_NEIGHBOR_INDEX] = nb;
         }

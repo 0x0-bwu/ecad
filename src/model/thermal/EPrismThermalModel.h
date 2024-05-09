@@ -151,11 +151,14 @@ struct PrismInstance
         ar & boost::serialization::make_nvp("contact_instances", contactInstances);
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
-    CPtr<PrismLayer> layer{nullptr};
-    CPtr<PrismElement> element{nullptr};
+    size_t layer{invalidIndex};
+    size_t element{invalidIndex};
     std::array<size_t, 6> vertices;//top, bot
     std::array<size_t, 5> neighbors = {noNeighbor, noNeighbor, noNeighbor, noNeighbor, noNeighbor};//[edge1, edge2, edge3, top, bot];
     std::array<ContactInstances, 2> contactInstances;//[top, bot], only used for stackup prism model
+    PrismInstance(size_t layer, size_t element) : layer(layer), element(element) {}
+protected:
+    PrismInstance() = default;
 };
 
 class ECAD_API EPrismThermalModel : public EThermalModel
@@ -200,6 +203,7 @@ public:
     const FPoint3D & GetPoint(size_t index) const { return m_points.at(index); }
     const PrismInstance & GetPrism(size_t index) const { return m_prisms.at(index); }
     const LineElement & GetLine(size_t index) const { return m_lines.at(index); }
+    const PrismElement & GetPrismElement(size_t lyrIdx, size_t eleIdx) const { return layers[lyrIdx][eleIdx]; }
 
     bool NeedIteration() const { return true; }
     bool isTopLayer(size_t lyrIndex) const;
