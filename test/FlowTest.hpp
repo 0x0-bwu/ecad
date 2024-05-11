@@ -354,7 +354,8 @@ void t_thermal_static_flow2()
     setup.settings.iteration = 10;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
-    auto [minT, maxT] = layout->RunThermalSimulation(prismSettings, setup);    
+    setup.extractionSettings = std::make_unique<EPrismThermalModelExtractionSettings>(std::move(prismSettings));
+    auto [minT, maxT] = layout->RunThermalSimulation(setup);    
     BOOST_CHECK_CLOSE(minT, 34.35, 2);
     BOOST_CHECK_CLOSE(maxT, 131.77, 2);
     EDataMgr::Instance().ShutDown();

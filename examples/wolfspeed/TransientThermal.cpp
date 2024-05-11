@@ -40,16 +40,41 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
     return monitors;
 }
 
-void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
+void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, EFloat period, EFloat duty)
 {
-    EThermalStaticSimulationSetup setup;
-    setup.settings.iteration = 100;
-    setup.settings.dumpHotmaps = true;
-    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
+    auto extractionSettings = ExtractionSettings(workDir);
+    // extractionSettings->meshSettings.genMeshByLayer = true;
+    // extractionSettings->meshSettings.imprintUpperLayer = true;
+    // extractionSettings->meshSettings.maxLen = 2;
+    // extractionSettings->meshSettings.minAlpha = 20;
+    // extractionSettings->layerCutSettings.layerTransitionRatio = 0;
+
+    EThermalTransientSimulationSetup setup;
     setup.workDir = workDir;
     setup.monitors = GetDieMonitors(layout);
-    setup.extractionSettings = ExtractionSettings(workDir);
-    auto [minT, maxT] = layout->RunThermalSimulation(setup);    
+    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
+    setup.settings.mor = true;
+    setup.settings.verbose = true;
+    setup.settings.dumpResults = true;
+    setup.settings.duration = 10;
+    setup.settings.step = period * duty / 10;
+    setup.settings.temperatureDepend = true;
+    setup.settings.samplingWindow = setup.settings.duration;
+    setup.settings.minSamplingInterval = period * duty / 10;
+    setup.settings.absoluteError = 1e-5;
+    setup.settings.relativeError = 1e-5;
+    setup.settings.threads = eDataMgr.Threads();
+    setup.extractionSettings = std::move(extractionSettings);
+    EThermalTransientExcitation excitation = [period, duty](EFloat t, size_t scen) -> EFloat { 
+        EFloat tm = std::fmod(t, period); 
+        switch (scen) {
+            case 0 : return 1;
+            case 1 : return tm < duty * period ? 1 : 0;
+            case 2 : return 0.5 * period < tm && tm < (duty + 0.5) * period ? 1 : 0; 
+            default : { ECAD_ASSERT(false) return 0; }
+        }
+    };
+    auto [minT, maxT] = layout->RunThermalSimulation(setup, excitation);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
 
@@ -64,9 +89,9 @@ int main(int argc, char * argv[])
     auto database = eDataMgr.LoadDatabase(filename);
     if (nullptr == database) return EXIT_FAILURE;
     auto cell = database->FindCellByName("Base");
-    std::string workDir = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "simulation" + ECAD_SEPS + "static";
+    std::string workDir = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "simulation" + ECAD_SEPS + "transient";
     auto layout = cell->GetFlattenedLayoutView();
-    StaticThermalFlow(layout, workDir);
+    TransientThermalFlow(layout, workDir, 0.02, 0.5);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }

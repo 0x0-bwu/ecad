@@ -19,23 +19,55 @@ using namespace ecad::model;
 using namespace ecad::utils;
 using namespace ecad::solver;
 
-ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & minT, EFloat & maxT) const
+ECAD_API EThermalSimulation::EThermalSimulation(CPtr<IModel> model, const EThermalSimulationSetup & setup)
+ : m_model(model), m_setup(setup)
 {
+}
+
+ECAD_API bool EThermalSimulation::RunStaticSimulation(EFloat & minT, EFloat & maxT) const
+{
+    if (nullptr == m_model) return false;
     generic::fs::CreateDir(m_setup.workDir);
-    auto modelType = model->GetModelType();
+    auto modelType = m_model->GetModelType();
     switch (modelType)
     {
         case EModelType::ThermalGrid : {
-            if (auto grid = dynamic_cast<CPtr<EGridThermalModel> >(model); grid)
-                return EGridThermalSimulator(grid, m_setup).Run(minT, maxT);
+            if (auto grid = dynamic_cast<CPtr<EGridThermalModel> >(m_model); grid)
+                return EGridThermalSimulator(grid, m_setup).RunStaticSimulation(minT, maxT);
         }
         case EModelType::ThermalPrism : {
-            if (auto prism = dynamic_cast<CPtr<EPrismThermalModel> >(model); prism)
-                return EPrismThermalSimulator(prism, m_setup).Run(minT, maxT);
+            if (auto prism = dynamic_cast<CPtr<EPrismThermalModel> >(m_model); prism)
+                return EPrismThermalSimulator(prism, m_setup).RunStaticSimulation(minT, maxT);
         }
         case EModelType::ThermalStackupPrism : {
-            if (auto prism = dynamic_cast<CPtr<EStackupPrismThermalModel> >(model); prism)
-                return EStackupPrismThermalSimulator(prism, m_setup).Run(minT, maxT);
+            if (auto prism = dynamic_cast<CPtr<EStackupPrismThermalModel> >(m_model); prism)
+                return EStackupPrismThermalSimulator(prism, m_setup).RunStaticSimulation(minT, maxT);
+        }
+        default :
+            ECAD_ASSERT(false)
+            return false;
+    }
+    return false;
+}
+
+ECAD_API bool EThermalSimulation::RunTransientSimulation(const EThermalTransientExcitation & excitation, EFloat & minT, EFloat & maxT) const
+{
+    if (nullptr == m_model) return false;
+    generic::fs::CreateDir(m_setup.workDir);
+    auto modelType = m_model->GetModelType();
+    switch (modelType)
+    {
+        case EModelType::ThermalGrid : {
+            if (auto grid = dynamic_cast<CPtr<EGridThermalModel> >(m_model); grid)
+                return EGridThermalSimulator(grid, m_setup).RunTransientSimulation(excitation, minT, maxT);
+        }
+        case EModelType::ThermalPrism : {
+            if (auto prism = dynamic_cast<CPtr<EPrismThermalModel> >(m_model); prism)
+                return EPrismThermalSimulator(prism, m_setup).RunTransientSimulation(excitation, minT, maxT);
+        }
+        case EModelType::ThermalStackupPrism : {
+            if (auto prism = dynamic_cast<CPtr<EStackupPrismThermalModel> >(m_model); prism)
+                return EStackupPrismThermalSimulator(prism, m_setup).RunTransientSimulation(excitation, minT, maxT);
         }
         default :
             ECAD_ASSERT(false)
@@ -47,16 +79,6 @@ ECAD_API bool EThermalSimulation::Run(CPtr<IModel> model, EFloat & minT, EFloat 
 ECAD_API EThermalSimulator::EThermalSimulator(CPtr<IModel> model, const EThermalSimulationSetup & setup)
  : m_model(model), m_setup(setup)
 {
-}
-
-ECAD_API bool EThermalSimulator::Run(EFloat & minT, EFloat & maxT) const
-{
-    if (auto * ss = dynamic_cast<CPtr<EThermalStaticSimulationSetup> >(&m_setup); ss)
-        return RunStaticSimulation(minT, maxT);
-    else if(auto * ts = dynamic_cast<CPtr<EThermalTransientSimulationSetup> >(&m_setup); ts)
-        return RunTransientSimulation(minT, maxT);
-    ECAD_ASSERT(false)
-    return false;
 }
 
 ECAD_API EGridThermalSimulator::EGridThermalSimulator(CPtr<EGridThermalModel> model, const EThermalSimulationSetup & setup)
@@ -79,7 +101,7 @@ ECAD_API bool EGridThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat &
     return solver.Solve(minT, maxT);
 }
 
-ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloat & maxT) const
+ECAD_API bool EGridThermalSimulator::RunTransientSimulation(const EThermalTransientExcitation & excitation, EFloat & minT, EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("grid thermal transient simulation")
     auto model = dynamic_cast<CPtr<EGridThermalModel> >(m_model);
@@ -87,7 +109,7 @@ ECAD_API bool EGridThermalSimulator::RunTransientSimulation(EFloat & minT, EFloa
     if (nullptr == model || nullptr == setup) return false;
 
     std::vector<EFloat> results;
-    EGridThermalNetworkTransientSolver solver(*model);
+    EGridThermalNetworkTransientSolver solver(*model, excitation);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
     model->SearchElementIndices(setup->monitors, solver.settings.probs);
@@ -114,7 +136,7 @@ ECAD_API bool EPrismThermalSimulator::RunStaticSimulation(EFloat & minT, EFloat 
     return solver.Solve(minT, maxT);
 }
 
-ECAD_API bool EPrismThermalSimulator::RunTransientSimulation(EFloat & minT, EFloat & maxT) const
+ECAD_API bool EPrismThermalSimulator::RunTransientSimulation(const EThermalTransientExcitation & excitation, EFloat & minT, EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("prism thermal transient simulation")
     auto model = dynamic_cast<CPtr<EPrismThermalModel> >(m_model);
@@ -122,7 +144,7 @@ ECAD_API bool EPrismThermalSimulator::RunTransientSimulation(EFloat & minT, EFlo
     if (nullptr == model || nullptr == setup) return false;
 
     std::vector<EFloat> results;
-    EPrismThermalNetworkTransientSolver solver(*model);
+    EPrismThermalNetworkTransientSolver solver(*model, excitation);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
     model->SearchElementIndices(setup->monitors, solver.settings.probs);
@@ -149,7 +171,7 @@ ECAD_API bool EStackupPrismThermalSimulator::RunStaticSimulation(EFloat & minT, 
     return solver.Solve(minT, maxT);
 }
 
-ECAD_API bool EStackupPrismThermalSimulator::RunTransientSimulation(EFloat & minT, EFloat & maxT) const
+ECAD_API bool EStackupPrismThermalSimulator::RunTransientSimulation(const EThermalTransientExcitation & excitation, EFloat & minT, EFloat & maxT) const
 {
     ECAD_EFFICIENCY_TRACK("stackup prism thermal transient simulation")
     auto model = dynamic_cast<CPtr<EStackupPrismThermalModel> >(m_model);
@@ -157,7 +179,7 @@ ECAD_API bool EStackupPrismThermalSimulator::RunTransientSimulation(EFloat & min
     if (nullptr == model || nullptr == setup) return false;
 
     std::vector<EFloat> results;
-    EStackupPrismThermalNetworkTransientSolver solver(*model);
+    EStackupPrismThermalNetworkTransientSolver solver(*model, excitation);
     solver.settings.workDir = setup->workDir;
     solver.settings = setup->settings;
     model->SearchElementIndices(setup->monitors, solver.settings.probs);

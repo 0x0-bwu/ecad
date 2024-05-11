@@ -125,7 +125,8 @@ public:
     virtual CPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) = 0;
 
     ///Thermal Simulation
-    virtual EPair<EFloat, EFloat> RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetupp) = 0;
+    virtual EPair<EFloat, EFloat> RunThermalSimulation(const EThermalStaticSimulationSetup & simulationSetup) = 0;
+    virtual EPair<EFloat, EFloat> RunThermalSimulation(const EThermalTransientSimulationSetup & simulationSetup, const EThermalTransientExcitation & excitation) = 0;
 
     ///Mapping
     virtual void Map(CPtr<ILayerMap> lyrMap) = 0;

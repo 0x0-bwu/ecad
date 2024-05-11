@@ -387,6 +387,7 @@ struct EThermalSimulationSetup
     virtual ~EThermalSimulationSetup() = default;
     std::string workDir;
     std::vector<FPoint3D> monitors;
+    UPtr<EThermalModelExtractionSettings> extractionSettings{nullptr};
 protected:
     EThermalSimulationSetup() = default;
 };
@@ -420,7 +421,7 @@ struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
     EThermalStaticSettings settings;
 };
 
-using EThermalTransientExcitation = std::function<EFloat(EFloat, size_t)>;//power = f(t, scenario)
+using EThermalTransientExcitation = std::function<EFloat(EFloat, size_t)>;//ratio = f(t, scenario), range[0, 1]
 
 struct EThermalTransientSettings : public EThermalSettings
 {
@@ -436,7 +437,6 @@ struct EThermalTransientSettings : public EThermalSettings
     EFloat relativeError{1e-6};
     EFloat minSamplingInterval{0};
     EFloat samplingWindow{0};
-    CPtr<EThermalTransientExcitation> excitation{nullptr};
 };
 
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup

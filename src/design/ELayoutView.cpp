@@ -351,14 +351,27 @@ ECAD_INLINE CPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExt
     return collection->FindModel(modelType);
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalModelExtractionSettings & extractionSettings, const EThermalSimulationSetup & simulationSetup)
+ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalStaticSimulationSetup & simulationSetup)
 {
     EPair<EFloat, EFloat> temperature{invalidFloat, invalidFloat};
-    auto model = ExtractThermalModel(extractionSettings);
+    if (nullptr == simulationSetup.extractionSettings) return temperature;
+    auto model = ExtractThermalModel(*simulationSetup.extractionSettings);
     if (nullptr == model) return temperature;
 
-    simulation::EThermalSimulation sim(simulationSetup);
-    [[maybe_unused]] auto check = sim.Run(model, temperature.first, temperature.second); { ECAD_ASSERT(check) }
+    simulation::EThermalSimulation sim(model, simulationSetup);
+    [[maybe_unused]] auto check = sim.RunStaticSimulation(temperature.first, temperature.second); { ECAD_ASSERT(check) }
+    return temperature;
+}
+
+ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalTransientSimulationSetup & simulationSetup, const EThermalTransientExcitation & excitation)
+{
+    EPair<EFloat, EFloat> temperature{invalidFloat, invalidFloat};
+    if (nullptr == simulationSetup.extractionSettings) return temperature;
+    auto model = ExtractThermalModel(*simulationSetup.extractionSettings);
+    if (nullptr == model) return temperature;
+
+    simulation::EThermalSimulation sim(model, simulationSetup);
+    [[maybe_unused]] auto check = sim.RunTransientSimulation(excitation, temperature.first, temperature.second); { ECAD_ASSERT(check) }
     return temperature;
 }
 

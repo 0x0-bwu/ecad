@@ -29,8 +29,11 @@ jobs:
       - name: Run unit test
         run: build.release/bin/EcadTest.exe
         
-      - name: Run examples
+      - name: Run examples - WolfSpeed SetupDesign
         run: build.release/bin/WolfSpeed_SetupDesign.exe
+
+      - name: Run examples - WolfSpeed StaticThermal
+        run: build.release/bin/WolfSpeed_StaticThermal.exe
 
       - name: Run PyEcad Test
         run: python py/PyEcadTest.py

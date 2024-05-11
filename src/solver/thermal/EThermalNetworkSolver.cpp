@@ -84,6 +84,11 @@ ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EGridThermalNetwork
 ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EPrismThermalNetworkBuilder>(const EPrismThermalModel & model, std::vector<EFloat> & results) const;
 ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EStackupPrismThermalNetworkBuilder>(const EStackupPrismThermalModel & model, std::vector<EFloat> & results) const;
 
+EThermalNetworkTransientSolver::EThermalNetworkTransientSolver(const EThermalTransientExcitation & excitation)
+ : m_excitation(excitation)
+{
+}
+
 template <typename ThermalNetworkBuilder>
 ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, EFloat & minT, EFloat & maxT) const
 {
@@ -116,7 +121,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
                 auto network = builder.Build(initT);
                 TransSolver solver(*network, envT, probs);
                 Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
-                steps += solver.SolveAdaptive(initT, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+                steps += solver.SolveAdaptive(initT, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
                 time += settings.step;
             }
         }
@@ -124,7 +129,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
             auto network = builder.Build(initT);
             TransSolver solver(*network, envT, probs);
             Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
-            steps = solver.SolveAdaptive(initT, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+            steps = solver.SolveAdaptive(initT, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
         }
     }
     else {
@@ -142,7 +147,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
                 TransSolver solver(*network, envT, probs);
                 if (not solver.Im().Input2State(initT, initState)) return false;
                 Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
-                steps += solver.SolveAdaptive(initState, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+                steps += solver.SolveAdaptive(initState, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
                 solver.Im().State2Output(initState, initT);
                 time += settings.step;
             }
@@ -153,7 +158,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
             TransSolver solver(*network, envT, probs);
             if (not solver.Im().Input2State(initT, initState)) return false;
             Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
-            steps = solver.SolveAdaptive(initState, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), settings.excitation);
+            steps = solver.SolveAdaptive(initState, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
         }
     }
     for (auto & sample : samples) {
@@ -232,8 +237,8 @@ ECAD_INLINE bool EGridThermalNetworkStaticSolver::Solve(EFloat & minT, EFloat & 
     return res;
 }
 
-ECAD_INLINE EGridThermalNetworkTransientSolver::EGridThermalNetworkTransientSolver(const EGridThermalModel & model)
- : EGridThermalNetworkSolver(model)
+ECAD_INLINE EGridThermalNetworkTransientSolver::EGridThermalNetworkTransientSolver(const EGridThermalModel & model, const EThermalTransientExcitation & excitation)
+ : EGridThermalNetworkSolver(model), EThermalNetworkTransientSolver(excitation)
 {
 }
 
@@ -270,8 +275,8 @@ ECAD_INLINE bool EPrismThermalNetworkStaticSolver::Solve(EFloat & minT, EFloat &
     return res;
 }
 
-ECAD_INLINE EPrismThermalNetworkTransientSolver::EPrismThermalNetworkTransientSolver(const EPrismThermalModel & model)
- : EPrismThermalNetworkSolver(model)
+ECAD_INLINE EPrismThermalNetworkTransientSolver::EPrismThermalNetworkTransientSolver(const EPrismThermalModel & model, const EThermalTransientExcitation & excitation)
+ : EPrismThermalNetworkSolver(model), EThermalNetworkTransientSolver(excitation)
 {
 }
 
@@ -308,8 +313,8 @@ ECAD_INLINE bool EStackupPrismThermalNetworkStaticSolver::Solve(EFloat & minT, E
     return res;
 }
 
-ECAD_INLINE EStackupPrismThermalNetworkTransientSolver::EStackupPrismThermalNetworkTransientSolver(const EStackupPrismThermalModel & model)
- : EStackupPrismThermalNetworkSolver(model)
+ECAD_INLINE EStackupPrismThermalNetworkTransientSolver::EStackupPrismThermalNetworkTransientSolver(const EStackupPrismThermalModel & model, const EThermalTransientExcitation & excitation)
+ : EStackupPrismThermalNetworkSolver(model), EThermalNetworkTransientSolver(excitation)
 {
 }
 

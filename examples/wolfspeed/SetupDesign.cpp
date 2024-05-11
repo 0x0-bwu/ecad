@@ -661,7 +661,7 @@ int main(int argc, char * argv[])
     // std::vector<EFloat> parameters{-6.28323,9.1159,-6.13371,3.41274,-4.54684,-1.35806,4.60621,8.17798,3.8993,1.42668,2.64954,-4.95307,4.75943,8.76399,4.25377,0.922324,5.61007,-5.06671,-4.21649,7.63576,-4.1069,2.27594,-3.74797,-5.25336,};
     auto layout = SetupDesign("CAS300M12BM2", parameters);
     std::string workDir = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "simulation" + ECAD_SEPS + "static";
-    layout->ExtractThermalModel(ExtractionSettings(workDir));
+    layout->ExtractThermalModel(*ExtractionSettings(workDir));
     std::string filename = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "design" + ECAD_SEPS + "CAS300M12BM2.ecad";
     layout->GetDatabase()->Save(filename, EArchiveFormat::BIN);
     ecad::EDataMgr::Instance().ShutDown();
