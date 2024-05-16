@@ -6,7 +6,7 @@
 
 #include "../test/TestData.hpp"
 #include "generic/tools/StringHelper.hpp"
-#include "utils/ELayoutRetriever.h"
+#include "utility/ELayoutRetriever.h"
 #include "EDataMgr.h"
 
 void SignalHandler(int signum)
@@ -86,27 +86,6 @@ void SetupMaterials(Ptr<IDatabase> database)
     matSolder->SetProperty(EMaterialPropId::SpecificHeat, eDataMgr.CreateSimpleMaterialProp(218));
     matSolder->SetProperty(EMaterialPropId::MassDensity, eDataMgr.CreateSimpleMaterialProp(7800));
     matSolder->SetProperty(EMaterialPropId::Resistivity, eDataMgr.CreateSimpleMaterialProp(11.4e-8));
-}
-
-Ptr<IPadstackDef> CreateBondwireSolderJoints(Ptr<IDatabase> database, const std::string & name, EFloat bwRadius)
-{
-    const auto & coordUnits = database->GetCoordUnits();
-    auto def = eDataMgr.CreatePadstackDef(database, name);
-    auto defData = eDataMgr.CreatePadstackDefData();
-    defData->SetTopSolderBumpMaterial(MAT_SAC305.data());
-    defData->SetBotSolderBallMaterial(MAT_SAC305.data());
-    
-    auto bumpR = bwRadius * 1.1;
-    // auto topBump = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
-    auto topBump = eDataMgr.CreateShapeRectangle(coordUnits, {-bumpR, -bumpR}, {bumpR, bumpR});
-    defData->SetTopSolderBumpParameters(std::move(topBump), 0.05);
-    
-    // auto botBall = eDataMgr.CreateShapeCircle(coordUnits, {0, 0}, bumpR);
-    auto botBall = eDataMgr.CreateShapeRectangle(coordUnits, {-bumpR, -bumpR}, {bumpR, bumpR});
-    defData->SetBotSolderBallParameters(std::move(botBall), 0.05);
-
-    def->SetPadstackDefData(std::move(defData));   
-    return def;
 }
 
 Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
@@ -210,102 +189,8 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
         {3, 24}, {3, 23.275}, {3, 22.55}, {4, 21.825}, {3, 21.825}, {3, 6.525}, {3, 5.8}, {3, 5.075}, {3, 7.25}, {4, 7.25},
 
     };
-    for (size_t i = 0; i < dPLoc.size(); ++i) {
-        auto bw1 = eDataMgr.CreateBondwire(baseLayout, "DS1_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);
-        bw1->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
-        bw1->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false);
-        bw1->SetCurrent(15);
-        bw1->SetDynamicPowerScenario(0);
-
-        dPLoc[i][1] *= -1; sPLoc[i][1] *= -1;
-        auto bw2 = eDataMgr.CreateBondwire(baseLayout, "DS2_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);
-        bw2->SetStartLayer(topCuLayer, coordUnits.toCoord(dPLoc.at(i)), false);
-        bw2->SetEndLayer(topCuLayer, coordUnits.toCoord(sPLoc.at(i)), false); 
-        bw2->SetCurrent(15);
-        bw1->SetDynamicPowerScenario(0);
-    }
-    std::vector<FPoint2D> gPLoc{{-3, 3}, {-3, 1.8}};
-    for (size_t i = 0; i < gPLoc.size(); ++i) {
-        const auto & p = gPLoc.at(i);
-        auto bw1 = eDataMgr.CreateBondwire(baseLayout, "G1_" + std::to_string(i + 1), ENetId::noNet, THIN_BONDWIRE_RADIUS);
-        bw1->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(p[0], p[1])), false);
-        bw1->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(-p[0], p[1])), false); 
-
-        auto bw2 = eDataMgr.CreateBondwire(baseLayout, "G2_" + std::to_string(i + 1), ENetId::noNet, THIN_BONDWIRE_RADIUS);
-        bw2->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(p[0], -p[1])), false);
-        bw2->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(-p[0], -p[1])), false); 
-    }
-
-    auto KelvinBw0 = eDataMgr.CreateBondwire(baseLayout, "KelvinBw0", nk->GetNetId(), THIN_BONDWIRE_RADIUS);
-    KelvinBw0->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(30.15, -5.95)), false);
-    KelvinBw0->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -5.95)), false);
-
-    auto KelvinBw = eDataMgr.CreateBondwire(baseLayout, "KelvinBw", nk->GetNetId(), THIN_BONDWIRE_RADIUS);
-    KelvinBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(30.15, 5)), false);
-    KelvinBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(30.15, -5)), false);
-
-    auto gateBw0 = eDataMgr.CreateBondwire(baseLayout, "GateBw0", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw0->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32, -12.375)), false);
-    gateBw0->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -12.375)), false);
-
-    auto gateBw = eDataMgr.CreateBondwire(baseLayout, "GateBw", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32, 5)), false);
-    gateBw->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32, -5)), false);
-
-    auto gateBw1 = eDataMgr.CreateBondwire(baseLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw1->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, 3.0)), false);
-    gateBw1->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(41.3, 3.35)), false);
-
-    auto gateBw2 = eDataMgr.CreateBondwire(baseLayout, "GateBw2", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw2->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, 1.8)), false);
-    gateBw2->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, 1.0375)), false);
-
-    auto gateBw3 = eDataMgr.CreateBondwire(baseLayout, "GateBw3", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw3->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, -1.8)), false);
-    gateBw3->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -0.3625)), false);
-
-    auto gateBw4 = eDataMgr.CreateBondwire(baseLayout, "GateBw4", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw4->SetStartLayer(topCuLayer, coordUnits.toCoord(FPoint2D(32.5, -3)), false);
-    gateBw4->SetEndLayer(topCuLayer, coordUnits.toCoord(FPoint2D(40.05, -2.7)), false);
-
+    
     return baseLayout;
-}
-
-Ptr<ILayoutView> CreateDriverLayout(Ptr<IDatabase> database)
-{
-    const auto & coordUnits = database->GetCoordUnits();
-    auto driverCell = eDataMgr.CreateCircuitCell(database, "Driver");
-    auto driverLayout = driverCell->GetLayoutView();
-
-    //layer
-    auto driverLayer1 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer1", ELayerType::DielectricLayer, -0.3, 0.38, MAT_ALN.data(), MAT_AIR.data()));
-    auto driverLayer2 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer2", ELayerType::ConductingLayer, -0.68, 0.3, MAT_CU.data(), MAT_AIR.data()));
-    auto driverLayer3 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer3", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
-    auto driverLayer4 = driverLayout->AppendLayer(eDataMgr.CreateStackupLayer("DriverLayer4", ELayerType::ConductingLayer, -0.98, 0.1, MAT_SAC305.data(), MAT_AIR.data()));
-
-    //boundary   
-    driverLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-5.5, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {-5.5, 14.725}}));
-
-    //net
-    eDataMgr.CreateNet(driverLayout, "Gate");
-    eDataMgr.CreateNet(driverLayout, "Drain");
-    eDataMgr.CreateNet(driverLayout, "Source");
-
-    //wire
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7,   9.625}, {4.7,   9.625}, {4.7, 13.925}, {1.7, 13.925}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7,   4.325}, {4.7,   4.325}, {4.7,  8.625}, {1.7,  8.625}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7, -13.925}, {4.7, -13.925}, {4.7,  1.075}, {3.2,  1.075},
-        {3.2, -1.775}, {4.2, -1.775}, {4.2, -4.925}, {3.2, -4.925}, {3.2, -7.025}, {4.2, -7.025}, {4.2, -11.425}, {1.7, -11.425}}, 0.25)
-    );
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.7, -10.325}, {3.2, -10.325},
-        {3.2, -8.225}, {2.2, -8.225}, {2.2, -3.875}, {3.2, -3.875}, {3.2, -2.825}, {2.2, -2.825}, {2.2, 2.175}, {4.7, 2.175}, {4.7, 3.225}, {1.7, 3.225}}, 0.25)
-    );
-
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer2, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{0.9, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {0.9, 14.725}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer3, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{1.4, -14.225}, {5.0, -14.225}, {5.0, 14.225}, {1.4, 14.225}}, 0.25));
-    eDataMgr.CreateGeometry2D(driverLayout, driverLayer4, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{0.9, -14.725}, {5.5, -14.725}, {5.5, 14.725}, {0.9, 14.725}}, 0.25));
-
-    return driverLayout;
 }
 
 Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vector<FPoint2D> & locations)
@@ -379,61 +264,6 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vecto
     eDataMgr.CreateComponent(botBridgeLayout, "R2", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 6.075}), false);
     eDataMgr.CreateComponent(botBridgeLayout, "R3", resGate, botBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {-14.17, 1.65}), false);
 
-    auto gateBw1 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw1->SetStartComponent(dieComp[0], "G");
-    gateBw1->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 8.6}), false);
-
-    auto gateBw2 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw2", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw2->SetStartComponent(dieComp[1], "G");
-    gateBw2->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, 4.05}), false);
-
-    auto gateBw3 = eDataMgr.CreateBondwire(botBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw3->SetStartComponent(dieComp[2], "G");
-    gateBw3->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(FPoint2D{-13.275, -0.27}), false);
-
-    std::vector<std::string> iPins{"A", "B", "C", "D", "E"};
-    for (size_t i = 0; i < dieComp.size(); ++i) {
-        for (size_t j = 0; j < iPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, iPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
-            bw->SetStartComponent(dieComp[i], iPins.at(j));
-            bw->SetEndComponent(diodeComp[i], iPins.at(j));
-            bw->SetCurrent(10);
-            bw->SetDynamicPowerScenario(2);
-        }
-    }
-
-    std::vector<std::string> oPins{"F", "G", "H", "I", "J"};
-    std::array<std::vector<FPoint2D>, 3> diodePLocs{
-        std::vector<FPoint2D>{{12.65, 7.105}, {12.65, 6.38}, {11.075, 7.105}, {11.075, 6.38}, {11.075, 5.655}},
-        std::vector<FPoint2D>{{14.225, 7.105}, {14.225, 6.38}, {12.65, -2.595}, {11.075, -2.595}, {11.075, -3.32}},
-        std::vector<FPoint2D>{{12.65, -3.32}, {14.225, -3.32}, {11.075, -4.045}, {12.65, -4.045}, {14.225, -4.045}}
-    };
-
-    for (size_t i = 0; i < diodePLocs.size(); ++i) {
-        for (size_t j = 0; j < oPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
-            bw->SetStartComponent(diodeComp[i], oPins.at(j));
-            bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
-            bw->SetCurrent(10);
-            bw->SetDynamicPowerScenario(2);
-        }
-    }
-
-    for (size_t i = 0; i < diodeComp.size(); ++i) {
-        for (size_t j = 0; j < oPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(botBridgeLayout, iPins.at(j) + "-" + oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
-            bw->SetStartComponent(diodeComp[i], iPins.at(j));
-            bw->SetEndComponent(diodeComp[i], oPins.at(j));
-            bw->SetCurrent(10);
-            bw->SetDynamicPowerScenario(2);
-        }
-    }
-    std::vector<FPoint2D> kelvinBwPLocs{{-11.475, 8.15}, {-11.475, 3.6}, {-11.475, -0.72}};
-    for (size_t i = 0; i < kelvinBwPLocs.size(); ++i) {
-        auto bw = eDataMgr.CreateBondwire(botBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), THIN_BONDWIRE_RADIUS);
-        bw->SetStartComponent(dieComp[i], "K");
-        bw->SetEndLayer(botBridgeLayer1, coordUnits.toCoord(kelvinBwPLocs.at(i)), false);
-    }
     return botBridgeLayout;
 }
 
@@ -514,62 +344,6 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vecto
     eDataMgr.CreateComponent(topBridgeLayout, "R2", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, 1.9}), false);
     eDataMgr.CreateComponent(topBridgeLayout, "R3", resGate, topBridgeLayer1, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {14.17, -4.55}), false);
 
-    auto gateBw1 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw1->SetStartComponent(dieComp[0], "G");
-    gateBw1->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, 10.25}), false);
-
-    auto gateBw2 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw2", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw2->SetStartComponent(dieComp[1], "G");
-    gateBw2->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, 3.8}), false);
-
-    auto gateBw3 = eDataMgr.CreateBondwire(topBridgeLayout, "GateBw1", ng->GetNetId(), THIN_BONDWIRE_RADIUS);
-    gateBw3->SetStartComponent(dieComp[2], "G");
-    gateBw3->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(FPoint2D{13.275, -2.65}), false);
-
-    std::vector<std::string> iPins{"A", "B", "C", "D", "E"};
-    for (size_t i = 0; i < dieComp.size(); ++i) {
-        for (size_t j = 0; j < iPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, iPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
-            bw->SetStartComponent(dieComp[i], iPins.at(j));
-            bw->SetEndComponent(diodeComp[i], iPins.at(j));
-            bw->SetCurrent(10);
-            bw->SetDynamicPowerScenario(1);
-        }
-    }
-
-    std::vector<std::string> oPins{"F", "G", "H", "I", "J"};
-    std::array<std::vector<FPoint2D>, 3> diodePLocs{
-        std::vector<FPoint2D>{{-10.15, 10.725}, {-10.15, 10}, {-10.15, 9.27}, {-10.15, 8.55}, {-10.15, 7.825}},
-        std::vector<FPoint2D>{{-10.15, 7.1}, {-10.15, 6.375}, {-11.15, 6.375}, {-10.15, -3.8125}, {-10.15, -4.525}},
-        std::vector<FPoint2D>{{-10.15, -5.2375}, {-10.15, -5.95}, {-10.15, -6.6625}, {-10.15, -7.375}, {-10.15, -8.0875}}
-    };
-    
-    for (size_t i = 0; i < diodePLocs.size(); ++i) {
-        for (size_t j = 0; j < oPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
-            bw->SetStartComponent(diodeComp[i], oPins.at(j));
-            bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(diodePLocs.at(i).at(j)), false);
-            bw->SetCurrent(10);
-            bw->SetDynamicPowerScenario(1);
-        }
-    }
-
-    for (size_t i = 0; i < diodeComp.size(); ++i) {
-        for (size_t j = 0; j < oPins.size(); ++j) {
-            auto bw = eDataMgr.CreateBondwire(topBridgeLayout, iPins.at(j) + "-" + oPins.at(j), ns->GetNetId(), THICK_BONDWIRE_RADIUS);
-            bw->SetStartComponent(diodeComp[i], iPins.at(j));
-            bw->SetEndComponent(diodeComp[i], oPins.at(j));
-            bw->SetCurrent(10);
-            bw->SetDynamicPowerScenario(1);
-        }
-    }
-
-    std::vector<FPoint2D> kelvinBwPLocs{{11.475, 8.08}, {11.475, 1.33}, {11.475, -5.42}};
-    for (size_t i = 0; i < kelvinBwPLocs.size(); ++i) {
-        auto bw = eDataMgr.CreateBondwire(topBridgeLayout, "KelvinBw" + std::to_string(i + 1), ns->GetNetId(), THIN_BONDWIRE_RADIUS);
-        bw->SetStartComponent(dieComp[i], "K");
-        bw->SetEndLayer(topBridgeLayer1, coordUnits.toCoord(kelvinBwPLocs.at(i)), false);
-    }
     return topBridgeLayout;
 }
 
@@ -586,23 +360,12 @@ Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat>
     ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
     database->SetCoordUnits(coordUnits);
 
-    //bindwire solder
-    auto thinBwSolderDef = CreateBondwireSolderJoints(database, "Thin Solder Joints", THIN_BONDWIRE_RADIUS);
-    auto thickBwSolderDef = CreateBondwireSolderJoints(database, "Thick Solder Joins", THICK_BONDWIRE_RADIUS);
-
     //component
     CreateSicDieComponentDef(database);
     CreateDiodeComponentDef(database);
     CreateGateResistanceComponentDef(database);
 
-    auto baseLayout = CreateBaseLayout(database);
-    auto driverLayout = CreateDriverLayout(database);
-    auto driverLayerMap = CreateDefaultLayerMap(database, driverLayout, baseLayout, "DriverLayerMap");
-    
-    //instance
-    auto driver = eDataMgr.CreateCellInst(baseLayout, "Driver", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {44, 0}, EMirror2D::XY));
-    driver->SetLayerMap( driverLayerMap);
-
+    auto baseLayout = CreateBaseLayout(database);    
     std::vector<FPoint2D> botCompLoc;
     for (size_t i = 0; i < 6; ++i)
         botCompLoc.emplace_back(FPoint2D(parameters.at(i * 2), parameters.at(i * 2 + 1)));
@@ -631,19 +394,6 @@ Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat>
 
     //flatten
     baseLayout->Flatten(EFlattenOption{});
-    auto primIter = baseLayout->GetPrimitiveIter();
-    while (auto * prim = primIter->Next()) {
-        if (auto * bw = prim->GetBondwireFromPrimitive(); bw) {
-            bw->SetBondwireType(EBondwireType::Simple);
-            if (bw->GetRadius() > THIN_BONDWIRE_RADIUS)
-                bw->SetSolderJoints(thickBwSolderDef);
-            else bw->SetSolderJoints(thinBwSolderDef);
-            bw->SetMaterial(MAT_AL.data());
-            if (math::EQ<EFloat>(bw->GetHeight(), 0))
-                bw->SetHeight(0.5);
-        }
-    }
-
     return baseLayout;
 }
 
@@ -666,21 +416,21 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
     return monitors;
 }
 
-EPrismThermalModelExtractionSettings ExtractionSettings(const std::string & workDir)
+UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string & workDir)
 {
     EFloat htc = 5000;
     EPrismThermalModelExtractionSettings prismSettings;
-    prismSettings.threads = eDataMgr.Threads();
+    prismSettings.threads = EDataMgr::Instance().Threads();
     prismSettings.workDir = workDir;
     prismSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismSettings.botUniformBC.value = htc;
-    prismSettings.meshSettings.genMeshByLayer = false;
+    prismSettings.meshSettings.genMeshByLayer = true;
     if (prismSettings.meshSettings.genMeshByLayer)
-        prismSettings.meshSettings.imprintUpperLayer = true;
-    prismSettings.meshSettings.iteration = 1e5;
-    prismSettings.meshSettings.minAlpha = 20;
-    prismSettings.meshSettings.minLen = 1e-5;
-    prismSettings.meshSettings.maxLen = 1;
+        prismSettings.meshSettings.imprintUpperLayer = false;
+    prismSettings.meshSettings.iteration = 3e3;
+    prismSettings.meshSettings.minAlpha = 15;
+    prismSettings.meshSettings.minLen = 1e-3;
+    prismSettings.meshSettings.maxLen = 100;
     prismSettings.meshSettings.tolerance = 0;
     prismSettings.layerCutSettings.layerTransitionRatio = 3;
     prismSettings.meshSettings.dumpMeshFile = true;
@@ -693,46 +443,27 @@ EPrismThermalModelExtractionSettings ExtractionSettings(const std::string & work
     prismSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, -17}, {9.75, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
     prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, 11.5}, {-2.55, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
     prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, -17}, {-2.55, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    return prismSettings;
-}
-
-void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
-{
-    auto extractionSettings = ExtractionSettings(workDir);
-    EThermalStaticSimulationSetup setup;
-    setup.settings.iteration = 100;
-    setup.settings.dumpHotmaps = true;
-    setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.workDir = workDir;
-    setup.monitors = GetDieMonitors(layout);
-    auto [minT, maxT] = layout->RunThermalSimulation(extractionSettings, setup);    
-    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
+    return std::make_unique<EPrismThermalModelExtractionSettings>(prismSettings);
 }
 
 void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, EFloat period, EFloat duty)
 {
-    auto extractionSettings = ExtractionSettings(workDir);
-    extractionSettings.meshSettings.genMeshByLayer = true;
-    extractionSettings.meshSettings.imprintUpperLayer = true;
-    extractionSettings.meshSettings.maxLen = 2;
-    extractionSettings.meshSettings.minAlpha = 20;
-    extractionSettings.layerCutSettings.layerTransitionRatio = 0;
-
     EThermalTransientSimulationSetup setup;
     setup.workDir = workDir;
     setup.monitors = GetDieMonitors(layout);
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.settings.mor = false;
+    setup.settings.mor = true;
     setup.settings.verbose = true;
     setup.settings.dumpResults = true;
     setup.settings.duration = 10;
     setup.settings.step = period * duty / 10;
-    setup.settings.temperatureDepend = true;
+    setup.settings.temperatureDepend = false;
     setup.settings.samplingWindow = setup.settings.duration;
     setup.settings.minSamplingInterval = period * duty / 10;
     setup.settings.absoluteError = 1e-5;
     setup.settings.relativeError = 1e-5;
     setup.settings.threads = eDataMgr.Threads();
+    setup.extractionSettings = ExtractionSettings(workDir);
     EThermalTransientExcitation excitation = [period, duty](EFloat t, size_t scen) -> EFloat { 
         EFloat tm = std::fmod(t, period); 
         switch (scen) {
@@ -742,8 +473,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
             default : { ECAD_ASSERT(false) return 0; }
         }
     };
-    setup.settings.excitation = &excitation;
-    auto [minT, maxT] = layout->RunThermalSimulation(extractionSettings, setup);    
+    auto [minT, maxT] = layout->RunThermalSimulation(setup, excitation);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
 }
 
@@ -761,8 +491,8 @@ int main(int argc, char * argv[])
     };
     // std::vector<EFloat> parameters{-6.28323,9.1159,-6.13371,3.41274,-4.54684,-1.35806,4.60621,8.17798,3.8993,1.42668,2.64954,-4.95307,4.75943,8.76399,4.25377,0.922324,5.61007,-5.06671,-4.21649,7.63576,-4.1069,2.27594,-3.74797,-5.25336,};
     auto layout = SetupDesign("CREE62mm", parameters);
-    StaticThermalFlow(layout, workDir);
-    // TransientThermalFlow(layout, workDir, 1, 0.5);
+    // StaticThermalFlow(layout, workDir);
+    TransientThermalFlow(layout, workDir, 1, 0.5);
     ecad::EDataMgr::Instance().ShutDown();
     return EXIT_SUCCESS;
 }
