@@ -11,15 +11,15 @@ UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string 
     prismSettings.workDir = workDir;
     prismSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismSettings.botUniformBC.value = htc;
-    prismSettings.meshSettings.genMeshByLayer = false;
+    prismSettings.meshSettings.genMeshByLayer = true;
     if (prismSettings.meshSettings.genMeshByLayer)
-        prismSettings.meshSettings.imprintUpperLayer = true;
-    prismSettings.meshSettings.iteration = 3e3;
+        prismSettings.meshSettings.imprintUpperLayer = false;
+    prismSettings.meshSettings.iteration = 1e5;
     prismSettings.meshSettings.minAlpha = 15;
     prismSettings.meshSettings.minLen = 1e-3;
-    prismSettings.meshSettings.maxLen = 1000;
+    prismSettings.meshSettings.maxLen = 3;
     prismSettings.meshSettings.tolerance = 0;
-    prismSettings.layerCutSettings.layerTransitionRatio = 3;
+    prismSettings.layerCutSettings.layerTransitionRatio = 0;
     prismSettings.meshSettings.dumpMeshFile = true;
     prismSettings.layerCutSettings.dumpSketchImg = true;
 

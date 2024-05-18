@@ -118,7 +118,8 @@ set(EMESH_INCLUDE_PATH ${THIRD_LIBRARY_PATH}/emesh/include)
 include_directories(${PROJECT_SOURCE_DIR}/src ${THIRD_LIBRARY_PATH} ${EMESH_INCLUDE_PATH} ${PNG_INCLUDE_DIR} ${BOOST_INCLUDE_PATH})
 
 # Compile definition
-add_definitions("-DBOOST_GIL_IO_PNG_SUPPORT=1")
+#add_definitions("-DBOOST_GIL_IO_PNG_SUPPORT=1")
+add_compile_definitions(GENERIC_BOOST_GIL_IO_PNG_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 

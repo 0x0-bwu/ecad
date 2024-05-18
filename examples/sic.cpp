@@ -20,12 +20,7 @@ using namespace ecad;
 using namespace generic;
 auto & eDataMgr = EDataMgr::Instance();
 inline static constexpr EFloat AVERAGE_LOSS_POWER = 123.3333;
-inline static constexpr EFloat THIN_BONDWIRE_RADIUS = 0.0635;
-inline static constexpr EFloat THICK_BONDWIRE_RADIUS = 0.15;
 inline static constexpr std::string_view RES_GATE = "Rg";
-inline static constexpr std::string_view NET_GATE = "Gate";
-inline static constexpr std::string_view NET_DRAIN = "Drain";
-inline static constexpr std::string_view NET_SOURCE = "Source";
 
 inline static constexpr std::string_view MAT_AL = "Al";
 inline static constexpr std::string_view MAT_CU = "Cu";
@@ -452,7 +447,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
     setup.workDir = workDir;
     setup.monitors = GetDieMonitors(layout);
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.settings.mor = true;
+    setup.settings.mor.order = 10;
     setup.settings.verbose = true;
     setup.settings.dumpResults = true;
     setup.settings.duration = 10;

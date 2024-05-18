@@ -423,11 +423,17 @@ struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
 
 using EThermalTransientExcitation = std::function<EFloat(EFloat, size_t)>;//ratio = f(t, scenario), range[0, 1]
 
+struct EThermalModelReductionSettings
+{
+    size_t order = 0;
+    std::string romLoadFile;
+    std::string romSaveFile;
+};
+
 struct EThermalTransientSettings : public EThermalSettings
 {
     virtual ~EThermalTransientSettings() = default;
 
-    bool mor{false};
     bool verbose{false};
     bool adaptive{true};
     bool temperatureDepend{true};
@@ -437,6 +443,7 @@ struct EThermalTransientSettings : public EThermalSettings
     EFloat relativeError{1e-6};
     EFloat minSamplingInterval{0};
     EFloat samplingWindow{0};
+    EThermalModelReductionSettings mor;
 };
 
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup

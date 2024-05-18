@@ -1,8 +1,8 @@
 #pragma once
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
-    #ifndef BOOST_SERIALIZATION_SUPPORT
-        #define BOOST_SERIALIZATION_SUPPORT
+    #ifndef GENERIC_BOOST_SERIALIZATION_SUPPORT
+        #define GENERIC_BOOST_SERIALIZATION_SUPPORT
     #endif
     #include "generic/common/Archive.hpp"
     #include "generic/geometry/Serialization.hpp"

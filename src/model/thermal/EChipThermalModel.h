@@ -70,7 +70,7 @@ public:
     bool GetLayerHeightThickness(const std::string & name, EFloat & height, EFloat & thickness) const;
     CPtr<ECTMv1LayerStackup> GetLayerStackup(std::string * info = nullptr) const;
 
-    virtual EModelType GetModelType() const { return EModelType::ThermalCTMv1; }
+    virtual EModelType GetModelType() const override { return EModelType::ThermalCTMv1; }
     virtual bool Match(const ECadSettings & settings) const override { return false; } //todo
 
 protected:

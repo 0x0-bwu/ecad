@@ -100,14 +100,12 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
     ThermalNetworkBuilder builder(model);
     UPtr<ThermalNetwork<EFloat> > network;
     using Model = typename ThermalNetworkBuilder::ModelType;
-    auto [probs, permutation] = GetProbsAndPermutation(settings.probs);
-    if (probs.empty()) return false;
     
     size_t steps{0};
     Samples<EFloat> samples;
     TimeWindow<EFloat> window(settings.duration - settings.samplingWindow, settings.duration, settings.minSamplingInterval);
     ECAD_TRACE("duration: %1%, step: %2%, abs error: %3%, rel error: %4%", settings.duration, settings.step, settings.absoluteError, settings.relativeError);
-    if (not settings.mor) {
+    if (0 == settings.mor.order) {
         ECAD_EFFICIENCY_TRACK("transient orig")
         using TransSolver = ThermalNetworkTransientSolver<EFloat>;
         using StateType = typename TransSolver::StateType;
@@ -119,7 +117,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
                 if (settings.verbose)
                     ECAD_TRACE("time:%1%/%2%", time, settings.duration)
                 auto network = builder.Build(initT);
-                TransSolver solver(*network, envT, probs);
+                TransSolver solver(*network, envT, settings.probs);
                 Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
                 steps += solver.SolveAdaptive(initT, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
                 time += settings.step;
@@ -127,7 +125,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         }
         else {
             auto network = builder.Build(initT);
-            TransSolver solver(*network, envT, probs);
+            TransSolver solver(*network, envT, settings.probs);
             Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
             steps = solver.SolveAdaptive(initT, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
         }
@@ -144,7 +142,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
                 ECAD_TRACE("time:%1%/%2%", time, settings.duration)
                 StateType initState;
                 auto network = builder.Build(initT);
-                TransSolver solver(*network, envT, probs);
+                TransSolver solver(*network, envT, settings.probs, settings.mor.order, {}, {});
                 if (not solver.Im().Input2State(initT, initState)) return false;
                 Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
                 steps += solver.SolveAdaptive(initState, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
@@ -155,7 +153,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         else {
             StateType initState;
             auto network = builder.Build(initT);
-            TransSolver solver(*network, envT, probs);
+            TransSolver solver(*network, envT, settings.probs, settings.mor.order, settings.mor.romLoadFile, settings.mor.romSaveFile);
             if (not solver.Im().Input2State(initT, initState)) return false;
             Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
             steps = solver.SolveAdaptive(initState, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
@@ -175,9 +173,8 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         std::ofstream out(filename);
         if (out.is_open()) {
             for (const auto & sample : samples) {
-                out << sample.front() << ',';
-                for (auto perm : permutation)
-                    out << sample.at(perm + 1) << ',';
+                for (const auto & value : sample)
+                    out << value << ',';
                 out << ECAD_EOL;
             }
             out.close();

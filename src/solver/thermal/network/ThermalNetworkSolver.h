@@ -1,10 +1,8 @@
 #pragma once
 #include "ThermalNetwork.h"
-#include "generic/math/MathUtility.hpp"
 #include "generic/tools/Tools.hpp"
 #include "generic/circuit/MNA.hpp"
 #include "generic/circuit/MOR.hpp"
-#include "generic/tools/Log.hpp"
 
 #include <boost/numeric/odeint.hpp>
 #include <memory>
@@ -198,7 +196,7 @@ namespace thermal::solver {
             }
         };
         
-        ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::set<size_t> probs = {})
+        ThermalNetworkTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::vector<size_t> probs)
             : m_refT(refT), m_probs(std::move(probs)), m_network(network)
         {
             m_im.reset(new Intermidiate(m_network, m_refT));
@@ -217,11 +215,11 @@ namespace thermal::solver {
                                     Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, std::move(observer));
         }
 
-        const std::set<size_t> Probs() const { return m_probs; }
+        const std::vector<size_t> Probs() const { return m_probs; }
         const Intermidiate & Im() const { return *m_im; }
     private:
         num_type m_refT;
-        std::set<size_t> m_probs;
+        std::vector<size_t> m_probs;
         const ThermalNetwork<num_type> & m_network;
         std::unique_ptr<Intermidiate> m_im{nullptr};
     };
@@ -234,7 +232,7 @@ namespace thermal::solver {
         struct Intermidiate
         {
             num_type refT;
-            const std::set<size_t> & probs;
+            const std::vector<size_t> & probs;
             const ThermalNetwork<num_type> & network;
 
             bool includeBonds{true};
@@ -243,15 +241,34 @@ namespace thermal::solver {
             DenseMatrix<num_type> rLT;
             ReducedModel<num_type> rom;
             DenseMatrix<num_type> coeff, input;
-            Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::set<size_t> & probs, size_t order)
+            Intermidiate(const ThermalNetwork<num_type> & network, num_type refT, const std::vector<size_t> & probs, size_t order, const std::string & romLoadFile, const std::string & romSaveFile)
                 : refT(refT), probs(probs), network(network)
             {
-                const size_t source = network.Source(includeBonds);
-                auto m = makeMNA(network, includeBonds, probs);
-                {
-                    tools::ProgressTimer t("reduce");
-                    rom = Reduce(m, std::max(order, source));
-                    std::cout << "mor: " << rom.x.rows() << "->" << rom.x.cols() << std::endl;
+                bool loadFromFile{false};
+                if (generic::fs::FileExists(romLoadFile)) {
+                    if (std::ifstream ifs(romLoadFile); ifs.is_open()) {
+                        boost::archive::binary_iarchive ia(ifs);
+                        boost::serialization::serialize(ia, rom, ecad::toInt(ecad::CURRENT_VERSION));
+                        ECAD_TRACE("load rom from file %1%", romLoadFile)
+                        loadFromFile = true;
+                    }
+                }
+                if (not loadFromFile) {
+                    auto m = makeMNA(network, includeBonds, probs);
+                    {
+                        tools::ProgressTimer t("reduce");
+                        const size_t source = network.Source(includeBonds);
+                        rom = Reduce(m, std::max(order, source));
+                        ECAD_TRACE("mor %1% -> %2%", rom.x.rows(), rom.x.cols())
+                    }
+                    if (not romSaveFile.empty()) {
+                        generic::fs::CreateDir(generic::fs::DirName(romSaveFile));
+                        if (std::ofstream ofs(romSaveFile); ofs.is_open()) {
+                            boost::archive::binary_oarchive oa(ofs);
+                            boost::serialization::serialize(oa, rom, ecad::toInt(ecad::CURRENT_VERSION));
+                            ECAD_TRACE("save rom to file %1%", romSaveFile)
+                        }
+                    }
                 }
                 auto dcomp = rom.m.C.ldlt();
                 coeff = dcomp.solve(-1 * rom.m.G);
@@ -356,10 +373,10 @@ namespace thermal::solver {
             }
         };
 
-        ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::set<size_t> probs = {}, size_t order = 99)
+        ThermalNetworkReducedTransientSolver(const ThermalNetwork<num_type> & network, num_type refT, std::vector<size_t> probs, size_t order, const std::string & romLoadFile = {}, const std::string & romSaveFile = {})
             : m_refT(refT), m_probs(std::move(probs)), m_network(network)
         {
-            m_im.reset(new Intermidiate(m_network, m_refT, m_probs, order));
+            m_im.reset(new Intermidiate(m_network, m_refT, m_probs, order, romLoadFile, romSaveFile));
         }
 
         virtual ~ThermalNetworkReducedTransientSolver() = default;
@@ -373,11 +390,11 @@ namespace thermal::solver {
                                     Solver<Excitation>(*m_im, e), initState, num_type{t0}, num_type{t0 + duration}, num_type{dt}, observer);
         }
 
-        const std::set<size_t> Probs() const { return m_probs; }
+        const std::vector<size_t> Probs() const { return m_probs; }
         const Intermidiate & Im() const { return *m_im; }
     private:
         num_type m_refT;
-        std::set<size_t> m_probs;
+        std::vector<size_t> m_probs;
         const ThermalNetwork<num_type> & m_network;
         std::unique_ptr<Intermidiate> m_im{nullptr};
     };

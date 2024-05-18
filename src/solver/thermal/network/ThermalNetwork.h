@@ -1,5 +1,6 @@
 #pragma once
 
+#include "basic/ECadCommon.h"
 #include "generic/math/MathUtility.hpp"
 #include "generic/tools/Format.hpp"
 #include "generic/circuit/MNA.hpp"
@@ -280,7 +281,7 @@ inline std::pair<SparseMatrix<num_type>, SparseMatrix<num_type>> makeInvCandNegG
 }
 
 template <typename num_type>
-inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network, bool includeBonds, const std::set<size_t> & probs = {})
+inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & network, bool includeBonds, const std::vector<size_t> & probs = {})
 {
     using Matrix = SparseMatrix<num_type>;
     using Triplets = std::vector<Eigen::Triplet<num_type> >;

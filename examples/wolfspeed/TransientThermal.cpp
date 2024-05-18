@@ -53,12 +53,14 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
     setup.workDir = workDir;
     setup.monitors = GetDieMonitors(layout);
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.settings.mor = true;
+    setup.settings.mor.order = 100;
+    setup.settings.mor.romLoadFile = workDir + ECAD_SEPS + "rom_source.db";
+    setup.settings.mor.romSaveFile = setup.settings.mor.romLoadFile;
     setup.settings.verbose = true;
     setup.settings.dumpResults = true;
     setup.settings.duration = 10;
     setup.settings.step = period * duty / 10;
-    setup.settings.temperatureDepend = true;
+    setup.settings.temperatureDepend = false;
     setup.settings.samplingWindow = setup.settings.duration;
     setup.settings.minSamplingInterval = period * duty / 10;
     setup.settings.absoluteError = 1e-5;
