@@ -20,13 +20,10 @@ void SignalHandler(int signum)
 using namespace ecad;
 using namespace generic;
 auto & eDataMgr = EDataMgr::Instance();
-inline static constexpr EFloat AVERAGE_LOSS_POWER = 123.3333;
+// inline static constexpr EFloat AVERAGE_LOSS_POWER = 123.3333;
 inline static constexpr EFloat THIN_BONDWIRE_RADIUS = 0.0635;
 inline static constexpr EFloat THICK_BONDWIRE_RADIUS = 0.15;
 inline static constexpr std::string_view RES_GATE = "Rg";
-inline static constexpr std::string_view NET_GATE = "Gate";
-inline static constexpr std::string_view NET_DRAIN = "Drain";
-inline static constexpr std::string_view NET_SOURCE = "Source";
 
 inline static constexpr std::string_view MAT_AL = "Al";
 inline static constexpr std::string_view MAT_CU = "Cu";
@@ -192,10 +189,10 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
     pwh.holes.emplace_back(eDataMgr.CreateShapeCircle(coordUnits, {-46.5,  24}, 3.85)->GetContour());
     baseLayout->SetBoundary(eDataMgr.CreateShapePolygonWithHoles(std::move(pwh)));
 
-    auto ng = eDataMgr.CreateNet(baseLayout, "Gate");
-    auto nd = eDataMgr.CreateNet(baseLayout, "Drain");
-    auto ns = eDataMgr.CreateNet(baseLayout, "Source");
-    auto nk = eDataMgr.CreateNet(baseLayout, "Kelvin");
+    [[maybe_unused]] auto ng = eDataMgr.CreateNet(baseLayout, "Gate");
+    [[maybe_unused]] auto nd = eDataMgr.CreateNet(baseLayout, "Drain");
+    [[maybe_unused]] auto ns = eDataMgr.CreateNet(baseLayout, "Source");
+    [[maybe_unused]] auto nk = eDataMgr.CreateNet(baseLayout, "Kelvin");
 
     //base
     auto topCuLayer = baseLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCuLayer", ELayerType::ConductingLayer, 0, 0.3, MAT_CU.data(), MAT_AIR.data()));
@@ -326,9 +323,9 @@ Ptr<ILayoutView> CreateBotBridgeLayout(Ptr<IDatabase> database, const std::vecto
     botBridgeLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
     
     //net
-    auto ng = eDataMgr.CreateNet(botBridgeLayout, "Gate");
-    auto nd = eDataMgr.CreateNet(botBridgeLayout, "Drain");
-    auto ns = eDataMgr.CreateNet(botBridgeLayout, "Source");
+    [[maybe_unused]] auto ng = eDataMgr.CreateNet(botBridgeLayout, "Gate");
+    [[maybe_unused]] auto nd = eDataMgr.CreateNet(botBridgeLayout, "Drain");
+    [[maybe_unused]] auto ns = eDataMgr.CreateNet(botBridgeLayout, "Source");
 
     //wire
     eDataMgr.CreateGeometry2D(botBridgeLayout, botBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -11.2}, {13.35, -11.2}, {13.95, -11.6}, {15.45, -11.6},
@@ -455,9 +452,9 @@ Ptr<ILayoutView> CreateTopBridgeLayout(Ptr<IDatabase> database, const std::vecto
     topBridgeLayout->SetBoundary(eDataMgr.CreateShapePolygon(coordUnits, {{-16.75, -12.5}, {16.75, -12.5}, {16.75, 12.5}, {-16.75, 12.5}}));
     
     //net
-    auto ns = eDataMgr.CreateNet(topBridgeLayout, "Gate");
-    auto nd = eDataMgr.CreateNet(topBridgeLayout, "Drain");
-    auto ng = eDataMgr.CreateNet(topBridgeLayout, "Source");
+    [[maybe_unused]] auto ns = eDataMgr.CreateNet(topBridgeLayout, "Gate");
+    [[maybe_unused]] auto nd = eDataMgr.CreateNet(topBridgeLayout, "Drain");
+    [[maybe_unused]] auto ng = eDataMgr.CreateNet(topBridgeLayout, "Source");
 
     //wire
     eDataMgr.CreateGeometry2D(topBridgeLayout, topBridgeLayer1, ENetId::noNet, eDataMgr.CreateShapePolygon(coordUnits, {{-15.45, -11.6}, {-13.95, -11.6}, {-13.35, -11.2}, {13.35, -11.2},
