@@ -186,6 +186,12 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
 
     if (not settings.workDir.empty() && settings.layerCutSettings.dumpSketchImg) {
         std::string filename = settings.workDir + ECAD_SEPS + "LayerCut.png";
+        if (fs::FileExists(filename)) {
+            size_t index = 0;
+            do {  
+                filename = settings.workDir + ECAD_SEPS + "LayerCut" + std::to_string(++index) + ".png";
+            } while (fs::FileExists(filename));
+        }
         compact->WriteImgView(filename, 3000);
     }
 
@@ -315,6 +321,12 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalMod
 
     if (not settings.workDir.empty() && settings.layerCutSettings.dumpSketchImg) {
         std::string filename = settings.workDir + ECAD_SEPS + "LayerCut.png";
+        if (fs::FileExists(filename)) {
+            size_t index = 0;
+            do {  
+                filename = settings.workDir + ECAD_SEPS + "LayerCut" + std::to_string(++index) + ".png";
+            } while (fs::FileExists(filename));
+        }
         compact->WriteImgView(filename, 3000);
     }
 
