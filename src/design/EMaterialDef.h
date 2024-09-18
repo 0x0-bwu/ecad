@@ -16,6 +16,7 @@ public:
     EMaterialDef(const EMaterialDef & other);
     EMaterialDef & operator= (const EMaterialDef & other);
 
+    void SetDatabase(CPtr<IDatabase> database) override;
     EMaterialId GetMaterialId() const override;
     bool hasProperty(EMaterialPropId id) const override;
     void SetProperty(EMaterialPropId id, UPtr<IMaterialProp> prop) override;

@@ -13,6 +13,7 @@ public:
     ELayerMap(std::string name, CPtr<IDatabase> database);
     virtual ~ELayerMap();
 
+    void SetDatabase(CPtr<IDatabase> database) override;
     CPtr<IDatabase> GetDatabase() const override;
 
     EDefinitionType GetDefinitionType() const override;

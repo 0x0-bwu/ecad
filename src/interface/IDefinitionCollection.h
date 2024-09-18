@@ -2,6 +2,7 @@
 #include "basic/ECadCommon.h"
 namespace ecad {
 
+class IDatabase;
 class IDefinition;
 class ECAD_API IDefinitionCollection : public Clonable<IDefinitionCollection>
 {
@@ -13,6 +14,7 @@ public:
     virtual Ptr<IDefinition> AddDefinition(const std::string & name, UPtr<IDefinition> definition) = 0;
     virtual Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const = 0;
     virtual std::string GetNextDefName(const std::string & base, EDefinitionType type) const = 0;
+    virtual void SetDatabase(CPtr<IDatabase> database) = 0;
     virtual size_t Size() const = 0;
 };
 }//namespace ecad

@@ -31,11 +31,7 @@ ECAD_INLINE void EDatabase::serialize(Archive & ar, const unsigned int version)
     ar & boost::serialization::make_nvp("coord_units", m_coordUnits);
 
     if (Archive::is_loading::value) {
-        //need set cell's ref since EDatabase may not come from serialization
-        auto cellIter = GetCellIter();
-        while(auto cell = cellIter->Next()){
-            cell->SetDatabase(this);
-        }
+        EDefinitionCollection::SetDatabase(this);
     }
 }
 
@@ -69,14 +65,10 @@ ECAD_INLINE EDatabase::EDatabase(const EDatabase & other)
 ECAD_INLINE EDatabase & EDatabase::operator= (const EDatabase & other)
 {
     EDefinitionCollection::operator=(other);
+    EDefinitionCollection::SetDatabase(this);
     EObject::operator=(other);
     
     m_coordUnits = other.m_coordUnits;
-
-    auto cellIter = GetCellIter();
-    while(auto cell = cellIter->Next()){
-        cell->SetDatabase(this);
-    }
     return *this;
 }
 
@@ -114,7 +106,7 @@ ECAD_INLINE bool EDatabase::Load(const std::string & archive, EArchiveFormat fmt
     std::ifstream ifs(archive);
     if(!ifs.is_open()) return false;
 
-    unsigned int version;
+    unsigned int version{0};
     if(fmt == EArchiveFormat::TXT){
         boost::archive::text_iarchive ia(ifs);
         ia & boost::serialization::make_nvp("version", version);
@@ -130,7 +122,7 @@ ECAD_INLINE bool EDatabase::Load(const std::string & archive, EArchiveFormat fmt
         ia & boost::serialization::make_nvp("version", version);
         serialize(ia, version);
     }
-
+    m_version = fromInt(version);
     return true;
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -305,9 +297,7 @@ ECAD_INLINE PadstackDefIter EDatabase::GetPadstackDefIter() const
 
 ECAD_INLINE void EDatabase::Clear()
 {
-    GetPadstackDefCollection()->Clear();
-    GetLayerMapCollection()->Clear();
-    GetCellCollection()->Clear();
+    EDefinitionCollection::Clear();
 }
 
 }//namesapce ecad

@@ -13,7 +13,6 @@ ECAD_INLINE void ELayerMap::serialize(Archive & ar, const unsigned int version)
     boost::serialization::void_cast_register<ELayerMap, ILayerMap>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
     ar & boost::serialization::make_nvp("layer_map", m_layerIdMap);
-    ar & boost::serialization::make_nvp("database", m_database);
 }
 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayerMap)
@@ -35,9 +34,14 @@ ECAD_INLINE ELayerMap::~ELayerMap()
 {
 }
 
+ECAD_INLINE void ELayerMap::SetDatabase(CPtr<IDatabase> database)
+{
+    return EDefinition::SetDatabase(database);
+}
+
 ECAD_INLINE CPtr<IDatabase> ELayerMap::GetDatabase() const
 {
-    return m_database;
+    return EDefinition::GetDatabase();
 }
 
 ECAD_INLINE EDefinitionType ELayerMap::GetDefinitionType() const

@@ -46,6 +46,11 @@ ECAD_INLINE EPadstackDef & EPadstackDef::operator= (const EPadstackDef & other)
     return *this;
 }
 
+ECAD_INLINE void EPadstackDef::SetDatabase(CPtr<IDatabase> database)
+{
+    EDefinition::SetDatabase(database);
+}
+
 ECAD_INLINE void EPadstackDef::SetPadstackDefData(UPtr<IPadstackDefData> data)
 {
     m_data = std::move(data);

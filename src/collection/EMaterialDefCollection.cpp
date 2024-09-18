@@ -84,6 +84,15 @@ ECAD_INLINE Ptr<IMaterialDef> EMaterialDefCollection::FindMaterialDefById(EMater
     return nullptr;
 }
 
+ECAD_INLINE void EMaterialDefCollection::SetDatabase(CPtr<IDatabase> database)
+{
+    auto matIter = GetMaterialDefIter();
+    while(auto mat = matIter->Next()) {
+        mat->SetDatabase(database);
+    }
+}
+
+
 ECAD_INLINE MaterialDefIter EMaterialDefCollection::GetMaterialDefIter() const
 {
     return MaterialDefIter(new EMaterialDefIterator(*this));

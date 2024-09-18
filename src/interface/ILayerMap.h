@@ -8,6 +8,7 @@ class ECAD_API ILayerMap : public Clonable<ILayerMap>
 public:
     virtual ~ILayerMap() = default;
 
+    virtual void SetDatabase(CPtr<IDatabase> database) = 0;
     virtual CPtr<IDatabase> GetDatabase() const = 0;
     virtual void SetName(std::string name) = 0;
     virtual const std::string & GetName() const = 0;

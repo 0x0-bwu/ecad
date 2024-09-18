@@ -73,6 +73,14 @@ ECAD_INLINE std::string EPadstackDefCollection::GetNextDefName(const std::string
     return std::string{};
 }
 
+ECAD_INLINE void EPadstackDefCollection::SetDatabase(CPtr<IDatabase> database)
+{
+    auto psIter = GetPadstackDefIter();
+    while(auto ps = psIter->Next()){
+        ps->SetDatabase(database);
+    }
+}
+
 ECAD_INLINE PadstackDefIter EPadstackDefCollection::GetPadstackDefIter() const
 {
     return PadstackDefIter(new EPadstackDefIterator(*this));

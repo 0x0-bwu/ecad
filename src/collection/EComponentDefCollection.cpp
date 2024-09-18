@@ -74,6 +74,14 @@ ECAD_INLINE std::string EComponentDefCollection::GetNextDefName(const std::strin
     return std::string{};
 }
 
+ECAD_INLINE void EComponentDefCollection::SetDatabase(CPtr<IDatabase> database)
+{
+    auto compDefIter = GetComponentDefIter();
+    while(auto compDef = compDefIter->Next()) {
+        compDef->SetDatabase(database);
+    }
+}
+
 ECAD_INLINE ComponentDefIter EComponentDefCollection::GetComponentDefIter() const
 {
     return ComponentDefIter(new EComponentDefIterator(*this));

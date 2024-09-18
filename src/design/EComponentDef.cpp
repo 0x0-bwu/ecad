@@ -42,6 +42,11 @@ ECAD_INLINE EComponentDef::~EComponentDef()
 {
 }
 
+ECAD_INLINE void EComponentDef::SetDatabase(CPtr<IDatabase> database)
+{
+    return EDefinition::SetDatabase(database);
+}
+
 ECAD_INLINE CPtr<IDatabase> EComponentDef::GetDatabase() const
 {
     return EDefinition::GetDatabase();

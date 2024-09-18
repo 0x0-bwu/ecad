@@ -66,7 +66,7 @@ public:
     const std::string & GetName() const override;
     std::string sUuid() const override;
 
-    void Clear();
+    virtual void Clear() override;
 
 protected:
     ///Copy
@@ -74,6 +74,7 @@ protected:
     
 protected:
     ECoordUnits m_coordUnits;
+    EVersion m_version{CURRENT_VERSION};
 };
 
 ECAD_ALWAYS_INLINE const std::string & EDatabase::GetName() const

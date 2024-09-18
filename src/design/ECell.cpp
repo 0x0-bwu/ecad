@@ -66,12 +66,12 @@ ECAD_INLINE const ECoordUnits & ECell::GetCoordUnits() const
 
 ECAD_INLINE void ECell::SetDatabase(CPtr<IDatabase> database)
 {
-    m_database = database; 
+    return EDefinition::SetDatabase(database);
 }
 
 ECAD_INLINE CPtr<IDatabase> ECell::GetDatabase() const
 {
-    return m_database;
+    return EDefinition::GetDatabase();
 }
 
 ECAD_INLINE EDefinitionType ECell::GetDefinitionType() const

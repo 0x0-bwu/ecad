@@ -53,6 +53,7 @@ public:
     Ptr<IComponentDefPinCollection> ComponentDefPinCollection() const;
 
     size_t Size() const override;
+    void Clear() override;
 protected:
     ///Copy
     virtual Ptr<ECollectionCollection> CloneImp() const override { return new ECollectionCollection(*this); }

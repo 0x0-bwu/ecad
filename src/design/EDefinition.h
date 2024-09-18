@@ -14,6 +14,7 @@ public:
     virtual ~EDefinition();
 
     virtual EDefinitionType GetDefinitionType() const override;
+    void SetDatabase(CPtr<IDatabase> database) override;
     CPtr<IDatabase> GetDatabase() const override;
     const std::string & GetName() const override;
     const EUuid & Uuid() const;

@@ -242,4 +242,9 @@ ECAD_INLINE size_t ECollectionCollection::Size() const
     return count;
 }
 
+ECAD_INLINE void ECollectionCollection::Clear()
+{
+    for (auto & collection : m_collection)
+        collection.second->Clear();
+}
 }//namespace ecad

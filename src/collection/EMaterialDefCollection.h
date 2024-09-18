@@ -30,6 +30,7 @@ public:
     std::string GetNextDefName(const std::string & base, EDefinitionType type) const override;
 
     Ptr<IMaterialDef> FindMaterialDefById(EMaterialId id) const override;
+    void SetDatabase(CPtr<IDatabase> database) override;
     MaterialDefIter GetMaterialDefIter() const override;
     size_t Size() const override;
     void Clear() override;

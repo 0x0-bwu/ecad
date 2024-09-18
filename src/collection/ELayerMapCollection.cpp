@@ -74,6 +74,14 @@ ECAD_INLINE std::string ELayerMapCollection::GetNextDefName(const std::string & 
     return std::string{};
 }
 
+ECAD_INLINE void ELayerMapCollection::SetDatabase(CPtr<IDatabase> database)
+{
+    auto lmIter = GetLayerMapIter();
+    while (auto lm = lmIter->Next()) {
+        lm->SetDatabase(database);
+    }
+}
+
 ECAD_INLINE LayerMapIter ELayerMapCollection::GetLayerMapIter() const
 {
     return LayerMapIter(new ELayerMapIterator(*this));

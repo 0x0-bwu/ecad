@@ -50,6 +50,11 @@ ECAD_INLINE EMaterialDef & EMaterialDef::operator= (const EMaterialDef & other)
     return *this;
 }
 
+ECAD_INLINE void EMaterialDef::SetDatabase(CPtr<IDatabase> database)
+{
+    EDefinition::SetDatabase(database);
+}
+
 ECAD_INLINE EMaterialId EMaterialDef::GetMaterialId() const
 {
     return m_id;

@@ -8,9 +8,8 @@ class ECAD_API EDefinitionCollection : public ECollectionCollection, public IDef
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
-    EDefinitionCollection();
-    explicit EDefinitionCollection(std::string name);
-    virtual ~EDefinitionCollection();
+    EDefinitionCollection() = default;
+    virtual ~EDefinitionCollection() = default;
 
     ///Copy
     EDefinitionCollection(const EDefinitionCollection & other);
@@ -21,6 +20,7 @@ public:
     virtual Ptr<IDefinition> AddDefinition(const std::string & name, UPtr<IDefinition> definition) override;
     virtual Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const override;
     virtual std::string GetNextDefName(const std::string & name, EDefinitionType type) const override;
+    virtual void SetDatabase(CPtr<IDatabase> database) override;
     virtual size_t Size() const override;
 protected:
     ///Copy

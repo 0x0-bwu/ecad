@@ -72,6 +72,14 @@ ECAD_INLINE std::string ECellCollection::GetNextDefName(const std::string & base
     return std::string{};
 }
 
+ECAD_INLINE void ECellCollection::SetDatabase(CPtr<IDatabase> database)
+{
+    auto cellIter = GetCellIter();
+    while(auto cell = cellIter->Next()){
+        cell->SetDatabase(database);
+    }
+}
+
 ECAD_INLINE CellIter ECellCollection::GetCellIter() const
 {
     return CellIter(new ECellIterator(*this));

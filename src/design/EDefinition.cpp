@@ -11,8 +11,8 @@ ECAD_INLINE void EDefinition::serialize(Archive & ar, const unsigned int version
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EDefinition, IDefinition>();
+    // ar & boost::serialization::make_nvp("database", m_database);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
-    ar & boost::serialization::make_nvp("database", m_database);
 }
     
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EDefinition)
@@ -30,6 +30,11 @@ ECAD_INLINE EDefinition::EDefinition(std::string name, CPtr<IDatabase> database)
 
 ECAD_INLINE EDefinition::~EDefinition()
 {
+}
+
+ECAD_INLINE void EDefinition::SetDatabase(CPtr<IDatabase> database)
+{
+    m_database = database;
 }
 
 ECAD_INLINE CPtr<IDatabase> EDefinition::GetDatabase() const

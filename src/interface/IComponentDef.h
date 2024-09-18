@@ -12,6 +12,7 @@ public:
     virtual ~IComponentDef() = default;
     virtual const std::string & GetName() const = 0;
 
+    virtual void SetDatabase(CPtr<IDatabase> database) = 0;
     virtual CPtr<IDatabase> GetDatabase() const = 0;
 
     virtual void SetComponentType(EComponentType type) = 0;

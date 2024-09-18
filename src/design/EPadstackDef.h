@@ -16,6 +16,8 @@ public:
     EPadstackDef(const EPadstackDef & other);
     EPadstackDef & operator= (const EPadstackDef & other);
 
+    void SetDatabase(CPtr<IDatabase> database) override;
+    
     void SetPadstackDefData(UPtr<IPadstackDefData> data) override;
     Ptr<IPadstackDefData> GetPadstackDefData() const override;
 

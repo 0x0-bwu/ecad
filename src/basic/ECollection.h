@@ -31,8 +31,8 @@ public:
         return *this;
     }
 
+    virtual void Clear() override {}
     virtual size_t Size() const override { return 0; }
-
 protected:
     ///Copy
     virtual Ptr<ECollection> CloneImp() const override { return new ECollection(*this); }
@@ -84,8 +84,8 @@ public:
     T & operator[] (Key && key) { return m_collection[key]; }
     T & operator[] (const Key & key) { return m_collection[key]; }
     
-    void Clear() { m_collection.clear(); }
-    size_t Size() const { return m_collection.size(); }
+    void Clear() override { m_collection.clear(); }
+    size_t Size() const override { return m_collection.size(); }
 
     bool Count(const Key & key) const { return m_collection.count(key); }
 
@@ -280,8 +280,8 @@ public:
     T & operator[] (size_t index) { return m_collection[index]; }
     const T & operator[] (size_t index) const { return m_collection[index]; }
 
-    void Clear() { m_collection.clear(); }
-    size_t Size() const { return m_collection.size(); }
+    void Clear() override { m_collection.clear(); }
+    size_t Size() const override { return m_collection.size(); }
 
     template <typename value_t>
     void Append(value_t && value) { m_collection.push_back(std::forward<value_t>(value)); }

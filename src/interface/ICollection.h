@@ -7,6 +7,7 @@ class ECAD_API ICollection : public Clonable<ICollection>, public Printable
 public:
     virtual ~ICollection() = default;
     virtual size_t Size() const = 0;
+    virtual void Clear() = 0;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ICollection)

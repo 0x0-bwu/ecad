@@ -8,7 +8,8 @@
 
 namespace ecad {
 
-using namespace  generic::geometry;
+using namespace generic;
+using namespace generic::geometry;
 
 struct ESize2D
 {

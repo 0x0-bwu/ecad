@@ -1,6 +1,7 @@
 #pragma once
 #include "basic/ECadCommon.h"
 namespace ecad {
+class IDatabase;
 class IMaterialProp;
 class ECAD_API IMaterialDef : public Clonable<IMaterialDef>
 {
@@ -8,6 +9,7 @@ class ECAD_API IMaterialDef : public Clonable<IMaterialDef>
 public:
     virtual ~IMaterialDef() = default;
 
+    virtual void SetDatabase(CPtr<IDatabase> database) = 0;
     virtual EMaterialId GetMaterialId() const = 0;
     virtual bool hasProperty(EMaterialPropId id) const = 0;
     virtual void SetProperty(EMaterialPropId id, UPtr<IMaterialProp> prop) = 0;

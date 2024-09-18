@@ -18,14 +18,6 @@ ECAD_INLINE void EDefinitionCollection::serialize(Archive & ar, const unsigned i
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EDefinitionCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EDefinitionCollection::EDefinitionCollection()
-{
-}
-
-ECAD_INLINE EDefinitionCollection::~EDefinitionCollection()
-{
-}
-
 ECAD_INLINE EDefinitionCollection::EDefinitionCollection(const EDefinitionCollection & other)
 {
     *this = other;
@@ -102,6 +94,12 @@ ECAD_INLINE std::string EDefinitionCollection::GetNextDefName(const std::string 
     auto dc = GetDefinitionCollection(type);
     if(dc) return dc->GetNextDefName(name, type);
     return std::string{};  
+}
+
+ECAD_INLINE void EDefinitionCollection::SetDatabase(CPtr<IDatabase> database)
+{
+    for (auto & collection : m_collection)
+        dynamic_cast<Ptr<IDefinitionCollection>>(collection.second.get())->SetDatabase(database);
 }
 
 ECAD_INLINE size_t EDefinitionCollection::Size() const

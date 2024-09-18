@@ -36,7 +36,7 @@ public:
     UPtr<IPrimitive> PopBack() override;
 
     size_t Size() const override;
-    void Clear();
+    void Clear() override;
     
 protected:
     ///Copy

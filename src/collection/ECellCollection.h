@@ -29,6 +29,7 @@ public:
     Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const override;
     std::string GetNextDefName(const std::string & base, EDefinitionType type) const override;
 
+    void SetDatabase(CPtr<IDatabase> database) override;
     CellIter GetCellIter() const override;
     size_t Size() const override;
     void Clear() override;
