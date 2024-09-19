@@ -6,5 +6,5 @@
 	url = git@github.com:0x0-bwu/emesh.git
 [submodule "3rdparty/pybind11"]
 	path = 3rdparty/pybind11
-	url = ../../pybind/pybind11
+	url = https://github.com/pybind/pybind11.git
 	branch = stable
