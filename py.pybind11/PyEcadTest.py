@@ -22,10 +22,12 @@ def test_data_mgr() :
 @print_test_info
 def test_static_thermal_flow() :
 
-    design_filename = os.path.dirname(__file__) + '/../test/data/serialization/CAS300M12BM2_Hierarchy.ecad'
+    design_filename = os.path.dirname(__file__) + '/../examples/wolfspeed/data/design/CAS300M12BM2_Hierarchy.ecad'
     mgr = ecad.EDataMgr
     mgr.init(ecad.ELogLevel.INFO)
     database = mgr.load_database(design_filename)
+
+    cell = database.find_cell_by_name("")
     print(database.get_name())
     
 
