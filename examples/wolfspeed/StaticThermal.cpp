@@ -23,6 +23,7 @@ auto & eDataMgr = EDataMgr::Instance();
 
 std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
 {
+    EFloat elevation, thickness;
     std::vector<FPoint3D> monitors;
     utils::ELayoutRetriever retriever(layout);
     std::vector<std::string> cellInsts{"TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"};
@@ -30,10 +31,10 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
     for(const auto & cellInst : cellInsts) {
         for (const auto & component : components) {
             std::string name = cellInst + eDataMgr.HierSep() + component;
-            auto comp = layout->FindComponentByName(name);
-            EFloat elevation, thickness;
-            retriever.GetComponentHeightThickness(comp, elevation, thickness);
-            auto loc = layout->GetCoordUnits().toUnit(comp->GetBoundingBox().Center());
+            auto cp = layout->FindComponentByName(name);
+            retriever.GetComponentHeightThickness(cp, elevation, thickness);
+            auto ct = cp->GetBoundingBox().Center();
+            auto loc = layout->GetCoordUnits().toUnit(ct);
             monitors.emplace_back(loc[0], loc[1], elevation - 0.1 * thickness);
         }
     }
@@ -49,8 +50,10 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.workDir = workDir;
     setup.monitors = GetDieMonitors(layout);
     setup.extractionSettings = ExtractionSettings(workDir);
-    auto [minT, maxT] = layout->RunThermalSimulation(setup);    
+    std::vector<EFloat> temperatures;
+    auto [minT, maxT] = layout->RunThermalSimulation(setup, temperatures);    
     ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
+    ECAD_TRACE("temperatures:[%1%]", fmt::Fmt2Str(temperatures, ","));
 }
 
 int main(int argc, char * argv[])

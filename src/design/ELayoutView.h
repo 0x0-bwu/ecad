@@ -113,7 +113,7 @@ public:
     CPtr<IModel> ExtractThermalModel(const EThermalModelExtractionSettings & settings) override;
 
     ///Simulation
-    EPair<EFloat, EFloat> RunThermalSimulation(const EThermalStaticSimulationSetup & simulationSetup) override;
+    EPair<EFloat, EFloat> RunThermalSimulation(const EThermalStaticSimulationSetup & simulationSetup, std::vector<EFloat> & temperatures) override;
     EPair<EFloat, EFloat> RunThermalSimulation(const EThermalTransientSimulationSetup & simulationSetup, const EThermalTransientExcitation & excitation) override;
 
     ///Flatten

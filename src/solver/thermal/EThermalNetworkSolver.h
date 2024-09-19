@@ -12,7 +12,6 @@ class ECAD_API EThermalNetworkSolver
 {
 public:
     virtual ~EThermalNetworkSolver() = default;
-    virtual bool Solve(EFloat & minT, EFloat & maxT) = 0;
 };
 
 class ECAD_API EThermalNetworkStaticSolver : public EThermalNetworkSolver
@@ -54,7 +53,7 @@ public:
     using EThermalNetworkStaticSolver::settings;
     explicit EGridThermalNetworkStaticSolver(const EGridThermalModel & model);
     virtual ~EGridThermalNetworkStaticSolver() = default;
-    bool Solve(EFloat & minT, EFloat & maxT) override;
+    EPair<EFloat, EFloat> Solve(std::vector<EFloat> & temperatures) const;
 };
 
 class ECAD_API EGridThermalNetworkTransientSolver : public EGridThermalNetworkSolver, EThermalNetworkTransientSolver
@@ -63,7 +62,7 @@ public:
     using EThermalNetworkTransientSolver::settings;
     explicit EGridThermalNetworkTransientSolver(const EGridThermalModel & model, const EThermalTransientExcitation & excitation);
     virtual ~EGridThermalNetworkTransientSolver() = default;
-    bool Solve(EFloat & minT, EFloat & maxT) override;
+    EPair<EFloat, EFloat> Solve() const;
 };
 
 class ECAD_API EPrismThermalNetworkSolver
@@ -82,7 +81,7 @@ public:
     using EThermalNetworkStaticSolver::settings;
     explicit EPrismThermalNetworkStaticSolver(const EPrismThermalModel & model);
     virtual ~EPrismThermalNetworkStaticSolver() = default;
-    bool Solve(EFloat & minT, EFloat & maxT) override;
+    EPair<EFloat, EFloat> Solve(std::vector<EFloat> & temperatures) const;
 };
 
 class ECAD_API EPrismThermalNetworkTransientSolver : public EPrismThermalNetworkSolver, EThermalNetworkTransientSolver
@@ -91,7 +90,7 @@ public:
     using EThermalNetworkTransientSolver::settings;
     explicit EPrismThermalNetworkTransientSolver(const EPrismThermalModel & model, const EThermalTransientExcitation & excitation);
     virtual ~EPrismThermalNetworkTransientSolver() = default;
-    bool Solve(EFloat & minT, EFloat & maxT) override;
+    EPair<EFloat, EFloat> Solve() const;
 };
 
 class ECAD_API EStackupPrismThermalNetworkSolver
@@ -110,7 +109,7 @@ public:
     using EThermalNetworkStaticSolver::settings;
     explicit EStackupPrismThermalNetworkStaticSolver(const EStackupPrismThermalModel & model);
     virtual ~EStackupPrismThermalNetworkStaticSolver() = default;
-    bool Solve(EFloat & minT, EFloat & maxT) override;
+    EPair<EFloat, EFloat> Solve(std::vector<EFloat> & temperatures) const;
 };
 
 class ECAD_API EStackupPrismThermalNetworkTransientSolver : public EStackupPrismThermalNetworkSolver, EThermalNetworkTransientSolver
@@ -119,7 +118,7 @@ public:
     using EThermalNetworkTransientSolver::settings;
     explicit EStackupPrismThermalNetworkTransientSolver(const EStackupPrismThermalModel & model, const EThermalTransientExcitation & excitation);
     virtual ~EStackupPrismThermalNetworkTransientSolver() = default;
-    bool Solve(EFloat & minT, EFloat & maxT) override;
+    EPair<EFloat, EFloat> Solve() const;
 };
 
 }//namesapce solver

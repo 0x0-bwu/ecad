@@ -351,28 +351,27 @@ ECAD_INLINE CPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExt
     return collection->FindModel(modelType);
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalStaticSimulationSetup & simulationSetup)
+ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalStaticSimulationSetup & simulationSetup, std::vector<EFloat> & temperatures)
 {
-    EPair<EFloat, EFloat> temperature{invalidFloat, invalidFloat};
-    if (nullptr == simulationSetup.extractionSettings) return temperature;
+    temperatures.clear();
+    if (nullptr == simulationSetup.extractionSettings)
+        return {invalidFloat, invalidFloat};
     auto model = ExtractThermalModel(*simulationSetup.extractionSettings);
-    if (nullptr == model) return temperature;
+    if (nullptr == model) return {invalidFloat, invalidFloat};
 
     simulation::EThermalSimulation sim(model, simulationSetup);
-    [[maybe_unused]] auto check = sim.RunStaticSimulation(temperature.first, temperature.second); { ECAD_ASSERT(check) }
-    return temperature;
+    return sim.RunStaticSimulation(temperatures);
 }
 
 ECAD_INLINE EPair<EFloat, EFloat> ELayoutView::RunThermalSimulation(const EThermalTransientSimulationSetup & simulationSetup, const EThermalTransientExcitation & excitation)
 {
-    EPair<EFloat, EFloat> temperature{invalidFloat, invalidFloat};
-    if (nullptr == simulationSetup.extractionSettings) return temperature;
+    if (nullptr == simulationSetup.extractionSettings)
+        return {invalidFloat, invalidFloat};
     auto model = ExtractThermalModel(*simulationSetup.extractionSettings);
-    if (nullptr == model) return temperature;
+    if (nullptr == model) return {invalidFloat, invalidFloat};
 
     simulation::EThermalSimulation sim(model, simulationSetup);
-    [[maybe_unused]] auto check = sim.RunTransientSimulation(excitation, temperature.first, temperature.second); { ECAD_ASSERT(check) }
-    return temperature;
+    return sim.RunTransientSimulation(excitation);
 }
 
 ECAD_INLINE void ELayoutView::Flatten(const EFlattenOption & option)

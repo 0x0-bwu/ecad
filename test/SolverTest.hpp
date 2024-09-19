@@ -36,8 +36,10 @@ void t_grid_thermal_model_solver_test()
     EGridThermalNetworkStaticSolver solver(*model);
     solver.settings.envTemperature.value = 25;
     solver.settings.iteration = 3;
-    EFloat minT, maxT;
-    BOOST_CHECK(solver.Solve(minT, maxT));
+    auto [minT, maxT] = solver.Solve(results);
+    BOOST_CHECK(results.empty());
+    BOOST_CHECK(isValid(minT));
+    BOOST_CHECK(isValid(maxT));
     ECAD_TRACE("maxT: %1%, minT: %2%", maxT, minT)
     //max: 99.4709, min: 81.9183
 }
