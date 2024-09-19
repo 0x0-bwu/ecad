@@ -26,9 +26,10 @@ def test_static_thermal_flow() :
     mgr = ecad.EDataMgr
     mgr.init(ecad.ELogLevel.INFO)
     database = mgr.load_database(design_filename)
-
-    cell = database.find_cell_by_name("")
     print(database.get_name())
+    cells = database.get_top_cells()
+    for cell in cells :
+        print(cell.get_name())
     
 
 def main() :
