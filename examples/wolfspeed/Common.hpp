@@ -6,9 +6,7 @@ using namespace ecad;
 UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string & workDir)
 {
     EFloat htc = 5000;
-    EPrismThermalModelExtractionSettings prismSettings;
-    prismSettings.threads = EDataMgr::Instance().Threads();
-    prismSettings.workDir = workDir;
+    EPrismThermalModelExtractionSettings prismSettings(workDir, EDataMgr::Instance().Threads(), {});
     prismSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismSettings.botUniformBC.value = htc;
     prismSettings.meshSettings.genMeshByLayer = true;

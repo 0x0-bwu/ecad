@@ -103,7 +103,7 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::GenerateMetalFractionMapping(Ptr<IL
     ECAD_EFFICIENCY_TRACK("metal fraction mapping");
     
     if(m_settings.mergeGeomBeforeMapping) {
-        ELayoutPolygonMergeSettings settings;
+        ELayoutPolygonMergeSettings settings(m_settings.threads, m_settings.selectNets);
         settings.threads = m_settings.threads;
         settings.selectNets = m_settings.selectNets;
         layout->MergeLayerPolygons(settings);

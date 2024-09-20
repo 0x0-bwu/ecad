@@ -19,7 +19,7 @@ namespace utils {
 using namespace generic;
 using namespace generic::geometry;
 ECAD_INLINE ELayoutPolygonMerger::ELayoutPolygonMerger(Ptr<ILayoutView> layout)
- : m_layout(layout)
+ : m_layout(layout), m_settings(1, {})
 {
     std::vector<CPtr<IStackupLayer> > layers;
     layout->GetStackupLayers(layers);
@@ -27,8 +27,8 @@ ECAD_INLINE ELayoutPolygonMerger::ELayoutPolygonMerger(Ptr<ILayoutView> layout)
     for(size_t i = 0; i < layers.size(); ++i) {
         auto layer = layers.at(i);
         auto type = layer->GetLayerType();
-        if(!m_settings.includeDielectricLayer && type == ELayerType::DielectricLayer) continue;
-        if(m_settings.skipTopBotDielectricLayers && type == ELayerType::DielectricLayer) {
+        if (not m_settings.includeDielectricLayer && type == ELayerType::DielectricLayer) continue;
+        if (m_settings.skipTopBotDielectricLayers && type == ELayerType::DielectricLayer) {
             if(i == 0 || i == layers.size() - 1) continue;
         }
         m_mergers.insert(std::make_pair(layer->GetLayerId(), std::make_unique<LayerMerger>()));

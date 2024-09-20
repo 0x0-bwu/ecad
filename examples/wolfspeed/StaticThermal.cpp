@@ -43,11 +43,10 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
 
 void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 {
-    EThermalStaticSimulationSetup setup;
+    EThermalStaticSimulationSetup setup(workDir, eDataMgr.Threads(), {});
     setup.settings.iteration = 100;
     setup.settings.dumpHotmaps = true;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.workDir = workDir;
     setup.monitors = GetDieMonitors(layout);
     setup.extractionSettings = ExtractionSettings(workDir);
     std::vector<EFloat> temperatures;

@@ -414,9 +414,7 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
 UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string & workDir)
 {
     EFloat htc = 5000;
-    EPrismThermalModelExtractionSettings prismSettings;
-    prismSettings.threads = EDataMgr::Instance().Threads();
-    prismSettings.workDir = workDir;
+    EPrismThermalModelExtractionSettings prismSettings(workDir, EDataMgr::Instance().Threads(), {});
     prismSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
     prismSettings.botUniformBC.value = htc;
     prismSettings.meshSettings.genMeshByLayer = true;
@@ -443,8 +441,7 @@ UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string 
 
 void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, EFloat period, EFloat duty)
 {
-    EThermalTransientSimulationSetup setup;
-    setup.workDir = workDir;
+    EThermalTransientSimulationSetup setup(workDir, eDataMgr.Threads(), {});
     setup.monitors = GetDieMonitors(layout);
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.settings.mor.order = 10;

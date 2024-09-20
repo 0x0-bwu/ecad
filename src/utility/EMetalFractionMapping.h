@@ -48,10 +48,10 @@ struct EStackupLayerInfo
 
 struct EMetalFractionInfo
 {
+    ESize2D grid;
     EBox2D origin;
     EBox2D extension;
     ECoordUnits coordUnits;
-    std::array<size_t, 2> grid;
     std::array<ECoord, 2> stride;
     std::vector<EStackupLayerInfo> layers;
 

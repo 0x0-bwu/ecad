@@ -33,6 +33,11 @@ ECAD_INLINE void EPrismThermalModel::serialize(Archive & ar, const unsigned int 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPrismThermalModel)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
+ECAD_INLINE EPrismThermalModel::EPrismThermalModel()
+ : m_layout(nullptr), m_settings("", 1, {})
+{
+}
+
 ECAD_INLINE EPrismThermalModel::EPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings)
  : m_layout(layout), m_settings(std::move(settings))
 {

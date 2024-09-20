@@ -165,7 +165,7 @@ class ECAD_API EPrismThermalModel : public EThermalModel
 {
 protected:
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
-    EPrismThermalModel() = default;
+    EPrismThermalModel();
 public:
     friend class utils::EPrismThermalModelQuery;
     using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;

@@ -54,14 +54,13 @@ void t_thermal_static_flow1()
     rendererSettings.dirName = ecad_test::GetTestDataPath() + "/simulation/thermal";
     BOOST_CHECK(layout->Renderer(rendererSettings));
     
-    ELayoutPolygonMergeSettings mergeSettings;
+    ELayoutPolygonMergeSettings mergeSettings(4, {});
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     BOOST_CHECK(layout->MergeLayerPolygons(mergeSettings));
 
     size_t xGrid = 3;
     auto bbox = layout->GetBoundary()->GetBBox();
-    EGridThermalModelExtractionSettings gridSettings;
-    gridSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    EGridThermalModelExtractionSettings gridSettings(ecad_test::GetTestDataPath() + "/simulation/thermal", 4, {});
     gridSettings.dumpHotmaps = true;
     gridSettings.dumpDensityFile = true;
     gridSettings.dumpTemperatureFile = true;
@@ -71,8 +70,7 @@ void t_thermal_static_flow1()
     gridSettings.botUniformBC.value = 2750;
     auto model1 = layout->ExtractThermalModel(gridSettings); BOOST_CHECK(model1);
 
-    EPrismThermalModelExtractionSettings prismSettings;
-    prismSettings.workDir = gridSettings.workDir;
+    EPrismThermalModelExtractionSettings prismSettings(gridSettings.workDir, 4, {});
     auto model2 = layout->ExtractThermalModel(prismSettings); BOOST_CHECK(model2);
     EDataMgr::Instance().ShutDown();
 }
@@ -337,12 +335,11 @@ void t_thermal_static_flow2()
     rendererSettings.dirName = ecad_test::GetTestDataPath() + "/simulation/thermal";
     BOOST_CHECK(layout->Renderer(rendererSettings));
     
-    ELayoutPolygonMergeSettings mergeSettings;
+    ELayoutPolygonMergeSettings mergeSettings(4, {});
     mergeSettings.outFile = ecad_test::GetTestDataPath() + "/simulation/thermal";
     BOOST_CHECK(layout->MergeLayerPolygons(mergeSettings));
 
-    EPrismThermalModelExtractionSettings prismSettings;
-    prismSettings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    EPrismThermalModelExtractionSettings prismSettings(ecad_test::GetTestDataPath() + "/simulation/thermal", 4, {});
     prismSettings.meshSettings.iteration = 1e5;
     prismSettings.meshSettings.minAlpha = 20;
     prismSettings.meshSettings.minLen = 1e-2;
@@ -350,10 +347,9 @@ void t_thermal_static_flow2()
     prismSettings.botUniformBC.type = EThermalBondaryConditionType::HTC;
     prismSettings.botUniformBC.value = 2750;
 
-    EThermalStaticSimulationSetup setup;
+    EThermalStaticSimulationSetup setup(prismSettings.workDir, 4, {});
     setup.settings.iteration = 10;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
     setup.extractionSettings = std::make_unique<EPrismThermalModelExtractionSettings>(std::move(prismSettings));
     std::vector<EFloat> temperatures;
     auto [minT, maxT] = layout->RunThermalSimulation(setup, temperatures);    

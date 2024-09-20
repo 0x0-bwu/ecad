@@ -85,7 +85,7 @@ ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EPrismThermalNetwor
 ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EStackupPrismThermalNetworkBuilder>(const EStackupPrismThermalModel & model, std::vector<EFloat> & results) const;
 
 EThermalNetworkTransientSolver::EThermalNetworkTransientSolver(const EThermalTransientExcitation & excitation)
- : m_excitation(excitation)
+ : settings("", 1), m_excitation(excitation)
 {
 }
 

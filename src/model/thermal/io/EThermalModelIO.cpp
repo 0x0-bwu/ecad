@@ -34,7 +34,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const ECh
     if(devLyr.empty()) return nullptr;
 
     const auto & tiles = pCtm->header.tiles;
-    auto model = std::make_unique<EGridThermalModel>(EGridThermalModelExtractionSettings{}, tiles);
+    auto model = std::make_unique<EGridThermalModel>(EGridThermalModelExtractionSettings("", 1, {}), tiles);
 
     for(size_t i = 0; i < stackup->layers.size(); ++i) {
         const auto & layer = stackup->layers.at(i);
@@ -43,15 +43,15 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const ECh
         SPtr<ELayerMetalFraction> mf = nullptr;
 
         std::list<std::string> mName;
-        for(const auto & name : names) {
+        for (const auto & name : names) {
             if(pCtm->densities.count(name))
                 mName.push_back(name);
         }
-        if(mName.size() == 1)
+        if (mName.size() == 1)
             mf = pCtm->densities.at(mName.front());
         else {
             mf = std::make_shared<ELayerMetalFraction>(tiles.x, tiles.y, 0);
-            for(const auto & name : mName) {
+            for (const auto & name : mName) {
                 auto lm = pCtm->densities.at(name);
                 for(size_t x = 0; x < tiles.x; ++x) {
                     for(size_t y = 0; y < tiles.y; ++y) {
@@ -59,16 +59,15 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const ECh
                     }
                 }
             }
-            for(size_t x = 0; x < tiles.x; ++x) {
-                for(size_t y = 0; y < tiles.y; ++y) {
-                    if((*mf)(x, y) > 1) (*mf)(x, y) = 1;//wbtest
-                }
+            for (size_t x = 0; x < tiles.x; ++x) {
+                for (size_t y = 0; y < tiles.y; ++y)
+                    (*mf)(x, y) = std::min<float>((*mf)(x, y), 1);
             }
         }
         EGridThermalLayer gridLayer(layer.name, mf);
         gridLayer.SetThickness(layer.thickness * 1e-6);//um to m
 
-        if(layer.name == devLyr)
+        if (layer.name == devLyr)
             gridLayer.AddPowerModel(pCtm->powers);
 
         model->AppendLayer(std::move(gridLayer));

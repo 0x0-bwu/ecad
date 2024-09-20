@@ -1,5 +1,5 @@
 #pragma once
-#include "ECadConfig.h"
+#include "ECadDef.h"
 #include "generic/geometry/Triangle.hpp"
 #include "generic/geometry/Box.hpp"
 #include "generic/tools/Log.hpp"
@@ -48,6 +48,8 @@ using ETriangle2D = generic::geometry::Triangle2D<ECoord>;
 using FTriangle2D = generic::geometry::Triangle2D<FCoord>;
 
 using EUuid = boost::uuids::uuid;
+using ENetIdSet = std::unordered_set<ENetId>;
+using ELayerIdSet = std::unordered_set<ELayerId>;
 
 class EShape;
 using ETemplateShape = SPtr<const EShape>;

@@ -24,8 +24,15 @@ ECAD_API EThermalSimulation::EThermalSimulation(CPtr<IModel> model, const ETherm
 
 ECAD_API EPair<EFloat, EFloat> EThermalSimulation::RunStaticSimulation(std::vector<EFloat> & temperatures) const
 {
-    if (nullptr == m_model) return {invalidFloat, invalidFloat};
-    generic::fs::CreateDir(m_setup.workDir);
+    ECAD_TRACE("run static thermal simulation at %1%", m_setup.workDir);
+    if (nullptr == m_model) {
+        ECAD_ASSERT(false);
+        return {invalidFloat, invalidFloat};
+    }
+    if (not generic::fs::CreateDir(m_setup.workDir)) {
+        ThrowException("failed to create folder: " + m_setup.workDir);
+        return {invalidFloat, invalidFloat};
+    }
     auto modelType = m_model->GetModelType();
     switch (modelType) {
     case EModelType::ThermalGrid : {
@@ -49,8 +56,14 @@ ECAD_API EPair<EFloat, EFloat> EThermalSimulation::RunStaticSimulation(std::vect
 
 ECAD_API EPair<EFloat, EFloat> EThermalSimulation::RunTransientSimulation(const EThermalTransientExcitation & excitation) const
 {
-    if (nullptr == m_model) return {invalidFloat, invalidFloat};;
-    generic::fs::CreateDir(m_setup.workDir);
+    if (nullptr == m_model){
+        ECAD_ASSERT(false);
+        return {invalidFloat, invalidFloat};
+    }
+    if (not generic::fs::CreateDir(m_setup.workDir)) {
+        ThrowException("failed to create folder: " + m_setup.workDir);
+        return {invalidFloat, invalidFloat};
+    }
     auto modelType = m_model->GetModelType();
     switch (modelType) {
     case EModelType::ThermalGrid : {

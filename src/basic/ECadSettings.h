@@ -54,7 +54,10 @@ struct ELayoutPolygonMergeSettings : public ECadSettings
     bool includePadstackInst = true;
     bool includeDielectricLayer = true;
     bool skipTopBotDielectricLayers = false;
-    std::unordered_set<ENetId> selectNets;
+    ENetIdSet selectNets;
+
+    explicit ELayoutPolygonMergeSettings(size_t threads, const ENetIdSet & selectNets)
+     : threads(threads), selectNets(selectNets) {}
 
     virtual bool operator== (const ECadSettings & settings) const override
     {
@@ -96,10 +99,12 @@ struct EMetalFractionMappingSettings : public ECadSettings
     EFloat regionExtLeft = 0;
     EFloat regionExtRight = 0;
     bool mergeGeomBeforeMapping = true;
-    std::array<size_t, 2> grid = {1, 1};
-    std::unordered_set<ENetId> selectNets;
+    ESize2D grid = ESize2D(1, 1);
+    ENetIdSet selectNets;
     ELayoutPolygonMergeSettings polygonMergeSettings;
 
+    explicit EMetalFractionMappingSettings(size_t threads, const ENetIdSet & selectNets)
+     : threads(threads), selectNets(selectNets), polygonMergeSettings(threads, selectNets) {}
     virtual bool operator== (const ECadSettings & settings) const override
     {
         auto ps = dynamic_cast<CPtr<EMetalFractionMappingSettings>>(&settings);
@@ -302,7 +307,11 @@ struct EThermalModelExtractionSettings : public ECadSettings
         return true;
     }
 protected:
-    EThermalModelExtractionSettings() = default;
+    explicit EThermalModelExtractionSettings(std::string workDir_, size_t threads)
+     : threads(threads), workDir(std::move(workDir_))
+    {
+        if (workDir.empty()) workDir = fs::CurrentPath();
+    }
 };
 
 struct EGridThermalModelExtractionSettings : public EThermalModelExtractionSettings
@@ -320,6 +329,8 @@ struct EGridThermalModelExtractionSettings : public EThermalModelExtractionSetti
         ar & boost::serialization::make_nvp("metal_fraction_mapping_settings", metalFractionMappingSettings);
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
+    explicit EGridThermalModelExtractionSettings(std::string workDir, size_t threads, const ENetIdSet & selectNets)
+     : EThermalModelExtractionSettings(std::move(workDir), threads), metalFractionMappingSettings(threads, selectNets) {}
     virtual ~EGridThermalModelExtractionSettings() = default;
     bool dumpHotmaps = false;
     bool dumpDensityFile = false;
@@ -356,6 +367,8 @@ struct EPrismThermalModelExtractionSettings : public EThermalModelExtractionSett
     EPrismMeshSettings meshSettings;
     ELayoutPolygonMergeSettings polygonMergeSettings;
     ELayerCutModelExtractionSettings layerCutSettings;
+    explicit EPrismThermalModelExtractionSettings(std::string workDir, size_t threads, const ENetIdSet & selectNets)
+     : EThermalModelExtractionSettings(std::move(workDir), threads), polygonMergeSettings(threads, selectNets) {}
     virtual ~EPrismThermalModelExtractionSettings() = default;
     
     virtual EModelType GetModelType() const override
@@ -387,9 +400,14 @@ struct EThermalSimulationSetup
     virtual ~EThermalSimulationSetup() = default;
     std::string workDir;
     std::vector<FPoint3D> monitors;
-    UPtr<EThermalModelExtractionSettings> extractionSettings{nullptr};
+    UPtr<EThermalModelExtractionSettings> extractionSettings;
 protected:
-    EThermalSimulationSetup() = default;
+    explicit EThermalSimulationSetup(std::string workDir_, size_t threads, const ENetIdSet & selectedNets)
+     : workDir(std::move(workDir_))
+    {
+        if (workDir.empty()) workDir = fs::CurrentPath();
+        extractionSettings.reset(new EPrismThermalModelExtractionSettings(workDir, threads, selectedNets));
+    }
 };
 
 enum class EThermalNetworkStaticSolverType
@@ -401,10 +419,11 @@ enum class EThermalNetworkStaticSolverType
 
 struct EThermalSettings
 {
-    virtual ~EThermalSettings() = default;
     bool dumpResults = true;
     size_t threads = 1;
     ETemperature envTemperature{25, ETemperatureUnit::Celsius};
+    explicit EThermalSettings(size_t threads) : threads(threads) {}
+    virtual ~EThermalSettings() = default;
 };
 
 struct EThermalStaticSettings : public EThermalSettings
@@ -414,10 +433,13 @@ struct EThermalStaticSettings : public EThermalSettings
     EFloat residual = 0.1;
     size_t iteration = 10;
     EThermalNetworkStaticSolverType solverType = EThermalNetworkStaticSolverType::ConjugateGradient;
+    explicit EThermalStaticSettings(size_t threads) : EThermalSettings(threads) {}
 };
 
 struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
 {
+    explicit EThermalStaticSimulationSetup(std::string workDir, size_t threads, const ENetIdSet & selectedNets)
+     : EThermalSimulationSetup(std::move(workDir), threads, selectedNets), settings(threads) {}
     EThermalStaticSettings settings;
 };
 
@@ -432,8 +454,6 @@ struct EThermalModelReductionSettings
 
 struct EThermalTransientSettings : public EThermalSettings
 {
-    virtual ~EThermalTransientSettings() = default;
-
     bool verbose{false};
     bool adaptive{true};
     bool temperatureDepend{true};
@@ -444,10 +464,14 @@ struct EThermalTransientSettings : public EThermalSettings
     EFloat minSamplingInterval{0};
     EFloat samplingWindow{0};
     EThermalModelReductionSettings mor;
+    explicit EThermalTransientSettings(size_t threads) : EThermalSettings(threads) {}
+    virtual ~EThermalTransientSettings() = default;
 };
 
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
 {
+    explicit EThermalTransientSimulationSetup(std::string workDir, size_t threads, const ENetIdSet & selectedNets)
+     : EThermalSimulationSetup(std::move(workDir), threads, selectedNets), settings(threads) {}
     EThermalTransientSettings settings;
 };
 
@@ -457,11 +481,14 @@ struct EThermalNetworkSolveSettings
     std::string workDir;
     std::vector<size_t> probs;
 protected:
-    EThermalNetworkSolveSettings() = default;
+    explicit EThermalNetworkSolveSettings(std::string workDir)
+     : workDir(std::move(workDir)) {}
 };
 
 struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings, EThermalStaticSettings
 {
+    explicit EThermalNetworkStaticSolveSettings(std::string workDir, size_t threads)
+     : EThermalNetworkSolveSettings(workDir), EThermalStaticSettings(threads) {}
     void operator= (const EThermalStaticSettings & settings)
     {
         dynamic_cast<EThermalStaticSettings&>(*this) = settings;
@@ -470,7 +497,8 @@ struct EThermalNetworkStaticSolveSettings : public EThermalNetworkSolveSettings,
 
 struct EThermalNetworkTransientSolveSettings : public EThermalNetworkSolveSettings, EThermalTransientSettings
 {
-
+    explicit EThermalNetworkTransientSolveSettings(std::string workDir, size_t threads)
+     : EThermalNetworkSolveSettings(workDir), EThermalTransientSettings(threads) {}
     void operator= (const EThermalTransientSettings & settings)
     {
         dynamic_cast<EThermalTransientSettings&>(*this) = settings;
@@ -487,7 +515,7 @@ struct ELayout2CtmSettings
     EFloat regionExtBot = 0;
     EFloat regionExtLeft = 0;
     EFloat regionExtRight = 0;
-    std::unordered_set<ENetId> selectNets;
+    ENetIdSet selectNets;
 };
 
 struct ELayoutViewRendererSettings
@@ -499,8 +527,8 @@ struct ELayoutViewRendererSettings
     Format format;
     size_t width = 1024;
     std::string dirName;
-    std::unordered_set<ENetId> selectNets;
-    std::unordered_set<ELayerId> selectLayers;
+    ENetIdSet selectNets;
+    ELayerIdSet selectLayers;
 };
 
 }//namespace ecad

@@ -50,8 +50,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
     // extractionSettings->meshSettings.minAlpha = 20;
     // extractionSettings->layerCutSettings.layerTransitionRatio = 0;
 
-    EThermalTransientSimulationSetup setup;
-    setup.workDir = workDir;
+    EThermalTransientSimulationSetup setup(workDir, eDataMgr.Threads(), {});
     setup.monitors = GetDieMonitors(layout);
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.settings.mor.order = 100;
@@ -66,7 +65,6 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
     setup.settings.minSamplingInterval = period * duty / 10;
     setup.settings.absoluteError = 1e-5;
     setup.settings.relativeError = 1e-5;
-    setup.settings.threads = eDataMgr.Threads();
     setup.extractionSettings = std::move(extractionSettings);
     EThermalTransientExcitation excitation = [period, duty](EFloat t, size_t scen) -> EFloat { 
         EFloat tm = std::fmod(t, period); 

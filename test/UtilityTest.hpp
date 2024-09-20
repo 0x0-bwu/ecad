@@ -66,7 +66,7 @@ void t_layout_polygon_merge()
     
     auto layout = cells.front()->GetLayoutView();
 
-    ELayoutPolygonMergeSettings settings;
+    ELayoutPolygonMergeSettings settings(4, {});
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/qcom";
     // settings.selectNets = { ENetId(74) };
     BOOST_CHECK(layout->MergeLayerPolygons(settings));
@@ -92,9 +92,8 @@ void t_metal_fraction_mapping()
     auto topCell = topCells.front();
     auto flattened = topCell->GetFlattenedLayoutView();
 
-    EMetalFractionMappingSettings settings;
+    EMetalFractionMappingSettings settings(4, {});
     settings.grid = {50, 50};
-    settings.threads = 4;
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
 
     BOOST_CHECK(flattened->GenerateMetalFractionMapping(settings));
@@ -120,11 +119,9 @@ void t_metal_fraction_mapping_select_nets()
     auto layout = cells.front()->GetLayoutView();
     layout->ExtractConnectivity();
 
-    EMetalFractionMappingSettings settings;
+    EMetalFractionMappingSettings settings(4, {ENetId(1)});
     settings.grid = {50, 50};
-    settings.threads = 4;
     settings.outFile = ecad_test::GetTestDataPath() + "/simulation/result.mf";
-    settings.selectNets.insert(static_cast<ENetId>(1));
 
     BOOST_CHECK(layout->GenerateMetalFractionMapping(settings));
 

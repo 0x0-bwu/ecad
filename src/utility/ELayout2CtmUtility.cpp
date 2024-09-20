@@ -29,14 +29,13 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
     if(nullptr == m_layout) return false;
     if(m_settings.dirName.empty() || m_settings.filename.empty()) return false;
 
-    EMetalFractionMappingSettings mfSettings;
+    EGridThermalModelExtractionSettings settings(m_settings.dirName, m_settings.threads, m_settings.selectNets);
+    auto & mfSettings = settings.metalFractionMappingSettings;
     mfSettings.outFile = std::string{};
-    mfSettings.threads = m_settings.threads;
     mfSettings.regionExtTop = m_settings.regionExtTop;
     mfSettings.regionExtBot = m_settings.regionExtBot;
     mfSettings.regionExtLeft = m_settings.regionExtLeft;
     mfSettings.regionExtRight = m_settings.regionExtRight;
-    mfSettings.selectNets = m_settings.selectNets;
     mfSettings.mergeGeomBeforeMapping = true;
 
     auto coordUnits = m_layout->GetCoordUnits();    
@@ -62,8 +61,6 @@ ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
     if(nullptr == mf) return false;
 
     using namespace ecad::model;
-    EGridThermalModelExtractionSettings settings;
-    settings.metalFractionMappingSettings = mfSettings;
     auto gridModel = std::make_unique<EGridThermalModel>(settings, ESize2D(nx, ny));
     auto rx = coordUnits.toUnit(stride, ECoordUnits::Unit::Meter), ry = rx;
     gridModel->SetResolution(rx, ry);

@@ -18,6 +18,7 @@ class ECAD_API EThermalNetworkStaticSolver : public EThermalNetworkSolver
 {
 public:
     EThermalNetworkStaticSolveSettings settings;
+    explicit EThermalNetworkStaticSolver() : settings("", 1) {}//wbtest
     virtual ~EThermalNetworkStaticSolver() = default;
 
     template <typename ThermalNetworkBuilder>

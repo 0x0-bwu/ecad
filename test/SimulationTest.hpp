@@ -22,8 +22,7 @@ void t_thermal_network_extraction()
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
-    EGridThermalModelExtractionSettings settings;
-    settings.workDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    EGridThermalModelExtractionSettings settings(ecad_test::GetTestDataPath() + "/simulation/thermal", 4, {});
     settings.dumpHotmaps = true;
     settings.dumpDensityFile = true;
     settings.dumpTemperatureFile = true;
