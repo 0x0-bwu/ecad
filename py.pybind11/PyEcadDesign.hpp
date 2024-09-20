@@ -1,14 +1,11 @@
 #pragma once
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-#include "EDataMgr.h"
-using namespace ecad;
-namespace py = pybind11;
+#include "PyEcadCommon.hpp"
 
 void ecad_init_design(py::module_ & m)
 {
     py::class_<ICell>(m, "Cell")
         .def("get_name", &ICell::GetName, py::return_value_policy::reference)
+        .def("get_flattened_layout_view", &ICell::GetFlattenedLayoutView, py::return_value_policy::reference)
     ;
 
     py::class_<IDatabase>(m, "Database")
@@ -22,8 +19,22 @@ void ecad_init_design(py::module_ & m)
     ;
 
     py::class_<ILayoutView>(m, "LayoutView")
-
+        .def("get_name", &ILayoutView::GetName, py::return_value_policy::reference)
+        .def("run_thermal_simulation", [](ILayoutView & layout, const EThermalStaticSimulationSetup & simulationSetup){
+            std::vector<EFloat> temperatures;
+            auto range = layout.RunThermalSimulation(simulationSetup, temperatures);
+            return std::make_tuple(range.first, range.second, temperatures);
+        })
     ;
 
+    py::class_<IMaterialDef>(m, "MaterialDef")
+        .def("set_property", [](IMaterialDef & mat, EMaterialPropId id, Ptr<IMaterialProp> prop){
+            mat.SetProperty(id, prop->Clone());
+        })
+        .def("set_material_type", &IMaterialDef::SetMaterialType)
+    ;
+
+    py::class_<IMaterialProp>(m, "MaterialProp")
+    ;
 
 }

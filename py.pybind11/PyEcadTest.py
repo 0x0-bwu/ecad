@@ -16,21 +16,23 @@ def print_test_info(func) :
 @print_test_info
 def test_data_mgr() :
     #instance
-    mgr = ecad.EDataMgr
-    mgr.init(ecad.ELogLevel.INFO)
+    mgr = ecad.DataMgr
+    mgr.init(ecad.LogLevel.INFO)
 
 @print_test_info
 def test_static_thermal_flow() :
 
-    design_filename = os.path.dirname(__file__) + '/../examples/wolfspeed/data/design/CAS300M12BM2_Hierarchy.ecad'
-    mgr = ecad.EDataMgr
-    mgr.init(ecad.ELogLevel.INFO)
+    design_filename = os.path.dirname(__file__) + '/../examples/wolfspeed/data/design/CAS300M12BM2.ecad'
+    mgr = ecad.DataMgr
+    mgr.init(ecad.LogLevel.TRACE)
     database = mgr.load_database(design_filename)
     print(database.get_name())
-    cells = database.get_top_cells()
-    for cell in cells :
-        print(cell.get_name())
-    
+    cell = database.find_cell_by_name("Base")
+    layout = cell.get_flattened_layout_view()
+
+    # setup = ecad.ThermalStaticSimulationSetup()
+    # results = layout.run_thermal_simulation(setup)
+    # print(results)
 
 def main() :
     print('ecad version: ' + ecad.__version__)
