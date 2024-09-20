@@ -56,7 +56,7 @@ class ECAD_API ETransform2D
     void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
-        m_sequence.clear();
+        if constexpr (Archive::is_loading::value) m_sequence.clear();
         ar & boost::serialization::make_nvp("sequence", m_sequence);
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT

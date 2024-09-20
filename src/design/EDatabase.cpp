@@ -24,13 +24,13 @@ ECAD_INLINE void EDatabase::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
 
-    if (Archive::is_loading::value) Clear();
+    if constexpr (Archive::is_loading::value) Clear();
     boost::serialization::void_cast_register<EDatabase, IDatabase>();
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinitionCollection);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
     ar & boost::serialization::make_nvp("coord_units", m_coordUnits);
 
-    if (Archive::is_loading::value) {
+    if constexpr (Archive::is_loading::value) {
         EDefinitionCollection::SetDatabase(this);
     }
 }
