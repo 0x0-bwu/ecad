@@ -23,7 +23,6 @@ target_link_libraries(Ecad
     Eextraction
     Esolver
     Esimulation
-    Emesh 
     ${PNG_LIBRARY} 
     boost_serialization
 )

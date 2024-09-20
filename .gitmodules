@@ -2,9 +2,6 @@
 	path = 3rdparty/generic
 	url = git@github.com:0x0-bwu/generic.git
 	branch = dev
-[submodule "3rdparty/emesh"]
-	path = 3rdparty/emesh
-	url = git@github.com:0x0-bwu/emesh.git
 [submodule "3rdparty/pybind11"]
 	path = 3rdparty/pybind11
 	url = https://github.com/pybind/pybind11.git

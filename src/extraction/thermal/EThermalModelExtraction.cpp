@@ -10,8 +10,7 @@
 #include "utility/EMetalFractionMapping.h"
 #include "utility/ELayoutRetriever.h"
 #include "generic/tools/FileSystem.hpp"
-
-#include "Mesher2D.h"
+#include "generic/geometry/Mesh2D.hpp"
 #include "interface/Interface.h"
 
 namespace ecad::extraction {
@@ -156,22 +155,21 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
 ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const std::vector<EPoint2D> & steinerPoints, const ECoordUnits & coordUnits, const EPrismMeshSettings & meshSettings, 
                                 tri::Triangulation<EPoint2D> & triangulation, std::string meshFile)
 {
-    using namespace emesh;
     ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, tolerance: %4%, ite: %5%", 
                 meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.tolerance, meshSettings.iteration)
     auto minAlpha = math::Rad(meshSettings.minAlpha);
     auto minLen = coordUnits.toCoord(meshSettings.minLen);
     auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
     auto tolerance = coordUnits.toCoord(meshSettings.tolerance);
-    std::list<tri::IndexEdge> edges;
-    std::vector<Point2D<ECoord> > points;
-    std::vector<Segment2D<ECoord> > segments;
-    MeshFlow2D::ExtractIntersections(polygons, segments);
-    MeshFlow2D::ExtractTopology(segments, points, edges);
+    mesh2d::IndexEdgeList edges;
+    mesh2d::Point2DContainer points;
+    mesh2d::Segment2DContainer segments;
+    mesh2d::ExtractIntersections(polygons, segments);
+    mesh2d::ExtractTopology(segments, points, edges);
     points.insert(points.end(), steinerPoints.begin(), steinerPoints.end());
-    MeshFlow2D::MergeClosePointsAndRemapEdge(points, edges, tolerance);
-    MeshFlow2D::TriangulatePointsAndEdges(points, edges, triangulation);
-    MeshFlow2D::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
+    mesh2d::MergeClosePointsAndRemapEdge(points, edges, tolerance);
+    mesh2d::TriangulatePointsAndEdges(points, edges, triangulation);
+    mesh2d::TriangulationRefinement(triangulation, minAlpha, minLen, maxLen, meshSettings.iteration);
     if (not meshFile.empty()) GeometryIO::WritePNG(meshFile, triangulation, 4096);
     return true;
 }

@@ -9,8 +9,6 @@
 #include "utility/ELayoutRetriever.h"
 
 #include "generic/tools/FileSystem.hpp"
-
-#include "Mesher2D.h"
 #include "interface/Interface.h"
 
 namespace ecad::simulation {
