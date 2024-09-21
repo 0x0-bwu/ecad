@@ -3,6 +3,16 @@
 
 namespace ecad::wrapper {
 
+    class PyShape : public EShape
+    {
+    public:
+        using EShape::EShape;
+        EPolygonData GetContour() const
+        {
+            PYBIND11_OVERRIDE_PURE(EPolygonData, EShape, GetContour);
+        }
+    };
+
     class PyECadSettings : public ECadSettings
     {
     public:
@@ -20,17 +30,6 @@ namespace ecad::wrapper {
             PYBIND11_OVERRIDE(void, EThermalModelExtractionSettings, AddBlockBC, orient, block, type, value);
         }
     };
-    
-    void SetThermalModelExtractionSettings(EThermalSimulationSetup & setup, Ptr<EThermalModelExtractionSettings> settings)
-    {
-        setup.extractionSettings = settings->Clone();
-    }
-
-    ECoordUnits CreateCoordUnits(ECoordUnits::Unit user = ECoordUnits::Unit::Micrometer, 
-                                 ECoordUnits::Unit data = ECoordUnits::Unit::Nanometer)
-    {
-        return ECoordUnits(user, data);
-    }
 } // namespace ecad::wrapper
 
 void ecad_init_basic(py::module_ & m)
@@ -68,7 +67,9 @@ void ecad_init_basic(py::module_ & m)
     ;
 
     py::class_<ECoordUnits>(m, "CoordUnits")
-        .def(py::init(&CreateCoordUnits))
+        .def(py::init<>())
+        .def(py::init<ECoordUnits::Unit>())
+        .def(py::init<ECoordUnits::Unit, ECoordUnits::Unit>())
         .def("to_unit", py::overload_cast<const EPoint2D &>(&ECoordUnits::toUnit<ECoord>, py::const_))
         .def("to_unit", py::overload_cast<const FPoint2D &>(&ECoordUnits::toUnit<FCoord>, py::const_))
     ;
@@ -100,6 +101,26 @@ void ecad_init_basic(py::module_ & m)
         .value("YOUNGS_MODULUS", EMaterialPropId::YoungsModulus)
         .value("POISSONS_RATIO", EMaterialPropId::PoissonsRatio)
         .value("THERMAL_EXPANSION_COEFFICIENT", EMaterialPropId::ThermalExpansionCoefficient)
+    ;
+
+    py::enum_<EPinIOType>(m, "PinIOType")
+        .value("INVALID", EPinIOType::Invalid)
+        .value("DRIVER", EPinIOType::Driver)
+        .value("RECEIVER", EPinIOType::Receiver)
+        .value("BI_DIRECTIONAL", EPinIOType::BiDirectional)
+        .value("DRIVER_TERMINATOR", EPinIOType::DriverTerminator)
+        .value("RECEIVER_TERMINATOR", EPinIOType::ReceiverTerminator)
+    ;
+
+    py::enum_<EComponentType>(m, "ComponentType")
+        .value("INVALID", EComponentType::Invalid)
+        .value("OTHER", EComponentType::Other)
+        .value("RESISTOR", EComponentType::Resistor)
+        .value("INDUCTOR", EComponentType::Inductor)
+        .value("CAPACITOR", EComponentType::Capacitor)
+        .value("IC", EComponentType::IC)
+        .value("IO", EComponentType::IO)
+        .value("MOLDING", EComponentType::Molding)
     ;
 
     py::enum_<EThermalBondaryConditionType>(m, "ThermalBondaryConditionType")
@@ -174,6 +195,20 @@ void ecad_init_basic(py::module_ & m)
         .def(py::init<FPoint3D, FPoint3D>())
         .def_property("ll", [](const FBox3D & box){ return box[0]; }, [](FBox3D & box, FPoint3D & ll){ box[0] = ll; })
         .def_property("ur", [](const FBox3D & box){ return box[1]; }, [](FBox3D & box, FPoint3D & ur){ box[1] = ur; })
+    ;
+
+    py::class_<EPolygonData>(m, "PolygonData")
+
+    ;
+
+    py::class_<EPolygonWithHolesData>(m, "PolygonWithHolesData")
+        .def(py::init<>())
+        .def_readwrite("outline", &EPolygonWithHolesData::outline)
+        .def_readwrite("holes", &EPolygonWithHolesData::holes)
+    ;
+
+    py::class_<EShape, PyShape>(m, "Shape")
+        .def("get_contour", &EShape::GetContour)
     ;
 
     py::enum_<ETemperatureUnit>(m, "TemperatureUnit")
@@ -273,7 +308,9 @@ void ecad_init_basic(py::module_ & m)
     py::class_<EThermalSimulationSetup>(m, "ThermalSimulationSetup")
         .def_readwrite("work_dir", &EThermalSimulationSetup::workDir)
         .def_readwrite("monitors", &EThermalSimulationSetup::monitors)
-        .def("set_extraction_settings", &SetThermalModelExtractionSettings)
+        .def("set_extraction_settings", [](EThermalSimulationSetup & setup, Ptr<EThermalModelExtractionSettings> settings){
+            setup.extractionSettings = settings->Clone();
+        })
     ;
 
     py::class_<EThermalStaticSimulationSetup, EThermalSimulationSetup>(m, "ThermalStaticSimulationSetup")

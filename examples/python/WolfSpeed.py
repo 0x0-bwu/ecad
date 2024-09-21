@@ -23,13 +23,6 @@ def print_test_info(func) :
 
     return wrapper
 
-###EDataMgr
-@print_test_info
-def test_data_mgr() :
-    #instance
-    mgr = ecad.DataMgr
-    mgr.init(ecad.LogLevel.INFO)
-
 @print_test_info
 def setup_design(name, parameters) :
     mgr = ecad.DataMgr
@@ -40,17 +33,119 @@ def setup_design(name, parameters) :
         mat_al.set_property(ecad.MaterialPropId.MASS_DENSITY, mgr.create_simple_material_prop(2700))
         mat_al.set_property(ecad.MaterialPropId.RESISTIVITY, mgr.create_simple_material_prop(2.82e-8))
     
-        mat_al = mgr.create_material_def(database, MAT_AL)
-        mat_al.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_simple_material_prop(238))
-        mat_al.set_property(ecad.MaterialPropId.SPECIFIC_HEAT, mgr.create_simple_material_prop(880))
-        mat_al.set_property(ecad.MaterialPropId.MASS_DENSITY, mgr.create_simple_material_prop(2700))
-        mat_al.set_property(ecad.MaterialPropId.RESISTIVITY, mgr.create_simple_material_prop(2.82e-8))
+        mat_cu = mgr.create_material_def(database, MAT_CU)
+        mat_cu.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_polynomial_material_prop([[437.6, -0.165, 1.825e-4, -1.427e-7, 3.979e-11]]))
+        mat_cu.set_property(ecad.MaterialPropId.SPECIFIC_HEAT, mgr.create_polynomial_material_prop([[342.8, 0.134, 5.535e-5, -1.971e-7, 1.141e-10]]))
+        mat_cu.set_property(ecad.MaterialPropId.MASS_DENSITY, mgr.create_simple_material_prop(8850))
 
+        mat_air = mgr.create_material_def(database, MAT_AIR)
+        mat_air.set_material_type(ecad.MaterialType.FLUID)
+        mat_air.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_simple_material_prop(0.026))
+        mat_air.set_property(ecad.MaterialPropId.SPECIFIC_HEAT, mgr.create_simple_material_prop(1.003))
+        mat_air.set_property(ecad.MaterialPropId.MASS_DENSITY, mgr.create_simple_material_prop(1.225))
+
+        mat_sic = mgr.create_material_def(database, MAT_SIC)
+        mat_sic.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_polynomial_material_prop([[1860, -11.7, 0.03442, -4.869e-5, 2.675e-8]]))
+        mat_sic.set_property(ecad.MaterialPropId.SPECIFIC_HEAT, mgr.create_polynomial_material_prop([[-3338, 33.12, -0.1037, 0.0001522, -8.553e-80]]))
+        mat_sic.set_property(ecad.MaterialPropId.MASS_DENSITY, mgr.create_simple_material_prop(3210))
+
+        mat_aln = mgr.create_material_def(database, MAT_ALN)
+        mat_aln.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_polynomial_material_prop([[421.7867, -1.1262, 0.001]]))
+        mat_aln.set_property(ecad.MaterialPropId.SPECIFIC_HEAT, mgr.create_polynomial_material_prop([[170.2, -2.018, 0.032, -8.957e-5, 1.032e-7, -4.352e-11]]))
+        mat_aln.set_property(ecad.MaterialPropId.MASS_DENSITY, mgr.create_simple_material_prop(3260))
+
+        mat_solder = mgr.create_material_def(database, MAT_SAC305)
+        mat_solder.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_simple_material_prop(55))
+        mat_solder.set_property(ecad.MaterialPropId.SPECIFIC_HEAT, mgr.create_simple_material_prop(218))
+        mat_solder.set_property(ecad.MaterialPropId.MASS_DENSITY, mgr.create_simple_material_prop(7800))
+        mat_solder.set_property(ecad.MaterialPropId.RESISTIVITY, mgr.create_simple_material_prop(11.4e-8))
+
+    def create_bondwire_solder_joints(database, name, radius) :
+        padstack_def = mgr.create_padstack_def(database, name)
+        def_data = mgr.create_padstack_def_data()
+        def_data.set_top_solder_bump_material(MAT_SAC305)
+        def_data.set_bot_solder_ball_material(MAT_SAC305)
+
+        bump_r = radius * 1.1
+        bump = mgr.create_shape_rectangle(database.coord_units, ecad.FPoint2D(-bump_r, -bump_r), ecad.FPoint2D(bump_r, bump_r))
+        def_data.set_top_solder_bump_parameters(bump, 0.05)
+        def_data.set_bot_solder_ball_parameters(bump, 0.05)
+
+        padstack_def.set_padstack_def_data(def_data)
+        return padstack_def
+
+    def create_sic_die_component_def(database) :
+        sic_die = mgr.create_component_def(database, 'SicDie')
+        sic_die.set_component_type(ecad.ComponentType.IC)
+        sic_die.set_solder_ball_bump_height(0.1)
+        sic_die.set_solder_filling_material(MAT_SAC305)
+        sic_die.set_bonding_box(mgr.create_box(database.coord_units, ecad.FPoint2D(-2.545, -2.02), ecad.FPoint2D(2.545, 2.02)))        
+        sic_die.set_material(MAT_SIC)
+        sic_die.set_height(0.18)
+
+        mgr.create_component_def_pin(sic_die, "G", ecad.FPoint2D(-1.25,  1.0), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(sic_die, "B", ecad.FPoint2D(-1.25,  0.0), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(sic_die, "D", ecad.FPoint2D(-1.25, -1.0), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(sic_die, "A", ecad.FPoint2D( 1.25,  1.0), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(sic_die, "C", ecad.FPoint2D( 1.25,  0.0), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(sic_die, "E", ecad.FPoint2D( 1.25, -1.0), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(sic_die, "K", ecad.FPoint2D(-2.00, -0.5), ecad.PinIOType.RECEIVER)
+        return sic_die
+
+    def create_diode_component_def(database) :
+        diode = mgr.create_component_def(database, "Diode")
+        diode.set_component_type(ecad.ComponentType.IC)
+        diode.set_solder_ball_bump_height(0.1)
+        diode.set_solder_filling_material(MAT_SAC305)
+        diode.set_bonding_box(mgr.create_box(database.coord_units, ecad.FPoint2D(-2.25, -2.25), ecad.FPoint2D(2.25, 2.25)))
+        diode.set_material(MAT_SIC)
+        diode.set_height(0.18)
+
+        mgr.create_component_def_pin(diode, "A", ecad.FPoint2D(-1.125,  1.50), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "B", ecad.FPoint2D(-1.125,  0.75), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "C", ecad.FPoint2D(-1.125,  0.00), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "D", ecad.FPoint2D(-1.125, -0.75), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "E", ecad.FPoint2D(-1.125, -1.50), ecad.PinIOType.RECEIVER)
+
+        mgr.create_component_def_pin(diode, "F", ecad.FPoint2D( 1.125,  1.50), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "G", ecad.FPoint2D( 1.125,  0.75), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "H", ecad.FPoint2D( 1.125,  0.00), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "I", ecad.FPoint2D( 1.125, -0.75), ecad.PinIOType.RECEIVER)
+        mgr.create_component_def_pin(diode, "J", ecad.FPoint2D( 1.125, -1.50), ecad.PinIOType.RECEIVER)
+        return diode
     
+    def create_gate_resistance_component_def(database) :
+        r = mgr.create_component_def(database, RES_GATE)
+        r.set_bonding_box(mgr.create_box(database.coord_units, ecad.FPoint2D(-1.05, -0.65), ecad.FPoint2D(1.05, 0.65)))
+        r.set_material(MAT_SIC)
+        r.set_height(0.5)
+        return r
+
+    def create_base_layout(database) :
+        base_cell = mgr.create_circuit_cell(database, 'Base')
+        base_layout = base_cell.get_layout_view()
+        pwh = ecad.PolygonWithHolesData()
+        pwh.outline = mgr.create_shape_polygon(database.coord_units, [-52.2, -29.7, 52.2, -29.7, 52.5, 29.7, -52.2, 29.7], 5.3).get_contour()
+
+
+        return base_layout
+
     mgr.remove_database(name)
     database = mgr.create_database(name)
 
+    database.coord_units = ecad.CoordUnits(ecad.CoordUnit.MILLIMETER)
+
     setup_material(database)
+
+    thin_bw_solder_def = create_bondwire_solder_joints(database, 'Thin Solder Joints', THIN_BONDWIRE_RADIUS)
+    thick_bw_solder_def = create_bondwire_solder_joints(database, 'Thick Solder Joints', THICK_BONDWIRE_RADIUS)
+    
+    create_sic_die_component_def(database)
+    create_diode_component_def(database)
+    create_gate_resistance_component_def(database)
+
+    base_layout = create_base_layout(database)
+
         
 @print_test_info
 def static_thermal_flow() :
@@ -130,7 +225,7 @@ def main() :
         5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,]
     
     setup_design("CAS300M12BM2", chip_locations)
-    static_thermal_flow()
+    # static_thermal_flow()
 
     mgr.shut_down()
     print('every thing is fine')

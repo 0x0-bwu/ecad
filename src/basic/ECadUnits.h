@@ -161,13 +161,23 @@ class ECoordUnits
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
     using Unit = generic::unit::Length;
+    ECoordUnits()
+     : ECoordUnits(Unit::Micrometer, Unit::Nanometer)
+    {
+    }
+
+    explicit ECoordUnits(Unit user)
+     : ECoordUnits(user, Unit::Nanometer)
+    {
+    }
+
     /**
      * @brief Construct a new ECoordUnits object
      * 
      * @param user user unit, defualt is um
      * @param data database unit, default is nm
      */
-    ECoordUnits(Unit user = Unit::Micrometer, Unit data = Unit::Nanometer)
+    ECoordUnits(Unit user, Unit data)
     {
         precision = generic::unit::Scale2Meter(data);
         unit = precision / generic::unit::Scale2Meter(user);

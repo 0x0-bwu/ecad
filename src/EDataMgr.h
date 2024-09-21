@@ -92,7 +92,8 @@ public:
     UPtr<EShape> CreateShapeCircle(const ECoordUnits & coordUnits, const FPoint2D & loc, EFloat radius);
     UPtr<EShape> CreateShapePath(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat width);
     UPtr<EShape> CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat cornerR = 0);
-    
+    UPtr<EShape> CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FCoord> & coords, EFloat cornerR = 0);
+
     UPtr<EShape> CreateShapeRectangle(EPoint2D ll, EPoint2D ur);
     UPtr<EShape> CreateShapeCircle(EPoint2D loc, ECoord radius);
     UPtr<EShape> CreateShapePath(std::vector<EPoint2D> points, ECoord width);

@@ -125,7 +125,7 @@ enum class EPinIOType
     Driver,
     Receiver,
     BiDirectional,
-    DirverTerminator,
+    DriverTerminator,
     ReceiverTerminator
 };
 

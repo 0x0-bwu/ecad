@@ -255,6 +255,15 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordU
     return CreateShapePolygon(coordUnits.toCoord(points));
 }
 
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FCoord> & coords, EFloat cornerR)
+{
+    std::vector<FPoint2D> points(coords.size() / 2);
+    for (size_t i = 0; i < points.size(); ++i)
+        points[i] = FPoint2D(coords.at(i * 2), coords.at(i * 2 + 1));
+    return CreateShapePolygon(coordUnits, points, cornerR);
+}
+
+
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur)
 {
     auto shape = new ERectangle(std::move(ll), std::move(ur));
