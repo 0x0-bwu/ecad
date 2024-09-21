@@ -25,15 +25,36 @@ void ecad_init_design(py::module_ & m)
         .def("get_bounding_box", &IComponent::GetBoundingBox)
     ;
 
+    py::class_<INet>(m, "Net")
+    ;
+
+    py::class_<ILayer>(m, "Layer")
+    ;
+    
     py::class_<ILayoutView>(m, "LayoutView")
         .def("get_name", &ILayoutView::GetName, py::return_value_policy::reference)
         .def("get_coord_units", &ILayoutView::GetCoordUnits, py::return_value_policy::reference)
         .def("find_component_by_name", &ILayoutView::FindComponentByName, py::return_value_policy::reference)
+        .def("set_boundary", [](ILayoutView & layout, CPtr<EShape> shape){
+            layout.SetBoundary(shape->Clone());
+        })
+        .def("append_layer", [](ILayoutView & layout, CPtr<ILayer> layer){
+            return layout.AppendLayer(layer->Clone());
+        })
         .def("run_thermal_simulation", [](ILayoutView & layout, const EThermalStaticSimulationSetup & simulationSetup){
             std::vector<EFloat> temperatures;
             auto range = layout.RunThermalSimulation(simulationSetup, temperatures);
             return std::make_tuple(range.first, range.second, temperatures);
         })
+    ;
+
+    py::class_<IBondwire>(m, "Bondwire")
+        .def("set_start_layer", py::overload_cast<ELayerId, const EPoint2D &, bool>(&IBondwire::SetStartLayer))
+        .def("set_start_layer", py::overload_cast<ELayerId>(&IBondwire::SetStartLayer))
+        .def("set_end_layer", py::overload_cast<ELayerId, const EPoint2D &, bool>(&IBondwire::SetEndLayer))
+        .def("set_end_layer", py::overload_cast<ELayerId>(&IBondwire::SetEndLayer))
+        .def("set_current", &IBondwire::SetCurrent)
+        .def("set_dynamic_power_scenario", &IBondwire::SetDynamicPowerScenario)
     ;
 
     py::class_<IMaterialDef>(m, "MaterialDef")

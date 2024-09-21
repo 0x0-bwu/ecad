@@ -37,6 +37,14 @@ void ecad_init_datamgr(py::module_ & m)
         .def("create_circuit_cell", [](Ptr<IDatabase> database, const std::string & name)
             { return EDataMgr::Instance().CreateCircuitCell(database, name); }, py::return_value_policy::reference)
 
+        // net
+        .def("create_net", [](Ptr<ILayoutView> layout, const std::string & name)
+            { return EDataMgr::Instance().CreateNet(layout, name); }, py::return_value_policy::reference)
+
+        // layer
+        .def("create_stackup_layer", [](const std::string & name, ELayerType type, EFloat elevation, EFloat thickness, const std::string & conductingMat, const std::string & dielectricMat)
+            { return EDataMgr::Instance().CreateStackupLayer(name, type, elevation, thickness, conductingMat, dielectricMat); })
+
         // material
         .def("create_material_def", [](Ptr<IDatabase> database, const std::string & name)
             { return EDataMgr::Instance().CreateMaterialDef(database, name); }, py::return_value_policy::reference)
@@ -54,7 +62,11 @@ void ecad_init_datamgr(py::module_ & m)
         .def("create_component_def_pin", [](Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type)
             { return EDataMgr::Instance().CreateComponentDefPin(compDef, pinName, loc, type); }, py::return_value_policy::reference)
 
-       // padstack
+        // bondwire
+        .def("create_bondwire", [](Ptr<ILayoutView> layout, std::string name, ENetId net, EFloat radius)
+            { return EDataMgr::Instance().CreateBondwire(layout, std::move(name), net, radius); }, py::return_value_policy::reference)
+
+        // padstack
         .def("create_padstack_def", [](Ptr<IDatabase> database, const std::string & name)
             { return EDataMgr::Instance().CreatePadstackDef(database, name); }, py::return_value_policy::reference)
         .def("create_padstack_def_data", []
@@ -71,7 +83,8 @@ void ecad_init_datamgr(py::module_ & m)
             { return EDataMgr::Instance().CreateShapePolygon(coordUnits, points, cornerR); })
         .def("create_shape_polygon", [](const ECoordUnits & coordUnits, const std::vector<FCoord> & coords, EFloat cornerR)
             { return EDataMgr::Instance().CreateShapePolygon(coordUnits, coords, cornerR); })
-
+        .def("create_shape_polygon_with_holes", [](EPolygonWithHolesData pwh)
+            { return EDataMgr::Instance().CreateShapePolygonWithHoles(std::move(pwh)); })
         .def("create_box", [](const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
             { return EDataMgr::Instance().CreateBox(coordUnits, ll, ur); })
             

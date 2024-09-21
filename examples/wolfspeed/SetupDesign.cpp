@@ -206,7 +206,6 @@ Ptr<ILayoutView> CreateBaseLayout(Ptr<IDatabase> database)
     };
     std::vector<FPoint2D> sPLoc{
         {3, 24}, {3, 23.275}, {3, 22.55}, {4, 21.825}, {3, 21.825}, {3, 6.525}, {3, 5.8}, {3, 5.075}, {3, 7.25}, {4, 7.25},
-
     };
     for (size_t i = 0; i < dPLoc.size(); ++i) {
         auto bw1 = eDataMgr.CreateBondwire(baseLayout, "DS1_" + std::to_string(i + 1), ENetId::noNet, THICK_BONDWIRE_RADIUS);

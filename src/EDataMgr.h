@@ -44,7 +44,7 @@ public:
     ///Layer
     UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, EFloat elevation, EFloat thickness,
                                     const std::string & conductingMat = sDefaultConductingMat,
-                                    const std::string & dirlectricMat = sDefaultDielectricMat);
+                                    const std::string & dielectricMat = sDefaultDielectricMat);
     
     ///ComponentDef
     Ptr<IComponentDef> CreateComponentDef(Ptr<IDatabase> database, const std::string & name);

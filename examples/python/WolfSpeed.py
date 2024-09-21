@@ -124,9 +124,85 @@ def setup_design(name, parameters) :
     def create_base_layout(database) :
         base_cell = mgr.create_circuit_cell(database, 'Base')
         base_layout = base_cell.get_layout_view()
+        coord_units = database.coord_units
         pwh = ecad.PolygonWithHolesData()
-        pwh.outline = mgr.create_shape_polygon(database.coord_units, [-52.2, -29.7, 52.2, -29.7, 52.5, 29.7, -52.2, 29.7], 5.3).get_contour()
+        pwh.outline = mgr.create_shape_polygon(coord_units, [-52.2, -29.7, 52.2, -29.7, 52.5, 29.7, -52.2, 29.7], 5.3).get_contour()
+        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D(-46.5, -24), 3.85).get_contour())
+        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D( 46.5, -24), 3.85).get_contour())
+        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D( 46.5,  24), 3.85).get_contour())
+        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D(-46.5,  24), 3.85).get_contour())
+        base_layout.set_boundary(mgr.create_shape_polygon_with_holes(pwh))
+        
+        mgr.create_net(base_layout, 'Gate')
+        mgr.create_net(base_layout, 'Drain')
+        mgr.create_net(base_layout, 'Source')
+        mgr.create_net(base_layout, 'Kelvin')
 
+        top_layer = base_layout.append_layer(mgr.create_stackup_layer('TopCuLayer', ecad.LayerType.CONDUCTING_LAYER, 0, 0.3, MAT_CU, MAT_AIR))
+        base_layout.append_layer(mgr.create_stackup_layer('CeramicLayer', ecad.LayerType.DIELECTRIC_LAYER, -0.3, 0.38, MAT_ALN, MAT_AIR))
+        base_layout.append_layer(mgr.create_stackup_layer('BotCuLayer', ecad.LayerType.CONDUCTING_LAYER, -0.68, 0.3, MAT_CU, MAT_AIR))
+        base_layout.append_layer(mgr.create_stackup_layer('SolderLayer', ecad.LayerType.CONDUCTING_LAYER, -0.98, 0.1, MAT_SAC305, MAT_AIR))
+        base_layout.append_layer(mgr.create_stackup_layer('BaseLayer', ecad.LayerType.CONDUCTING_LAYER, -1.08, 3, MAT_CU, MAT_CU))
+
+        d_ploc = ecad.fcoord_to_fpoint2d([-3, 24, -3, 23.275, -3, 22.55, -4, 23.275, -4, 22.55, -3, 6.525, -3, 5.8, -3, 5.075, -4, 6.525, -4, 5.8])
+        s_ploc = ecad.fcoord_to_fpoint2d([3, 24, 3, 23.275, 3, 22.55, 4, 21.825, 3, 21.825, 3, 6.525, 3, 5.8, 3, 5.075, 3, 7.25, 4, 7.25])
+        for i in range(len(d_ploc)) :
+            bw1 = mgr.create_bondwire(base_layout, f'DS1_{i + 1}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+            bw1.set_start_layer(top_layer, coord_units.to_coord(d_ploc[i]), False)
+            bw1.set_end_layer(top_layer, coord_units.to_coord(s_ploc[i]), False)
+            bw1.set_current(15)
+            bw1.set_dynamic_power_scenario(0)
+
+            d_ploc[i].y *= -1
+            s_ploc[i].y *= -1
+            bw2 = mgr.create_bondwire(base_layout, f'DS2_{i + 1}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+            bw2.set_start_layer(top_layer, coord_units.to_coord(d_ploc[i]), False)
+            bw2.set_end_layer(top_layer, coord_units.to_coord(s_ploc[i]), False)
+            bw2.set_current(15)
+            bw2.set_dynamic_power_scenario(0)
+        
+        g_ploc = ecad.fcoord_to_fpoint2d([-3, 3, -3, 1.8])
+        for i in range(len(g_ploc)) :
+            p = g_ploc[i]
+            bw1 = mgr.create_bondwire(base_layout, f'G1_{i + 1}', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+            bw1.set_start_layer(top_layer, coord_units.to_coord(p), False)
+            bw2.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(-p.x, p.y)), False)
+
+            bw2 = mgr.create_bondwire(base_layout, f'G2_{i + 1}', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+            bw2.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(p.x, -p.y)), False)
+            bw2.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(-p.x, -p.y)), False)
+        
+        kelvin_bw0 = mgr.create_bondwire(base_layout, 'KelvinBw0', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        kelvin_bw0.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(30.15, -5.95)), False)
+        kelvin_bw0.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(40.05, -5.95)), False)
+
+        kelvin_bw = mgr.create_bondwire(base_layout, 'KelvinBw', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        kelvin_bw.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(30.15, 5)), False)
+        kelvin_bw.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(30.15, -5)), False)
+
+        gate_bw0 = mgr.create_bondwire(base_layout, 'GateBw0', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        gate_bw0.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(32, -12.375)), False)
+        gate_bw0.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(40.05, -12.375)), False)
+
+        gate_bw = mgr.create_bondwire(base_layout, 'GateBw', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        gate_bw.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(32, 5)), False)
+        gate_bw.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(32, -5)), False)
+
+        gate_bw1 = mgr.create_bondwire(base_layout, 'GateBw1', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        gate_bw1.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(32.5, 3)), False)
+        gate_bw1.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(41.3, 3.35)), False)
+
+        gate_bw2 = mgr.create_bondwire(base_layout, 'GateBw2', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        gate_bw2.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(32.5, 1.8)), False)
+        gate_bw2.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(40.05, 1.0375)), False)
+
+        gate_bw3 = mgr.create_bondwire(base_layout, 'GateBw3', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        gate_bw3.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(32.5, -1.8)), False)
+        gate_bw3.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(40.05, -0.3625)), False)
+
+        gate_bw4 = mgr.create_bondwire(base_layout, 'GateBw4', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+        gate_bw4.set_start_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(32.5, -3)), False)
+        gate_bw4.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(40.05, -2.7)), False)
 
         return base_layout
 

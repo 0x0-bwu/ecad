@@ -30,6 +30,16 @@ namespace ecad::wrapper {
             PYBIND11_OVERRIDE(void, EThermalModelExtractionSettings, AddBlockBC, orient, block, type, value);
         }
     };
+
+    template <typename Coord>
+    std::vector<generic::geometry::Point2D<Coord>> Coord2Point2D(const std::vector<Coord> & coords)
+    {
+        std::vector<generic::geometry::Point2D<Coord>> points(coords.size() / 2);
+        for (size_t i = 0; i < points.size(); ++i)
+            points[i] = generic::geometry::Point2D<Coord>(coords[i * 2], coords[i * 2 + 1]);
+        return points;
+    }
+
 } // namespace ecad::wrapper
 
 void ecad_init_basic(py::module_ & m)
@@ -41,6 +51,9 @@ void ecad_init_basic(py::module_ & m)
     )pbdoc";
 
     m.attr("__version__") = toString(CURRENT_VERSION);
+
+    m.def("coord_to_point2d", &Coord2Point2D<ECoord>);
+    m.def("fcoord_to_fpoint2d", &Coord2Point2D<FCoord>);
 
     py::enum_<ELogLevel>(m, "LogLevel")
         .value("TRACE", ELogLevel::Trace)
@@ -70,6 +83,7 @@ void ecad_init_basic(py::module_ & m)
         .def(py::init<>())
         .def(py::init<ECoordUnits::Unit>())
         .def(py::init<ECoordUnits::Unit, ECoordUnits::Unit>())
+        .def("to_coord", py::overload_cast<const FPoint2D &>(&ECoordUnits::toCoord, py::const_))
         .def("to_unit", py::overload_cast<const EPoint2D &>(&ECoordUnits::toUnit<ECoord>, py::const_))
         .def("to_unit", py::overload_cast<const FPoint2D &>(&ECoordUnits::toUnit<FCoord>, py::const_))
     ;
@@ -81,6 +95,21 @@ void ecad_init_basic(py::module_ & m)
         // .value("RIGHT", EOrientation::Right)
         // .value("FRONT", EOrientation::Front)
         // .value("BACK", EOrientation::Back)
+    ;
+
+    py::enum_<ENetId>(m, "NetId")
+        .value("NO_NET", ENetId::noNet)
+    ;
+
+    py::enum_<ELayerType>(m, "LayerType")
+        .value("INVALID", ELayerType::Invalid)
+        .value("DIELECTRIC_LAYER", ELayerType::DielectricLayer)
+        .value("CONDUCTING_LAYER", ELayerType::ConductingLayer)
+        .value("METALIZED_SIGNAL", ELayerType::MetalizedSignal)
+    ;
+
+    py::enum_<ELayerId>(m, "LayerId")
+        .value("NO_LAYER", ELayerId::noLayer)
     ;
 
     py::enum_<EMaterialType>(m, "MaterialType")
