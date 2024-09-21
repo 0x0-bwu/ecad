@@ -18,8 +18,15 @@ void ecad_init_design(py::module_ & m)
         }, py::return_value_policy::reference)
     ;
 
+    py::class_<IComponent>(m, "Component")
+        .def("get_name", &IComponent::GetName, py::return_value_policy::reference)
+        .def("get_bounding_box", &IComponent::GetBoundingBox)
+    ;
+
     py::class_<ILayoutView>(m, "LayoutView")
         .def("get_name", &ILayoutView::GetName, py::return_value_policy::reference)
+        .def("get_coord_units", &ILayoutView::GetCoordUnits, py::return_value_policy::reference)
+        .def("find_component_by_name", &ILayoutView::FindComponentByName, py::return_value_policy::reference)
         .def("run_thermal_simulation", [](ILayoutView & layout, const EThermalStaticSimulationSetup & simulationSetup){
             std::vector<EFloat> temperatures;
             auto range = layout.RunThermalSimulation(simulationSetup, temperatures);

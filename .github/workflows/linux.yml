@@ -35,5 +35,5 @@ jobs:
       - name: Run examples - WolfSpeed StaticThermal
         run: build.release/bin/WolfSpeed_StaticThermal.exe
 
-      - name: Run PyEcad Test
-        run: python py/PyEcadTest.py
+      - name: Run python examples - WolfSpeed
+        run: python examples/python/WolfSpeed.py
