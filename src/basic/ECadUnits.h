@@ -114,6 +114,8 @@ struct ETemperature
 {
     EFloat value{25};
     ETemperatureUnit unit{ETemperatureUnit::Celsius};
+    ETemperature() = default;
+    ETemperature(EFloat value, ETemperatureUnit unit) : value(value), unit(unit) {}
     EFloat inCelsius() const { return unit == ETemperatureUnit::Celsius ? value : generic::unit::Kelvins2Celsius(value); }
     EFloat inKelvins() const { return unit == ETemperatureUnit::Kelvins ? value : generic::unit::Celsius2Kelvins(value); }
     static EFloat Kelvins2Celsius(EFloat t) { return generic::unit::Kelvins2Celsius(t); }

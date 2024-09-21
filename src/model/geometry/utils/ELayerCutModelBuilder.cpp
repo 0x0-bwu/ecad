@@ -15,7 +15,7 @@ ECAD_INLINE ELayerCutModelBuilder::ELayerCutModelBuilder(CPtr<ILayoutView> layou
 
 ECAD_INLINE void ELayerCutModelBuilder::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness)
 {
-    if (m_model->m_settings.addCircleCenterAsSteinerPoints) {
+    if (m_model->m_settings.addCircleCenterAsSteinerPoint) {
         if (EShapeType::Circle == shape->GetShapeType()) {
             auto circle = dynamic_cast<CPtr<ECircle>>(shape);
             m_model->m_steinerPoints.emplace_back(circle->o);

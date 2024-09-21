@@ -200,7 +200,7 @@ struct ELayerCutModelExtractionSettings : public ECadSettings
         ar & boost::serialization::make_nvp("dump_sketch_img", dumpSketchImg);
         ar & boost::serialization::make_nvp("layer_cut_precision", layerCutPrecision);
         ar & boost::serialization::make_nvp("layer_transition_ratio", layerTransitionRatio);
-        ar & boost::serialization::make_nvp("add_circle_center_as_steiner_points", addCircleCenterAsSteinerPoints);
+        ar & boost::serialization::make_nvp("add_circle_center_as_steiner_point", addCircleCenterAsSteinerPoint);
         ar & boost::serialization::make_nvp("imprint_box", imprintBox);
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -208,7 +208,7 @@ struct ELayerCutModelExtractionSettings : public ECadSettings
     bool dumpSketchImg = true;
     size_t layerCutPrecision = 6;
     EFloat layerTransitionRatio = 2;
-    bool addCircleCenterAsSteinerPoints{false};
+    bool addCircleCenterAsSteinerPoint{false};
     std::vector<FBox2D> imprintBox;
 
     virtual bool operator== (const ECadSettings & settings) const override
@@ -217,7 +217,7 @@ struct ELayerCutModelExtractionSettings : public ECadSettings
         if (nullptr == ps) return false;
         if (layerCutPrecision != ps->layerCutPrecision ||
             layerTransitionRatio != ps->layerTransitionRatio ||
-            addCircleCenterAsSteinerPoints != ps->addCircleCenterAsSteinerPoints ||
+            addCircleCenterAsSteinerPoint != ps->addCircleCenterAsSteinerPoint ||
             imprintBox != ps->imprintBox) return false;
         return true;
     }
@@ -256,7 +256,7 @@ struct EThermalBondaryCondition
     }
 };
 
-struct EThermalModelExtractionSettings : public ECadSettings
+struct EThermalModelExtractionSettings : public ECadSettings, public Clonable<EThermalModelExtractionSettings>
 {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
@@ -267,10 +267,10 @@ struct EThermalModelExtractionSettings : public ECadSettings
         ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECadSettings);
         ar & boost::serialization::make_nvp("threads", threads);
         ar & boost::serialization::make_nvp("work_dir", workDir);
-        ar & boost::serialization::make_nvp("top_uniform_BC", topUniformBC);
-        ar & boost::serialization::make_nvp("bot_uniform_BC", botUniformBC);
-        ar & boost::serialization::make_nvp("top_block_BC", topBlockBC);
-        ar & boost::serialization::make_nvp("bot_block_BC", botBlokcBC);
+        ar & boost::serialization::make_nvp("top_uniform_bc", topUniformBC);
+        ar & boost::serialization::make_nvp("bot_uniform_bc", botUniformBC);
+        ar & boost::serialization::make_nvp("top_block_bc", topBlockBC);
+        ar & boost::serialization::make_nvp("bot_block_bc", botBlockBC);
         ar & boost::serialization::make_nvp("env_temperature", envTemperature);
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
@@ -282,7 +282,7 @@ struct EThermalModelExtractionSettings : public ECadSettings
     EThermalBondaryCondition topUniformBC;
     EThermalBondaryCondition botUniformBC;
     std::vector<BlockBoundaryCondition> topBlockBC;
-    std::vector<BlockBoundaryCondition> botBlokcBC;
+    std::vector<BlockBoundaryCondition> botBlockBC;
     ETemperature envTemperature{25, ETemperatureUnit::Celsius};
 
     virtual EModelType GetModelType() const = 0;
@@ -292,7 +292,7 @@ struct EThermalModelExtractionSettings : public ECadSettings
         if (EOrientation::Top == orient)
             topBlockBC.emplace_back(std::move(block), EThermalBondaryCondition(value, type));
         if (EOrientation::Bot == orient)
-            botBlokcBC.emplace_back(std::move(block), EThermalBondaryCondition(value, type));
+            botBlockBC.emplace_back(std::move(block), EThermalBondaryCondition(value, type));
     }
 
     virtual bool operator== (const ECadSettings & settings) const override
@@ -302,7 +302,7 @@ struct EThermalModelExtractionSettings : public ECadSettings
         if (topUniformBC != ps->topUniformBC ||
             botUniformBC != ps->botUniformBC ||
             topBlockBC != ps->topBlockBC ||
-            botBlokcBC != ps->botBlokcBC ||
+            botBlockBC != ps->botBlockBC ||
             envTemperature != ps->envTemperature) return false;
         return true;
     }
@@ -348,6 +348,9 @@ struct EGridThermalModelExtractionSettings : public EThermalModelExtractionSetti
         if (metalFractionMappingSettings != ps->metalFractionMappingSettings) return false;
         return true;
     }
+
+private:
+    virtual Ptr<EGridThermalModelExtractionSettings> CloneImp() const override { return new EGridThermalModelExtractionSettings(*this); }
 };
 
 struct EPrismThermalModelExtractionSettings : public EThermalModelExtractionSettings
@@ -393,6 +396,9 @@ struct EPrismThermalModelExtractionSettings : public EThermalModelExtractionSett
             layerCutSettings != ps->layerCutSettings) return false;
         return true;
     }
+
+private:
+    virtual Ptr<EPrismThermalModelExtractionSettings> CloneImp() const override { return new EPrismThermalModelExtractionSettings(*this); }
 };
 
 struct EThermalSimulationSetup
@@ -402,11 +408,11 @@ struct EThermalSimulationSetup
     std::vector<FPoint3D> monitors;
     UPtr<EThermalModelExtractionSettings> extractionSettings;
 protected:
-    explicit EThermalSimulationSetup(std::string workDir_, size_t threads, const ENetIdSet & selectedNets)
+    explicit EThermalSimulationSetup(std::string workDir_, size_t threads, const ENetIdSet & selectNets)
      : workDir(std::move(workDir_))
     {
         if (workDir.empty()) workDir = fs::CurrentPath();
-        extractionSettings.reset(new EPrismThermalModelExtractionSettings(workDir, threads, selectedNets));
+        extractionSettings.reset(new EPrismThermalModelExtractionSettings(workDir, threads, selectNets));
     }
 };
 
@@ -438,8 +444,8 @@ struct EThermalStaticSettings : public EThermalSettings
 
 struct EThermalStaticSimulationSetup : public EThermalSimulationSetup
 {
-    explicit EThermalStaticSimulationSetup(std::string workDir, size_t threads, const ENetIdSet & selectedNets)
-     : EThermalSimulationSetup(std::move(workDir), threads, selectedNets), settings(threads) {}
+    explicit EThermalStaticSimulationSetup(std::string workDir, size_t threads, const ENetIdSet & selectNets)
+     : EThermalSimulationSetup(std::move(workDir), threads, selectNets), settings(threads) {}
     EThermalStaticSettings settings;
 };
 
@@ -470,8 +476,8 @@ struct EThermalTransientSettings : public EThermalSettings
 
 struct EThermalTransientSimulationSetup : public EThermalSimulationSetup
 {
-    explicit EThermalTransientSimulationSetup(std::string workDir, size_t threads, const ENetIdSet & selectedNets)
-     : EThermalSimulationSetup(std::move(workDir), threads, selectedNets), settings(threads) {}
+    explicit EThermalTransientSimulationSetup(std::string workDir, size_t threads, const ENetIdSet & selectNets)
+     : EThermalSimulationSetup(std::move(workDir), threads, selectNets), settings(threads) {}
     EThermalTransientSettings settings;
 };
 

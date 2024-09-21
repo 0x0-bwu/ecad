@@ -142,7 +142,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         auto ur = mfInfo->GetIndex(bbox[1]);
         model->AddBlockBC(EOrientation::Top, std::move(ll), std::move(ur), block.second);
     }
-    for (const auto & block : settings.botBlokcBC) {
+    for (const auto & block : settings.botBlockBC) {
         if (not block.second.isValid()) continue;
         const auto & bbox = coordUnits.toCoord(block.first);
         auto ll = mfInfo->GetIndex(bbox[0]);
@@ -296,7 +296,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
         if (not block.second.isValid()) continue;
         model->AddBlockBC(EOrientation::Top, coordUnits.toCoord(block.first), block.second);
     }
-    for (const auto & block : settings.botBlokcBC) {
+    for (const auto & block : settings.botBlockBC) {
         if (not block.second.isValid()) continue;
         model->AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
     }
@@ -459,7 +459,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalMod
         if (not block.second.isValid()) continue;
         model->AddBlockBC(EOrientation::Top, coordUnits.toCoord(block.first), block.second);
     }
-    for (const auto & block : settings.botBlokcBC) {
+    for (const auto & block : settings.botBlockBC) {
         if (not block.second.isValid()) continue;
         model->AddBlockBC(EOrientation::Bot, coordUnits.toCoord(block.first), block.second);
     }

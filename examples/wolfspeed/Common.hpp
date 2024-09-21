@@ -17,8 +17,8 @@ UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string 
     prismSettings.meshSettings.minLen = 1e-3;
     prismSettings.meshSettings.maxLen = 3;
     prismSettings.meshSettings.tolerance = 0;
-    prismSettings.layerCutSettings.layerTransitionRatio = 0;
     prismSettings.meshSettings.dumpMeshFile = true;
+    prismSettings.layerCutSettings.layerTransitionRatio = 0;
     prismSettings.layerCutSettings.dumpSketchImg = true;
 
     EFloat topHTC = htc;
