@@ -26,6 +26,13 @@ def print_test_info(func) :
 @print_test_info
 def setup_design(name, parameters) :
     mgr = ecad.DataMgr
+    mgr.init(ecad.LogLevel.TRACE)
+    def get_sic_die_temperature_and_power_config() :
+        return [(25.0, 108.0), (125.0, 124.0), (150.0, 126.5)]
+    
+    def get_diode_temperature_and_power_config() :
+        return [(25.0, 20.4), (125.0, 21.7), (150.0, 21.8)]
+    
     def setup_material(database) :
         mat_al = mgr.create_material_def(database, MAT_AL)
         mat_al.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_simple_material_prop(238))
@@ -205,6 +212,100 @@ def setup_design(name, parameters) :
         gate_bw4.set_end_layer(top_layer, coord_units.to_coord(ecad.FPoint2D(40.05, -2.7)), False)
 
         return base_layout
+    
+    def create_driver_layout(database) :
+        coord_units = database.coord_units
+        driver_cell = mgr.create_circuit_cell(database, "Driver")
+        driver_layout = driver_cell.get_layout_view()
+
+        layer1 = driver_layout.append_layer(mgr.create_stackup_layer('DriverLayer1', ecad.LayerType.DIELECTRIC_LAYER, -0.3, 0.38, MAT_ALN, MAT_AIR))
+        layer2 = driver_layout.append_layer(mgr.create_stackup_layer('DriverLayer2', ecad.LayerType.CONDUCTING_LAYER, -0.68, 0.3, MAT_CU, MAT_AIR))
+        layer3 = driver_layout.append_layer(mgr.create_stackup_layer('DriverLayer3', ecad.LayerType.CONDUCTING_LAYER, -0.98, 0.1, MAT_SAC305, MAT_AIR))
+        layer4 = driver_layout.append_layer(mgr.create_stackup_layer('DriverLayer4', ecad.LayerType.CONDUCTING_LAYER, -0.98, 0.1, MAT_SAC305, MAT_AIR))
+        
+        driver_layout.set_boundary(mgr.create_shape_polygon(coord_units, [-5.5, -14.725, 5.5, -14.725, 5.5, 14.725, -5.5, 14.725], 0))
+
+        mgr.create_net(driver_layout, 'Gate')
+        mgr.create_net(driver_layout, 'Drain')
+        mgr.create_net(driver_layout, 'Source')
+
+        mgr.create_geometry_2d(driver_layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [1.7, 9.625, 4.7, 9.625, 4.7, 13.925, 1.7, 13.925], 0.25))
+        mgr.create_geometry_2d(driver_layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [1.7, 4.325, 4.7, 4.325, 4.7,  8.625, 1.7, 8.625], 0.25))
+        mgr.create_geometry_2d(driver_layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [1.7, -13.925, 4.7, -13.925, 4.7, 1.075, 3.2, 1.075, 3.2, -1.775, 4.2, -1.775, 4.2, -4.925, 3.2, -4.925, 3.2, -7.025, 4.2, -7.025, 4.2, -11.425, 1.7, -11.425], 0.25))
+        mgr.create_geometry_2d(driver_layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [1.7, -10.325, 3.2, -10.325, 3.2, -8.225, 2.2, -8.225, 2.2, -3.875, 3.2, -3.875, 3.2, -2.825, 2.2, -2.825, 2.2, 2.175, 4.7, 2.175, 4.7, 3.225, 1.7, 3.225], 0.25))
+
+        mgr.create_geometry_2d(driver_layout, layer2, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [0.9, -14.725, 5.5, -14.725, 5.5, 14.725, 0.9, 14.725], 0.25))
+        mgr.create_geometry_2d(driver_layout, layer3, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [1.4, -14.225, 5.0, -14.225, 5.0, 14.225, 1.4, 14.225], 0.25))
+        mgr.create_geometry_2d(driver_layout, layer4, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [0.9, -14.725, 5.5, -14.725, 5.5, 14.725, 0.9, 14.725], 0.25))
+
+        return driver_layout
+
+    def create_default_layer_map(database, from_layout, to_layout, name) :
+        layer_map = mgr.create_layer_map(database, name)
+        from_iter = from_layout.get_layer_iter()
+        to_iter = to_layout.get_layer_iter()
+        from_layer = from_iter.next()
+        to_layer = to_iter.next()
+        while from_layer and to_layer :
+            layer_map.set_mapping(from_layer.get_layer_id(), to_layer.get_layer_id())
+            from_layer = from_iter.next()
+            to_layer = to_iter.next()
+        return layer_map
+
+    def create_bot_bridge_layout(database, locations) :
+        coord_units = database.coord_units
+        cell = mgr.create_circuit_cell(database, 'BotBridgeCell')
+        layout = cell.get_layout_view()
+
+        layer1 = layout.append_layer(mgr.create_stackup_layer('Layer1', ecad.LayerType.DIELECTRIC_LAYER, -0.3, 0.38, MAT_ALN, MAT_AIR))
+        layer2 = layout.append_layer(mgr.create_stackup_layer('Layer2', ecad.LayerType.CONDUCTING_LAYER, -0.68, 0.3, MAT_CU, MAT_AIR))
+        layer3 = layout.append_layer(mgr.create_stackup_layer('Layer3', ecad.LayerType.CONDUCTING_LAYER, -0.98, 0.1, MAT_SAC305, MAT_AIR))
+        layer4 = layout.append_layer(mgr.create_stackup_layer('Layer4', ecad.LayerType.CONDUCTING_LAYER, -0.98, 0.1, MAT_SAC305, MAT_AIR))
+
+        layout.set_boundary(mgr.create_shape_polygon(coord_units, [-16.75, -12.5, 16.75, -12.5, 16.75, 12.5, -16.75, 12.5], 0))
+        mgr.create_net(layout, 'Gate')
+        mgr.create_net(layout, 'Drain')
+        mgr.create_net(layout, 'Source')
+
+        mgr.create_geometry_2d(layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-15.45, -11.2, 13.35, -11.2, 13.95, -11.6, 15.45, -11.6, 15.45, -10.8, -15.05, -10.8, -15.05, -1.3, -14.7, -0.7, -14.7, 11.45, -15.45, 11.45], 0.25))
+        mgr.create_geometry_2d(layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-14.2, -10.4, 15.45, -10.4, 15.45, -9.6, 13.95, -9.6, 13.35, -10, -13.8, -10, -13.8, -2.55, -11.1, -2.55, -11.1, 11.45, -11.85, 11.45, -11.85, -2, -14.2, -2], 0.25))
+        mgr.create_geometry_2d(layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-12.6, -8.8, 12.35, -8.8, 12.95, -8.4, 15.45, -8.4, 15.45, -5.97, 7.95, -5.97, 7.95, 9.03, 15.45, 9.03, 15.45, 11.45, -9.75, 11.45, -9.75, -3.75, -12.6, -3.75], 0.25))
+
+        mgr.create_geometry_2d(layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-13.65, -0.7, -12.9, -0.7, -12.9, 2.6, -13.65, 2.6], 0.25))
+        mgr.create_geometry_2d(layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-13.65, 3.725, -12.9, 3.725, -12.9, 7.025, -13.65, 7.025], 0.25))
+        mgr.create_geometry_2d(layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-13.65, 8.15, -12.9, 8.15, -12.9, 11.45, -13.65, 11.45], 0.25))
+       
+        mgr.create_geometry_2d(layout, layer1, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [9.5, -4.77, 15.8, -4.77, 15.8, 7.83, 9.5, 7.83], 0.25))
+       
+        mgr.create_geometry_2d(layout, layer2, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-16.75, -12.5, 16.75, -12.5, 16.75, 12.5, -16.75, 12.5], 0.25))
+        mgr.create_geometry_2d(layout, layer3, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-16.25, -12, 16.25, -12, 16.25, 12, -16.25, 12], 0.25))
+        mgr.create_geometry_2d(layout, layer4, ecad.NetId.NO_NET, mgr.create_shape_polygon(coord_units, [-16.75, -12.5, 16.75, -12.5, 16.75, 12.5, -16.75, 12.5], 0.25))
+
+        sic_die = mgr.find_component_def_by_name(database, 'SicDie')
+        die_comps = [mgr.create_component(layout, f'Die{i + 1}', sic_die, layer1, mgr.create_transform_2d(coord_units, 1, 0, locations[i], ecad.Mirror2D.NO), False) for i in range(3)]
+        for t, p in get_sic_die_temperature_and_power_config() :
+            for die_comp in die_comps :
+                die_comp.set_loss_power(t, p)
+                die_comp.set_dynamic_power_scenario(2)
+
+        diode = mgr.find_component_def_by_name(database, "Diode")
+        diode_comps = [mgr.create_component(layout, f'Diode{i + 1}', diode, layer1, mgr.create_transform_2d(coord_units, 1, 0, locations[i + 3], ecad.Mirror2D.NO), False) for i in range(3)]
+        for t, p in get_diode_temperature_and_power_config() :
+            for diode_comp in diode_comps :
+                diode_comp.set_loss_power(t, p)
+                diode_comp.set_dynamic_power_scenario(2)
+        res = mgr.find_component_def_by_name(database, RES_GATE)
+        res_loc = [ecad.FPoint2D(-14.17, y) for y in [10.5, 6.075, 1.65]]
+        res_comps = [mgr.create_component(layout, f'R{i + 1}', res, layer1, mgr.create_transform_2d(coord_units, 1, 0, res_loc[i], ecad.Mirror2D.NO), False) for i in range(3)]
+
+        bw_loc = [ecad.FPoint2D(-13.275, y) for y in [8.6, 4.05, -0.27]]
+        for i in range(3) :
+            gate_bw = mgr.create_bondwire(layout, f'GateBw{i + 1}', ecad.NetId.NO_NET, THIN_BONDWIRE_RADIUS)
+            gate_bw.set_start_component(die_comps[i], 'G')
+            gate_bw.set_end_layer(layer1, coord_units.to_coord(bw_loc[i]), False)
+
+        # todo
+        return layout
 
     mgr.remove_database(name)
     database = mgr.create_database(name)
@@ -221,8 +322,32 @@ def setup_design(name, parameters) :
     create_gate_resistance_component_def(database)
 
     base_layout = create_base_layout(database)
+    driver_layout = create_driver_layout(database)
+    driver_layer_map = create_default_layer_map(database, driver_layout, base_layout, 'DriverLayerMap')
 
+    driver = mgr.create_cell_inst(base_layout, 'Driver', driver_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FVector2D(44, 0), ecad.Mirror2D.XY))
         
+    bot_comp_loc = [ecad.FPoint2D(parameters[i * 2], parameters[i * 2 + 1]) for i in range(6)]
+    bot_bridge_layout = create_bot_bridge_layout(database, bot_comp_loc)
+    bot_bridge_layer_map = create_default_layer_map(database, bot_bridge_layout, base_layout, 'BotBridgeLayerMap')
+
+    bot_bridge1 = mgr.create_cell_inst(base_layout, 'BotBridge1', bot_bridge_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FPoint2D(-17.75, 13), ecad.Mirror2D.NO))
+    bot_bridge2 = mgr.create_cell_inst(base_layout, 'BotBridge2', bot_bridge_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FPoint2D(-17.75, -13), ecad.Mirror2D.X))
+
+    base_layout.flatten(ecad.FlattenOption.NO)
+    prim_iter = base_layout.get_primitive_iter()
+    while prim := prim_iter.next() :
+        if bw := prim.get_bondwire_from_primitive() :
+            if bw.get_radius() > THIN_BONDWIRE_RADIUS :
+                bw.set_solder_joints(thick_bw_solder_def)
+            else :
+                bw.set_solder_joints(thin_bw_solder_def)
+            bw.set_material(MAT_AL)
+            if not (bw.get_height() > 0) :
+                bw.set_height(0.5)
+    
+    mgr.shut_down()
+
 @print_test_info
 def static_thermal_flow() :
     def get_die_monitors(layout) :
@@ -230,7 +355,8 @@ def static_thermal_flow() :
         elevation = 0.0
         thickness = 0.0
         retriever = ecad.LayoutRetriever(layout)
-        cell_insts = ["TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"]
+        # cell_insts = ["TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"]
+        cell_insts = ["BotBridge1", "BotBridge2"]
         components = ["Die1", "Die2", "Die3"]
         for cell_inst in cell_insts :
             for component in components :
@@ -272,9 +398,10 @@ def static_thermal_flow() :
         return prism_settings
 
     design_filename = os.path.dirname(__file__) + '/../wolfspeed/data/design/CAS300M12BM2.ecad'
-    work_dir = os.path.dirname(__file__) + '../wolfspeed/simulation/static'
+    work_dir = os.path.dirname(__file__) + '/../wolfspeed/simulation/static'
 
     mgr = ecad.DataMgr
+    mgr.init(ecad.LogLevel.TRACE)
     database = mgr.load_database(design_filename)
     print(database.get_name())
     cell = database.find_cell_by_name("Base")
@@ -289,21 +416,18 @@ def static_thermal_flow() :
     simulation_setup.monitors = get_die_monitors(layout)
     results = layout.run_thermal_simulation(simulation_setup)
     print(results)
+    mgr.shut_down()
 
 def main() :
     print('ecad version: ' + ecad.__version__)
-
-    mgr = ecad.DataMgr
-    mgr.init(ecad.LogLevel.TRACE)
 
     chip_locations = [
         -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
         5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,]
     
-    setup_design("CAS300M12BM2", chip_locations)
-    # static_thermal_flow()
+    # setup_design("CAS300M12BM2_Test", chip_locations)
+    static_thermal_flow()
 
-    mgr.shut_down()
     print('every thing is fine')
 
 if __name__ == '__main__' :

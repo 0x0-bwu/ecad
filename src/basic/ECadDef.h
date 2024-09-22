@@ -209,7 +209,7 @@ ECAD_ALWAYS_INLINE std::string toString(EDefinitionType type)
 
 enum class EFlattenOption
 {
-
+    NO = -1,
 };
 
 enum class ECloneOption

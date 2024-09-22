@@ -45,6 +45,10 @@ void ecad_init_datamgr(py::module_ & m)
         .def("create_stackup_layer", [](const std::string & name, ELayerType type, EFloat elevation, EFloat thickness, const std::string & conductingMat, const std::string & dielectricMat)
             { return EDataMgr::Instance().CreateStackupLayer(name, type, elevation, thickness, conductingMat, dielectricMat); })
 
+        // layermap
+        .def("create_layer_map", [](Ptr<IDatabase> database, const std::string & name)
+            { return EDataMgr::Instance().CreateLayerMap(database, name); }, py::return_value_policy::reference)
+
         // material
         .def("create_material_def", [](Ptr<IDatabase> database, const std::string & name)
             { return EDataMgr::Instance().CreateMaterialDef(database, name); }, py::return_value_policy::reference)
@@ -56,11 +60,16 @@ void ecad_init_datamgr(py::module_ & m)
         // component def
         .def("create_component_def", [](Ptr<IDatabase> database, const std::string & name)
             { return EDataMgr::Instance().CreateComponentDef(database, name); }, py::return_value_policy::reference)
+        .def("find_component_def_by_name", [](Ptr<IDatabase> database, const std::string & name)
+            { return EDataMgr::Instance().FindComponentDefByName(database, name); }, py::return_value_policy::reference)
 
         .def("create_component_def_pin", [](Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
             { return EDataMgr::Instance().CreateComponentDefPin(compDef, pinName, loc, type, psDef, lyr); }, py::return_value_policy::reference)
         .def("create_component_def_pin", [](Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type)
             { return EDataMgr::Instance().CreateComponentDefPin(compDef, pinName, loc, type); }, py::return_value_policy::reference)
+
+        .def("create_component", [](Ptr<ILayoutView> layout, const std::string & name, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped)
+            { return EDataMgr::Instance().CreateComponent(layout, name, compDef, layer, transform, flipped); }, py::return_value_policy::reference)
 
         // bondwire
         .def("create_bondwire", [](Ptr<ILayoutView> layout, std::string name, ENetId net, EFloat radius)
@@ -72,7 +81,15 @@ void ecad_init_datamgr(py::module_ & m)
         .def("create_padstack_def_data", []
             { return EDataMgr::Instance().CreatePadstackDefData(); })
         
-        //Shape
+        // cell inst
+        .def("create_cell_inst", [](Ptr<ILayoutView> layout, const std::string & name, Ptr<ILayoutView> defLayout, const ETransform2D & transform)
+            { return EDataMgr::Instance().CreateCellInst(layout, name, defLayout, transform); }, py::return_value_policy::reference)
+
+        // primitive
+        .def("create_geometry_2d", [](Ptr<ILayoutView> layout, ELayerId layer, ENetId net, CPtr<EShape> shape)
+            { return EDataMgr::Instance().CreateGeometry2D(layout, layer, net, shape->Clone()); }, py::return_value_policy::reference)
+
+        // shape
         .def("create_shape_rectangle", [](const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
             { return EDataMgr::Instance().CreateShapeRectangle(coordUnits, ll, ur); })
         .def("create_shape_circle", [](const ECoordUnits & coordUnits, const FPoint2D & loc, EFloat radius)
@@ -87,6 +104,9 @@ void ecad_init_datamgr(py::module_ & m)
             { return EDataMgr::Instance().CreateShapePolygonWithHoles(std::move(pwh)); })
         .def("create_box", [](const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
             { return EDataMgr::Instance().CreateBox(coordUnits, ll, ur); })
+
+        .def("create_transform_2d", [](const ECoordUnits & coordUnits, EFloat scale, EFloat rotation, const FVector2D & offset, EMirror2D mirror)
+            { return EDataMgr::Instance().CreateTransform2D(coordUnits, scale, rotation, offset, mirror); })
             
         // settings
         .def("hier_sep", []

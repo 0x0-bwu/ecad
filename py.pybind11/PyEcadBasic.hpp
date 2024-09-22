@@ -71,6 +71,10 @@ void ecad_init_basic(py::module_ & m)
         .value("BIN", EArchiveFormat::BIN)
     ;
 
+    py::enum_<EFlattenOption>(m, "FlattenOption")
+        .value("NO", EFlattenOption::NO)
+    ;
+
     py::enum_<ECoordUnits::Unit>(m, "CoordUnit")
         .value("NANOMETER", ECoordUnits::Unit::Nanometer)
         .value("MICROMETER", ECoordUnits::Unit::Micrometer)
@@ -110,6 +114,12 @@ void ecad_init_basic(py::module_ & m)
 
     py::enum_<ELayerId>(m, "LayerId")
         .value("NO_LAYER", ELayerId::noLayer)
+    ;
+
+    py::enum_<EBondwireType>(m, "BondwireType")
+        .value("INVALID", EBondwireType::Invalid)
+        .value("SIMPLE", EBondwireType::Simple)
+        .value("JEDEC4", EBondwireType::JEDEC4)
     ;
 
     py::enum_<EMaterialType>(m, "MaterialType")
@@ -177,6 +187,8 @@ void ecad_init_basic(py::module_ & m)
         .def_property("y", [](const FPoint2D & p){ return p[1]; }, [](FPoint2D & p, FCoord y){ return p[1] = y; })
     ;
 
+    m.attr("FVector2D") = m.attr("FPoint2D");
+
     py::class_<EPoint3D>(m, "Point3D")
         .def(py::init<>())
         .def(py::init<ECoord, ECoord, ECoord>())
@@ -234,6 +246,16 @@ void ecad_init_basic(py::module_ & m)
         .def(py::init<>())
         .def_readwrite("outline", &EPolygonWithHolesData::outline)
         .def_readwrite("holes", &EPolygonWithHolesData::holes)
+    ;
+
+    py::enum_<EMirror2D>(m, "Mirror2D")
+        .value("NO", EMirror2D::No)
+        .value("X" , EMirror2D::X)
+        .value("Y" , EMirror2D::Y)
+        .value("XY", EMirror2D::XY)
+    ;
+
+    py::class_<ETransform2D>(m, "Transform2D")
     ;
 
     py::class_<EShape, PyShape>(m, "Shape")

@@ -9,6 +9,9 @@ void ecad_init_design(py::module_ & m)
         .def("get_flattened_layout_view", &ICell::GetFlattenedLayoutView, py::return_value_policy::reference)
     ;
 
+    py::class_<ICellInst>(m, "CellInst")
+    ;
+
     py::class_<IDatabase>(m, "Database")
         .def("get_name", &IDatabase::GetName, py::return_value_policy::reference)
         .def_property("coord_units", &IDatabase::GetCoordUnits, &IDatabase::SetCoordUnits)
@@ -23,14 +26,33 @@ void ecad_init_design(py::module_ & m)
     py::class_<IComponent>(m, "Component")
         .def("get_name", &IComponent::GetName, py::return_value_policy::reference)
         .def("get_bounding_box", &IComponent::GetBoundingBox)
+        .def("set_loss_power", &IComponent::SetLossPower)
+        .def("set_dynamic_power_scenario", &IComponent::SetDynamicPowerScenario)
     ;
 
     py::class_<INet>(m, "Net")
     ;
 
     py::class_<ILayer>(m, "Layer")
+        .def("get_layer_id", &ILayer::GetLayerId)
+    ;
+
+    py::class_<IIterator<ILayer>>(m, "LayerIter")
+        .def("next", &IIterator<ILayer>::Next, py::return_value_policy::reference)
+    ;
+
+    py::class_<ILayerMap>(m, "LayerMap")
+        .def("set_mapping", &ILayerMap::SetMapping)
     ;
     
+    py::class_<IPrimitive>(m, "Primitive")
+        .def("get_bondwire_from_primitive", &IPrimitive::GetBondwireFromPrimitive)
+    ;
+
+    py::class_<IIterator<IPrimitive>>(m, "PrimitiveIter")
+        .def("next", &IIterator<IPrimitive>::Next, py::return_value_policy::reference)
+    ;
+
     py::class_<ILayoutView>(m, "LayoutView")
         .def("get_name", &ILayoutView::GetName, py::return_value_policy::reference)
         .def("get_coord_units", &ILayoutView::GetCoordUnits, py::return_value_policy::reference)
@@ -41,6 +63,9 @@ void ecad_init_design(py::module_ & m)
         .def("append_layer", [](ILayoutView & layout, CPtr<ILayer> layer){
             return layout.AppendLayer(layer->Clone());
         })
+        .def("get_layer_iter", &ILayoutView::GetLayerIter)
+        .def("get_primitive_iter", &ILayoutView::GetPrimitiveIter)
+        .def("flatten", &ILayoutView::Flatten)
         .def("run_thermal_simulation", [](ILayoutView & layout, const EThermalStaticSimulationSetup & simulationSetup){
             std::vector<EFloat> temperatures;
             auto range = layout.RunThermalSimulation(simulationSetup, temperatures);
@@ -53,6 +78,13 @@ void ecad_init_design(py::module_ & m)
         .def("set_start_layer", py::overload_cast<ELayerId>(&IBondwire::SetStartLayer))
         .def("set_end_layer", py::overload_cast<ELayerId, const EPoint2D &, bool>(&IBondwire::SetEndLayer))
         .def("set_end_layer", py::overload_cast<ELayerId>(&IBondwire::SetEndLayer))
+        .def("set_start_component", &IBondwire::SetStartComponent)
+        .def("set_bondwire_type", &IBondwire::SetBondwireType)
+        .def("set_solder_joints", &IBondwire::SetSolderJoints)
+        .def("set_material", &IBondwire::SetMaterial)
+        .def("set_height", &IBondwire::SetHeight)
+        .def("get_height", &IBondwire::GetHeight)
+        .def("get_radius", &IBondwire::GetRadius)
         .def("set_current", &IBondwire::SetCurrent)
         .def("set_dynamic_power_scenario", &IBondwire::SetDynamicPowerScenario)
     ;
