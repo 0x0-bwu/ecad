@@ -1,21 +1,12 @@
-#include <boost/stacktrace.hpp>
 #include <string_view>
 #include <filesystem>
 #include <cassert>
-#include <csignal>
 
 #include "Common.hpp"
 #include "../test/TestData.hpp"
 #include "generic/tools/StringHelper.hpp"
 #include "utility/ELayoutRetriever.h"
 #include "EDataMgr.h"
-
-void SignalHandler(int signum)
-{
-    ::signal(signum, SIG_DFL);
-    std::cout << boost::stacktrace::stacktrace();
-    ::raise(SIGABRT);
-}
 
 using namespace ecad;
 using namespace generic;
@@ -57,9 +48,6 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
 
 int main(int argc, char * argv[])
 {
-    ::signal(SIGSEGV, &SignalHandler);
-    ::signal(SIGABRT, &SignalHandler);
-
     eDataMgr.Init(ecad::ELogLevel::Trace);
 
     std::string filename = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "design" + ECAD_SEPS + "CAS300M12BM2.ecad";

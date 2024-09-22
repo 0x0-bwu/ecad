@@ -10,6 +10,7 @@ void ecad_init_design(py::module_ & m)
     ;
 
     py::class_<ICellInst>(m, "CellInst")
+        .def("set_layer_map", &ICellInst::SetLayerMap)
     ;
 
     py::class_<IDatabase>(m, "Database")
@@ -46,7 +47,7 @@ void ecad_init_design(py::module_ & m)
     ;
     
     py::class_<IPrimitive>(m, "Primitive")
-        .def("get_bondwire_from_primitive", &IPrimitive::GetBondwireFromPrimitive)
+        .def("get_bondwire_from_primitive", &IPrimitive::GetBondwireFromPrimitive, py::return_value_policy::reference)
     ;
 
     py::class_<IIterator<IPrimitive>>(m, "PrimitiveIter")
@@ -79,6 +80,7 @@ void ecad_init_design(py::module_ & m)
         .def("set_end_layer", py::overload_cast<ELayerId, const EPoint2D &, bool>(&IBondwire::SetEndLayer))
         .def("set_end_layer", py::overload_cast<ELayerId>(&IBondwire::SetEndLayer))
         .def("set_start_component", &IBondwire::SetStartComponent)
+        .def("set_end_component", &IBondwire::SetEndComponent)
         .def("set_bondwire_type", &IBondwire::SetBondwireType)
         .def("set_solder_joints", &IBondwire::SetSolderJoints)
         .def("set_material", &IBondwire::SetMaterial)

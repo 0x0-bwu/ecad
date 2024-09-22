@@ -1,5 +1,4 @@
 #include "EDataMgr.h"
-
 #include "extension/ECadExtension.h"
 #include "design/EPadstackDefData.h"
 #include "design/EComponentDef.h"
@@ -10,10 +9,26 @@
 #include "design/ELayer.h"
 #include "design/ECell.h"
 #include "basic/EShape.h"
+
+#include <boost/stacktrace.hpp>
+#include <csignal>
+
 namespace ecad {
+
+ECAD_INLINE void SignalHandler(int signum)
+{
+    ::signal(signum, SIG_DFL);
+    std::cout << boost::stacktrace::stacktrace();
+    ::raise(SIGABRT);
+}
 
 ECAD_INLINE EDataMgr::EDataMgr()
 {
+    static std::once_flag flag;
+    std::call_once(flag, []{
+        ::signal(SIGSEGV, &SignalHandler);
+        ::signal(SIGABRT, &SignalHandler);
+    });
 }
 
 ECAD_INLINE EDataMgr::~EDataMgr()

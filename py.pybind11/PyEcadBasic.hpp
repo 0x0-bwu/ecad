@@ -53,7 +53,7 @@ void ecad_init_basic(py::module_ & m)
     m.attr("__version__") = toString(CURRENT_VERSION);
 
     m.def("coord_to_point2d", &Coord2Point2D<ECoord>);
-    m.def("fcoord_to_fpoint2d", &Coord2Point2D<FCoord>);
+    m.def("coord_to_fpoint2d", &Coord2Point2D<FCoord>);
 
     py::enum_<ELogLevel>(m, "LogLevel")
         .value("TRACE", ELogLevel::Trace)

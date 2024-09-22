@@ -1,21 +1,12 @@
-#include <boost/stacktrace.hpp>
 #include <string_view>
 #include <filesystem>
 #include <cassert>
-#include <csignal>
 
 #include "Common.hpp"
 #include "../test/TestData.hpp"
 #include "generic/tools/StringHelper.hpp"
 #include "utility/ELayoutRetriever.h"
 #include "EDataMgr.h"
-
-void SignalHandler(int signum)
-{
-    ::signal(signum, SIG_DFL);
-    std::cout << boost::stacktrace::stacktrace();
-    ::raise(SIGABRT);
-}
 
 using namespace ecad;
 using namespace generic;
@@ -598,7 +589,7 @@ Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat>
     
     //instance
     auto driver = eDataMgr.CreateCellInst(baseLayout, "Driver", driverLayout, eDataMgr.CreateTransform2D(coordUnits, 1, 0, {44, 0}, EMirror2D::XY));
-    driver->SetLayerMap( driverLayerMap);
+    driver->SetLayerMap(driverLayerMap);
 
     std::vector<FPoint2D> botCompLoc;
     for (size_t i = 0; i < 6; ++i)
@@ -646,9 +637,6 @@ Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat>
 
 int main(int argc, char * argv[])
 {
-    ::signal(SIGSEGV, &SignalHandler);
-    ::signal(SIGABRT, &SignalHandler);
-
     eDataMgr.Init(ecad::ELogLevel::Trace);
     std::vector<EFloat> parameters = {
         -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
