@@ -13,9 +13,9 @@ class ECAD_API EUidGenerator
     void serialize(Archive & ar, const unsigned int version)
     {
         ECAD_UNUSED(version)
-        EUid uid;
+        EUid uid{m_uid.load()};
         ar & boost::serialization::make_nvp("uid", uid);
-        m_uid.store(uid);
+        if constexpr (Archive::is_loading::value) m_uid.store(uid);
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
