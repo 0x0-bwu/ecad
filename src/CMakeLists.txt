@@ -1,73 +1,28 @@
 
+add_subdirectory(basic)
+add_subdirectory(collection)
+add_subdirectory(design)
+add_subdirectory(utility)
+add_subdirectory(model)
+add_subdirectory(extension)
+add_subdirectory(extraction)
+add_subdirectory(solver)
+add_subdirectory(simulation)
+
 add_library(Ecad SHARED
-extension/dmcdom/ECadExtDmcDomHandler.cpp
-extension/gds/ECadExtGdsHandler.cpp
-extension/gds/EGdsFileIO.cpp
-extension/gds/EGdsLayerMap.cpp
-extension/gds/EGdsParser.cpp
-extension/xfl/ECadExtXflHandler.cpp
-extension/ECadExtension.cpp
-models/thermal/io/EChipThermalModelIO.cpp
-models/thermal/io/EGridThermalModelIO.cpp
-models/thermal/io/EPrismaThermalModelIO.cpp
-models/thermal/io/EThermalModelIO.cpp
-models/thermal/utilities/EThermalModelReduction.cpp
-models/thermal/EChipThermalModel.cpp
-models/thermal/EGridThermalModel.cpp
-models/thermal/EPrismaThermalModel.cpp
-models/thermal/EThermalModel.cpp
-simulation/EThermalNetworkExtraction.cpp
-solvers/utilities/EGridThermalNetworkBuilder.cpp
-solvers/utilities/EPrismaThermalNetworkBuilder.cpp
-solvers/EThermalNetworkSolver.cpp
-utilities/EBoundaryCalculator.cpp
-utilities/EFlattenUtility.cpp
-utilities/ELayout2CtmUtility.cpp
-utilities/ELayoutConnectivity.cpp
-utilities/ELayoutMergeUtility.cpp
-utilities/ELayoutPolygonMerger.cpp
-utilities/ELayoutRetriever.cpp
-utilities/ELayoutViewRenderer.cpp
-utilities/EMetalFractionMapping.cpp
-ECell.cpp
-ECellCollection.cpp
-ECellInst.cpp
-ECellInstCollection.cpp
-ECollection.cpp
-ECollectionCollection.cpp
-EComponent.cpp
-EComponentCollection.cpp
-EComponentDef.cpp
-EComponentDefCollection.cpp
-EComponentDefPin.cpp
-EComponentDefPinCollection.cpp
-EConnObj.cpp
-EConnObjCollection.cpp
-EDatabase.cpp
 EDataMgr.cpp
-EDefinition.cpp
-EDefinitionCollection.cpp
-EHierarchyObj.cpp
-EHierarchyObjCollection.cpp
-ELayer.cpp
-ELayerCollection.cpp
-ELayerMap.cpp
-ELayerMapCollection.cpp
-ELayoutView.cpp
-EMaterialDef.cpp
-EMaterialDefCollection.cpp
-EMaterialProp.cpp
-ENet.cpp
-ENetCollection.cpp
-EObject.cpp
-EPadstackDef.cpp
-EPadstackDefCollection.cpp
-EPadstackDefData.cpp
-EPadstackInst.cpp
-EPadstackInstCollection.cpp
-EPrimitive.cpp
-EPrimitiveCollection.cpp
-EShape.cpp
 )
 
-target_link_libraries(Ecad Emesh ${PNG_LIBRARY} boost_serialization)
+target_link_libraries(Ecad
+    Ebasic
+    Ecollection
+    Edesign
+    Eutility
+    Emodel
+    Eextension
+    Eextraction
+    Esolver
+    Esimulation
+    ${PNG_LIBRARY} 
+    boost_serialization
+)

@@ -1,0 +1,22 @@
+add_library(Edesign
+    ECell.cpp
+    ECellInst.cpp
+    EComponent.cpp
+    EComponentDef.cpp
+    EComponentDefPin.cpp
+    EConnObj.cpp
+    EDatabase.cpp
+    EDefinition.cpp
+    EHierarchyObj.cpp
+    ELayer.cpp
+    ELayerMap.cpp
+    ELayoutView.cpp
+    EMaterialDef.cpp
+    EMaterialProp.cpp
+    ENet.cpp
+    EObject.cpp
+    EPadstackDef.cpp
+    EPadstackDefData.cpp
+    EPadstackInst.cpp
+    EPrimitive.cpp
+)

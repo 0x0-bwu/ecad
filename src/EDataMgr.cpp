@@ -1,44 +1,58 @@
 #include "EDataMgr.h"
-
 #include "extension/ECadExtension.h"
-#include "EPadstackDefData.h"
-#include "EComponentDef.h"
-#include "EMaterialProp.h"
-#include "ELayoutView.h"
-#include "EDatabase.h"
-#include "ELayerMap.h"
-#include "ELayer.h"
-#include "EShape.h"
-#include "ECell.h"
+#include "design/EPadstackDefData.h"
+#include "design/EComponentDef.h"
+#include "design/EMaterialProp.h"
+#include "design/ELayoutView.h"
+#include "design/EDatabase.h"
+#include "design/ELayerMap.h"
+#include "design/ELayer.h"
+#include "design/ECell.h"
+#include "basic/EShape.h"
+
+#include <boost/stacktrace.hpp>
+#include <csignal>
+
 namespace ecad {
+
+ECAD_INLINE void SignalHandler(int signum)
+{
+    ::signal(signum, SIG_DFL);
+    std::cout << boost::stacktrace::stacktrace();
+    ::raise(SIGABRT);
+}
 
 ECAD_INLINE EDataMgr::EDataMgr()
 {
+    static std::once_flag flag;
+    std::call_once(flag, []{
+        ::signal(SIGSEGV, &SignalHandler);
+        ::signal(SIGABRT, &SignalHandler);
+    });
 }
 
 ECAD_INLINE EDataMgr::~EDataMgr()
 {
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabase(const std::string & name)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabase(const std::string & name)
 {
-    if(m_databases.count(name)) return nullptr;
+    if (m_databases.count(name)) return nullptr;
 
     auto database = std::make_shared<EDatabase>(name);
-    m_databases.insert(std::make_pair(name, database));
-    return database;
+    return m_databases.emplace(name, database).first->second.get();
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::OpenDatabase(const std::string & name)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::OpenDatabase(const std::string & name)
 {
-    if(!m_databases.count(name)) return nullptr;
-    //todo, add is open flag
-    return m_databases[name];
+    auto iter = m_databases.find(name);
+    if (iter == m_databases.cend()) return nullptr;
+    return iter->second.get();
 }
 
 ECAD_INLINE bool EDataMgr::RemoveDatabase(const std::string & name)
 {
-    return m_databases.erase(name) > 0;
+    return m_databases.erase(std::string(name)) > 0;
 }
 
 ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
@@ -49,47 +63,44 @@ ECAD_INLINE void EDataMgr::ShutDown(bool autoSave)
     log::ShutDown();
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap)
 {
-    if (m_databases.count(name)) return nullptr;
-
-    auto database = ext::CreateDatabaseFromGds(name, gds, lyrMap);
-    if (database) m_databases.insert(std::make_pair(name, database));
-    return database;
+    return ext::CreateDatabaseFromGds(name, gds, lyrMap);
 }
 
-ECAD_INLINE SPtr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & name, const std::string & xfl)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromKiCad(const std::string & name, const std::string & kicad)
 {
-    if(m_databases.count(name)) return nullptr;
+    return ext::CreateDatabaseFromKiCad(name, kicad);
+}
 
-    auto database = ext::CreateDatabaseFromXfl(name, xfl);
-    if(database) {
-        m_databases.insert(std::make_pair(name, database));
-    }
-    return database;
+ECAD_INLINE Ptr<IDatabase> EDataMgr::CreateDatabaseFromXfl(const std::string & name, const std::string & xfl)
+{
+    return ext::CreateDatabaseFromXfl(name, xfl);
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-ECAD_INLINE bool EDataMgr::SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
+ECAD_INLINE bool EDataMgr::SaveDatabase(CPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
 {
-    if(nullptr == database) return false;
+    ECAD_ASSERT(database)
     return database->Save(archive, fmt);
 }
     
-ECAD_INLINE bool EDataMgr::LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt)
+ECAD_INLINE Ptr<IDatabase> EDataMgr::LoadDatabase(const std::string & archive, EArchiveFormat fmt)
 {
-    if(nullptr == database) return false;
-    return database->Load(archive, fmt);
+    auto database = std::make_shared<EDatabase>("");
+    if (not database->Load(archive, fmt)) return nullptr;
+    if (m_databases.count(database->GetName())) return nullptr;
+    return m_databases.emplace(database->GetName(), database).first->second.get();
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE Ptr<ICell> EDataMgr::CreateCircuitCell(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<ICell> EDataMgr::CreateCircuitCell(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateCircuitCell(name);
 }
 
-ECAD_INLINE Ptr<ICell> EDataMgr::FindCellByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<ICell> EDataMgr::FindCellByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindCellByName(name);
@@ -101,7 +112,7 @@ ECAD_INLINE Ptr<INet> EDataMgr::CreateNet(Ptr<ILayoutView> layout, const std::st
     return layout->CreateNet(name);
 }
 
-ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std::string & name)
+ECAD_INLINE Ptr<INet> EDataMgr::FindNetByName(Ptr<ILayoutView> layout, const std::string & name) const
 {
     if(nullptr == layout) return nullptr;
     return layout->FindNetByName(name);
@@ -118,25 +129,25 @@ ECAD_INLINE UPtr<ILayer> EDataMgr::CreateStackupLayer(const std::string & name, 
     return UPtr<ILayer>(stackupLayer);
 }
 
-ECAD_INLINE Ptr<IComponentDef> EDataMgr::CreateComponentDef(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IComponentDef> EDataMgr::CreateComponentDef(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateComponentDef(name);
 }
 
-ECAD_INLINE Ptr<IComponentDef> EDataMgr::FindComponentDefByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IComponentDef> EDataMgr::FindComponentDefByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindComponentDefByName(name);
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EDataMgr::CreateMaterialDef(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IMaterialDef> EDataMgr::CreateMaterialDef(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateMaterialDef(name);
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IMaterialDef> EDataMgr::FindMaterialDefByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindMaterialDefByName(name);
@@ -157,25 +168,30 @@ ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateTensorMateriaProp(const std::arr
     return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }
 
-ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreatePolynomialMaterialProp(std::vector<std::vector<EFloat>> coefficients)
+{
+    return UPtr<IMaterialProp>(new EMaterialPropPolynomial(std::move(coefficients)));
+}
+
+ECAD_INLINE Ptr<ILayerMap> EDataMgr::CreateLayerMap(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreateLayerMap(name);
 }
 
-ECAD_INLINE Ptr<ILayerMap> EDataMgr::FindLayerMapByName(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<ILayerMap> EDataMgr::FindLayerMapByName(CPtr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->FindLayerMapByName(name);
 }
 
-ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(SPtr<IDatabase> database, const std::string & name)
+ECAD_INLINE Ptr<IPadstackDef> EDataMgr::CreatePadstackDef(Ptr<IDatabase> database, const std::string & name)
 {
     if(nullptr == database) return nullptr;
     return database->CreatePadstackDef(name);
 }
 
-ECAD_INLINE Ptr<IPadstackDef> EDataMgr::FindPadstackDefByName(SPtr<IDatabase> database, const std::string & name) const
+ECAD_INLINE Ptr<IPadstackDef> EDataMgr::FindPadstackDefByName(CPtr<IDatabase> database, const std::string & name) const
 {
     if(nullptr == database) return nullptr;
     return database->FindPadstackDefByName(name);
@@ -223,11 +239,10 @@ ECAD_INLINE Ptr<IPrimitive> EDataMgr::CreateGeometry2D(Ptr<ILayoutView> layout, 
     return layout->CreateGeometry2D(layer, net, std::move(shape));
 }
 
-ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, const FPoint2D & start, const FPoint2D & end, EFloat radius)
+ECAD_INLINE Ptr<IBondwire> EDataMgr::CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EFloat radius)
 {
     if (nullptr == layout) return nullptr;
-    const auto & coordUnits = layout->GetDatabase()->GetCoordUnits();
-    return layout->CreateBondwire(std::move(name), net, coordUnits.toCoord(start), coordUnits.toCoord(end), radius);
+    return layout->CreateBondwire(std::move(name), net, radius);
 }
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur)
@@ -245,10 +260,24 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePath(const ECoordUnits & coordUnit
     return CreateShapePath(coordUnits.toCoord(points), coordUnits.toCoord(width));
 }
 
-ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points)
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat cornerR)
 {
+    if (cornerR > 0) {
+        generic::geometry::Polygon2D<EFloat> polygon; polygon.Set(points);
+        polygon = generic::geometry::RoundCorners(polygon, cornerR, CircleDiv());
+        return CreateShapePolygon(coordUnits.toCoord(polygon.GetPoints()));
+    }
     return CreateShapePolygon(coordUnits.toCoord(points));
 }
+
+ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FCoord> & coords, EFloat cornerR)
+{
+    std::vector<FPoint2D> points(coords.size() / 2);
+    for (size_t i = 0; i < points.size(); ++i)
+        points[i] = FPoint2D(coords.at(i * 2), coords.at(i * 2 + 1));
+    return CreateShapePolygon(coordUnits, points, cornerR);
+}
+
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur)
 {
@@ -258,7 +287,7 @@ ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeRectangle(EPoint2D ll, EPoint2D ur
 
 ECAD_INLINE UPtr<EShape> EDataMgr::CreateShapeCircle(EPoint2D loc, ECoord radius)
 {
-    auto shape = new ECircle(std::move(loc), radius, DefaultCircleDiv());
+    auto shape = new ECircle(std::move(loc), radius, CircleDiv());
     return UPtr<EShape>(shape);
 }
 
@@ -333,34 +362,39 @@ ECAD_INLINE EDataMgr & EDataMgr::Instance()
     return mgr;
 }
 
-size_t EDataMgr::DefaultThreads() const
+ECAD_INLINE char EDataMgr::HierSep() const
+{
+    return m_settings.hierSep;
+}
+
+ECAD_INLINE size_t EDataMgr::Threads() const
 {
     return m_settings.threads;
 }
 
-void EDataMgr::SetDefaultThreads(size_t threads)
+ECAD_INLINE void EDataMgr::SetThreads(size_t threads)
 {
     m_settings.threads = threads;
 }
 
-size_t EDataMgr::DefaultCircleDiv() const
+ECAD_INLINE size_t EDataMgr::CircleDiv() const
 {
     return m_settings.circleDiv;
 }
 
-void EDataMgr::Init()
+ECAD_INLINE void EDataMgr::Init(ELogLevel level, const std::string & workDir)
 {   
     //threads
     m_settings.threads = std::thread::hardware_concurrency();
+#ifdef ECAD_OPEN_MP_SUPPORT
+    Eigen::setNbThreads(m_settings.threads);
+#endif//ECAD_OPEN_MP_SUPPORT
 
     //log
-    std::string logFile = generic::fs::CurrentPath() + ECAD_SEPS + "ecad.log";
-    auto traceSink = std::make_shared<log::StreamSinkMT>(std::cout);
-    auto infoSink  = std::make_shared<log::FileSinkMT>(logFile);
-    traceSink->SetLevel(log::Level::Trace);
-    infoSink->SetLevel(log::Level::Info);
-    auto logger = log::MultiSinksLogger("ecad", {traceSink, infoSink});
-    logger->SetLevel(log::Level::Trace);
+    std::string logFile = workDir.empty() ? generic::fs::CurrentPath() : workDir + ECAD_SEPS + "ecad.log";
+    auto logger = workDir.empty() ? log::OstreamLoggerMT("ecad", std::cout) : 
+                log::BasicLoggerMT("ecad", workDir + ECAD_SEPS + "ecad.log");
+    logger->SetLevel(level);
     log::SetDefaultLogger(logger);
 }
 }//namespace ecad

@@ -1,6 +1,5 @@
 #pragma once
-#include "ECadCommon.h"
-#include "ECadDef.h"
+#include "basic/ECadCommon.h"
 #include <unordered_map>
 #include <istream>
 #include <list>

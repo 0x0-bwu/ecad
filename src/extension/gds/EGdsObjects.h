@@ -1,8 +1,8 @@
 #pragma once
+#include "basic/ECadCommon.h"
+#include "basic/EShape.h"
 #include "generic/geometry/Geometries.hpp"
 #include "extension/gds/EGdsRecords.h"
-#include "ECadCommon.h"
-#include "EShape.h"
 #include <unordered_map>
 #include <unordered_set>
 namespace ecad {

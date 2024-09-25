@@ -4,15 +4,15 @@
 #include <boost/test/test_tools.hpp>
 #include "generic/tools/Format.hpp"
 #include "generic/tools/FileSystem.hpp"
-#include "solvers/EThermalNetworkSolver.h"
-#include "models/thermal/io/EThermalModelIO.h"
-#include "models/thermal/io/EGridThermalModelIO.h"
-#include "models/thermal/utilities/EThermalModelReduction.h"
+#include "solver/thermal/EThermalNetworkSolver.h"
+#include "model/thermal/io/EThermalModelIO.h"
+#include "model/thermal/io/EGridThermalModelIO.h"
+#include "model/thermal/utils/EThermalModelReduction.h"
 #include "TestData.hpp"
 using namespace boost::unit_test;
 using namespace ecad;
-using namespace ecad::esolver;
-using namespace ecad::emodel::etherm;
+using namespace ecad::solver;
+using namespace ecad::model;
 void t_grid_thermal_model_solver_test()
 {
     std::string err;
@@ -25,65 +25,23 @@ void t_grid_thermal_model_solver_test()
     BOOST_CHECK(model);
     
     auto size = model->ModelSize();
-    generic::log::Trace("size: (%1%, %2%)", size.x, size.y);
-    generic::log::Trace("total nodes: %1%", model->TotalGrids());
+    ECAD_TRACE("size: (%1%, %2%)", size.x, size.y)
+    ECAD_TRACE("total nodes: %1%", model->TotalGrids())
 
     //htc
-    EFloat iniT = 25.0;
-    auto bcModel = std::make_shared<EGridBCModel>(ESize2D(size.x, size.y));
-    bcModel->AddSample(iniT, EGridData(size.x, size.y, 200000));
-
-    model->SetTopBotBCModel(bcModel, bcModel);
-    model->SetTopBotBCType(EGridThermalModel::BCType::HTC, EGridThermalModel::BCType::HTC);
+    model->SetUniformBC(EOrientation::Top, EThermalBondaryCondition(200000, EThermalBondaryConditionType::HTC));
+    model->SetUniformBC(EOrientation::Bot, EThermalBondaryCondition(200000, EThermalBondaryConditionType::HTC));
 
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);
-    BOOST_CHECK(solver.Solve(iniT, results));
-
-    auto resModel = std::make_unique<EGridThermalModel>(*model);
-    auto resSize = resModel->GridSize();
-    auto & layer = resModel->GetLayers();
-    for(size_t z = 0; z < layer.size(); ++z) {
-        auto htMap = std::make_shared<ELayerMetalFraction>(resSize.x, resSize.y);
-        for(size_t x = 0; x < resSize.x; ++x) {
-            for(size_t y = 0; y < resSize.y; ++y) {
-                (*htMap)(x, y) = results[resModel->GetFlattenIndex(ESize3D(x, y, z))];
-            }
-        }
-        layer[z].SetMetalFraction(htMap);
-    }
-
-    std::string outDir = ecad_test::GetTestDataPath() + "/simulation/ctm/rhsc_ctm5";
-    std::string txtProfile = outDir + "/ThermalProfile_rhsc_ctm5.txt";
-    io::GenerateTxtProfile(*resModel, txtProfile);
-
-    using ValueType = typename ELayerMetalFraction::ResultType;
-    ValueType min = std::numeric_limits<ValueType>::max(), max = -min;
-    for(const auto & layer :  resModel->GetLayers()) {
-        auto htMap = layer.GetMetalFraction();
-        if(nullptr == htMap) continue;
-        min = std::min(min, htMap->MaxOccupancy(std::less<ValueType>()));
-        max = std::max(max, htMap->MaxOccupancy(std::greater<ValueType>()));
-    }
-    auto range = max - min;
-    generic::log::Trace("maxT: %1%, minT: %2%", max, min);
+    solver.settings.envTemperature.value = 25;
+    solver.settings.iteration = 3;
+    auto [minT, maxT] = solver.Solve(results);
+    BOOST_CHECK(results.empty());
+    BOOST_CHECK(isValid(minT));
+    BOOST_CHECK(isValid(maxT));
+    ECAD_TRACE("maxT: %1%, minT: %2%", maxT, minT)
     //max: 99.4709, min: 81.9183
-
-    size_t i = 0;
-    for(const auto & layer :  resModel->GetLayers()) {
-        auto htMap = layer.GetMetalFraction();
-        if(nullptr == htMap) continue;
-        min = std::min(min, htMap->MaxOccupancy(std::less<ValueType>()));
-        max = std::max(max, htMap->MaxOccupancy(std::greater<ValueType>()));
-        range = max - min;
-        auto rgbaFunc = [&min, &range](ValueType d) {
-            int r, g, b, a = 255;
-            generic::color::RGBFromScalar((d - min) / range, r, g, b);
-            return std::make_tuple(r, g, b, a);
-        };
-        std::string filepng = outDir + GENERIC_FOLDER_SEPS + "layer_" + std::to_string(++i) + ".png";
-        htMap->WriteImgProfile(filepng, rgbaFunc);
-    }
 }
 
 test_suite * create_ecad_solver_test_suite()

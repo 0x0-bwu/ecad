@@ -3,7 +3,6 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/test/test_tools.hpp>
 #include "generic/tools/FileSystem.hpp"
-#include "simulation/EThermalNetworkExtraction.h"
 #include "extension/ECadExtension.h"
 #include "TestData.hpp"
 #include "EDataMgr.h"
@@ -23,18 +22,15 @@ void t_thermal_network_extraction()
     BOOST_CHECK(cells.size() == 1);
     
     auto layout = cells.front()->GetLayoutView();
-    
-    EThermalNetworkExtractionSettings settings;
-    settings.outDir = ecad_test::GetTestDataPath() + "/simulation/thermal";
+    EGridThermalModelExtractionSettings settings(ecad_test::GetTestDataPath() + "/simulation/thermal", 4, {});
     settings.dumpHotmaps = true;
     settings.dumpDensityFile = true;
     settings.dumpTemperatureFile = true;
-    settings.grid = {25, 25};
-    settings.mergeGeomBeforeMetalMapping = true;
-
-    esim::EThermalNetworkExtraction ne;
-    ne.SetExtractionSettings(settings);
-    BOOST_CHECK(ne.GenerateGridThermalModel(layout));
+    settings.metalFractionMappingSettings.grid = {25, 25};
+    settings.metalFractionMappingSettings.mergeGeomBeforeMapping = true;
+    settings.botUniformBC.type = EThermalBondaryConditionType::HTC;
+    settings.botUniformBC.value = 2750;
+    BOOST_CHECK(layout->ExtractThermalModel(settings));
 
     EDataMgr::Instance().ShutDown();
 }

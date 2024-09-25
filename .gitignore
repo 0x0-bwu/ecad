@@ -20,4 +20,5 @@ build.release
 settings.json
 .VSCodeCounter
 .sconsign.dblite
-tools/__pycache__
+__pycache__
+examples/python/wolfspeed_results

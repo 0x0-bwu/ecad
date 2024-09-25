@@ -1,7 +1,6 @@
 #pragma once
-#include "ECadSettings.h"
-#include "Interface.h"
-#include "EShape.h"
+#include "basic/ECadSettings.h"
+#include "interface/Interface.h"
 
 #include <unordered_map>
 #include <memory>
@@ -10,59 +9,62 @@ namespace ecad {
 
 using namespace generic::geometry;
 
+class EShape;
 class ECAD_API EDataMgr
 {
 public:
     EDataMgr(const EDataMgr &) = delete;
     EDataMgr & operator= (const EDataMgr &) = delete;
-    void Init();
+    void Init(ELogLevel level = ELogLevel::Info, const std::string & workDir = {});
 
     ///Database
-    SPtr<IDatabase> CreateDatabase(const std::string & name);
-    SPtr<IDatabase> OpenDatabase(const std::string & name);
+    Ptr<IDatabase> CreateDatabase(const std::string & name);
+    Ptr<IDatabase> OpenDatabase(const std::string & name);
     bool RemoveDatabase(const std::string & name);
     void ShutDown(bool autoSave = true);
 
     ///Thirdpart
-    SPtr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap = std::string{});
-    SPtr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl);
+    Ptr<IDatabase> CreateDatabaseFromGds(const std::string & name, const std::string & gds, const std::string & lyrMap = std::string{});
+    Ptr<IDatabase> CreateDatabaseFromKiCad(const std::string & name, const std::string & kicad);
+    Ptr<IDatabase> CreateDatabaseFromXfl(const std::string & name, const std::string & xfl);
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-    bool SaveDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
-    bool LoadDatabase(SPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
+    bool SaveDatabase(CPtr<IDatabase> database, const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
+    Ptr<IDatabase> LoadDatabase(const std::string & archive, EArchiveFormat fmt = EArchiveFormat::BIN);
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
     ///Cell
-    Ptr<ICell> CreateCircuitCell(SPtr<IDatabase> database, const std::string & name);
-    Ptr<ICell> FindCellByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<ICell> CreateCircuitCell(Ptr<IDatabase> database, const std::string & name);
+    Ptr<ICell> FindCellByName(CPtr<IDatabase> database, const std::string & name);
 
     ///Net
     Ptr<INet> CreateNet(Ptr<ILayoutView> layout, const std::string & name);
-    Ptr<INet> FindNetByName(Ptr<ILayoutView> layout, const std::string & name);
+    Ptr<INet> FindNetByName(Ptr<ILayoutView> layout, const std::string & name) const;
 
     ///Layer
     UPtr<ILayer> CreateStackupLayer(const std::string & name, ELayerType type, EFloat elevation, EFloat thickness,
                                     const std::string & conductingMat = sDefaultConductingMat,
-                                    const std::string & dirlectricMat = sDefaultDielectricMat);
+                                    const std::string & dielectricMat = sDefaultDielectricMat);
     
     ///ComponentDef
-    Ptr<IComponentDef> CreateComponentDef(SPtr<IDatabase> database, const std::string & name);
-    Ptr<IComponentDef> FindComponentDefByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<IComponentDef> CreateComponentDef(Ptr<IDatabase> database, const std::string & name);
+    Ptr<IComponentDef> FindComponentDefByName(CPtr<IDatabase> database, const std::string & name);
 
     ///Material
-    Ptr<IMaterialDef> CreateMaterialDef(SPtr<IDatabase> database, const std::string & name);
-    Ptr<IMaterialDef> FindMaterialDefByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<IMaterialDef> CreateMaterialDef(Ptr<IDatabase> database, const std::string & name);
+    Ptr<IMaterialDef> FindMaterialDefByName(CPtr<IDatabase> database, const std::string & name);
     UPtr<IMaterialProp> CreateSimpleMaterialProp(EFloat value);
     UPtr<IMaterialProp> CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values);
     UPtr<IMaterialProp> CreateTensorMateriaProp(const std::array<EFloat, 9> & values);
+    UPtr<IMaterialProp> CreatePolynomialMaterialProp(std::vector<std::vector<EFloat>> coefficients);
 
     ///LayerMap
-    Ptr<ILayerMap> CreateLayerMap(SPtr<IDatabase> database, const std::string & name);
-    Ptr<ILayerMap> FindLayerMapByName(SPtr<IDatabase> database, const std::string & name);
+    Ptr<ILayerMap> CreateLayerMap(Ptr<IDatabase> database, const std::string & name);
+    Ptr<ILayerMap> FindLayerMapByName(CPtr<IDatabase> database, const std::string & name);
 
     ///PadstackDef
-    Ptr<IPadstackDef> CreatePadstackDef(SPtr<IDatabase> database, const std::string & name);
-    Ptr<IPadstackDef> FindPadstackDefByName(SPtr<IDatabase> database, const std::string & name) const;
+    Ptr<IPadstackDef> CreatePadstackDef(Ptr<IDatabase> database, const std::string & name);
+    Ptr<IPadstackDef> FindPadstackDefByName(CPtr<IDatabase> database, const std::string & name) const;
     UPtr<IPadstackDefData> CreatePadstackDefData();
 
     ///PadstackInst
@@ -83,14 +85,15 @@ public:
 
     ///Primitive
     Ptr<IPrimitive> CreateGeometry2D(Ptr<ILayoutView> layout, ELayerId layer, ENetId net, UPtr<EShape> shape);
-    Ptr<IBondwire> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, const FPoint2D & start, const FPoint2D & end, EFloat radius);
+    Ptr<IBondwire> CreateBondwire(Ptr<ILayoutView> layout, std::string name, ENetId net, EFloat radius);
 
     ///Shape
     UPtr<EShape> CreateShapeRectangle(const ECoordUnits & coordUnits, const FPoint2D & ll, const FPoint2D & ur);
     UPtr<EShape> CreateShapeCircle(const ECoordUnits & coordUnits, const FPoint2D & loc, EFloat radius);
     UPtr<EShape> CreateShapePath(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat width);
-    UPtr<EShape> CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points);
-    
+    UPtr<EShape> CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FPoint2D> & points, EFloat cornerR = 0);
+    UPtr<EShape> CreateShapePolygon(const ECoordUnits & coordUnits, const std::vector<FCoord> & coords, EFloat cornerR = 0);
+
     UPtr<EShape> CreateShapeRectangle(EPoint2D ll, EPoint2D ur);
     UPtr<EShape> CreateShapeCircle(EPoint2D loc, ECoord radius);
     UPtr<EShape> CreateShapePath(std::vector<EPoint2D> points, ECoord width);
@@ -112,10 +115,12 @@ public:
     Ptr<IComponentDefPin> CreateComponentDefPin(Ptr<IComponentDef> compDef, const std::string & pinName, FPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer);
     
     ///Settings
-    size_t DefaultThreads() const;
-    void SetDefaultThreads(size_t threads);
+    char HierSep() const;
 
-    size_t DefaultCircleDiv() const;
+    size_t Threads() const;
+    void SetThreads(size_t threads);
+
+    size_t CircleDiv() const;
 
     static EDataMgr & Instance();
 

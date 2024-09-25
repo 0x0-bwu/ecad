@@ -8,7 +8,7 @@
 using namespace boost::unit_test;
 using namespace ecad;
 
-bool f_serialization_database_varify(SPtr<IDatabase> database)
+bool f_serialization_database_varify(Ptr<IDatabase> database)
 {
     if(nullptr == database) return false;
 
