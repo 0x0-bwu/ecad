@@ -54,8 +54,8 @@ namespace thermal::solver {
                     solver.compute(m.G);
                     x = m.L * solver.solve(m.B * rhs);
 
-                    ECAD_TRACE("#iterations: %1%", solver.iterations())
-                    ECAD_TRACE("estimated error: %1%", solver.error())
+                    ECAD_TRACE("#iterations: %1%", solver.iterations());
+                    ECAD_TRACE("estimated error: %1%", solver.error());
                     break;
                 }
                 default : {
@@ -134,7 +134,7 @@ namespace thermal::solver {
                             auto res = sample;
                             auto begin = res.begin(); begin++;
                             std::for_each(begin, res.end(), [](auto & t){ t = generic::unit::Kelvins2Celsius(t); });
-                            ECAD_TRACE(generic::fmt::Fmt2Str(res, ","))
+                            ECAD_TRACE(generic::fmt::Fmt2Str(res, ","));
                         }
                         samples.emplace_back(std::move(sample));
                         count = 0;
@@ -249,7 +249,7 @@ namespace thermal::solver {
                     if (std::ifstream ifs(romLoadFile); ifs.is_open()) {
                         boost::archive::binary_iarchive ia(ifs);
                         boost::serialization::serialize(ia, rom, ecad::toInt(ecad::CURRENT_VERSION));
-                        ECAD_TRACE("load rom from file %1%", romLoadFile)
+                        ECAD_TRACE("load rom from file %1%", romLoadFile);
                         loadFromFile = true;
                     }
                 }
@@ -259,14 +259,14 @@ namespace thermal::solver {
                         tools::ProgressTimer t("reduce");
                         const size_t source = network.Source(includeBonds);
                         rom = Reduce(m, std::max(order, source));
-                        ECAD_TRACE("mor %1% -> %2%", rom.x.rows(), rom.x.cols())
+                        ECAD_TRACE("mor %1% -> %2%", rom.x.rows(), rom.x.cols());
                     }
                     if (not romSaveFile.empty()) {
                         generic::fs::CreateDir(generic::fs::DirName(romSaveFile));
                         if (std::ofstream ofs(romSaveFile); ofs.is_open()) {
                             boost::archive::binary_oarchive oa(ofs);
                             boost::serialization::serialize(oa, rom, ecad::toInt(ecad::CURRENT_VERSION));
-                            ECAD_TRACE("save rom to file %1%", romSaveFile)
+                            ECAD_TRACE("save rom to file %1%", romSaveFile);
                         }
                     }
                 }
@@ -338,7 +338,7 @@ namespace thermal::solver {
                             auto res = sample;
                             auto begin = res.begin(); begin++;
                             std::for_each(begin, res.end(), [](auto & t){ t = generic::unit::Kelvins2Celsius(t); });
-                            ECAD_TRACE(generic::fmt::Fmt2Str(res, ","))
+                            ECAD_TRACE(generic::fmt::Fmt2Str(res, ","));
                         }
                         samples.emplace_back(std::move(sample));
                         count = 0;

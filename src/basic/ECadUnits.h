@@ -11,6 +11,7 @@ namespace ecad {
 using namespace generic;
 using namespace generic::geometry;
 
+using ESize = std::size_t;
 struct ESize2D
 {
     size_t x = invalidIndex;

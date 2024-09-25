@@ -156,7 +156,7 @@ ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const 
                                 tri::Triangulation<EPoint2D> & triangulation, std::string meshFile)
 {
     ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, tolerance: %4%, ite: %5%", 
-                meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.tolerance, meshSettings.iteration)
+                meshSettings.minAlpha, meshSettings.minLen, meshSettings.maxLen, meshSettings.tolerance, meshSettings.iteration);
     auto minAlpha = math::Rad(meshSettings.minAlpha);
     auto minLen = coordUnits.toCoord(meshSettings.minLen);
     auto maxLen = coordUnits.toCoord(meshSettings.maxLen);
@@ -198,7 +198,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
     std::string meshFile = (settings.meshSettings.dumpMeshFile && not settings.workDir.empty()) ?
         settings.workDir + ECAD_SEPS + "mesh.png" : std::string{};
     GenerateMesh(compact->GetAllPolygonData(), compact->GetSteinerPoints(), coordUnits, settings.meshSettings, *triangulation, meshFile);
-    ECAD_TRACE("total mesh elements: %1%", triangulation->triangles.size())
+    ECAD_TRACE("total mesh elements: %1%", triangulation->triangles.size());
 
     ecad::utils::ELayoutRetriever retriever(layout);
     for (size_t layer = 0; layer < compact->TotalLayers(); ++layer) {
@@ -244,7 +244,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
                 ele.powerLut = iter->second.power;
             }
         }
-        ECAD_TRACE("layer %1%'s total elements: %2%", index, prismLayer.elements.size())
+        ECAD_TRACE("layer %1%'s total elements: %2%", index, prismLayer.elements.size());
     };
 
     for (size_t index = 0; index < model->TotalLayers(); ++index)
@@ -281,10 +281,10 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
     auto scaleH2Unit = coordUnits.Scale2Unit();
     auto scale2Meter = coordUnits.toUnit(coordUnits.toCoord(1), ECoordUnits::Unit::Meter);
     model->BuildPrismModel(scaleH2Unit, scale2Meter);
-    ECAD_TRACE("total prism elements: %1%", model->TotalPrismElements())
+    ECAD_TRACE("total prism elements: %1%", model->TotalPrismElements());
 
     model->AddBondWiresFromLayerCutModel(compact);
-    ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
+    ECAD_TRACE("total line elements: %1%", model->TotalLineElements());
 
     //bc
     if (settings.topUniformBC.isValid())
@@ -350,7 +350,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalMod
     }
     
     std::vector<EPoint2D> steinerPoints;//todo, bwu
-    ECAD_TRACE("generate mesh for %1% layers", prismTemplates.size())
+    ECAD_TRACE("generate mesh for %1% layers", prismTemplates.size());
     if (settings.threads > 1) {
         generic::thread::ThreadPool pool(settings.threads);
         for (size_t i = 0; i < prismTemplates.size(); ++i) {
@@ -414,7 +414,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalMod
                 ele.powerLut = iter->second.power;
             }
         }
-        ECAD_TRACE("layer %1%'s total elements: %2%", index, prismLayer.elements.size())
+        ECAD_TRACE("layer %1%'s total elements: %2%", index, prismLayer.elements.size());
     };
 
     for (size_t index = 0; index < model->TotalLayers(); ++index)
@@ -444,10 +444,10 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalMod
 
     model::utils::EStackupPrismThermalModelBuilder builder(model);
     builder.BuildPrismModel(scaleH2Unit, scale2Meter, settings.threads);
-    ECAD_TRACE("total prism elements: %1%", model->TotalPrismElements())
+    ECAD_TRACE("total prism elements: %1%", model->TotalPrismElements());
 
     builder.AddBondWiresFromLayerCutModel(compact);
-    ECAD_TRACE("total line elements: %1%", model->TotalLineElements())
+    ECAD_TRACE("total line elements: %1%", model->TotalLineElements());
 
     //bc
     if (settings.topUniformBC.isValid())

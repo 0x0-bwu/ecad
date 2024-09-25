@@ -42,7 +42,7 @@ void StaticThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir)
     setup.extractionSettings = ExtractionSettings(workDir);
     std::vector<EFloat> temperatures;
     auto [minT, maxT] = layout->RunThermalSimulation(setup, temperatures);    
-    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
+    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT);
     ECAD_TRACE("temperatures:[%1%]", fmt::Fmt2Str(temperatures, ","));
 }
 

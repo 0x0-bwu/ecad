@@ -25,8 +25,8 @@ void t_grid_thermal_model_solver_test()
     BOOST_CHECK(model);
     
     auto size = model->ModelSize();
-    ECAD_TRACE("size: (%1%, %2%)", size.x, size.y)
-    ECAD_TRACE("total nodes: %1%", model->TotalGrids())
+    ECAD_TRACE("size: (%1%, %2%)", size.x, size.y);
+    ECAD_TRACE("total nodes: %1%", model->TotalGrids());
 
     //htc
     model->SetUniformBC(EOrientation::Top, EThermalBondaryCondition(200000, EThermalBondaryConditionType::HTC));
@@ -40,7 +40,7 @@ void t_grid_thermal_model_solver_test()
     BOOST_CHECK(results.empty());
     BOOST_CHECK(isValid(minT));
     BOOST_CHECK(isValid(maxT));
-    ECAD_TRACE("maxT: %1%, minT: %2%", maxT, minT)
+    ECAD_TRACE("maxT: %1%, minT: %2%", maxT, minT);
     //max: 99.4709, min: 81.9183
 }
 

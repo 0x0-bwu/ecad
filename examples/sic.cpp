@@ -466,7 +466,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
         }
     };
     auto [minT, maxT] = layout->RunThermalSimulation(setup, excitation);    
-    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT)
+    ECAD_TRACE("minT: %1%, maxT: %2%", minT, maxT);
 }
 
 int main(int argc, char * argv[])

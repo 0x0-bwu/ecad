@@ -51,17 +51,17 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
         std::vector<EFloat> prevRes(results);
         auto network = builder.Build(prevRes);
         if (nullptr == network) return false;
-        ECAD_TRACE("total nodes: %1%", network->Size())
-        ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow)
-        ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow)
+        ECAD_TRACE("total nodes: %1%", network->Size());
+        ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow);
+        ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow);
 
         using namespace thermal::solver;
         ThermalNetworkSolver<EFloat> solver(*network, static_cast<int>(settings.solverType));
         solver.Solve(envT, results);
 
         residual = CalculateResidual(results, prevRes, settings.maximumRes);
-        ECAD_TRACE("P-T Iteration: %1%, Residual: %2%.", ++iteration, residual)
-        ECAD_TRACE("Max T: %1%C", ETemperature::Kelvins2Celsius(*std::max_element(results.begin(), results.end())))
+        ECAD_TRACE("P-T Iteration: %1%, Residual: %2%.", ++iteration, residual);
+        ECAD_TRACE("max T: %1%C", ETemperature::Kelvins2Celsius(*std::max_element(results.begin(), results.end())));
     } while (residual > settings.residual && --maxIteration > 0);
 
     if (settings.envTemperature.unit == ETemperatureUnit::Celsius) 
@@ -115,7 +115,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
             EFloat time = 0;
             while (time < settings.duration) {
                 if (settings.verbose)
-                    ECAD_TRACE("time:%1%/%2%", time, settings.duration)
+                    ECAD_TRACE("time:%1%/%2%", time, settings.duration);
                 auto network = builder.Build(initT);
                 TransSolver solver(*network, envT, settings.probs);
                 Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
@@ -139,7 +139,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
         if (settings.temperatureDepend) {
             EFloat time = 0;
             while (time < settings.duration) {
-                ECAD_TRACE("time:%1%/%2%", time, settings.duration)
+                ECAD_TRACE("time:%1%/%2%", time, settings.duration);
                 StateType initState;
                 auto network = builder.Build(initT);
                 TransSolver solver(*network, envT, settings.probs, settings.mor.order, {}, {});
@@ -231,7 +231,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkStaticSolver::Solve(std::ve
                 generic::color::RGBFromScalar((d - min) / range, r, g, b);
                 return std::make_tuple(r, g, b, a);
             };
-            ECAD_TRACE("layer: %1%, maxT: %2%, minT: %3%", index + 1, max, min)
+            ECAD_TRACE("layer: %1%, maxT: %2%, minT: %3%", index + 1, max, min);
             std::string filepng = settings.workDir + ECAD_SEPS + std::to_string(index) + ".png";
             lyr->WriteImgProfile(filepng, rgbaFunc);
         }
@@ -280,7 +280,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkStaticSolver::Solve(std::v
 
     if (settings.dumpHotmaps) {
         auto hotmapFile = settings.workDir + ECAD_SEPS + "hotmap.vtk";
-        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
+        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile);
         io::GenerateVTKFile(hotmapFile, m_model, &results);
     }
     return {minT, maxT};
@@ -328,7 +328,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EStackupPrismThermalNetworkStaticSolver::Solve
 
     if (settings.dumpHotmaps) {
         auto hotmapFile = settings.workDir + ECAD_SEPS + "hotmap.vtk";
-        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile)
+        ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile);
         io::GenerateVTKFile(hotmapFile, m_model, &results);
     }
     return {minT, maxT};

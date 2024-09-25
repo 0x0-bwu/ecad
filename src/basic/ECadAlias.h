@@ -28,6 +28,9 @@ using EPair = std::pair<T1, T2>;
 using EFloat = double;
 using FCoord = double;
 using ECoord = int64_t;
+using EInt64 = int64_t;
+using EInt32 = int32_t;
+
 
 using EPoint2D = generic::geometry::Point2D<ECoord>;
 using FPoint2D = generic::geometry::Point2D<FCoord>;
@@ -72,6 +75,7 @@ template <typename NumType>
 ECAD_ALWAYS_INLINE  bool isValid(NumType value) { return value != std::numeric_limits<NumType>::max(); }
 }//namespace ecad
 
-#define ECAD_TRACE(args...) generic::log::Trace(args);
-#define ECAD_DEBUG(args...) generic::log::Debug(args);
-#define ECAD_INFO(args...) generic::log::Info(args);
+#define ECAD_TRACE(args...) generic::log::Trace(args)
+#define ECAD_DEBUG(args...) generic::log::Debug(args)
+#define ECAD_INFO(args...) generic::log::Info(args)
+#define ECAD_ERROR(args...) generic::log::Error(args)
