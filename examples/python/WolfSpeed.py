@@ -1,9 +1,10 @@
 import os
 import sys
-
+import random
 py_ecad = os.path.abspath(os.path.dirname(__file__) + '/../../build.release/lib')
 sys.path.append(py_ecad)
 import PyEcad as ecad
+mgr = ecad.DataMgr
 
 #constant variables
 THIN_BONDWIRE_RADIUS = 0.0635
@@ -24,14 +25,8 @@ def print_test_info(func) :
     return wrapper
 
 @print_test_info
-def setup_design(name, parameters, work_dir) :
-    mgr = ecad.DataMgr
-    def get_sic_die_temperature_and_power_config() :
-        return [(25.0, 108.0), (125.0, 124.0), (150.0, 126.5)]
-    
-    def get_diode_temperature_and_power_config() :
-        return [(25.0, 20.4), (125.0, 21.7), (150.0, 21.8)]
-    
+def setup_design(name, chip_locations, work_dir, save = True) :
+        
     def setup_material(database) :
         mat_al = mgr.create_material_def(database, MAT_AL)
         mat_al.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_simple_material_prop(238))
@@ -153,19 +148,15 @@ def setup_design(name, parameters, work_dir) :
         d_ploc = ecad.coord_to_fpoint2d([-3, 24, -3, 23.275, -3, 22.55, -4, 23.275, -4, 22.55, -3, 6.525, -3, 5.8, -3, 5.075, -4, 6.525, -4, 5.8])
         s_ploc = ecad.coord_to_fpoint2d([3, 24, 3, 23.275, 3, 22.55, 4, 21.825, 3, 21.825, 3, 6.525, 3, 5.8, 3, 5.075, 3, 7.25, 4, 7.25])
         for i in range(len(d_ploc)) :
-            bw1 = mgr.create_bondwire(base_layout, f'DS1_{i + 1}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+            bw1 = mgr.create_bondwire(base_layout, f'15A_DS1_{i + 1}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
             bw1.set_start_layer(top_layer, coord_units.to_coord(d_ploc[i]), False)
             bw1.set_end_layer(top_layer, coord_units.to_coord(s_ploc[i]), False)
-            bw1.set_current(15)
-            bw1.set_dynamic_power_scenario(0)
 
             d_ploc[i].y *= -1
             s_ploc[i].y *= -1
-            bw2 = mgr.create_bondwire(base_layout, f'DS2_{i + 1}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+            bw2 = mgr.create_bondwire(base_layout, f'15A_DS2_{i + 1}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
             bw2.set_start_layer(top_layer, coord_units.to_coord(d_ploc[i]), False)
             bw2.set_end_layer(top_layer, coord_units.to_coord(s_ploc[i]), False)
-            bw2.set_current(15)
-            bw2.set_dynamic_power_scenario(0)
         
         g_ploc = ecad.coord_to_fpoint2d([-3, 3, -3, 1.8])
         for i in range(len(g_ploc)) :
@@ -283,17 +274,10 @@ def setup_design(name, parameters, work_dir) :
 
         sic_die = mgr.find_component_def_by_name(database, 'SicDie')
         die_comps = [mgr.create_component(layout, f'Die{i + 1}', sic_die, layer1, mgr.create_transform_2d(coord_units, 1, 0, locations[i], ecad.Mirror2D.NO), False) for i in range(3)]
-        for t, p in get_sic_die_temperature_and_power_config() :
-            for die_comp in die_comps :
-                die_comp.set_loss_power(t, p)
-                die_comp.set_dynamic_power_scenario(2)
 
         diode = mgr.find_component_def_by_name(database, "Diode")
         diode_comps = [mgr.create_component(layout, f'Diode{i + 1}', diode, layer1, mgr.create_transform_2d(coord_units, 1, 0, locations[i + 3], ecad.Mirror2D.NO), False) for i in range(3)]
-        for t, p in get_diode_temperature_and_power_config() :
-            for diode_comp in diode_comps :
-                diode_comp.set_loss_power(t, p)
-                diode_comp.set_dynamic_power_scenario(2)
+
         res = mgr.find_component_def_by_name(database, RES_GATE)
         res_loc = [ecad.FPoint2D(-14.17, y) for y in [10.5, 6.075, 1.65]]
         res_comps = [mgr.create_component(layout, f'R{i + 1}', res, layer1, mgr.create_transform_2d(coord_units, 1, 0, res_loc[i], ecad.Mirror2D.NO), False) for i in range(3)]
@@ -318,19 +302,15 @@ def setup_design(name, parameters, work_dir) :
         
         for i in range(len(diode_plocs)) :
             for j in range(len(out_pin_names)) :
-                bw = mgr.create_bondwire(layout, out_pin_names[j], ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+                bw = mgr.create_bondwire(layout, '10A_BOT_' + out_pin_names[j], ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
                 bw.set_start_component(diode_comps[i], out_pin_names[j])
                 bw.set_end_layer(layer1, coord_units.to_coord(diode_plocs[i][j]), False)
-                bw.set_current(10)
-                bw.set_dynamic_power_scenario(2)
         
         for i in range(len(diode_comps)) :
             for j in range(len(out_pin_names)) :
-                bw = mgr.create_bondwire(layout, f'{in_pin_names[j]}-{out_pin_names[j]}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+                bw = mgr.create_bondwire(layout, f'10A_BOT_{in_pin_names[j]}-{out_pin_names[j]}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
                 bw.set_start_component(diode_comps[i], in_pin_names[j])
                 bw.set_end_component(diode_comps[i], out_pin_names[j])
-                bw.set_current(10)
-                bw.set_dynamic_power_scenario(2)
         
         kelvin_bw_plocs = [ecad.FPoint2D(-11.475, y) for y in [8.15, 3.6, -0.72]]
         for i in range(len(kelvin_bw_plocs)) :
@@ -374,18 +354,10 @@ def setup_design(name, parameters, work_dir) :
 
         sic_die = mgr.find_component_def_by_name(database, "SicDie")
         die_comps = [mgr.create_component(layout, f'Die{i + 1}', sic_die, layer1, mgr.create_transform_2d(coord_units, 1, 0, locations[i], ecad.Mirror2D.Y), False) for i in range(3)]
-        for t, p in get_sic_die_temperature_and_power_config() :
-            for die_comp in die_comps :
-                die_comp.set_loss_power(t, p)
-                die_comp.set_dynamic_power_scenario(1)
 
         diode = mgr.find_component_def_by_name(database, 'Diode')
         diode_comps = [mgr.create_component(layout, f'Diode{i + 1}', diode, layer1, mgr.create_transform_2d(coord_units, 1, 0, locations[i + 3], ecad.Mirror2D.Y), False) for i in range(3)]
-        for t, p in get_diode_temperature_and_power_config() :
-            for diode_comp in diode_comps :
-                diode_comp.set_loss_power(t, p)
-                diode_comp.set_dynamic_power_scenario(0)
-        
+
         res = mgr.find_component_def_by_name(database, RES_GATE)
         res_loc = [ecad.FPoint2D(14.17, y) for y in [8.35, 1.9, -4.55]]
         res_comps = [mgr.create_component(layout, f'R{i + 1}', res, layer1, mgr.create_transform_2d(coord_units, 1, 0, res_loc[i], ecad.Mirror2D.NO), False) for i in range(3)]
@@ -399,11 +371,9 @@ def setup_design(name, parameters, work_dir) :
         in_pin_names = ['A', 'B', 'C', 'D', 'E']
         for i in range(len(die_comps)) :
             for j in range(len(in_pin_names)) :
-                bw = mgr.create_bondwire(layout, in_pin_names[j], ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+                bw = mgr.create_bondwire(layout, '10A_TOP_' + in_pin_names[j], ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
                 bw.set_start_component(die_comps[i], in_pin_names[j])
                 bw.set_end_component(diode_comps[i], in_pin_names[j])
-                bw.set_current(10)
-                bw.set_dynamic_power_scenario(1)
         
         out_pin_names = ['F', 'G', 'H', 'I', 'J']
         diode_plocs = [ecad.coord_to_fpoint2d([-10.15, 10.725, -10.15, 10, -10.15, 9.27, -10.15, 8.55, -10.15, 7.825]),
@@ -411,11 +381,9 @@ def setup_design(name, parameters, work_dir) :
                        ecad.coord_to_fpoint2d([-10.15, -5.2375, -10.15, -5.95, -10.15, -6.6625, -10.15, -7.375, -10.15, -8.0875])]
         for i in range(len(diode_plocs)) :
             for j in range(len(out_pin_names)) :
-                bw = mgr.create_bondwire(layout, f'{in_pin_names[j]}-{out_pin_names[j]}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
+                bw = mgr.create_bondwire(layout, f'10A_TOP_{in_pin_names[j]}-{out_pin_names[j]}', ecad.NetId.NO_NET, THICK_BONDWIRE_RADIUS)
                 bw.set_start_component(diode_comps[i], in_pin_names[j])
                 bw.set_end_component(diode_comps[i], out_pin_names[j])
-                bw.set_current(10)
-                bw.set_dynamic_power_scenario(1)
             
         kelvin_bw_plocs = [ecad.FPoint2D(11.475, y) for y in [8.08, 1.33, -5.42]]
         for i in range(len(kelvin_bw_plocs)) :
@@ -425,6 +393,7 @@ def setup_design(name, parameters, work_dir) :
 
         return layout
     
+    mgr.remove_database(name)
     database = mgr.create_database(name)
     database.coord_units = ecad.CoordUnits(ecad.CoordUnit.MILLIMETER)
 
@@ -444,7 +413,7 @@ def setup_design(name, parameters, work_dir) :
     driver = mgr.create_cell_inst(base_layout, 'Driver', driver_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FVector2D(44, 0), ecad.Mirror2D.XY))
     driver.set_layer_map(driver_layer_map)
 
-    bot_bridge_layout = create_bot_bridge_layout(database, parameters[0:6])
+    bot_bridge_layout = create_bot_bridge_layout(database, chip_locations[0:6])
     bot_bridge_layer_map = create_default_layer_map(database, bot_bridge_layout, base_layout, 'BotBridgeLayerMap')
 
     bot_bridge1 = mgr.create_cell_inst(base_layout, 'BotBridge1', bot_bridge_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FVector2D(-17.75, 13), ecad.Mirror2D.NO))
@@ -452,7 +421,7 @@ def setup_design(name, parameters, work_dir) :
     bot_bridge2 = mgr.create_cell_inst(base_layout, 'BotBridge2', bot_bridge_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FVector2D(-17.75, -13), ecad.Mirror2D.X))
     bot_bridge2.set_layer_map(bot_bridge_layer_map)
 
-    top_bridge_layout = create_top_bridge_layout(database, parameters[6:])
+    top_bridge_layout = create_top_bridge_layout(database, chip_locations[6:])
     top_bridge_layer_map = create_default_layer_map(database, top_bridge_layout, base_layout, 'TopBridgeLayerMap')
 
     top_bridge1 = mgr.create_cell_inst(base_layout, "TopBridge1", top_bridge_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FVector2D(17.75, 13), ecad.Mirror2D.NO))
@@ -472,32 +441,11 @@ def setup_design(name, parameters, work_dir) :
             bw.set_material(MAT_AL)
             if not (bw.get_height() > 0) :
                 bw.set_height(0.5)
-
-    mgr.save_database(database, work_dir + '/CAS300M12BM2.ecad')
+    if save :
+        mgr.save_database(database, work_dir + '/CAS300M12BM2.ecad')
     return base_layout
-    
-@print_test_info
-def static_thermal_flow(layout, work_dir) :
-    def get_die_monitors(layout) :
-        monitors = []
-        elevation = 0.0
-        thickness = 0.0
-        retriever = ecad.LayoutRetriever(layout)
-        cell_insts = ["TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"]
-        components = ["Die1", "Die2", "Die3"]
-        for cell_inst in cell_insts :
-            for component in components :
-                name = cell_inst + mgr.hier_sep() + component
-                comp = layout.find_component_by_name(name)
-                assert(comp)
-                success, elevation, thickness = retriever.get_component_height_thickness(comp)
-                assert(success)
-                bounding_box = comp.get_bounding_box()
-                center = bounding_box.center()
-                location = layout.get_coord_units().to_unit(center)
-                monitors.append(ecad.FPoint3D(location.x, location.y, elevation - 0.1 * thickness))
-        return monitors
 
+def get_simulation_setup(layout, work_dir, cell_insts, components, force_rebuild = False) :
     def get_extraction_setting(work_dir) :
         htc = 5000
         prism_settings = ecad.PrismThermalModelExtractionSettings(work_dir, mgr.threads(), set())
@@ -512,8 +460,9 @@ def static_thermal_flow(layout, work_dir) :
         prism_settings.mesh_settings.max_len = 1
         prism_settings.mesh_settings.tolerance = 0
         prism_settings.mesh_settings.dump_mesh_file = True
-        prism_settings.layer_cut_settings.layer_transition_ratio = 0
+        prism_settings.layer_cut_settings.layer_transition_ratio = 3
         prism_settings.layer_cut_settings.dump_sketch_img = True
+        prism_settings.force_rebuild = force_rebuild
 
         top_htc = htc
         prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-29.35, 4.7, -20.35, 8.7), ecad.ThermalBondaryConditionType.HTC, top_htc)
@@ -524,30 +473,75 @@ def static_thermal_flow(layout, work_dir) :
         prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-7.75, -17, -2.55, -11.5), ecad.ThermalBondaryConditionType.HTC, top_htc)
         return prism_settings
 
-    mgr = ecad.DataMgr
+    def get_die_monitors(layout, cell_insts, components) :
+            monitors = []
+            elevation = 0.0
+            thickness = 0.0
+            retriever = ecad.LayoutRetriever(layout)
+            for cell_inst in cell_insts :
+                for component in components :
+                    name = cell_inst + mgr.hier_sep() + component
+                    comp = layout.find_component_by_name(name)
+                    assert(comp)
+                    success, elevation, thickness = retriever.get_component_height_thickness(comp)
+                    assert(success)
+                    bounding_box = comp.get_bounding_box()
+                    center = bounding_box.center()
+                    location = layout.get_coord_units().to_unit(center)
+                    monitors.append(ecad.FPoint3D(location.x, location.y, elevation - 0.1 * thickness))
+            return monitors
+
     extraction_setting = get_extraction_setting(work_dir)
     simulation_setup = ecad.ThermalStaticSimulationSetup(work_dir, mgr.threads(), set())
     simulation_setup.settings.iteration = 100
     simulation_setup.settings.dump_hotmaps = True
     simulation_setup.settings.env_temperature = ecad.Temperature(25, ecad.TemperatureUnit.CELSIUS)
     simulation_setup.set_extraction_settings(extraction_setting)
-    simulation_setup.monitors = get_die_monitors(layout)
-    results = layout.run_thermal_simulation(simulation_setup)
-    print(results)
+    simulation_setup.monitors = get_die_monitors(layout, cell_insts, components)
 
-def main() :
-    print('ecad version: ' + ecad.__version__)
-    mgr = ecad.DataMgr
+    return simulation_setup
+
+@print_test_info
+def static_thermal_flow(chip_locations) :
+    def setup_power(layout) :
+        def get_sic_die_temperature_and_power_config() :
+            return [(25.0, 108.0), (125.0, 124.0), (150.0, 126.5)]
+
+        def get_diode_temperature_and_power_config() :
+            return [(25.0, 20.4), (125.0, 21.7), (150.0, 21.8)]
+        
+        cell_insts = ["TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"]
+        diode_comps = ["Diode1", "Diode2", "Diode3"]
+        sic_comps = ["Die1", "Die2", "Die3"]
+        for cell_inst in cell_insts :
+            for sic_comp in sic_comps :
+                name = cell_inst + mgr.hier_sep() + sic_comp
+                comp = layout.find_component_by_name(name)
+                assert(comp)
+                for t, p in get_sic_die_temperature_and_power_config() :
+                    comp.set_loss_power(t, p)
+            for diode_comp in diode_comps :
+                name = cell_inst + mgr.hier_sep() + diode_comp
+                comp = layout.find_component_by_name(name)
+                assert(comp)
+                for t, p in get_diode_temperature_and_power_config() :
+                    comp.set_loss_power(t, p)
+            prim_iter = layout.get_primitive_iter()
+            while prim := prim_iter.next() :
+                if bw := prim.get_bondwire_from_primitive() :
+                    name = bw.get_name()
+                    if '10A' in name :
+                        bw.set_current(10)
+                    if '15A' in name :
+                        bw.set_current(15)
+
     mgr.init(ecad.LogLevel.TRACE)
-
-    chip_locations = ecad.coord_to_fpoint2d([
-        -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
-        5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,])
-    
-    work_dir = os.path.dirname(__file__) + '/wolfspeed_results'
+    work_dir = os.path.dirname(__file__) + '/wolfspeed_static'
     layout = setup_design("CAS300M12BM2", chip_locations, work_dir)
-    static_thermal_flow(layout, work_dir)    
-    mgr.shut_down()
+    setup_power(layout)
+    setup = get_simulation_setup(layout, work_dir, ["TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"], ["Die1", "Die2", "Die3"])
+    results = layout.run_thermal_simulation(setup)
+    print(results)
 
     try :
         import vtk
@@ -557,6 +551,69 @@ def main() :
             HotmapViewer.view_hotmap(hotmap_vtk)
     except :
         pass
+
+@print_test_info
+def static_p_t_try_run(chip_locations, round) :
+    print(f'try run round: {round}')
+    def setup_power(layout) :
+        def get_random_power_config(mean, sigma) :
+            return random.gauss(mean, sigma)
+        power_config = []
+        cell_insts = ["TopBridge1", "TopBridge2"]
+        diode_comps = ["Diode1", "Diode2", "Diode3"]
+        sic_comps = ["Die1", "Die2", "Die3"]
+        for cell_inst in cell_insts :
+            for sic_comp in sic_comps :
+                name = cell_inst + mgr.hier_sep() + sic_comp
+                comp = layout.find_component_by_name(name)
+                assert(comp)
+                power_config.append(get_random_power_config(124, 10))
+                comp.set_loss_power(25, power_config[-1])
+
+        for cell_inst in cell_insts :
+            for diode_comp in diode_comps :
+                name = cell_inst + mgr.hier_sep() + diode_comp
+                comp = layout.find_component_by_name(name)
+                assert(comp)
+                power_config.append(get_random_power_config(21, 0))
+                comp.set_loss_power(25, power_config[-1])
+        return power_config
+        
+    work_dir = os.path.dirname(__file__) + '/wolfspeed_pt_research_' + str(round + 1)
+    layout = setup_design("CAS300M12BM2", chip_locations, work_dir, False)
+    power_config = setup_power(layout)
+    setup = get_simulation_setup(layout, work_dir, ["TopBridge1", "TopBridge2"], ["Die1", "Die2", "Die3"], True)
+    # setup.settings.solver_type = ecad.ThermalNetworkStaticSolverType.SIMPLICIAL_CHOLESKY
+    temperatures = layout.run_thermal_simulation(setup)
+    return power_config + temperatures[2]
+
+def static_p_t_research(chip_locations) :
+
+    mgr.init(ecad.LogLevel.INFO)
+
+    total_run = 2
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(max_workers=8) as pool :
+        futures = [pool.submit(static_p_t_try_run, chip_locations, i) for i in range(total_run)]   
+    
+        filename = os.path.dirname(__file__) + '/wolfspeed_pt_research.txt'
+        with open(filename, 'w') as f :
+            for future in futures :
+                values = [str(value) for value in future.result()]
+                f.write(','.join(values))
+                f.write('\n')
+        f.close()
+
+def main() :
+    print('ecad version: ' + ecad.__version__)
+    chip_locations = ecad.coord_to_fpoint2d([
+        -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
+        5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,])
+    
+    static_thermal_flow(chip_locations)    
+    # static_p_t_research(chip_locations)
+
+    mgr.shut_down()
     
     print('every thing is fine')
 

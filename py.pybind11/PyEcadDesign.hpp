@@ -75,6 +75,7 @@ void ecad_init_design(py::module_ & m)
     ;
 
     py::class_<IBondwire>(m, "Bondwire")
+        .def("get_name", &IBondwire::GetName, py::return_value_policy::reference)
         .def("set_start_layer", py::overload_cast<ELayerId, const EPoint2D &, bool>(&IBondwire::SetStartLayer))
         .def("set_start_layer", py::overload_cast<ELayerId>(&IBondwire::SetStartLayer))
         .def("set_end_layer", py::overload_cast<ELayerId, const EPoint2D &, bool>(&IBondwire::SetEndLayer))

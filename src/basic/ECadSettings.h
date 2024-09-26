@@ -265,6 +265,7 @@ struct EThermalModelExtractionSettings : public ECadSettings, public Clonable<ET
     {
         ECAD_UNUSED(version)
         ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECadSettings);
+        ar & boost::serialization::make_nvp("force_rebuild", forceRebuild);
         ar & boost::serialization::make_nvp("threads", threads);
         ar & boost::serialization::make_nvp("work_dir", workDir);
         ar & boost::serialization::make_nvp("top_uniform_bc", topUniformBC);
@@ -277,6 +278,7 @@ struct EThermalModelExtractionSettings : public ECadSettings, public Clonable<ET
     using BCType = EThermalBondaryConditionType;
     using BlockBoundaryCondition = std::pair<FBox2D, EThermalBondaryCondition>;
     virtual ~EThermalModelExtractionSettings() = default;
+    bool forceRebuild{false};
     size_t threads;
     std::string workDir;
     EThermalBondaryCondition topUniformBC;

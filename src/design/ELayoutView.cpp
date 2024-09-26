@@ -343,7 +343,7 @@ ECAD_INLINE CPtr<IModel> ELayoutView::ExtractThermalModel(const EThermalModelExt
     auto modelType = settings.GetModelType();
     auto collection = GetModelCollection();
     auto model = collection->FindModel(modelType);
-    if (model && model->Match(settings)) {
+    if (not settings.forceRebuild && model && model->Match(settings)) {
         ECAD_TRACE("reuse exist %1% model", toString(modelType));
         return model;
     }

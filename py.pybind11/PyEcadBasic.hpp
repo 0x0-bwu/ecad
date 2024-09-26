@@ -322,6 +322,7 @@ void ecad_init_basic(py::module_ & m)
     ;
 
     py::class_<EThermalModelExtractionSettings, PyThermalModelExtractionSettings>(m, "ThermalModelExtractionSettings")
+        .def_readwrite("force_rebuild", &EThermalModelExtractionSettings::forceRebuild)
         .def_readwrite("threads", &EThermalModelExtractionSettings::threads)
         .def_readwrite("work_dir", &EThermalModelExtractionSettings::workDir)
         .def_readwrite("top_uniform_bc", &EThermalModelExtractionSettings::topUniformBC)
