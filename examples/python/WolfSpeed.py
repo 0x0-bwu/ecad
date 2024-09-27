@@ -552,9 +552,7 @@ def static_thermal_flow(chip_locations) :
     except :
         pass
 
-@print_test_info
-def static_p_t_try_run(chip_locations, round) :
-    print(f'try run round: {round}')
+def static_p_t_try_run(chip_locations, work_dir) :
     def setup_power(layout) :
         def get_random_power_config(mean, sigma) :
             return random.gauss(mean, sigma)
@@ -579,43 +577,60 @@ def static_p_t_try_run(chip_locations, round) :
                 comp.set_loss_power(25, power_config[-1])
         return power_config
         
-    work_dir = os.path.dirname(__file__) + '/wolfspeed_pt_research_' + str(round + 1)
     layout = setup_design("CAS300M12BM2", chip_locations, work_dir, False)
     power_config = setup_power(layout)
     setup = get_simulation_setup(layout, work_dir, ["TopBridge1", "TopBridge2"], ["Die1", "Die2", "Die3"], True)
     # setup.settings.solver_type = ecad.ThermalNetworkStaticSolverType.SIMPLICIAL_CHOLESKY
     temperatures = layout.run_thermal_simulation(setup)
-    return power_config + temperatures[2]
+    return power_config[0:6] + temperatures[2]
 
-def static_p_t_research(chip_locations) :
+chip_locations = ecad.coord_to_fpoint2d([
+    -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
+    5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,])
 
-    mgr.init(ecad.LogLevel.INFO)
+def static_p_t_research(index) :
+    work_dir = os.path.dirname(__file__) + '/wolfspeed_pt_research_' + str(int(index) + 1)
+    mgr.set_threads(1)
+    mgr.init(ecad.LogLevel.INFO, work_dir)
 
-    total_run = 2
-    from concurrent.futures import ThreadPoolExecutor
-    with ThreadPoolExecutor(max_workers=8) as pool :
-        futures = [pool.submit(static_p_t_try_run, chip_locations, i) for i in range(total_run)]   
-    
-        filename = os.path.dirname(__file__) + '/wolfspeed_pt_research.txt'
-        with open(filename, 'w') as f :
-            for future in futures :
-                values = [str(value) for value in future.result()]
-                f.write(','.join(values))
-                f.write('\n')
-        f.close()
+    results = static_p_t_try_run(chip_locations, work_dir)
+    with open(work_dir + '/results.txt', 'w') as f :
+        values = [str(value) for value in results]
+        f.write(','.join(values))
+        f.write('\n')
+    f.close()
 
 def main() :
     print('ecad version: ' + ecad.__version__)
-    chip_locations = ecad.coord_to_fpoint2d([
-        -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
-        5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,])
     
     static_thermal_flow(chip_locations)    
-    # static_p_t_research(chip_locations)
 
     mgr.shut_down()
     
     print('every thing is fine')
 
+def test() :
+    
+    def collect_results(total) :
+        sum_f = open(os.path.dirname(__file__) + '/summary.txt', 'w')
+        for i in range(total) :
+            filename = os.path.dirname(__file__) + f'/wolfspeed_pt_research_{i + 1}/results.txt'
+            if not os.path.exists(filename) :
+                continue
+            with open(filename) as f :
+                for line in f :
+                    line = line.strip()
+                    if line :
+                        sum_f.write(f'{line}\n')
+        sum_f.close()
+
+    total = 1000
+    core_num = 20
+    from multiprocessing import Pool
+    with Pool(core_num) as pool:
+        pool.map(static_p_t_research, range(total))
+    collect_results(total)
+
 if __name__ == '__main__' :
     main()
+    # test() #p-t research

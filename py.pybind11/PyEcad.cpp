@@ -111,6 +111,8 @@ void ecad_init_datamgr(py::module_ & m)
         // settings
         .def("hier_sep", []
             { return EDataMgr::Instance().HierSep(); })
+        .def("set_threads", [](size_t threads)
+            { return EDataMgr::Instance().SetThreads(threads); })
         .def("threads", []
             { return EDataMgr::Instance().Threads(); })   
 
