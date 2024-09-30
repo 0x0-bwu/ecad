@@ -73,9 +73,9 @@ public:
     bool isPropTable() const override { return true;  }
     Ptr<IMaterialPropTable> GetPropTable() override;
 
-    bool GetSimpleProperty(EFloat index, EFloat & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
-    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
-    bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override { ECAD_ASSERT(false/*todo*/); return false; }
+    bool GetSimpleProperty(EFloat index, EFloat & value) const override { ECAD_ASSERT(false/*todo*/) return false; }
+    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override { ECAD_ASSERT(false/*todo*/) return false; }
+    bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override { ECAD_ASSERT(false/*todo*/) return false; }
 
 protected:
     ///Copy

@@ -58,7 +58,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
 
     std::vector<Ptr<IStackupLayer> > layers;
     layout->GetStackupLayers(layers);
-    ECAD_ASSERT(layers.size() == mf->size());
+    ECAD_ASSERT(layers.size() == mf->size())
 
     std::unordered_map<ELayerId, size_t> lyrMap;
     for(size_t i = 0; i < layers.size(); ++i) {
@@ -97,7 +97,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
         if (component->hasLossPower()) {
             auto layer = component->GetPlacementLayer();
             if (lyrMap.find(layer) == lyrMap.cend()) {
-                GENERIC_ASSERT(false)
+                ECAD_ASSERT(false)
                 continue;
             }
             auto lyrId = lyrMap.at(layer);
@@ -105,7 +105,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
             auto ll = mfInfo->GetIndex(bbox[0]);
             auto ur = mfInfo->GetIndex(bbox[1]);
             if (not ll.isValid() || not ur.isValid()) {
-                GENERIC_ASSERT(false)
+                ECAD_ASSERT(false)
                 continue;
             }
             

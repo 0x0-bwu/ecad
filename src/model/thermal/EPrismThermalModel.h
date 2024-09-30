@@ -282,7 +282,7 @@ ECAD_ALWAYS_INLINE std::pair<size_t, size_t> EPrismThermalModel::PrismLocalIndex
 
 ECAD_ALWAYS_INLINE size_t EPrismThermalModel::LineLocalIndex(size_t index) const
 {
-    ECAD_ASSERT(index >= m_indexOffset.back());
+    ECAD_ASSERT(index >= m_indexOffset.back())
     return index - m_indexOffset.back();
 }
 

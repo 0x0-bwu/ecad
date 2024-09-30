@@ -15,13 +15,24 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 if(NOT CMAKE_BUILD_TYPE)
   	set(CMAKE_BUILD_TYPE Release)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
   	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE}")
-else()
-  	set(CMAKE_BUILD_TYPE Debug)
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
   	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_DEBUG}")
 endif()
 
 # Compile options
+option(ENABLE_ASSERTION "Enable assertion" OFF)
+option(ENABLE_EXCEPTION "Enable exception" ON)
+if(NOT ENABLE_ASSERTION)
+	add_compile_definitions(GENERIC_NO_ASSERTION)	
+endif()
+if(NOT ENABLE_EXCEPTION)
+	add_compile_definitions(GENERIC_NO_EXCEPTION)
+endif()
+
 option(ENABLE_PROFILING "Enable profiling" OFF)
 if (ENABLE_PROFILING)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
@@ -39,9 +50,6 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
 	add_definitions(-DGENERIC_USE_BOOST_CCMATH)
   	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-return-std-move")
 endif()
-
-message("-- Build Type: " ${CMAKE_BUILD_TYPE})
-message("-- CMAKE_CXX_FLAGS: " ${CMAKE_CXX_FLAGS})
 
 set(DYLIB_SUFFIX "so")
 # MacOs
@@ -74,20 +82,10 @@ endif()
 # Boost library
 set(BOOST_INCLUDE_PATH $ENV{BOOST_PATH}/include)
 set(BOOST_LIBRARY_PATH $ENV{BOOST_PATH}/lib)
-message(STATUS "BOOST_INCLUDE_PATH: ${BOOST_INCLUDE_PATH}")
-message(STATUS "BOOST_LIBRARY_PATH: ${BOOST_LIBRARY_PATH}")
 
 ## Ignore BOOST deprecated headers
 add_definitions(-DBOOST_ALLOW_DEPRECATED_HEADERS)
 add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
-
-## Link Eigen
-if(DEFINED ENV{EIGEN_PATH})
-	include_directories($ENV{EIGEN_PATH})
-else()
-	find_package(Eigen3 REQUIRED)
-	include_directories(${EIGEN3_INCLUDE_DIR})
-endif()
 
 ## Link boost_serialization
 add_library(boost_serialization SHARED IMPORTED)
@@ -100,11 +98,19 @@ if(NOT EXISTS ${BOOST_SERIALIZATION_LIB_PATH})
 endif()
 set_target_properties(boost_serialization PROPERTIES IMPORTED_LOCATION ${BOOST_SERIALIZATION_LIB_PATH})
 
+# Link Eigen
+if(DEFINED ENV{EIGEN_PATH})
+	include_directories($ENV{EIGEN_PATH})
+else()
+	find_package(Eigen3 REQUIRED)
+	include_directories(${EIGEN3_INCLUDE_DIR})
+endif()
+
 # Find package
-find_package(OpenMP)
 find_package(PNG REQUIRED)
 find_package(Threads REQUIRED)
 
+find_package(OpenMP)
 if(OpenMP_CXX_FOUND)
     message(STATUS "FOUND OMP: ${OpenMP_CXX_LIBRARY}")
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
@@ -123,6 +129,10 @@ add_compile_definitions(GENERIC_BOOST_GIL_IO_PNG_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 
+# Message
+message(STATUS "BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
+message(STATUS "BOOST_INCLUDE_PATH: ${BOOST_INCLUDE_PATH}")
+message(STATUS "BOOST_LIBRARY_PATH: ${BOOST_LIBRARY_PATH}")
 message(STATUS "CMAKE_HOST_SYSTEM: ${CMAKE_HOST_SYSTEM}")
 message(STATUS "CMAKE_CXX_COMPILER_VERSION: ${CMAKE_CXX_COMPILER_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
@@ -132,6 +142,8 @@ message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 message(STATUS "CMAKE_EXE_LINKER_FLAGS: " ${CMAKE_EXE_LINKER_FLAGS})
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+message(STATUS "ENABLE_ASSERTION: ${ENABLE_ASSERTION}")
+message(STATUS "ENABLE_EXCEPTION: ${ENABLE_EXCEPTION}")
 message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
 # Tracting build time

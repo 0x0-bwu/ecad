@@ -150,7 +150,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyUniformBoundaryConditionForLay
                     break;
                 }
                 default : {
-                 GENERIC_ASSERT(false)
+                    ECAD_ASSERT(false)
                 }
             }
         }
@@ -179,7 +179,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder::ApplyBlockBoundaryConditionForLayer
                     break;
                 }
                 default : {
-                 GENERIC_ASSERT(false)
+                    ECAD_ASSERT(false)
                 }
             }
         }

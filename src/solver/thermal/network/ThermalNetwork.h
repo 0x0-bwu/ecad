@@ -314,7 +314,7 @@ inline MNA<SparseMatrix<num_type> > makeMNA(const ThermalNetwork<num_type> & net
         size_t j{0};
         Triplets tL;
         for (auto p : probs) {
-            GENERIC_ASSERT(p < nodes)
+            ECAD_ASSERT(p < nodes)
             tL.emplace_back(p, j++, 1);
         }
         m.L = Matrix(nodes, probs.size());

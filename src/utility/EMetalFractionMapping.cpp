@@ -1,13 +1,10 @@
 #include "EMetalFractionMapping.h"
 
-#if defined(ECAD_DEBUG_MODE)
-#include "generic/tools/Color.hpp"
-#endif
-
 #include "generic/geometry/Transform.hpp"
 #include "generic/tools/StringHelper.hpp"
 #include "generic/tools/FileSystem.hpp"
 #include "generic/tools/Format.hpp"
+#include "generic/tools/Color.hpp"
 
 #include "interface/ILayoutView.h"
 #include "interface/IPrimitive.h"
@@ -234,8 +231,6 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
     m_fileHelper.Flush();
     m_fileHelper.Close();
 
-#if defined(ECAD_DEBUG_MODE)
-
     size_t index = 0;
     auto rgbaFunc = [](float d) {
         int r, g, b, a = 255;
@@ -249,8 +244,6 @@ ECAD_INLINE bool ELayoutMetalFractionMapper::WriteResult2File(double scale)
         std::string filepng = dirPath + GENERIC_FOLDER_SEPS + fileName + "_" + info.layers[index].name + ".png";
         m_result->at(index)->WriteImgProfile(filepng, rgbaFunc);
     }
-#endif
-
     return true;
 }
 

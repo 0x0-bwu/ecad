@@ -26,7 +26,7 @@ ECAD_INLINE std::pair<std::set<size_t>, std::vector<size_t> > GetProbsAndPermuta
 
 ECAD_INLINE EFloat CalculateResidual(const std::vector<EFloat> & v1, const std::vector<EFloat> & v2, bool maximumRes)
 {
-    ECAD_ASSERT(v1.size() == v2.size());
+    ECAD_ASSERT(v1.size() == v2.size())
     EFloat residual = 0;
     size_t size = v1.size();
     for(size_t i = 0; i < size; ++i) {

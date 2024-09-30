@@ -26,7 +26,7 @@ ECAD_API EPair<EFloat, EFloat> EThermalSimulation::RunStaticSimulation(std::vect
 {
     ECAD_TRACE("run static thermal simulation at %1%", m_setup.workDir);
     if (nullptr == m_model) {
-        ECAD_ASSERT(false);
+        ECAD_ASSERT(false)
         return {invalidFloat, invalidFloat};
     }
     if (not generic::fs::CreateDir(m_setup.workDir)) {
@@ -57,7 +57,7 @@ ECAD_API EPair<EFloat, EFloat> EThermalSimulation::RunStaticSimulation(std::vect
 ECAD_API EPair<EFloat, EFloat> EThermalSimulation::RunTransientSimulation(const EThermalTransientExcitation & excitation) const
 {
     if (nullptr == m_model){
-        ECAD_ASSERT(false);
+        ECAD_ASSERT(false)
         return {invalidFloat, invalidFloat};
     }
     if (not generic::fs::CreateDir(m_setup.workDir)) {

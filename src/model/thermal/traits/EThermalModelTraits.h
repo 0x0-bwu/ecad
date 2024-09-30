@@ -7,8 +7,8 @@ namespace ecad::model::traits {
 template <typename Model>
 struct EThermalModelTraits
 {
-    static size_t Size(const Model & /*model*/) { ECAD_ASSERT(false); return 0; }
-    static bool NeedIteration(const Model & /*model*/) { ECAD_ASSERT(false); return false; }
+    static size_t Size(const Model & /*model*/) { ECAD_ASSERT(false) return 0; }
+    static bool NeedIteration(const Model & /*model*/) { ECAD_ASSERT(false) return false; }
 };
 
 template <>

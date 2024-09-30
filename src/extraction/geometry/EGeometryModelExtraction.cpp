@@ -90,12 +90,12 @@ ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILa
             auto matIt = layerMaterialMap.find(lyrId);
             if (matIt == layerMaterialMap.cend()) {
                 auto layer = layout->GetLayerCollection()->FindLayerByLayerId(lyrId);
-                if (nullptr == layer) { ECAD_ASSERT(false); continue; }
+                if (nullptr == layer) { ECAD_ASSERT(false) continue; }
                 auto stackupLayer = layer->GetStackupLayerFromLayer();
-                ECAD_ASSERT(nullptr != stackupLayer);
+                ECAD_ASSERT(nullptr != stackupLayer)
                 auto condMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetConductingMaterial());
                 auto dielMat = layout->GetDatabase()->FindMaterialDefByName(stackupLayer->GetDielectricMaterial());
-                ECAD_ASSERT(condMat && dielMat);
+                ECAD_ASSERT(condMat && dielMat)
                 matIt = layerMaterialMap.emplace(lyrId, std::make_pair(condMat->GetMaterialId(), dielMat->GetMaterialId())).first;
             }
             const auto & [condMatId, dielMatId] = matIt->second;
@@ -116,7 +116,7 @@ ECAD_INLINE UPtr<IModel> EGeometryModelExtraction::GenerateLayerCutModel(Ptr<ILa
         if (nullptr == defData) continue;
 
         auto material = layout->GetDatabase()->FindMaterialDefByName(defData->GetMaterial());
-        ECAD_ASSERT(nullptr != material);
+        ECAD_ASSERT(nullptr != material)
 
         ELayerId top, bot;
         psInst->GetLayerRange(top, bot);

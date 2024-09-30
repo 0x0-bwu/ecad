@@ -348,13 +348,13 @@ ECAD_INLINE const std::vector<EGridThermalLayer> & EGridThermalModel::GetLayers(
 
 ECAD_INLINE bool EGridThermalModel::AddPowerModel(size_t layer, SPtr<EThermalPowerModel> pwrModel)
 {
-    GENERIC_ASSERT(layer < m_stackupLayers.size())
+    ECAD_ASSERT(layer < m_stackupLayers.size())
     return m_stackupLayers.at(layer).AddPowerModel(pwrModel);
 }
 
 ECAD_INLINE const std::vector<SPtr<EThermalPowerModel> > & EGridThermalModel::GetPowerModels(size_t layer) const
 {
-    GENERIC_ASSERT(layer < m_stackupLayers.size())
+    ECAD_ASSERT(layer < m_stackupLayers.size())
     return m_stackupLayers.at(layer).GetPowerModels();
 }
 
