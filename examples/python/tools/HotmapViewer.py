@@ -1,6 +1,11 @@
 import vtk
+import sys
 import os
 def view_hotmap(filename):
+    if not os.path.exists(filename) :
+        print(f'Error: {filename} not exists')
+        return
+
     colors = vtk.vtkNamedColors()
 
     # Create the reader for the data.
@@ -70,3 +75,14 @@ def view_hotmap(filename):
     render_window.Render()
 
     render_window_interactor.Start()
+
+def main() :
+    if len(sys.argv) < 2 :
+        print('Error: please specify vtk file')
+        return
+
+    filename = sys.argv[1]    
+    view_hotmap(filename)
+
+if __name__ == '__main__' :
+    main()
