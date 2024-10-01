@@ -1,5 +1,6 @@
 //todo refactor with EPrismThermalNetworkBuilder
 #pragma once
+#include "EThermalNetworkBuilder.h"
 #include "model/thermal/EStackupPrismThermalModel.h"
 #include "solver/thermal/network/ThermalNetwork.h"
 namespace ecad::solver {
@@ -7,20 +8,10 @@ namespace ecad::solver {
 using namespace model;
 using namespace thermal::model;
 
-struct EStackupPrismThermalNetworkBuildSummary
-{
-    size_t totalNodes = 0;
-    size_t fixedTNodes = 0;
-    size_t boundaryNodes = 0;
-    double iHeatFlow = 0, oHeatFlow = 0;
-    void Reset() { *this = EStackupPrismThermalNetworkBuildSummary{}; }
-};
-
-class ECAD_API EStackupPrismThermalNetworkBuilder
+class ECAD_API EStackupPrismThermalNetworkBuilder : public EThermalNetworkBuilder
 {
 public:
     using ModelType = EStackupPrismThermalModel;
-    mutable EStackupPrismThermalNetworkBuildSummary summary;
     explicit EStackupPrismThermalNetworkBuilder(const ModelType & model);
     virtual ~EStackupPrismThermalNetworkBuilder() = default;
 

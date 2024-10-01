@@ -1,4 +1,5 @@
- #pragma once
+#pragma once
+#include "EThermalNetworkBuilder.h"
 #include "model/thermal/EPrismThermalModel.h"
 #include "solver/thermal/network/ThermalNetwork.h"
 namespace ecad::solver {
@@ -6,20 +7,10 @@ namespace ecad::solver {
 using namespace model;
 using namespace thermal::model;
 
-struct EPrismThermalNetworkBuildSummary
-{
-    size_t totalNodes = 0;
-    size_t fixedTNodes = 0;
-    size_t boundaryNodes = 0;
-    double iHeatFlow = 0, oHeatFlow = 0;
-    void Reset() { *this = EPrismThermalNetworkBuildSummary{}; }
-};
-
-class ECAD_API EPrismThermalNetworkBuilder
+class ECAD_API EPrismThermalNetworkBuilder : public EThermalNetworkBuilder
 {
 public:
     using ModelType = EPrismThermalModel;
-    mutable EPrismThermalNetworkBuildSummary summary;
     explicit EPrismThermalNetworkBuilder(const ModelType & model);
     virtual ~EPrismThermalNetworkBuilder() = default;
 

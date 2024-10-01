@@ -52,6 +52,7 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
         auto network = builder.Build(prevRes);
         if (nullptr == network) return false;
         ECAD_TRACE("total nodes: %1%", network->Size());
+        ECAD_TRACE("total joule heat: %1%w", builder.summary.jouleHeat);
         ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow);
         ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow);
 

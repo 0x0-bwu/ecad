@@ -193,7 +193,6 @@ public:
     size_t TotalElements() const;
     size_t TotalLineElements() const;
     size_t TotalPrismElements() const;
-    size_t GlobalIndex(size_t lineIdx) const;
     size_t GlobalIndex(size_t lyrIndex, size_t eleIndex) const;
     std::pair<size_t, size_t> PrismLocalIndex(size_t index) const;//[lyrIndex, eleIndex]
     size_t LineLocalIndex(size_t index) const;
@@ -261,11 +260,6 @@ ECAD_ALWAYS_INLINE size_t EPrismThermalModel::TotalLineElements() const
 ECAD_ALWAYS_INLINE size_t EPrismThermalModel::TotalPrismElements() const
 {
     return m_indexOffset.back();
-}
-
-ECAD_ALWAYS_INLINE size_t EPrismThermalModel::GlobalIndex(size_t lineIdx) const
-{
-    return m_indexOffset.back() + lineIdx;
 }
 
 ECAD_ALWAYS_INLINE size_t EPrismThermalModel::GlobalIndex(size_t lyrIndex, size_t eleIndex) const

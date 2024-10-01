@@ -1,4 +1,5 @@
 #pragma once
+#include "EThermalNetworkBuilder.h"
 #include "model/thermal/EGridThermalModel.h"
 #include "solver/thermal/network/ThermalNetwork.h"
 namespace ecad {
@@ -7,21 +8,11 @@ namespace solver {
 using namespace ecad::model;
 using namespace thermal::model;
 
-struct EGridThermalNetworkBuildSummary
-{
-    size_t totalNodes = 0;
-    size_t fixedTNodes = 0;
-    size_t boundaryNodes = 0;
-    double iHeatFlow = 0, oHeatFlow = 0;
-    void Reset() { *this = EGridThermalNetworkBuildSummary{}; }
-};
-
-class ECAD_API EGridThermalNetworkBuilder
+class ECAD_API EGridThermalNetworkBuilder : public EThermalNetworkBuilder
 {
     enum class Axis { X = 0, Y = 1, Z = 2};
 public:
     using ModelType = EGridThermalModel;
-    mutable EGridThermalNetworkBuildSummary summary;
     enum class Orientation { Top, Bot, Left, Right, Front, End };
     explicit EGridThermalNetworkBuilder(const ModelType & model);
     virtual ~EGridThermalNetworkBuilder() = default;

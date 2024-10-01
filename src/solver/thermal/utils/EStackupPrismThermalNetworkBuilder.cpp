@@ -201,16 +201,18 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildLineElement(const std:
 {
     for (size_t i = 0; i < m_model.TotalLineElements(); ++i) {
         const auto & line = m_model.GetLine(i);
-        auto index = m_model.GlobalIndex(i);
+        auto index = line.id;
         auto rho = GetMatMassDensity(line.matId, iniT.at(index));
         auto c = GetMatSpecificHeat(line.matId, iniT.at(index));
         auto v = GetLineVolume(index);
         network->SetC(index, c * rho * v);
 
-        auto jh = GetLineJouleHeat(index, iniT.at(index));
-        network->AddHF(index, jh);
         network->SetScenario(index, line.scenario);
-        summary.iHeatFlow += jh;
+        if (auto jh = GetLineJouleHeat(index, iniT.at(index)); jh > 0) {
+            network->AddHF(index, jh);
+            summary.iHeatFlow += jh;
+            summary.jouleHeat += jh;
+        }
 
         auto k = GetMatThermalConductivity(line.matId, iniT.at(index));
         auto aveK = (k[0] + k[1] + k[2]) / 3;
@@ -222,14 +224,14 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildLineElement(const std:
                 auto r = 0.5 * l / aveK / area;
                 network->SetR(nbIndex, index, r);
             }
-            else if (i < nbIndex) {
+            else if (index < nbIndex) {
                 const auto & lineNb = m_model.GetLine(m_model.LineLocalIndex(nbIndex));
                 auto kNb = GetMatThermalConductivity(lineNb.matId, iniT.at(index));
                 auto avekNb = (kNb[0] + kNb[1] + kNb[2]) / 3;
                 auto areaNb = GetLineArea(nbIndex);
                 auto lNb = GetLineLength(nbIndex);
                 auto r = 0.5 * l / aveK / area + 0.5 * lNb / avekNb / areaNb;
-                network->SetR(i, nbIndex, r);
+                network->SetR(index, nbIndex, r);
             }
         };
         for (auto nb : line.neighbors.front()) setR(nb);
