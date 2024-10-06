@@ -57,6 +57,7 @@ void ecad_init_design(py::module_ & m)
     py::class_<ILayoutView>(m, "LayoutView")
         .def("get_name", &ILayoutView::GetName, py::return_value_policy::reference)
         .def("get_coord_units", &ILayoutView::GetCoordUnits, py::return_value_policy::reference)
+        .def("get_database", &ILayoutView::GetDatabase, py::return_value_policy::reference)
         .def("find_component_by_name", &ILayoutView::FindComponentByName, py::return_value_policy::reference)
         .def("set_boundary", [](ILayoutView & layout, CPtr<EShape> shape){
             layout.SetBoundary(shape->Clone());

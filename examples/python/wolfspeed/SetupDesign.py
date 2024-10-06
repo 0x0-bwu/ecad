@@ -1,10 +1,7 @@
 import os
 import sys
-import random
-py_ecad = os.path.abspath(os.path.dirname(__file__) + '/../../build.release/lib')
-sys.path.append(py_ecad)
+sys.path.append(os.path.dirname(__file__) + '/../../../build.release/lib')
 import PyEcad as ecad
-mgr = ecad.DataMgr
 
 #constant variables
 THIN_BONDWIRE_RADIUS = 0.0635
@@ -17,16 +14,13 @@ MAT_ALN = "AlN"
 MAT_SIC = "SiC"
 MAT_SAC305 = "SAC305"
 
-def print_test_info(func) :
-    def wrapper(*args, **kwargs):
-        print(f'running: {func.__qualname__}')
-        return func(*args, **kwargs)
+mgr = ecad.DataMgr
+chip_locations = ecad.coord_to_fpoint2d([
+-5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
+5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,])
 
-    return wrapper
-
-@print_test_info
 def setup_design(name, chip_locations, work_dir, save = True) :
-        
+    
     def setup_material(database) :
         mat_al = mgr.create_material_def(database, MAT_AL)
         mat_al.set_property(ecad.MaterialPropId.THERMAL_CONDUCTIVITY, mgr.create_simple_material_prop(238))
@@ -445,192 +439,15 @@ def setup_design(name, chip_locations, work_dir, save = True) :
         mgr.save_database(database, work_dir + '/CAS300M12BM2.ecad')
     return base_layout
 
-def get_simulation_setup(layout, work_dir, cell_insts, components, force_rebuild = False) :
-    def get_extraction_setting(work_dir) :
-        htc = 5000
-        prism_settings = ecad.PrismThermalModelExtractionSettings(work_dir, mgr.threads(), set())
-        prism_settings.bot_uniform_bc.type = ecad.ThermalBondaryConditionType.HTC
-        prism_settings.bot_uniform_bc.value = htc
-        prism_settings.mesh_settings.gen_mesh_by_layer = True
-        if prism_settings.mesh_settings.gen_mesh_by_layer :
-            prism_settings.mesh_settings.imprint_upper_layer = False
-        prism_settings.mesh_settings.iteration = int(1e5)
-        prism_settings.mesh_settings.min_alpha = 15
-        prism_settings.mesh_settings.min_len = 1e-3
-        prism_settings.mesh_settings.max_len = 1
-        prism_settings.mesh_settings.tolerance = 0
-        prism_settings.mesh_settings.dump_mesh_file = True
-        prism_settings.layer_cut_settings.layer_transition_ratio = 3
-        prism_settings.layer_cut_settings.dump_sketch_img = True
-        prism_settings.force_rebuild = force_rebuild
-
-        top_htc = htc
-        prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-29.35, 4.7, -20.35, 8.7), ecad.ThermalBondaryConditionType.HTC, top_htc)
-        prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-29.35, -8.7, -20.35, -4.7), ecad.ThermalBondaryConditionType.HTC, top_htc)
-        prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(2.75, 11.5, 9.75, 17), ecad.ThermalBondaryConditionType.HTC, top_htc)
-        prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(2.75, -17, 9.75, -11.5), ecad.ThermalBondaryConditionType.HTC, top_htc)
-        prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-7.75, 11.5, -2.55, 17), ecad.ThermalBondaryConditionType.HTC, top_htc)
-        prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-7.75, -17, -2.55, -11.5), ecad.ThermalBondaryConditionType.HTC, top_htc)
-        return prism_settings
-
-    def get_die_monitors(layout, cell_insts, components) :
-            monitors = []
-            elevation = 0.0
-            thickness = 0.0
-            retriever = ecad.LayoutRetriever(layout)
-            for cell_inst in cell_insts :
-                for component in components :
-                    name = cell_inst + mgr.hier_sep() + component
-                    comp = layout.find_component_by_name(name)
-                    assert(comp)
-                    success, elevation, thickness = retriever.get_component_height_thickness(comp)
-                    assert(success)
-                    bounding_box = comp.get_bounding_box()
-                    center = bounding_box.center()
-                    location = layout.get_coord_units().to_unit(center)
-                    monitors.append(ecad.FPoint3D(location.x, location.y, elevation - 0.1 * thickness))
-            return monitors
-
-    extraction_setting = get_extraction_setting(work_dir)
-    simulation_setup = ecad.ThermalStaticSimulationSetup(work_dir, mgr.threads(), set())
-    simulation_setup.settings.iteration = 100
-    simulation_setup.settings.dump_hotmaps = True
-    simulation_setup.settings.env_temperature = ecad.Temperature(25, ecad.TemperatureUnit.CELSIUS)
-    simulation_setup.set_extraction_settings(extraction_setting)
-    simulation_setup.monitors = get_die_monitors(layout, cell_insts, components)
-
-    return simulation_setup
-
-@print_test_info
-def static_thermal_flow(chip_locations) :
-    def setup_power(layout) :
-        def get_sic_die_temperature_and_power_config() :
-            return [(25.0, 108.0), (125.0, 124.0), (150.0, 126.5)]
-
-        def get_diode_temperature_and_power_config() :
-            return [(25.0, 20.4), (125.0, 21.7), (150.0, 21.8)]
-        
-        cell_insts = ["TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"]
-        diode_comps = ["Diode1", "Diode2", "Diode3"]
-        sic_comps = ["Die1", "Die2", "Die3"]
-        for cell_inst in cell_insts :
-            for sic_comp in sic_comps :
-                name = cell_inst + mgr.hier_sep() + sic_comp
-                comp = layout.find_component_by_name(name)
-                assert(comp)
-                for t, p in get_sic_die_temperature_and_power_config() :
-                    comp.set_loss_power(t, p)
-            for diode_comp in diode_comps :
-                name = cell_inst + mgr.hier_sep() + diode_comp
-                comp = layout.find_component_by_name(name)
-                assert(comp)
-                for t, p in get_diode_temperature_and_power_config() :
-                    comp.set_loss_power(t, p)
-            prim_iter = layout.get_primitive_iter()
-            while prim := prim_iter.next() :
-                if bw := prim.get_bondwire_from_primitive() :
-                    name = bw.get_name()
-                    if '10A' in name :
-                        bw.set_current(10)
-                    if '15A' in name :
-                        bw.set_current(15)
-
-    mgr.init(ecad.LogLevel.TRACE)
-    work_dir = os.path.dirname(__file__) + '/wolfspeed_static'
-    layout = setup_design("CAS300M12BM2", chip_locations, work_dir)
-    setup_power(layout)
-    setup = get_simulation_setup(layout, work_dir, ["TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"], ["Die1", "Die2", "Die3"])
-    results = layout.run_thermal_simulation(setup)
-    print(results)
-
-    try :
-        import vtk
-        hotmap_vtk = work_dir + '/hotmap.vtk'
-        if 'vtk' in sys.modules and os.path.exists(hotmap_vtk) :
-            from tools import HotmapViewer
-            HotmapViewer.view_hotmap(hotmap_vtk)
-    except :
-        pass
-
-def static_p_t_try_run(chip_locations, work_dir) :
-    def setup_power(layout) :
-        def get_random_power_config(mean, sigma) :
-            return random.gauss(mean, sigma)
-        power_config = []
-        cell_insts = ["TopBridge1", "TopBridge2"]
-        diode_comps = ["Diode1", "Diode2", "Diode3"]
-        sic_comps = ["Die1", "Die2", "Die3"]
-        for cell_inst in cell_insts :
-            for sic_comp in sic_comps :
-                name = cell_inst + mgr.hier_sep() + sic_comp
-                comp = layout.find_component_by_name(name)
-                assert(comp)
-                power_config.append(get_random_power_config(124, 10))
-                comp.set_loss_power(25, power_config[-1])
-
-        for cell_inst in cell_insts :
-            for diode_comp in diode_comps :
-                name = cell_inst + mgr.hier_sep() + diode_comp
-                comp = layout.find_component_by_name(name)
-                assert(comp)
-                power_config.append(get_random_power_config(21, 0))
-                comp.set_loss_power(25, power_config[-1])
-        return power_config
-        
-    layout = setup_design("CAS300M12BM2", chip_locations, work_dir, False)
-    power_config = setup_power(layout)
-    setup = get_simulation_setup(layout, work_dir, ["TopBridge1", "TopBridge2"], ["Die1", "Die2", "Die3"], True)
-    # setup.settings.solver_type = ecad.ThermalNetworkStaticSolverType.SIMPLICIAL_CHOLESKY
-    temperatures = layout.run_thermal_simulation(setup)
-    return power_config[0:6] + temperatures[2]
-
-chip_locations = ecad.coord_to_fpoint2d([
-    -5.23, 8.93, -5.23, 3.86, -5.23, -1.21, 3.71, 8.08, 3.71, 1.33, 3.71, -5.42,
-    5.23, 8.08, 5.23, 1.33, 5.23, -5.42, -3.7, 8.08, -3.7, 1.33, -3.7, -5.42,])
-
-def static_p_t_research(index) :
-    work_dir = os.path.dirname(__file__) + '/wolfspeed_pt_research_' + str(int(index) + 1)
-    mgr.set_threads(1)
-    mgr.init(ecad.LogLevel.INFO, work_dir)
-
-    results = static_p_t_try_run(chip_locations, work_dir)
-    with open(work_dir + '/results.txt', 'w') as f :
-        values = [str(value) for value in results]
-        f.write(','.join(values))
-        f.write('\n')
-    f.close()
-
 def main() :
     print('ecad version: ' + ecad.__version__)
-    
-    static_thermal_flow(chip_locations)    
 
+    mgr.init(ecad.LogLevel.TRACE)
+    work_dir = os.path.dirname(__file__) + '/data/design'
+    layout = setup_design('CAS300M12BM2', chip_locations, work_dir, True)
+    assert(layout and layout.get_database().get_name() == 'CAS300M12BM2')
+    assert(os.path.exists(work_dir + '/CAS300M12BM2.ecad'))
     mgr.shut_down()
-    
-    print('every thing is fine')
-
-def test() :
-    
-    def collect_results(total) :
-        sum_f = open(os.path.dirname(__file__) + '/summary.txt', 'w')
-        for i in range(total) :
-            filename = os.path.dirname(__file__) + f'/wolfspeed_pt_research_{i + 1}/results.txt'
-            if not os.path.exists(filename) :
-                continue
-            with open(filename) as f :
-                for line in f :
-                    line = line.strip()
-                    if line :
-                        sum_f.write(f'{line}\n')
-        sum_f.close()
-
-    total = 1000
-    core_num = 20
-    from multiprocessing import Pool
-    with Pool(core_num) as pool:
-        pool.map(static_p_t_research, range(total))
-    collect_results(total)
 
 if __name__ == '__main__' :
     main()
-    # test() #p-t research

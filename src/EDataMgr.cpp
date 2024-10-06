@@ -391,7 +391,7 @@ ECAD_INLINE void EDataMgr::Init(ELogLevel level, const std::string & workDir)
 #endif//ECAD_OPEN_MP_SUPPORT
 
     //log
-    std::string logFile = workDir.empty() ? generic::fs::CurrentPath() : workDir + ECAD_SEPS + "ecad.log";
+    std::string logFile = workDir.empty() ? generic::fs::CurrentPath().string() : workDir + ECAD_SEPS + "ecad.log";
     auto logger = workDir.empty() ? log::OstreamLoggerMT("ecad", std::cout) : 
                 log::BasicLoggerMT("ecad", workDir + ECAD_SEPS + "ecad.log");
     logger->SetLevel(level);

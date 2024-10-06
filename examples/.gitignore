@@ -1,3 +1,2 @@
-data
-python/wolfspeed_pt_research*
-python/wolfspeed_static
+wolfspeed/data
+python/wolfspeed/data
