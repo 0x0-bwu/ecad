@@ -1,6 +1,7 @@
 #include "PyEcadBasic.hpp"
 #include "PyEcadDesign.hpp"
 #include "PyEcadUtility.hpp"
+#include "PyEcadGeometry.hpp"
 void ecad_init_datamgr(py::module_ & m)
 {
     //DataMgr
@@ -125,4 +126,8 @@ PYBIND11_MODULE(PyEcad, ecad)
     ecad_init_design(ecad);
     ecad_init_utility(ecad);
     ecad_init_datamgr(ecad);
+
+    //sub modules
+    py::module_ mGeom = ecad.def_submodule("geom", "geometry module");
+    ecad_init_geometry(mGeom);
 }

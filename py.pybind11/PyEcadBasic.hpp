@@ -212,6 +212,8 @@ void ecad_init_basic(py::module_ & m)
         .def_property("ll", [](const EBox2D & box){ return box[0]; }, [](EBox2D & box, EPoint2D & ll){ box[0] = ll; })
         .def_property("ur", [](const EBox2D & box){ return box[1]; }, [](EBox2D & box, EPoint2D & ur){ box[1] = ur; })
         .def("center", &EBox2D::Center)
+        .def("scale", &EBox2D::Scale)
+        .def_static("collision", py::overload_cast<const EBox2D &, const EBox2D &, bool>(&EBox2D::Collision))
     ;
 
     py::class_<FBox2D>(m, "FBox2D")

@@ -314,7 +314,7 @@ def setup_design(name, chip_locations, work_dir, save = True) :
         
         return layout
 
-    def create_top_bridge_layout(dataabse, locations) :
+    def create_top_bridge_layout(database, locations) :
         assert(len(locations) == 6)
         coord_units = database.coord_units
         cell = mgr.create_circuit_cell(database, "TopBridgeCell")
@@ -387,6 +387,27 @@ def setup_design(name, chip_locations, work_dir, save = True) :
 
         return layout
     
+    def place_check(layout, bonds) :
+        coord_units = layout.get_coord_units()
+        outline = mgr.create_shape_polygon(coord_units, bonds, 0).get_contour()
+        comp_boxes = []
+        for name in ['Die1', 'Die2', 'Die3', 'Diode1', 'Diode2', 'Diode3'] :
+            comp = layout.find_component_by_name(name)
+            assert(comp)
+            comp_boxes.append(comp.get_bounding_box())
+            if not ecad.geom.contains(outline, comp_boxes[-1], True) :
+                return False
+        
+        for box in comp_boxes :
+            box.scale(1.05)
+
+        for i in range(len(comp_boxes)) :
+            for j in [j for j in range(i + 1, len(comp_boxes))] :
+                if ecad.Box2D.collision(comp_boxes[i], comp_boxes[j], True) :
+                    return False
+    
+        return True
+    
     mgr.remove_database(name)
     database = mgr.create_database(name)
     database.coord_units = ecad.CoordUnits(ecad.CoordUnit.MILLIMETER)
@@ -408,6 +429,9 @@ def setup_design(name, chip_locations, work_dir, save = True) :
     driver.set_layer_map(driver_layer_map)
 
     bot_bridge_layout = create_bot_bridge_layout(database, chip_locations[0:6])
+    if not place_check(bot_bridge_layout, ecad.coord_to_fpoint2d([-9.45, -3.75, -2, -3.75, -2, -8.5, 7.65, -8.5, 7.65, 11.15, -9.45, 11.15])) :
+        return None
+    
     bot_bridge_layer_map = create_default_layer_map(database, bot_bridge_layout, base_layout, 'BotBridgeLayerMap')
 
     bot_bridge1 = mgr.create_cell_inst(base_layout, 'BotBridge1', bot_bridge_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FVector2D(-17.75, 13), ecad.Mirror2D.NO))
@@ -416,6 +440,9 @@ def setup_design(name, chip_locations, work_dir, save = True) :
     bot_bridge2.set_layer_map(bot_bridge_layer_map)
 
     top_bridge_layout = create_top_bridge_layout(database, chip_locations[6:])
+    if not place_check(top_bridge_layout, ecad.coord_to_fpoint2d([-7.65, -8.5, 9.45, -8.5, 9.45, 11.15, -7.65, 11.15])) :
+        return None
+
     top_bridge_layer_map = create_default_layer_map(database, top_bridge_layout, base_layout, 'TopBridgeLayerMap')
 
     top_bridge1 = mgr.create_cell_inst(base_layout, "TopBridge1", top_bridge_layout, mgr.create_transform_2d(database.coord_units, 1, 0, ecad.FVector2D(17.75, 13), ecad.Mirror2D.NO))
