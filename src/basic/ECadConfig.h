@@ -16,7 +16,6 @@
 #include "generic/common/Exception.hpp"
 #define ECAD_ASSERT(ex) GENERIC_ASSERT(ex);
 
-#define ECAD_EFFICIENCY_TRACK_MODE
 #ifdef ECAD_EFFICIENCY_TRACK_MODE
     #include "generic/tools/Tools.hpp"
     #define ECAD_MACRO_COMBINER(a, b) a ## b

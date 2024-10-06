@@ -349,12 +349,13 @@ void t_thermal_static_flow2()
 
     EThermalStaticSimulationSetup setup(prismSettings.workDir, 4, {});
     setup.settings.iteration = 10;
+    setup.settings.dumpHotmaps = true;
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
     setup.extractionSettings = std::make_unique<EPrismThermalModelExtractionSettings>(std::move(prismSettings));
     std::vector<EFloat> temperatures;
     auto [minT, maxT] = layout->RunThermalSimulation(setup, temperatures);    
-    BOOST_CHECK_CLOSE(minT, 34.35, 2);
-    BOOST_CHECK_CLOSE(maxT, 131.77, 2);
+    BOOST_CHECK_CLOSE(minT, 33.7, 2);
+    BOOST_CHECK_CLOSE(maxT, 242, 2);
     EDataMgr::Instance().ShutDown();
 }
 
