@@ -365,6 +365,8 @@ void ecad_init_basic(py::module_ & m)
         .def("set_extraction_settings", [](EThermalSimulationSetup & setup, Ptr<EThermalModelExtractionSettings> settings){
             setup.extractionSettings = settings->Clone();
         })
+        .def("get_grid_thermal_model_extraction_settings", &EThermalSimulationSetup::GetGridThermalModelExtractionSettings, py::return_value_policy::reference)
+        .def("get_prism_thermal_model_extraction_settings", &EThermalSimulationSetup::GetPrismThermalModelExtractionSettings, py::return_value_policy::reference)
     ;
 
     py::class_<EThermalStaticSimulationSetup, EThermalSimulationSetup>(m, "ThermalStaticSimulationSetup")

@@ -409,6 +409,16 @@ struct EThermalSimulationSetup
     std::string workDir;
     std::vector<FPoint3D> monitors;
     UPtr<EThermalModelExtractionSettings> extractionSettings;
+
+    Ptr<EGridThermalModelExtractionSettings> GetGridThermalModelExtractionSettings()
+    {
+        return dynamic_cast<Ptr<EGridThermalModelExtractionSettings>>(extractionSettings.get());
+    }
+
+    Ptr<EPrismThermalModelExtractionSettings> GetPrismThermalModelExtractionSettings()
+    {
+        return dynamic_cast<Ptr<EPrismThermalModelExtractionSettings>>(extractionSettings.get());
+    }
 protected:
     explicit EThermalSimulationSetup(std::string workDir_, size_t threads, const ENetIdSet & selectNets)
      : workDir(std::move(workDir_))
