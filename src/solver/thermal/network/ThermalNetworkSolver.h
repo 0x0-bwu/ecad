@@ -60,9 +60,9 @@ namespace thermal::solver {
                 }
                 case 3: {
 #ifdef ECAD_APPLE_ACCELERATE_SUPPORT
-                    Eigen::AccelerateLTLD<Eigen::SparseMatrix<num_type>,0> solver(m.G);
+                    Eigen::AccelerateLDLT<Eigen::SparseMatrix<num_type>,0> solver(m.G);
 #else
-                    Eigen::SimplicialLTLD<Eigen::SparseMatrix<num_type> > solver(m.G);
+                    Eigen::SimplicialLDLT<Eigen::SparseMatrix<num_type> > solver(m.G);
 #endif //ECAD_APPLE_ACCELERATE_SUPPORT
                     x = m.L * solver.solve(m.B * rhs);
                     break;
