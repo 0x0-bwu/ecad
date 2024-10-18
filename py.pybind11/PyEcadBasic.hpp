@@ -169,7 +169,9 @@ void ecad_init_basic(py::module_ & m)
 
     py::enum_<EThermalNetworkStaticSolverType>(m, "ThermalNetworkStaticSolverType")
         .value("SPARSE_LU", EThermalNetworkStaticSolverType::SparseLU)
-        .value("SIMPLICIAL_CHOLESKY", EThermalNetworkStaticSolverType::SimplicialCholesky)
+        .value("SIMPLICIAL_CHOLESKY", EThermalNetworkStaticSolverType::Cholesky)
+        .value("LLT", EThermalNetworkStaticSolverType::LLT)
+        .value("LDLT", EThermalNetworkStaticSolverType::LDLT)
         .value("CONJUGATE_GRADIENT", EThermalNetworkStaticSolverType::ConjugateGradient)
     ;
 

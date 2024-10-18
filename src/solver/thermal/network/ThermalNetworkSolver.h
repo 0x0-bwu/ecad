@@ -12,6 +12,10 @@
 #include <Eigen/SparseCholesky>
 #include <Eigen/SparseLU>
 
+#ifdef ECAD_APPLE_ACCELERATE_SUPPORT
+#include <Eigen/AccelerateSupport>
+#endif //ECAD_APPLE_ACCELERATE_SUPPORT
+
 namespace thermal::solver {
     using namespace model;
     using namespace generic;
@@ -36,24 +40,36 @@ namespace thermal::solver {
             Eigen::Map<DenseVector<num_type>> x(result.data(), result.size());
             switch (m_solverType) {
                 case 0 : {
-                    Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver;
-                    solver.analyzePattern(m.G);
-                    solver.factorize(m.G);
-                    x = solver.solve(m.B * rhs);
+                    Eigen::SparseLU<Eigen::SparseMatrix<num_type> > solver(m.G);
+                    x = m.L * solver.solve(m.B * rhs);
                     break;
                 }
                 case 1 : {
-                    Eigen::SimplicialCholesky<Eigen::SparseMatrix<num_type> > solver;
-                    solver.analyzePattern(m.G);
-                    solver.factorize(m.G);
-                    x = solver.solve(m.B * rhs);
+                    Eigen::SimplicialCholesky<Eigen::SparseMatrix<num_type> > solver(m.G);
+                    x = m.L * solver.solve(m.B * rhs);
                     break;
                 }
-                case 2 : {
-                    Eigen::ConjugateGradient<Eigen::SparseMatrix<num_type>, Eigen::Lower | Eigen::Upper> solver;
-                    solver.compute(m.G);
+                case 2: {
+#ifdef ECAD_APPLE_ACCELERATE_SUPPORT
+                    Eigen::AccelerateLLT<Eigen::SparseMatrix<num_type> > solver(m.G);
+#else
+                    Eigen::SimplicialLLT<Eigen::SparseMatrix<num_type> > solver(m.G);
+#endif //ECAD_APPLE_ACCELERATE_SUPPORT
                     x = m.L * solver.solve(m.B * rhs);
-
+                    break;
+                }
+                case 3: {
+#ifdef ECAD_APPLE_ACCELERATE_SUPPORT
+                    Eigen::AccelerateLTLD<Eigen::SparseMatrix<num_type>,0> solver(m.G);
+#else
+                    Eigen::SimplicialLTLD<Eigen::SparseMatrix<num_type> > solver(m.G);
+#endif //ECAD_APPLE_ACCELERATE_SUPPORT
+                    x = m.L * solver.solve(m.B * rhs);
+                    break;
+                }
+                case 10 : {
+                    Eigen::ConjugateGradient<Eigen::SparseMatrix<num_type>, Eigen::Lower | Eigen::Upper> solver(m.G);
+                    x = m.L * solver.solve(m.B * rhs);
                     ECAD_TRACE("#iterations: %1%", solver.iterations());
                     ECAD_TRACE("estimated error: %1%", solver.error());
                     break;

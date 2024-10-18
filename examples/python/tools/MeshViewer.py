@@ -1,38 +1,30 @@
 import os
+import sys
 import vtk
 
-def main():
-    filename = os.path.dirname(__file__) + '/../test/data/simulation/thermal/mesh.vtk'
-    # filename = os.path.dirname(__file__) + '/test.vtk'
+def view_mesh(filename):
 
-    # Create the reader for the data.
     reader = vtk.vtkUnstructuredGridReader()
     reader.SetFileName(filename)
     reader.Update()
-
-    # Set mapper and renderer
-    # mapper = vtk.vtkUnstructuredGridMapper()
-    # mapper.SetInputConnection(reader.GetOutputPort())
-    # mapper.SetLookupTable(lut)
-    # mapper.SetColorModeToMapScalars()
 
     bounds = reader.GetOutput().GetBounds()
     center = reader.GetOutput().GetCenter()
     
     colors = vtk.vtkNamedColors()
     renderer = vtk.vtkRenderer()
-    renderer.SetBackground(colors.GetColor3d('Wheat'))
+    renderer.SetBackground(colors.GetColor3d('White'))
     renderer.UseHiddenLineRemovalOn()
     # renderer.AddActor(mapper)
 
-    renderWindow = vtk.vtkRenderWindow()
-    renderWindow.AddRenderer(renderer)
-    renderWindow.SetSize(640, 480)
+    render_window = vtk.vtkRenderWindow()
+    render_window.AddRenderer(renderer)
+    render_window.SetSize(640, 480)
 
     interactor = vtk.vtkRenderWindowInteractor()
-    interactor.SetRenderWindow(renderWindow)
+    interactor.SetRenderWindow(render_window)
     
-    # shrink = vtkShrinkFilter()
+    # shrink = vtk.vtkShrinkFilter()
     # shrink.SetInputConnection(reader.GetOutputPort())
     # shrink.SetShrinkFactor(0.6)
 
@@ -42,7 +34,6 @@ def main():
 
     actor = vtk.vtkActor()
     actor.SetMapper(dataSetMapper)
-    # actor.GetProperty().SetDiffuseColor(colors.GetColor3d('tomato'))
     actor.GetProperty().EdgeVisibilityOn()
     actor.GetProperty().SetLineWidth(0.2)
     actor.SetScale(1.0, 1.0, 3)
@@ -56,11 +47,19 @@ def main():
     renderer.ResetCamera()
     renderer.GetActiveCamera().Dolly(1.4)
     renderer.ResetCameraClippingRange()
-    renderWindow.Render()
-    renderWindow.SetWindowName('mesh viewer')
-    renderWindow.Render()
+    render_window.Render()
+    render_window.SetWindowName('mesh viewer')
+    render_window.Render()
 
     interactor.Start()
 
-if __name__ == '__main__':
+def main() :
+    if len(sys.argv) < 2 :
+        print('Error: please specify vtk file')
+        return
+
+    filename = sys.argv[1]    
+    view_mesh(filename)
+
+if __name__ == '__main__' :
     main()

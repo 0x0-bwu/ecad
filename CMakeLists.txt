@@ -43,6 +43,8 @@ if (ENABLE_PROFILING)
 	message("-- Enable GNU Profiling")
 endif()
 
+option(ENABLE_APPLE_ACCELERATE "Enable apple accelerate framework" OFF)
+
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ffast-math -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -ffast-math -Wno-deprecated-declarations")
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -78,6 +80,11 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
     	#set(CMAKE_CXX_COMPILER "${HOMEBREW_INSTALL_PREFIX}/Cellar/gcc/13.2.0/bin/g++-13")
     	set(DYLIB_SUFFIX "dylib")
   	endif()
+
+	if (ENABLE_APPLE_ACCELERATE)
+		add_compile_definitions(ECAD_APPLE_ACCELERATE_SUPPORT)
+		message("-- Enable Apple accelerate framework")
+	endif()
 endif()
 
 # Boost library

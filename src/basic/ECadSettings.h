@@ -431,8 +431,10 @@ protected:
 enum class EThermalNetworkStaticSolverType
 {
     SparseLU = 0,
-    SimplicialCholesky = 1,
-    ConjugateGradient = 2,
+    Cholesky = 1,
+    LLT = 2,
+    LDLT = 3,
+    ConjugateGradient = 10,
 };
 
 struct EThermalSettings
