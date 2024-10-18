@@ -105,7 +105,7 @@ ECAD_INLINE void EPrismThermalNetworkBuilder::BuildPrismElement(const std::vecto
                     summary.boundaryNodes += 1;
                 }
                 else if (EThermalBondaryCondition::BCType::HeatFlux == topBC->type) {
-                    auto heatFlow = botBC->value * hArea;
+                    auto heatFlow = topBC->value * hArea;
                     network->SetHF(i, heatFlow);
                     if (heatFlow > 0)
                         summary.iHeatFlow += heatFlow;
