@@ -16,10 +16,11 @@ public:
 
     UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT, size_t threads = 1) const;
 
-private:
-    void BuildPrismElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const;
+protected:
+    virtual void BuildPrismElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const;
+    virtual void ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const;
+
     void BuildLineElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network) const;
-    void ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const;
 
     std::array<EFloat, 3> GetMatThermalConductivity(EMaterialId matId, EFloat refT) const;
     EFloat GetMatMassDensity(EMaterialId matId, EFloat refT) const;
@@ -44,7 +45,7 @@ private:
     EFloat GetLineLength(size_t index) const;
     EFloat GetLineArea(size_t index) const;
 
-private:
+protected:
     const ModelType & m_model;
 };
 } // namespace ecad::solver

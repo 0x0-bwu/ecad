@@ -6,8 +6,6 @@
 namespace ecad {
 namespace solver {
 using namespace ecad::model;
-ECAD_API EFloat CalculateResidual(const std::vector<EFloat> & v1, const std::vector<EFloat> & v2);
-
 class ECAD_API EThermalNetworkSolver
 {
 public:

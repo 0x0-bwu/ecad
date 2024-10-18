@@ -9,43 +9,10 @@
 #include "generic/thread/ThreadPool.hpp"
 namespace ecad::solver {
 
-using namespace generic;
 using namespace ecad::model;
 ECAD_INLINE EStackupPrismThermalNetworkBuilder::EStackupPrismThermalNetworkBuilder(const ModelType & model)
- : m_model(model)
+ : EPrismThermalNetworkBuilder(model)
 {
-}
-
-ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EStackupPrismThermalNetworkBuilder::Build(const std::vector<EFloat> & iniT, size_t threads) const
-{
-    const size_t size = m_model.TotalElements();
-    if(iniT.size() != size) return nullptr;
-
-    summary.Reset();
-    summary.totalNodes = size;
-    auto network = std::make_unique<ThermalNetwork<EFloat> >(size);
-
-    if (threads > 1) {
-        generic::thread::ThreadPool pool(threads);
-        size_t size = m_model.TotalPrismElements();
-        size_t blocks = pool.Threads();
-        size_t blockSize = size / blocks;
-
-        size_t begin = 0;
-        for(size_t i = 0; i < blocks && blockSize > 0; ++i){
-            size_t end = begin + blockSize;
-            pool.Submit(std::bind(&EStackupPrismThermalNetworkBuilder::BuildPrismElement, this, std::ref(iniT), network.get(), begin, end));
-            begin = end;
-        }
-        size_t end = size;
-        if(begin != end)
-            pool.Submit(std::bind(&EStackupPrismThermalNetworkBuilder::BuildPrismElement, this, std::ref(iniT), network.get(), begin, end));        
-    }
-    else BuildPrismElement(iniT, network.get(), 0, m_model.TotalPrismElements());
-    
-    BuildLineElement(iniT, network.get());
-    ApplyBlockBCs(network.get());
-    return network;
 }
 
 ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildPrismElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const
@@ -197,55 +164,13 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildPrismElement(const std
     }
 }
 
-ECAD_INLINE void EStackupPrismThermalNetworkBuilder::BuildLineElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network) const
-{
-    for (size_t i = 0; i < m_model.TotalLineElements(); ++i) {
-        const auto & line = m_model.GetLine(i);
-        auto index = line.id;
-        auto rho = GetMatMassDensity(line.matId, iniT.at(index));
-        auto c = GetMatSpecificHeat(line.matId, iniT.at(index));
-        auto v = GetLineVolume(index);
-        network->SetC(index, c * rho * v);
-
-        network->SetScenario(index, line.scenario);
-        if (auto jh = GetLineJouleHeat(index, iniT.at(index)); jh > 0) {
-            network->AddHF(index, jh);
-            summary.iHeatFlow += jh;
-            summary.jouleHeat += jh;
-        }
-
-        auto k = GetMatThermalConductivity(line.matId, iniT.at(index));
-        auto aveK = (k[0] + k[1] + k[2]) / 3;
-        auto area = GetLineArea(index);
-        auto l = GetLineLength(index);
-
-        auto setR = [&](size_t nbIndex) {
-            if (m_model.isPrima(nbIndex)) {
-                auto r = 0.5 * l / aveK / area;
-                network->SetR(nbIndex, index, r);
-            }
-            else if (index < nbIndex) {
-                const auto & lineNb = m_model.GetLine(m_model.LineLocalIndex(nbIndex));
-                auto kNb = GetMatThermalConductivity(lineNb.matId, iniT.at(index));
-                auto avekNb = (kNb[0] + kNb[1] + kNb[2]) / 3;
-                auto areaNb = GetLineArea(nbIndex);
-                auto lNb = GetLineLength(nbIndex);
-                auto r = 0.5 * l / aveK / area + 0.5 * lNb / avekNb / areaNb;
-                network->SetR(index, nbIndex, r);
-            }
-        };
-        for (auto nb : line.neighbors.front()) setR(nb);
-        for (auto nb : line.neighbors.back()) setR(nb);
-    }
-}
-
 ECAD_INLINE void EStackupPrismThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const
 {
     const auto & topBCs = m_model.GetBlockBCs(EOrientation::Top);
     const auto & botBCs = m_model.GetBlockBCs(EOrientation::Bot);
     if (topBCs.empty() && botBCs.empty()) return;
 
-    model::utils::EStackupPrismThermalModelQuery query(&m_model);
+    model::utils::EStackupPrismThermalModelQuery query(dynamic_cast<CPtr<EStackupPrismThermalModel>>(&m_model));
     using RtVal = model::utils::EStackupPrismThermalModelQuery::RtVal;
 
     auto applyBlockBC = [&](const auto & block, bool isTop)
@@ -285,135 +210,6 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNe
         applyBlockBC(block, true);
     for (const auto & block : botBCs)
         applyBlockBC(block, false);
-}
-
-ECAD_INLINE const FPoint3D & EStackupPrismThermalNetworkBuilder::GetPrismVertexPoint(size_t index, size_t iv) const
-{
-    return m_model.GetPoint(m_model.GetPrism(index).vertices.at(iv));
-}
-
-ECAD_INLINE FPoint2D EStackupPrismThermalNetworkBuilder::GetPrismVertexPoint2D(size_t index, size_t iv) const
-{
-    const auto & pt3d = GetPrismVertexPoint(index, iv);
-    return FPoint2D(pt3d[0], pt3d[1]);
-}
-
-ECAD_INLINE FPoint2D EStackupPrismThermalNetworkBuilder::GetPrismCenterPoint2D(size_t index) const
-{
-    auto p0 = GetPrismVertexPoint2D(index, 0);
-    auto p1 = GetPrismVertexPoint2D(index, 1);
-    auto p2 = GetPrismVertexPoint2D(index, 2);
-    return generic::geometry::Triangle2D<FCoord>(p0, p1, p2).Center();
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismCenterDist2Side(size_t index, size_t ie) const
-{
-    ie %= 3;
-    auto ct = GetPrismCenterPoint2D(index);
-    auto p1 = GetPrismVertexPoint2D(index, ie);
-    auto p2 = GetPrismVertexPoint2D(index, (ie + 1) % 3);
-    auto distSq = generic::geometry::PointLineDistanceSq(ct, p1, p2);
-    return std::sqrt(distSq) * m_model.UnitScale2Meter();
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismEdgeLength(size_t index, size_t ie) const
-{
-    ie %= 3;
-    auto p1 = GetPrismVertexPoint2D(index, ie);
-    auto p2 = GetPrismVertexPoint2D(index, (ie + 1) % 3);
-    auto dist = generic::geometry::Distance(p1, p2);
-    return dist * m_model.UnitScale2Meter();
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismSideArea(size_t index, size_t ie) const
-{
-    auto h = GetPrismHeight(index);
-    auto w = GetPrismEdgeLength(index, ie);
-    return h * w;
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismTopBotArea(size_t index) const
-{
-    const auto & points = m_model.GetPoints();
-    const auto & vs = m_model.GetPrism(index).vertices;
-    auto area = generic::geometry::Triangle3D<FCoord>(points.at(vs[0]), points.at(vs[1]), points.at(vs[2])).Area();
-    return area * m_model.UnitScale2Meter(2);
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismVolume(size_t index) const
-{
-    return GetPrismTopBotArea(index) * GetPrismHeight(index);
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetPrismHeight(size_t index) const
-{
-    const auto & prism = m_model.GetPrism(index);
-    return m_model.layers.at(prism.layer).thickness * m_model.UnitScale2Meter();
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetLineJouleHeat(size_t index, EFloat refT) const
-{
-    const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
-    if (generic::math::EQ<EFloat>(line.current, 0)) return 0;
-    auto rho = GetMatResistivity(line.matId, refT);
-    return rho * GetLineLength(index) * line.current * line.current / GetLineArea(index);
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetLineVolume(size_t index) const
-{
-    return GetLineArea(index) * GetLineLength(index);
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetLineLength(size_t index) const
-{
-    const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
-    const auto & p1 = m_model.GetPoint(line.endPoints.front());
-    const auto & p2 = m_model.GetPoint(line.endPoints.back());
-    return generic::geometry::Distance(p1, p2) * m_model.UnitScale2Meter();
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetLineArea(size_t index) const
-{
-    const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
-    return generic::math::pi * std::pow(line.radius * m_model.UnitScale2Meter(), 2);
-}
-
-ECAD_INLINE std::array<EFloat, 3> EStackupPrismThermalNetworkBuilder::GetMatThermalConductivity(EMaterialId matId, EFloat refT) const
-{
-    std::array<EFloat, 3> result;
-    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
-    for (size_t i = 0; i < result.size(); ++i) {
-        [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::ThermalConductivity)->GetAnsiotropicProperty(refT, i, result[i]);
-        ECAD_ASSERT(check)
-    }
-    return result;
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetMatMassDensity(EMaterialId matId, EFloat refT) const
-{
-    EFloat result{0};
-    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
-    [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::MassDensity)->GetSimpleProperty(refT, result);
-    ECAD_ASSERT(check)
-    return result;
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetMatSpecificHeat(EMaterialId matId, EFloat refT) const
-{
-    EFloat result{0};
-    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
-    [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::SpecificHeat)->GetSimpleProperty(refT, result);
-    ECAD_ASSERT(check)
-    return result;
-}
-
-ECAD_INLINE EFloat EStackupPrismThermalNetworkBuilder::GetMatResistivity(EMaterialId matId, EFloat refT) const
-{
-    EFloat result{0};
-    auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
-    [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::Resistivity)->GetSimpleProperty(refT, result);
-    ECAD_ASSERT(check)
-    return result; 
 }
 
 } // namespace ecad::solver

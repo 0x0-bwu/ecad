@@ -25,8 +25,10 @@ using UPtr = std::unique_ptr<T, Deleter>;
 template <typename T1, typename T2>
 using EPair = std::pair<T1, T2>;
 
-using EFloat = double;
-using FCoord = double;
+using Float1 = float;
+using Float2 = double;
+using EFloat = Float2;
+using FCoord = EFloat;
 using ECoord = int64_t;
 using EInt64 = int64_t;
 using EInt32 = int32_t;
