@@ -24,31 +24,32 @@ ECAD_INLINE std::pair<std::set<size_t>, std::vector<size_t> > GetProbsAndPermuta
     return std::make_pair(probs, permutation);
 }
 
-ECAD_INLINE EFloat CalculateResidual(const std::vector<EFloat> & v1, const std::vector<EFloat> & v2, bool maximumRes)
+template <typename Scalar>
+ECAD_INLINE Scalar CalculateResidual(const std::vector<Scalar> & v1, const std::vector<Scalar> & v2, bool maximumRes)
 {
     ECAD_ASSERT(v1.size() == v2.size())
-    EFloat residual = 0;
+    Scalar residual = 0;
     size_t size = v1.size();
     for(size_t i = 0; i < size; ++i) {
-        if (maximumRes) residual = std::max<EFloat>(std::fabs(v1[i] - v2[i]), residual);
+        if (maximumRes) residual = std::max<Scalar>(std::fabs(v1[i] - v2[i]), residual);
         else residual += std::fabs(v1[i] - v2[i]) / size;
     }
     return residual;
 }
 
 template <typename ThermalNetworkBuilder>
-ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<EFloat> & results) const
+ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<Scalar> & results) const
 {
     auto envT = settings.envTemperature.inKelvins();
     ThermalNetworkBuilder builder(model);
     using Model = typename ThermalNetworkBuilder::ModelType;
     results.assign(traits::EThermalModelTraits<Model>::Size(model), envT);
 
-    EFloat residual = 0;
+    Scalar residual = 0;
     size_t iteration = 0;
     size_t maxIteration = traits::EThermalModelTraits<Model>::NeedIteration(model) ? settings.iteration : 1;
     do {
-        std::vector<EFloat> prevRes(results);
+        std::vector<Scalar> prevRes(results);
         auto network = builder.Build(prevRes);
         if (nullptr == network) return false;
         ECAD_TRACE("total nodes: %1%", network->Size());
@@ -57,7 +58,7 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
         ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow);
 
         using namespace thermal::solver;
-        ThermalNetworkSolver<EFloat> solver(*network, static_cast<int>(settings.solverType));
+        ThermalNetworkSolver<Scalar> solver(*network, static_cast<int>(settings.solverType));
         solver.Solve(envT, results);
 
         residual = CalculateResidual(results, prevRes, settings.maximumRes);
@@ -81,9 +82,10 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
     return true;   
 }
 
-ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EGridThermalNetworkBuilder>(const EGridThermalModel & model, std::vector<EFloat> & results) const;
-ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EPrismThermalNetworkBuilder>(const EPrismThermalModel & model, std::vector<EFloat> & results) const;
-ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EStackupPrismThermalNetworkBuilder>(const EStackupPrismThermalModel & model, std::vector<EFloat> & results) const;
+using StaticSolverNumType = typename EThermalNetworkStaticSolver::Scalar;
+ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EGridThermalNetworkBuilder<StaticSolverNumType>>(const EGridThermalModel & model, std::vector<StaticSolverNumType> & results) const;
+ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EPrismThermalNetworkBuilder<StaticSolverNumType>>(const EPrismThermalModel & model, std::vector<StaticSolverNumType> & results) const;
+ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EStackupPrismThermalNetworkBuilder<StaticSolverNumType>>(const EStackupPrismThermalModel & model, std::vector<StaticSolverNumType> & results) const;
 
 EThermalNetworkTransientSolver::EThermalNetworkTransientSolver(const EThermalTransientExcitation & excitation)
  : settings("", 1), m_excitation(excitation)
@@ -99,7 +101,7 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
     maxT = -maxFloat;
     auto envT = settings.envTemperature.inKelvins();
     ThermalNetworkBuilder builder(model);
-    UPtr<ThermalNetwork<EFloat> > network;
+    UPtr<typename ThermalNetworkBuilder::Network> network;
     using Model = typename ThermalNetworkBuilder::ModelType;
     
     size_t steps{0};
@@ -198,8 +200,8 @@ ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkStaticSolver::Solve(std::ve
 {
     ECAD_EFFICIENCY_TRACK("grid thermal network static solve")
 
-    std::vector<EFloat> results;
-    auto res = EThermalNetworkStaticSolver::template Solve<EGridThermalNetworkBuilder>(m_model, results);
+    std::vector<Scalar> results;
+    auto res = EThermalNetworkStaticSolver::template Solve<EGridThermalNetworkBuilder<Scalar>>(m_model, results);
     if (not res) return {invalidFloat, invalidFloat};
     
     auto minT = *std::min_element(results.begin(), results.end());
@@ -250,7 +252,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkTransientSolver::Solve() co
     ECAD_EFFICIENCY_TRACK("grid thermal network transient solve")
     EPair<EFloat, EFloat> range;
     if (EThermalNetworkTransientSolver::template 
-        Solve<EGridThermalNetworkBuilder>(m_model, range.first, range.second))
+        Solve<EGridThermalNetworkBuilder<EFloat>>(m_model, range.first, range.second))
         return range;
     return {invalidFloat, invalidFloat};
 }
@@ -268,9 +270,8 @@ ECAD_INLINE EPrismThermalNetworkStaticSolver::EPrismThermalNetworkStaticSolver(c
 ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
 {
     ECAD_EFFICIENCY_TRACK("prism thermal network static solve")
-
-    std::vector<EFloat> results;
-    auto res = EThermalNetworkStaticSolver::template Solve<EPrismThermalNetworkBuilder>(m_model, results);
+    std::vector<Scalar> results;
+    auto res = EThermalNetworkStaticSolver::template Solve<EPrismThermalNetworkBuilder<Scalar>>(m_model, results);
     if (not res) return {invalidFloat, invalidFloat};
 
     auto minT = *std::min_element(results.begin(), results.end());
@@ -282,7 +283,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkStaticSolver::Solve(std::v
     if (settings.dumpHotmaps) {
         auto hotmapFile = settings.workDir + ECAD_SEPS + "hotmap.vtk";
         ECAD_TRACE("dump vtk hotmap: %1%", hotmapFile);
-        io::GenerateVTKFile(hotmapFile, m_model, &results);
+        io::GenerateVTKFile<Scalar>(hotmapFile, m_model, &results);
     }
     return {minT, maxT};
 }
@@ -297,7 +298,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkTransientSolver::Solve() c
     ECAD_EFFICIENCY_TRACK("prism thermal network transient solve")
     EPair<EFloat, EFloat> range;
     if (EThermalNetworkTransientSolver::template 
-        Solve<EPrismThermalNetworkBuilder>(m_model, range.first, range.second))
+        Solve<EPrismThermalNetworkBuilder<EFloat>>(m_model, range.first, range.second))
         return range;
     return {invalidFloat, invalidFloat};
 
@@ -316,9 +317,8 @@ ECAD_INLINE EStackupPrismThermalNetworkStaticSolver::EStackupPrismThermalNetwork
 ECAD_INLINE EPair<EFloat, EFloat> EStackupPrismThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
 {
     ECAD_EFFICIENCY_TRACK("stackup prism thermal network static solve")
-
-    std::vector<EFloat> results;
-    auto res = EThermalNetworkStaticSolver::template Solve<EStackupPrismThermalNetworkBuilder>(m_model, results);
+    std::vector<Scalar> results;
+    auto res = EThermalNetworkStaticSolver::template Solve<EStackupPrismThermalNetworkBuilder<Scalar>>(m_model, results);
     if (not res) return {invalidFloat, invalidFloat};
 
     auto minT = *std::min_element(results.begin(), results.end());
@@ -345,7 +345,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EStackupPrismThermalNetworkTransientSolver::So
     ECAD_EFFICIENCY_TRACK("prism thermal network transient solve")
     EPair<EFloat, EFloat> range;
     if (EThermalNetworkTransientSolver::template 
-        Solve<EStackupPrismThermalNetworkBuilder>(m_model, range.first, range.second))
+        Solve<EStackupPrismThermalNetworkBuilder<EFloat>>(m_model, range.first, range.second))
         return range;
     return {invalidFloat, invalidFloat};
 }

@@ -303,7 +303,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
         
     if (not settings.workDir.empty() && settings.meshSettings.dumpMeshFile) { 
         auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
-        io::GenerateVTKFile(meshFile, *model);
+        io::GenerateVTKFile<EFloat>(meshFile, *model);
     }
 
     return std::unique_ptr<IModel>(model);
@@ -466,7 +466,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalMod
         
     if (not settings.workDir.empty() && settings.meshSettings.dumpMeshFile) { 
         auto meshFile = settings.workDir + ECAD_SEPS + "mesh.vtk";
-        io::GenerateVTKFile(meshFile, *model);
+        io::GenerateVTKFile<EFloat>(meshFile, *model);
     }
     return std::unique_ptr<IModel>(model);
 }

@@ -7,20 +7,21 @@ namespace ecad::solver {
 using namespace model;
 using namespace thermal::model;
 
+template <typename Scalar>
 class ECAD_API EPrismThermalNetworkBuilder : public EThermalNetworkBuilder
 {
 public:
     using ModelType = EPrismThermalModel;
+    using Network = thermal::model::ThermalNetwork<Scalar>;
     explicit EPrismThermalNetworkBuilder(const ModelType & model);
     virtual ~EPrismThermalNetworkBuilder() = default;
 
-    UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT, size_t threads = 1) const;
+    UPtr<Network > Build(const std::vector<Scalar> & iniT, size_t threads = 1) const;
 
 protected:
-    virtual void BuildPrismElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const;
-    virtual void ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const;
-
-    void BuildLineElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network) const;
+    virtual void BuildPrismElement(const std::vector<Scalar> & iniT, Ptr<Network> network, size_t start, size_t end) const;
+    virtual void ApplyBlockBCs(Ptr<Network> network) const;
+    void BuildLineElement(const std::vector<Scalar> & iniT, Ptr<Network> network) const;
 
     std::array<EFloat, 3> GetMatThermalConductivity(EMaterialId matId, EFloat refT) const;
     EFloat GetMatMassDensity(EMaterialId matId, EFloat refT) const;

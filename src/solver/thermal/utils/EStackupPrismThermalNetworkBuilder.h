@@ -5,19 +5,20 @@
 #include "solver/thermal/network/ThermalNetwork.h"
 namespace ecad::solver {
 
-using namespace model;
-using namespace thermal::model;
+using namespace ecad::model;
 
-class ECAD_API EStackupPrismThermalNetworkBuilder : public EPrismThermalNetworkBuilder
+template <typename Scalar>
+class ECAD_API EStackupPrismThermalNetworkBuilder : public EPrismThermalNetworkBuilder<Scalar>
 {
 public:
     using ModelType = EStackupPrismThermalModel;
+    using Network = typename EPrismThermalNetworkBuilder<Scalar>::Network;
     explicit EStackupPrismThermalNetworkBuilder(const ModelType & model);
     virtual ~EStackupPrismThermalNetworkBuilder() = default;
 
 private:
-    void BuildPrismElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const override;
-    void ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const override;
+    void BuildPrismElement(const std::vector<Scalar> & iniT, Ptr<Network> network, size_t start, size_t end) const override;
+    void ApplyBlockBCs(Ptr<Network> network) const override;
 };
 } // namespace ecad::solver
 

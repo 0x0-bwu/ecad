@@ -2,7 +2,8 @@
 #include "generic/tools/Color.hpp"
 namespace ecad::model::io {
 
-ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismThermalModel & model, const std::vector<EFloat> * temperature, std::string * err)
+template <typename Scalar>
+ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismThermalModel & model, const std::vector<Scalar> * temperature, std::string * err)
 {
     if (not fs::CreateDir(fs::DirName(filename))) {
         if (err) *err = "Error: fail to create folder " + fs::DirName(filename).string();
@@ -65,5 +66,8 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismThermalM
     out.close();
     return true;
 }
+
+template ECAD_INLINE bool GenerateVTKFile<Float1>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float1> * temperature, std::string * err);
+template ECAD_INLINE bool GenerateVTKFile<Float2>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float2> * temperature, std::string * err);
 
 } // namespace ecad::model::io

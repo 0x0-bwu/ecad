@@ -6,23 +6,24 @@ namespace ecad {
 namespace solver {
 
 using namespace ecad::model;
-using namespace thermal::model;
 
+template <typename Scalar>
 class ECAD_API EGridThermalNetworkBuilder : public EThermalNetworkBuilder
 {
     enum class Axis { X = 0, Y = 1, Z = 2};
 public:
     using ModelType = EGridThermalModel;
+    using Network = thermal::model::ThermalNetwork<Scalar>;
     enum class Orientation { Top, Bot, Left, Right, Front, End };
     explicit EGridThermalNetworkBuilder(const ModelType & model);
     virtual ~EGridThermalNetworkBuilder() = default;
 
-    UPtr<ThermalNetwork<EFloat> > Build(const std::vector<EFloat> & iniT) const;
+    UPtr<Network> Build(const std::vector<Scalar> & iniT) const;
 
 private:
-    void ApplyHeatFlowForLayer(const std::vector<EFloat> & iniT, const EGridDataTable & dataTable, size_t layer, ThermalNetwork<EFloat> & network) const;
-    void ApplyUniformBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, ThermalNetwork<EFloat> & network) const;
-    void ApplyBlockBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, ThermalNetwork<EFloat> & network) const;
+    void ApplyHeatFlowForLayer(const std::vector<Scalar> & iniT, const EGridDataTable & dataTable, size_t layer, Network & network) const;
+    void ApplyUniformBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, Network & network) const;
+    void ApplyBlockBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, Network & network) const;
 
 public:
     EFloat GetMetalComposite(const ESize3D & index) const;
@@ -61,47 +62,56 @@ private:
     const ESize3D m_size;
 };
 
-ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetXGridLength() const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetXGridLength() const
 {
     return m_model.GetResolution().at(0) * m_model.GetScaleH();
 }
 
-ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetYGridLength() const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetYGridLength() const
 {
     return m_model.GetResolution().at(1) * m_model.GetScaleH();
 }
 
-ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetZGridLength(size_t layer) const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetZGridLength(size_t layer) const
 {
     return m_model.GetLayers().at(layer).GetThickness();
 }
 
-ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetXGridArea(size_t layer) const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetXGridArea(size_t layer) const
 {
     return GetZGridLength(layer) * GetYGridLength();
 }
 
-ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetYGridArea(size_t layer) const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetYGridArea(size_t layer) const
 {
     return GetZGridLength(layer) * GetXGridLength();
 }
 
-ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder::GetZGridArea() const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetZGridArea() const
 {
     return GetXGridLength() * GetYGridLength();
 }
 
-ECAD_ALWAYS_INLINE size_t EGridThermalNetworkBuilder::GetFlattenIndex(const ESize3D & index) const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE size_t EGridThermalNetworkBuilder<Scalar>::GetFlattenIndex(const ESize3D & index) const
 {
     return m_model.GetFlattenIndex(index);
 }
 
-ECAD_ALWAYS_INLINE ESize3D EGridThermalNetworkBuilder::GetGridIndex(size_t index) const
+template <typename Scalar>
+ECAD_ALWAYS_INLINE ESize3D EGridThermalNetworkBuilder<Scalar>::GetGridIndex(size_t index) const
 {
     return m_model.GetGridIndex(index);
 }
 
-ECAD_ALWAYS_INLINE bool EGridThermalNetworkBuilder::isValid(const ESize3D & index)
+template <typename Scalar>
+ECAD_ALWAYS_INLINE bool EGridThermalNetworkBuilder<Scalar>::isValid(const ESize3D & index)
 {
     return index.x != invalidIndex && index.y != invalidIndex && index.z != invalidIndex;
 }

@@ -15,12 +15,13 @@ public:
 class ECAD_API EThermalNetworkStaticSolver : public EThermalNetworkSolver
 {
 public:
+    using Scalar = Float1;
     EThermalNetworkStaticSolveSettings settings;
     explicit EThermalNetworkStaticSolver() : settings("", 1) {}//wbtest
     virtual ~EThermalNetworkStaticSolver() = default;
 
     template <typename ThermalNetworkBuilder>
-    bool Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<EFloat> & results) const;
+    bool Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<Scalar> & results) const;
 };
 
 class ECAD_API EThermalNetworkTransientSolver : public EThermalNetworkSolver

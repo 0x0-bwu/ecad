@@ -10,19 +10,22 @@
 namespace ecad::solver {
 
 using namespace ecad::model;
-ECAD_INLINE EPrismThermalNetworkBuilder::EPrismThermalNetworkBuilder(const ModelType & model)
+
+template <typename Scalar>
+ECAD_INLINE EPrismThermalNetworkBuilder<Scalar>::EPrismThermalNetworkBuilder(const ModelType & model)
  : m_model(model)
 {
 }
 
-ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EPrismThermalNetworkBuilder::Build(const std::vector<EFloat> & iniT, size_t threads) const
+template <typename Scalar>
+ECAD_INLINE UPtr<typename EPrismThermalNetworkBuilder<Scalar>::Network> EPrismThermalNetworkBuilder<Scalar>::Build(const std::vector<Scalar> & iniT, size_t threads) const
 {
     const size_t size = m_model.TotalElements();
     if(iniT.size() != size) return nullptr;
 
     summary.Reset();
     summary.totalNodes = size;
-    auto network = std::make_unique<ThermalNetwork<EFloat> >(size);
+    auto network = std::make_unique<Network>(size);
 
     if (threads > 1) {
         generic::thread::ThreadPool pool(threads);
@@ -47,7 +50,8 @@ ECAD_INLINE UPtr<ThermalNetwork<EFloat> > EPrismThermalNetworkBuilder::Build(con
     return network;
 }
 
-ECAD_INLINE void EPrismThermalNetworkBuilder::BuildPrismElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network, size_t start, size_t end) const
+template <typename Scalar>
+ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(const std::vector<Scalar> & iniT, Ptr<Network> network, size_t start, size_t end) const
 {
     auto topBC = m_model.GetUniformBC(EOrientation::Top);
     auto botBC = m_model.GetUniformBC(EOrientation::Bot);
@@ -149,7 +153,8 @@ ECAD_INLINE void EPrismThermalNetworkBuilder::BuildPrismElement(const std::vecto
     }
 }
 
-ECAD_INLINE void EPrismThermalNetworkBuilder::BuildLineElement(const std::vector<EFloat> & iniT, Ptr<ThermalNetwork<EFloat> > network) const
+template <typename Scalar>
+ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::BuildLineElement(const std::vector<Scalar> & iniT, Ptr<Network> network) const
 {
     for (size_t i = 0; i < m_model.TotalLineElements(); ++i) {
         const auto & line = m_model.GetLine(i);
@@ -191,7 +196,8 @@ ECAD_INLINE void EPrismThermalNetworkBuilder::BuildLineElement(const std::vector
     }
 }
 
-ECAD_INLINE void EPrismThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<EFloat> > network) const
+template <typename Scalar>
+ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<Network> network) const
 {
     const auto & topBCs = m_model.GetBlockBCs(EOrientation::Top);
     const auto & botBCs = m_model.GetBlockBCs(EOrientation::Bot);
@@ -236,18 +242,21 @@ ECAD_INLINE void EPrismThermalNetworkBuilder::ApplyBlockBCs(Ptr<ThermalNetwork<E
         applyBlockBC(block, false);
 }
 
-ECAD_INLINE const FPoint3D & EPrismThermalNetworkBuilder::GetPrismVertexPoint(size_t index, size_t iv) const
+template <typename Scalar>
+ECAD_INLINE const FPoint3D & EPrismThermalNetworkBuilder<Scalar>::GetPrismVertexPoint(size_t index, size_t iv) const
 {
     return m_model.GetPoint(m_model.GetPrism(index).vertices.at(iv));
 }
 
-ECAD_INLINE FPoint2D EPrismThermalNetworkBuilder::GetPrismVertexPoint2D(size_t index, size_t iv) const
+template <typename Scalar>
+ECAD_INLINE FPoint2D EPrismThermalNetworkBuilder<Scalar>::GetPrismVertexPoint2D(size_t index, size_t iv) const
 {
     const auto & pt3d = GetPrismVertexPoint(index, iv);
     return FPoint2D(pt3d[0], pt3d[1]);
 }
 
-ECAD_INLINE FPoint2D EPrismThermalNetworkBuilder::GetPrismCenterPoint2D(size_t index) const
+template <typename Scalar>
+ECAD_INLINE FPoint2D EPrismThermalNetworkBuilder<Scalar>::GetPrismCenterPoint2D(size_t index) const
 {
     auto p0 = GetPrismVertexPoint2D(index, 0);
     auto p1 = GetPrismVertexPoint2D(index, 1);
@@ -255,7 +264,8 @@ ECAD_INLINE FPoint2D EPrismThermalNetworkBuilder::GetPrismCenterPoint2D(size_t i
     return generic::geometry::Triangle2D<FCoord>(p0, p1, p2).Center();
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismCenterDist2Side(size_t index, size_t ie) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetPrismCenterDist2Side(size_t index, size_t ie) const
 {
     ie %= 3;
     auto ct = GetPrismCenterPoint2D(index);
@@ -265,7 +275,8 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismCenterDist2Side(size_t i
     return std::sqrt(distSq) * m_model.UnitScale2Meter();
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismEdgeLength(size_t index, size_t ie) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetPrismEdgeLength(size_t index, size_t ie) const
 {
     ie %= 3;
     auto p1 = GetPrismVertexPoint2D(index, ie);
@@ -274,14 +285,16 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismEdgeLength(size_t index,
     return dist * m_model.UnitScale2Meter();
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismSideArea(size_t index, size_t ie) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetPrismSideArea(size_t index, size_t ie) const
 {
     auto h = GetPrismHeight(index);
     auto w = GetPrismEdgeLength(index, ie);
     return h * w;
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismTopBotArea(size_t index) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetPrismTopBotArea(size_t index) const
 {
     const auto & points = m_model.GetPoints();
     const auto & vs = m_model.GetPrism(index).vertices;
@@ -289,18 +302,21 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismTopBotArea(size_t index)
     return area * m_model.UnitScale2Meter(2);
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismVolume(size_t index) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetPrismVolume(size_t index) const
 {
     return GetPrismTopBotArea(index) * GetPrismHeight(index);
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetPrismHeight(size_t index) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetPrismHeight(size_t index) const
 {
     const auto & prism = m_model.GetPrism(index);
     return m_model.layers.at(prism.layer).thickness * m_model.UnitScale2Meter();
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetLineJouleHeat(size_t index, EFloat refT) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetLineJouleHeat(size_t index, EFloat refT) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     if (generic::math::EQ<EFloat>(line.current, 0)) return 0;
@@ -308,12 +324,14 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetLineJouleHeat(size_t index, E
     return rho * GetLineLength(index) * line.current * line.current / GetLineArea(index);
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetLineVolume(size_t index) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetLineVolume(size_t index) const
 {
     return GetLineArea(index) * GetLineLength(index);
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetLineLength(size_t index) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetLineLength(size_t index) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     const auto & p1 = m_model.GetPoint(line.endPoints.front());
@@ -321,13 +339,15 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetLineLength(size_t index) cons
     return generic::geometry::Distance(p1, p2) * m_model.UnitScale2Meter();
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetLineArea(size_t index) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetLineArea(size_t index) const
 {
     const auto & line = m_model.GetLine(m_model.LineLocalIndex(index));
     return generic::math::pi * std::pow(line.radius * m_model.UnitScale2Meter(), 2);
 }
 
-ECAD_INLINE std::array<EFloat, 3> EPrismThermalNetworkBuilder::GetMatThermalConductivity(EMaterialId matId, EFloat refT) const
+template <typename Scalar>
+ECAD_INLINE std::array<EFloat, 3> EPrismThermalNetworkBuilder<Scalar>::GetMatThermalConductivity(EMaterialId matId, EFloat refT) const
 {
     std::array<EFloat, 3> result;
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
@@ -338,7 +358,8 @@ ECAD_INLINE std::array<EFloat, 3> EPrismThermalNetworkBuilder::GetMatThermalCond
     return result;
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetMatMassDensity(EMaterialId matId, EFloat refT) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetMatMassDensity(EMaterialId matId, EFloat refT) const
 {
     EFloat result{0};
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
@@ -347,7 +368,8 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetMatMassDensity(EMaterialId ma
     return result;
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetMatSpecificHeat(EMaterialId matId, EFloat refT) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetMatSpecificHeat(EMaterialId matId, EFloat refT) const
 {
     EFloat result{0};
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
@@ -356,7 +378,8 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetMatSpecificHeat(EMaterialId m
     return result;
 }
 
-ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetMatResistivity(EMaterialId matId, EFloat refT) const
+template <typename Scalar>
+ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetMatResistivity(EMaterialId matId, EFloat refT) const
 {
     EFloat result{0};
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
@@ -364,5 +387,8 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder::GetMatResistivity(EMaterialId ma
     ECAD_ASSERT(check)
     return result; 
 }
+
+template ECAD_INLINE class EPrismThermalNetworkBuilder<Float1>;
+template ECAD_INLINE class EPrismThermalNetworkBuilder<Float2>;
 
 } // namespace ecad::solver
