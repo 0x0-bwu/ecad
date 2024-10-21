@@ -19,8 +19,8 @@ def cost_function(parameters) :
     def score(chipT) :
         if not chipT :
             return 999999999
-
-        return stats.variation(chipT)
+        return stats.variation(chipT[:5]) + stats.variation(chipT[6:]) 
+        # return max(chipT) - min(chipT)
 
     chip_locations = ecad.coord_to_fpoint2d(parameters)
     work_dir = os.path.dirname(__file__) + '/data/optimization'
@@ -71,11 +71,18 @@ def main() :
              {'type': 'ineq', 'fun': lambda x: x[19] - x[21] - 4.5},
              {'type': 'ineq', 'fun': lambda x: x[21] - x[23] - 4.5},
             )
-
-    res = optimize.minimize(cost_function, parameters, method='SLSQP', bounds=bonds, constraints=conds, options={'disp': True, 'eps': 0.1})
-    print(res.x)
-    
+    minimizer_kwargs = {'method': 'Nelder-Mead', 'bounds': bonds, 'constraints': conds}
+    res = optimize.dual_annealing(cost_function, x0=parameters, bounds=bonds, maxiter=100, maxfun=50, minimizer_kwargs=minimizer_kwargs)
     mgr.shut_down()
+
+    # solution1 = [-5.47430291, 9.10514553, -4.5768218 ,  3.47671531, -5.30450942, -1.49377357,
+    #                 3.52563662, 8.40086493, 3.74418299, 1.4601866 , 3.57019182, -5.59078083,
+    #                 5.05825811, 7.95055065, 5.00023084, 0.93179762, 4.87108773, -5.80438403,
+    #                 -3.92175326, 8.33647521, -3.64471131, 0.94203844, -3.76396559, -5.05881545]
+    # solution2 = [-6.61367575, 8.27202511, -6.32373081, 1.47321837, -0.88582709, -0.89723667,
+    #                 4.62950951, 5.88185049, -1.06509744, 4.5586134, 4.82157607, -1.51623676,
+    #                 0.83176562, 8.57141646, 6.73294934, 1.99509159, 4.0975681, -4.69498692,
+    #                 -5.17233796, 4.93276395, -0.25947581, 0.0506895, -1.34856115, -5.09672135,]
 
 if __name__ == '__main__' :
     main()
