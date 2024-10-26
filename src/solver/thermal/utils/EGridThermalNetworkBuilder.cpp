@@ -359,8 +359,8 @@ ECAD_INLINE size_t EGridThermalNetworkBuilder<Scalar>::GetFlattenNeighbor(ESize3
     return GetFlattenIndex(GetNeighbor(index, o));
 }
 
-template ECAD_INLINE class EGridThermalNetworkBuilder<Float1>;
-template ECAD_INLINE class EGridThermalNetworkBuilder<Float2>;
+template ECAD_INLINE class EGridThermalNetworkBuilder<Float32>;
+template ECAD_INLINE class EGridThermalNetworkBuilder<Float64>;
 
 }//namespace solver
 }//namespace ecad

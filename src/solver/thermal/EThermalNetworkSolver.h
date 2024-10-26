@@ -15,7 +15,7 @@ public:
 class ECAD_API EThermalNetworkStaticSolver : public EThermalNetworkSolver
 {
 public:
-    using Scalar = Float1;
+    using Scalar = Float32;
     EThermalNetworkStaticSolveSettings settings;
     explicit EThermalNetworkStaticSolver() : settings("", 1) {}//wbtest
     virtual ~EThermalNetworkStaticSolver() = default;

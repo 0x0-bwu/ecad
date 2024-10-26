@@ -220,6 +220,6 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<N
         applyBlockBC(block, false);
 }
 
-template ECAD_INLINE class EStackupPrismThermalNetworkBuilder<Float1>;
-template ECAD_INLINE class EStackupPrismThermalNetworkBuilder<Float2>;
+template ECAD_INLINE class EStackupPrismThermalNetworkBuilder<Float32>;
+template ECAD_INLINE class EStackupPrismThermalNetworkBuilder<Float64>;
 } // namespace ecad::solver

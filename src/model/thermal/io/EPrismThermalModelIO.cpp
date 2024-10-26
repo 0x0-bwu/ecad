@@ -67,7 +67,7 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismThermalM
     return true;
 }
 
-template ECAD_INLINE bool GenerateVTKFile<Float1>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float1> * temperature, std::string * err);
-template ECAD_INLINE bool GenerateVTKFile<Float2>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float2> * temperature, std::string * err);
+template ECAD_INLINE bool GenerateVTKFile<Float32>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float32> * temperature, std::string * err);
+template ECAD_INLINE bool GenerateVTKFile<Float64>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float64> * temperature, std::string * err);
 
 } // namespace ecad::model::io

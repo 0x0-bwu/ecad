@@ -25,13 +25,13 @@ using UPtr = std::unique_ptr<T, Deleter>;
 template <typename T1, typename T2>
 using EPair = std::pair<T1, T2>;
 
-using Float1 = float;
-using Float2 = double;
-using EFloat = Float2;
+using Float32 = float;
+using Float64 = double;
+using EFloat = Float64;
 using FCoord = EFloat;
-using ECoord = int64_t;
-using EInt64 = int64_t;
-using EInt32 = int32_t;
+using Int32 = int32_t;
+using Int64 = int64_t;
+using ECoord = Int64;
 
 
 using EPoint2D = generic::geometry::Point2D<ECoord>;

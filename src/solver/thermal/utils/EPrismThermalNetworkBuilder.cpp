@@ -388,7 +388,7 @@ ECAD_INLINE EFloat EPrismThermalNetworkBuilder<Scalar>::GetMatResistivity(EMater
     return result; 
 }
 
-template ECAD_INLINE class EPrismThermalNetworkBuilder<Float1>;
-template ECAD_INLINE class EPrismThermalNetworkBuilder<Float2>;
+template ECAD_INLINE class EPrismThermalNetworkBuilder<Float32>;
+template ECAD_INLINE class EPrismThermalNetworkBuilder<Float64>;
 
 } // namespace ecad::solver
