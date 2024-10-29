@@ -19,7 +19,7 @@ public:
 
 private:
     template <typename... Args>
-    void GetValue(const std::string & s, Args ...args)
+    void GetValue(const std::string & s, Args & ...args)
     {
         static std::stringstream ss;
         ss.str(s); ss.clear();

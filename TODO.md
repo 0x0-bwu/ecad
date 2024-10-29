@@ -1,1 +1,3 @@
 - thermal subnetwork
+- ecad error stack
+- setting rftr with propertys

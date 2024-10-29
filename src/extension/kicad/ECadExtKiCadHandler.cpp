@@ -102,7 +102,8 @@ ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string
                         GENERIC_ASSERT(netId < db.nets.size());
                     }
                     else {
-                        ECAD_ERROR("undefined net name \"%1\" added in the netclass.", netName);
+                        ECAD_ERROR("undefined net name \"%1%\" added in the netclass.", netName);
+                        continue;
                     }
                     auto dpIter = m_name2DiffPairNetMap.find(name);
                     if (dpIter != m_name2DiffPairNetMap.cend())
@@ -130,22 +131,23 @@ ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string
                 if ("locked" == moduleNode.value)
                     instance.locked = true;
                 
-                if ("layer" == moduleNode.value and moduleNode.branches.size()) {
+                else if ("layer" == moduleNode.value and moduleNode.branches.size()) {
                     instance.layerId = GetLayerId(moduleNode.branches.front().value);
                     if (0 != instance.layerId)
                         isBottomComp = true;
                 }
 
-                if ("at" == moduleNode.value and moduleNode.branches.size()) {
-                    GetValue(moduleNode.branches.front().value, instance.x, instance.y);
+                else if ("at" == moduleNode.value and moduleNode.branches.size()) {
+                    GetValue(moduleNode.branches.at(0).value, instance.x);
+                    GetValue(moduleNode.branches.at(1).value, instance.y);
                     if (3 == moduleNode.branches.size())
                         GetValue(moduleNode.branches.at(2).value, instance.angle);
                 }
-                if ("fp_text" == moduleNode.value and moduleNode.branches.size()) {
+                else if ("fp_text" == moduleNode.value and moduleNode.branches.size()) {
                     //todo.
                 }
                 //create comp if need
-                if (compIter == m_comp2IndexMap.cend()) {
+                else if (compIter == m_comp2IndexMap.cend()) {
 
                     if ("fp_line" == moduleNode.value and moduleNode.branches.size() > 3) {
                         Line line;
