@@ -18,16 +18,51 @@ public:
     Ptr<IDatabase> CreateDatabase(const std::string & name, Ptr<std::string> err = nullptr);
 
 private:
+    void ExtractLayer(const Tree & node);
+    void ExtractNet(const Tree & node);
+    void ExtractNetClass(const Tree & node);
+    void ExtractModule(const Tree & node);
+    void ExtractGrLine(const Tree & node);
+    void ExtractSegment(const Tree & node);
+    void ExtractVia(const Tree & node);
+
+    void ExtractCircle(const Tree & node, Component & comp);
+    void ExtractArc(const Tree & node, Component & comp);
+    void ExtractPoly(const Tree & node, Component & comp);
+    void ExtractLine(const Tree & node, Component & comp, Instance & inst);
+    void ExtractPadstack(const Tree & node, Component & comp, Instance & inst, EIndex & noNameId, bool isBottomComp);
+    void ExtractPad(const Tree & node, Component & comp, Instance & inst, EIndex & noNameId);
+
     template <typename... Args>
-    void GetValue(const std::string & s, Args & ...args)
+    static void GetValue(const std::string & s, Args & ...args)
     {
         static std::stringstream ss;
         ss.str(s); ss.clear();
         (ss >> ... >> args);
     }
 
-    Int64 GetNetId(const std::string & name) const;
-    Int64 GetLayerId(const std::string & name) const;
+    template <typename... Args>
+    static void GetValue(std::vector<Tree>::const_iterator iter, Args & ...args)
+    {
+        ([&]{
+            GetValue(iter->value, args);
+            std::advance(iter, 1);
+        }(), ...);
+    }
+
+    template <typename... Args>
+    static void TryGetValue(std::vector<Tree>::const_iterator iter, std::vector<Tree>::const_iterator end, Args & ...args)
+    {
+        ([&]{
+            if (iter != end) {
+                GetValue(iter->value, args);
+                std::advance(iter, 1);
+            }
+        }(), ...);
+    }
+
+    EIndex GetNetId(const std::string & name) const;
+    EIndex GetLayerId(const std::string & name) const;
 
     Net * FindNetByName(const std::string & name) const;
 

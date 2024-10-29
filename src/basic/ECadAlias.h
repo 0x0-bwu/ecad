@@ -25,13 +25,16 @@ using UPtr = std::unique_ptr<T, Deleter>;
 template <typename T1, typename T2>
 using EPair = std::pair<T1, T2>;
 
+using Int32 = int32_t;
+using Int64 = int64_t;
 using Float32 = float;
 using Float64 = double;
 using EFloat = Float64;
 using FCoord = EFloat;
-using Int32 = int32_t;
-using Int64 = int64_t;
 using ECoord = Int64;
+using ESize = size_t;
+using EIndex = ESize;
+
 
 
 using EPoint2D = generic::geometry::Point2D<ECoord>;
@@ -63,13 +66,13 @@ using ELogLevel = generic::log::Level;
 
 using ETemperatureUnit = generic::unit::Temperature;
 
-using EScenarioId = size_t;
+using EScenarioId = ESize;
 
 ECAD_ALWAYS_INLINE static constexpr char sPadstack[] = "padstack";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultConductingMat[] = "copper";
 ECAD_ALWAYS_INLINE static constexpr char sDefaultDielectricMat[] = "silicon";
 
-ECAD_ALWAYS_INLINE static constexpr size_t invalidIndex = std::numeric_limits<size_t>::max();
+ECAD_ALWAYS_INLINE static constexpr ESize invalidIndex = std::numeric_limits<ESize>::max();
 ECAD_ALWAYS_INLINE static constexpr EFloat invalidFloat = std::numeric_limits<EFloat>::max();//std::nan(quiet_Nan) has issue with AppleClang with -ffast-math
 ECAD_ALWAYS_INLINE static constexpr EFloat maxFloat = std::numeric_limits<EFloat>::max();
 
