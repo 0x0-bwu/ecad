@@ -4,6 +4,59 @@
 namespace ecad {
 
 //todo refactor
+template <typename Left, typename Right,
+          typename LeftHash = std::hash<Left>, typename RightHash = std::hash<Right>>
+class EBidirectionMap
+{
+public:
+    std::unordered_map<Left, Right> forward;
+    std::unordered_map<Right, Left> backward;
+    EBidirectionMap() = default;
+    
+    void Insert(Left left, Right right)
+    {
+        forward.emplace(left, right);
+        backward.emplace(right, left);
+    }
+
+    bool hasLeft(const Left & left) const
+    {
+        return forward.count(left);
+    }
+
+    bool hasRight(const Right & right) const
+    {
+        return backward.count(right);
+    }
+
+    Left & GetLeft(const Right & right)
+    {
+        return backward[right];
+    }
+
+    const Left & GetLeft(const Right & right) const
+    {
+        return backward.at(right);
+    }
+
+    Right & GetRight(const Left & left)
+    {
+        return forward[left];
+    }
+
+    const Right & GetRight(const Left & left) const
+    {
+        return forward.at(left);
+    }
+
+    void Clear()
+    {
+        forward.clear();
+        backward.clear();
+    }
+};
+
+//todo refactor
 class ELookupTable1D : public Printable
 {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT

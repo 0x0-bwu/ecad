@@ -15,7 +15,6 @@ ECAD_INLINE bool EKiCadParser::operator() (std::string_view filename, Tree & tre
     }
 
     tree = ReadTree(in);
-    std::cout << tree.branches.size() << std::endl;//wbtest
     return true;
 }
 
@@ -113,6 +112,5 @@ void EKiCadParser::ReadWhitespace(std::istream & in)
         in.get(c);
     }
 }
-
 
 } // namespace ecad::ext::kicad

@@ -1,5 +1,6 @@
 #pragma once
 #include "basic/ECadCommon.h"
+#include "basic/ELookupTable.h"
 #include <string_view>
 #include <istream>
 
@@ -94,6 +95,17 @@ struct Text
     EIndex layer{invalidIndex};
     FPoint2D loc{0, 0};
     std::string text{};
+};
+
+enum class LayerType { INVALID, POWER, SIGNAL, USER };
+
+struct Layer
+{
+    EIndex id{invalidIndex};
+    LayerType type{LayerType::INVALID};
+    std::string attr;
+    std::string name;
+    EFloat thickness;
 };
 
 struct Pin
@@ -219,6 +231,7 @@ struct NetClass
 
 struct Component
 {
+    bool flipped{false};
     EIndex id{invalidIndex};
     std::string name;
     std::vector<Arc> arcs;
@@ -226,6 +239,8 @@ struct Component
     std::vector<Poly> polys;
     std::vector<Padstack> pads;
     std::vector<Circle> circles;
+
+    Component(std::string name, EIndex id) : id(id), name(std::move(name)) {}
 
     EIndex GetPadstackId(const std::string & name) const
     {
@@ -267,7 +282,7 @@ struct Database
     bool isComponentId(EIndex id) const
     {
         return id < components.size();
-    }
+    }    
 };
 
 } // namespace ecad::ext::kicad

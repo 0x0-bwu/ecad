@@ -18,6 +18,7 @@ public:
     Ptr<IDatabase> CreateDatabase(const std::string & name, Ptr<std::string> err = nullptr);
 
 private:
+    void ExtractNode(const Tree & node);
     void ExtractLayer(const Tree & node);
     void ExtractNet(const Tree & node);
     void ExtractNetClass(const Tree & node);
@@ -26,13 +27,13 @@ private:
     void ExtractSegment(const Tree & node);
     void ExtractVia(const Tree & node);
 
-    void ExtractCircle(const Tree & node, Component & comp);
-    void ExtractArc(const Tree & node, Component & comp);
-    void ExtractPoly(const Tree & node, Component & comp);
-    void ExtractLine(const Tree & node, Component & comp, Instance & inst);
-    void ExtractPadstack(const Tree & node, Component & comp, Instance & inst, EIndex & noNameId, bool isBottomComp);
-    void ExtractPad(const Tree & node, Component & comp, Instance & inst, EIndex & noNameId);
-
+    void ExtractCircle(const Tree & node);
+    void ExtractArc(const Tree & node);
+    void ExtractPoly(const Tree & node);
+    void ExtractLine(const Tree & node);
+    void ExtractPadstack(const Tree & node);
+    void ExtractPad(const Tree & node);
+    
     template <typename... Args>
     static void GetValue(const std::string & s, Args & ...args)
     {
@@ -68,10 +69,10 @@ private:
 
 private:
     std::string m_filename;
+    UPtr<Database> m_kicad{nullptr};
     Ptr<IDatabase> m_database{nullptr};
-    UPtr<Database> m_kicadDatabase{nullptr};
 
-    ///temp data
+    ///temp lut
     std::unordered_map<std::string, Int64> m_net2IndexMap;
     std::unordered_map<Int64, std::string> m_index2NetMap;
     std::unordered_map<std::string, Int64> m_layer2IndexMap;
@@ -79,6 +80,20 @@ private:
     std::unordered_map<std::string, Int64> m_comp2IndexMap;
     std::unordered_map<std::string, Int64> m_inst2IndexMap;
     std::unordered_map<std::string, EPair<Int64, Int64>> m_name2DiffPairNetMap;
+
+    //func lut
+    std::unordered_map<std::string, std::function<void(const Tree &)>> m_functions;
+
+    //current state
+    struct Current
+    {
+        Database * db = nullptr;
+        Instance * inst = nullptr;
+        Component * comp = nullptr;
+        EIndex noNamePinId{0};
+        EIndex noNamePadstackId{0};
+    };
+    Current m_current;
 };
 
 }//namespace kicad

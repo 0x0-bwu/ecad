@@ -25,6 +25,13 @@ std::vector<FPoint2D> Shape2Coords(const FPoint2D & size, const FPoint2D & pos, 
 ECAD_INLINE ECadExtKiCadHandler::ECadExtKiCadHandler(const std::string & kicadFile)
  : m_filename(kicadFile)
 {
+    m_functions.emplace("layers"   , std::bind(&ECadExtKiCadHandler::ExtractLayer   , this, std::placeholders::_1));
+    m_functions.emplace("net"      , std::bind(&ECadExtKiCadHandler::ExtractNet     , this, std::placeholders::_1));
+    m_functions.emplace("net_class", std::bind(&ECadExtKiCadHandler::ExtractNetClass, this, std::placeholders::_1));
+    m_functions.emplace("module"   , std::bind(&ECadExtKiCadHandler::ExtractModule  , this, std::placeholders::_1));
+    m_functions.emplace("gr_line"  , std::bind(&ECadExtKiCadHandler::ExtractGrLine  , this, std::placeholders::_1));
+    m_functions.emplace("segment"  , std::bind(&ECadExtKiCadHandler::ExtractSegment , this, std::placeholders::_1));
+    m_functions.emplace("via"      , std::bind(&ECadExtKiCadHandler::ExtractVia     , this, std::placeholders::_1));
 }
 
 ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
@@ -42,31 +49,21 @@ ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string
         return nullptr; 
     }
     
-    m_kicadDatabase.reset(new Database);
-    for (const auto & node : tree.branches) {
-        if ("layers" == node.value)
-            ExtractLayer(node);
-        else if ("net" == node.value)
-            ExtractNet(node);
-        else if ("net_class" ==  node.value)
-            ExtractNetClass(node);
-        else if ("module" == node.value)
-            ExtractModule(node);
-        else if ("gr_line" == node.value)
-            ExtractGrLine(node);
-        else if ("segment" == node.value)
-            ExtractSegment(node);
-        else if ("via" == node.value)
-            ExtractVia(node);
-        else if ("zone" == node.value) {
-            //todo
-        }
-    }
+    m_kicad.reset(new Database);
+    for (auto & node : tree.branches)
+        ExtractNode(node);
 
-    m_database= eMgr.CreateDatabase(name);
+    m_database = eMgr.CreateDatabase(name);
     if(nullptr == m_database) return nullptr;
 
     return m_database;
+}
+
+ECAD_INLINE void ECadExtKiCadHandler::ExtractNode(const Tree & node)
+{
+    auto iter = m_functions.find(node.value);
+    if (iter != m_functions.cend())
+        iter->second(node);
 }
 
 ECAD_INLINE void ECadExtKiCadHandler::ExtractLayer(const Tree & node)
@@ -100,78 +97,76 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractNet(const Tree & node)
 
 ECAD_INLINE void ECadExtKiCadHandler::ExtractNetClass(const Tree & node)
 {
-    auto & db = *m_kicadDatabase;
-    db.nets.resize(m_index2NetMap.size());
-    auto netClassId = db.netClasses.size();
+    m_kicad->nets.resize(m_index2NetMap.size());
+    auto netClassId = m_kicad->netClasses.size();
     auto netClassName = node.branches.front().value;
-    EFloat clearance{0}, traceWidth{0}, viaDia{0}, viaDrill{0}, uViaDia{0}, uViaDril{0};
-
-    for (const auto & netClass : node.branches) {
-        auto iter = netClass.branches.begin();
-        if (node.value == "clearance")
+    EFloat clearance{0}, traceWidth{0}, viaDia{0}, viaDrill{0}, uViaDia{0}, uViaDrill{0};
+    for (const auto & sub : node.branches) {
+        auto iter = sub.branches.begin();
+        if ("clearance" == sub.value)
             GetValue(iter, clearance);
-        else if (node.value == "trace_width")
+        else if ("trace_width" == sub.value)
             GetValue(iter, traceWidth);
-        else if (node.value == "via_dia")
+        else if ("via_dia" == sub.value)
             GetValue(iter, viaDia);
-        else if (node.value == "via_drill")
+        else if ("via_drill" == sub.value)
             GetValue(iter, viaDrill);
-        else if (node.value == "uvia_dia")
+        else if ("uvia_dia" == sub.value)
             GetValue(iter, uViaDia);
-        else if (node.value == "uvia_drill")
-            GetValue(iter, uViaDril);
-        else if (node.value == "add_net") {
-            auto netName = node.branches.front().value;
+        else if ("uvia_drill" == sub.value)
+            GetValue(iter, uViaDrill);
+        else if ("add_net" == sub.value) {
             auto netId = invalidIndex;
-            auto name = netName.substr(0, netName.size() - 1);
+            auto netName = sub.branches.front().value;
             auto diffPair = std::pair<EIndex, EIndex>(invalidIndex, invalidIndex);
             auto netIter = m_net2IndexMap.find(netName);
             if (netIter != m_net2IndexMap.cend()) {
                 netId = netIter->second;
-                GENERIC_ASSERT(netId < db.nets.size());
+                GENERIC_ASSERT(netId < m_kicad->nets.size());
             }
             else {
                 ECAD_ERROR("undefined net name \"%1%\" added in the netclass.", netName);
                 continue;
             }
-            auto dpIter = m_name2DiffPairNetMap.find(name);
+            auto dpIter = m_name2DiffPairNetMap.find(netName);
             if (dpIter != m_name2DiffPairNetMap.cend())
                 diffPair = dpIter->second;
-            db.nets[netId] = Net(netId, std::move(netName), netClassId, std::move(diffPair));
+            m_kicad->nets[netId] = Net(netId, std::move(netName), netClassId, std::move(diffPair));
         }
     }
-    db.netClasses.emplace_back(netClassId, netClassName, clearance, traceWidth, viaDia, viaDrill, uViaDia, uViaDril);
+    m_kicad->netClasses.emplace_back(netClassId, netClassName, clearance, traceWidth, viaDia, viaDrill, uViaDia, uViaDrill);
 }
 
 ECAD_INLINE void ECadExtKiCadHandler::ExtractModule(const Tree & node)
 {
-    auto & db = *m_kicadDatabase;
     auto & compName = node.branches.front().value;
-
     Instance instance;
-    instance.id = db.instances.size();
+    instance.id = m_kicad->instances.size();
     auto compIter = m_comp2IndexMap.find(compName);
-    auto compId = compIter == m_comp2IndexMap.cend() ? invalidIndex : compIter->second;
-    Component component;
-    component.id = compId;
-    component.name = compName;
+    auto compId = compIter == m_comp2IndexMap.cend() ? 
+                  m_kicad->components.size() : compIter->second;
+    Component component(compName, compId);
+    m_current.inst = &instance;
+    m_current.comp = &component;
 
-    EIndex noNameId{0};
-    bool isBottomComp{false};
     for (const auto & sub : node.branches) {
-        const auto & branchs = sub.branches;
+        const auto & branches = sub.branches;
         
         if ("locked" == sub.value)
             instance.locked = true;
-        
         else if ("layer" == sub.value) {
-            instance.layerId = GetLayerId(node.branches.front().value);
+            instance.layerId = GetLayerId(sub.branches.front().value);
             if (0 != instance.layerId)
-                isBottomComp = true;
+                component.flipped = true;
         }
-
+        else if ("tedit" == sub.value) {
+            //todo.
+        }
+        else if ("tstamp" == sub.value) {
+            //todo.
+        }
         else if ("at" == sub.value) {
-            TryGetValue(branchs.begin(), branchs.end(), 
+            TryGetValue(branches.begin(), branches.end(), 
                         instance.x, instance.y, instance.angle);
         }
         else if ("fp_text" == sub.value) {
@@ -181,31 +176,29 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractModule(const Tree & node)
         else if (compIter == m_comp2IndexMap.cend()) {
 
             if ("fp_line" == sub.value)
-                ExtractLine(sub, component, instance);
+                ExtractLine(sub);
             else if ("fp_poly" == sub.value)
-                ExtractPoly(sub, component);
+                ExtractPoly(sub);
             else if ("fp_circle" == sub.value)
-                ExtractCircle(sub, component);
+                ExtractCircle(sub);
             else if ("fp_arc" == sub.value)
-                ExtractArc(sub, component);
+                ExtractArc(sub);
             else if ("pad" == sub.value)
-                ExtractPadstack(sub, component, instance, noNameId, isBottomComp);
+                ExtractPadstack(sub);
         }
     }
+    for (const auto & sub : node.branches)
+        if ("pad" == sub.value)
+            ExtractPad(sub);
 
     if (compIter == m_comp2IndexMap.cend()) {
         m_comp2IndexMap.emplace(compName, compId);
-        db.components.emplace_back(std::move(component));
+        m_kicad->components.emplace_back(std::move(component));
     }
-
-    noNameId = 0;
-    for (const auto & sub : node.branches)
-        if ("pad" == sub.value)
-            ExtractPad(sub, component, instance, noNameId);
-
+    
     instance.compId = compId;
     m_inst2IndexMap.emplace(instance.name, instance.id);
-    db.instances.emplace_back(std::move(instance));
+    m_kicad->instances.emplace_back(std::move(instance));
 }
 
 ECAD_INLINE void ECadExtKiCadHandler::ExtractGrLine(const Tree & node)
@@ -230,21 +223,20 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractGrLine(const Tree & node)
             GetValue(sub.branches.begin(), line.width);
     }
     if (ECAD_KICAD_PCB_LAYER_EDGE_CUT_ID == line.layer)
-        m_kicadDatabase->boundaryLines.emplace_back(std::move(line));
+        m_kicad->boundaryLines.emplace_back(std::move(line));
 }
 
 ECAD_INLINE void ECadExtKiCadHandler::ExtractSegment(const Tree & node)
 {
     Segment segment;
-    auto & db = *m_kicadDatabase;
     GetValue(node.branches.at(0).branches.front().value, segment.start[0], segment.start[1]);
     GetValue(node.branches.at(1).branches.front().value, segment.end[0], segment.end[1]);
     GetValue(node.branches.at(2).branches.front().value, segment.width);
     segment.layer = node.branches.at(3).branches.front().value;
     GetValue(node.branches.at(4).branches.front().value, segment.netId);
-    if (segment.netId < db.nets.size()) {
-        segment.id = db.nets.at(segment.netId).segments.size();
-        db.nets[segment.netId].segments.emplace_back(std::move(segment));
+    if (segment.netId < m_kicad->nets.size()) {
+        segment.id = m_kicad->nets.at(segment.netId).segments.size();
+        m_kicad->nets[segment.netId].segments.emplace_back(std::move(segment));
     }
     else {
         //todo err msg
@@ -255,7 +247,6 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractVia(const Tree & node)
 {
     Via via;
     via.type = ViaType::THROUGH;
-    auto & db = *m_kicadDatabase;
     for (const auto & sub : node.branches) {
         if ("at" == sub.value)
             GetValue(sub.branches.front().value, via.pos[0], via.pos[1]);
@@ -272,60 +263,60 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractVia(const Tree & node)
         else if ("bline" == sub.value)
             via.type = ViaType::BLIND_BURIED;
     }
-    if (via.netId < db.nets.size()) {
-        via.id = db.nets.at(via.netId).vias.size();
-        db.nets[via.netId].vias.emplace_back(std::move(via));
+    if (via.netId < m_kicad->nets.size()) {
+        via.id = m_kicad->nets.at(via.netId).vias.size();
+        m_kicad->nets[via.netId].vias.emplace_back(std::move(via));
     }
     else {
         //todo, err msgs
     }
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractCircle(const Tree & node, Component & comp)
+ECAD_INLINE void ECadExtKiCadHandler::ExtractCircle(const Tree & node)
 {
     Circle circle;
     GetValue(node.branches.at(0).branches.begin(), circle.center[0], circle.center[1]);
     GetValue(node.branches.at(1).branches.begin(), circle.end[0], circle.end[1]);
     GetValue(node.branches.at(3).branches.begin(), circle.width);
-    comp.circles.emplace_back(std::move(circle));
+    m_current.comp->circles.emplace_back(std::move(circle));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractPoly(const Tree & node, Component & comp)
+ECAD_INLINE void ECadExtKiCadHandler::ExtractPoly(const Tree & node)
 {
     Poly poly;
-    for (const auto & coordNode : node.branches.at(0).branches) {
+    for (const auto & sub : node.branches.at(0).branches) {
         EFloat x{0}, y{0};
-        GetValue(coordNode.branches.begin(), x, y);
+        GetValue(sub.branches.begin(), x, y);
         poly.shape.emplace_back(x, y);
     }
     GetValue(node.branches.at(2).branches.begin(), poly.width);
-    for (const auto & polyNode : node.branches) {
+    for (const auto & sub : node.branches) {
 
-        if ("layer" == polyNode.value) {
-            auto layer = polyNode.branches.front().value;
+        if ("layer" == sub.value) {
+            auto layer = sub.branches.front().value;
             if (ECAD_KICAD_PCB_LAYER_FRONT_CRTYD_STR.data() == layer)
                 poly.layer = ECAD_KICAD_PCB_LAYER_FRONT_CRTYD_ID;
             else if (ECAD_KICAD_PCB_LAYER_BOTTOM_CRTYD_STR.data() == layer)
                 poly.layer = ECAD_KICAD_PCB_LAYER_BOTTOM_CRTYD_ID;
         }
     }
-    comp.polys.emplace_back(std::move(poly));
+    m_current.comp->polys.emplace_back(std::move(poly));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractArc(const Tree & node, Component & comp)
+ECAD_INLINE void ECadExtKiCadHandler::ExtractArc(const Tree & node)
 {
     Arc arc;
     GetValue(node.branches.at(0).branches.begin(), arc.start[0], arc.start[1]);
     GetValue(node.branches.at(1).branches.begin(), arc.end[0], arc.end[1]);
     GetValue(node.branches.at(2).branches.begin(), arc.angle);
     GetValue(node.branches.at(4).branches.begin(), arc.width);
-    comp.arcs.emplace_back(std::move(arc));
+    m_current.comp->arcs.emplace_back(std::move(arc));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractLine(const Tree & node, Component & comp, Instance & inst)
+ECAD_INLINE void ECadExtKiCadHandler::ExtractLine(const Tree & node)
 {
     Line line;
-    if (0 == inst.angle or 180 == inst.angle) {
+    if (0 == m_current.inst->angle or 180 == m_current.inst->angle) {
         GetValue(node.branches.at(0).branches.begin(), line.start[0], line.start[1]);
         GetValue(node.branches.at(1).branches.begin(), line.end[0], line.end[1]);
     }
@@ -334,26 +325,24 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractLine(const Tree & node, Component &
         GetValue(node.branches.at(1).branches.begin(), line.end[1], line.end[0]);
     }
     GetValue(node.branches.at(2).branches.begin(), line.width);
-    comp.lines.emplace_back(std::move(line));
+    m_current.comp->lines.emplace_back(std::move(line));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractPadstack(const Tree & node, Component & comp, Instance & inst, EIndex & noNameId, bool isBottomComp)
+ECAD_INLINE void ECadExtKiCadHandler::ExtractPadstack(const Tree & node)
 {
     Padstack padstack;
-    padstack.id = comp.pads.size();
+    padstack.id = m_current.comp->pads.size();
     padstack.rule = Rule{0.25, 0.25};
     padstack.name = node.branches.at(0).value;
-    if ("\"\"" == padstack.name) {
-        padstack.name = "Unnammed" + std::to_string(noNameId);
-        noNameId++;
-    }
+    if ("\"\"" == padstack.name)
+        padstack.name = "Unnammed" + std::to_string(m_current.noNamePadstackId++);
 
     padstack.SetType(node.branches.at(1).value);
     padstack.SetShape(node.branches.at(2).value);
     TryGetValue(node.branches.at(3).branches.begin(), node.branches.at(3).branches.end(),
                 padstack.pos[0], padstack.pos[1], padstack.angle);
-    if (isBottomComp) padstack.pos[1] *= -1;
-    padstack.angle -= inst.angle;
+    if (m_current.comp->flipped) padstack.pos[1] *= -1;
+    padstack.angle -= m_current.inst->angle;
 
     GetValue(node.branches.at(4).branches.begin(), padstack.size[0], padstack.size[1]);                        
 
@@ -386,22 +375,20 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractPadstack(const Tree & node, Compone
     }
 
     padstack.shapePolygon = utils::Shape2Coords(padstack.size, {0, 0}, 
-                                                padstack.shape, inst.angle, 
+                                                padstack.shape, m_current.inst->angle, 
                                                 padstack.angle, padstack.roundRectRatio, 32);
     
     padstack.rule.clearance = 0;
-    comp.pad2IndexMap.emplace(padstack.name, padstack.id); 
-    comp.pads.emplace_back(std::move(padstack));
+    m_current.comp->pad2IndexMap.emplace(padstack.name, padstack.id); 
+    m_current.comp->pads.emplace_back(std::move(padstack));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractPad(const Tree & node, Component & comp, Instance & inst, EIndex & noNameId)
+ECAD_INLINE void ECadExtKiCadHandler::ExtractPad(const Tree & node)
 {
-    auto & db = *m_kicadDatabase;
     auto pinName = node.branches.front().value;
-    if ("\"\"" == pinName) {
-        pinName = "Unnamed" + std::to_string(noNameId);
-        noNameId++;
-    }
+    if ("\"\"" == pinName)
+        pinName = "Unnamed" + std::to_string(m_current.noNamePinId++);
+
     bool connected{false};
     std::string netName{};
     EIndex netId{invalidIndex};
@@ -414,28 +401,28 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractPad(const Tree & node, Component & 
         }
     }
 
-    if (not db.isComponentId(comp.id)) {
+    if (not m_kicad->isComponentId(m_current.comp->id)) {
         //todo err msg
         return;
     }
 
-    auto padstackId = comp.GetPadstackId(pinName);
+    auto padstackId = m_current.comp->GetPadstackId(pinName);
     if (invalidIndex == padstackId) {
         // todo err msg
         return;
     }
 
-    Pin pin(padstackId, comp.id, inst.id);
+    Pin pin(padstackId, m_current.comp->id, m_current.inst->id);
 
     //todo. pin layers
     if (connected) {
-        inst.pinNetMap.emplace(pinName, netId);
+        m_current.inst->pinNetMap.emplace(pinName, netId);
         if (auto * net = FindNetByName(netName); net)
             net->pins.emplace_back(std::move(pin));
     }
     else {
-        inst.pinNetMap.emplace(pinName, invalidIndex);
-        db.unconnectedPins.emplace_back(std::move(pin));
+        m_current.inst->pinNetMap.emplace(pinName, invalidIndex);
+        m_kicad->unconnectedPins.emplace_back(std::move(pin));
     }
 }
 
@@ -455,7 +442,7 @@ ECAD_INLINE Net * ECadExtKiCadHandler::FindNetByName(const std::string & name) c
 {
     auto id = GetNetId(name);
     if (id == invalidIndex) return nullptr;
-    return &m_kicadDatabase->nets.at(id);
+    return &m_kicad->nets.at(id);
 }
 
 } // namespace ecad::ext::kicad
