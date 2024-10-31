@@ -65,7 +65,7 @@ Tree EKiCadParser::ReadQuotedString(std::istream & in)
 {
     char c;
     std::string s;
-    s.push_back('"');
+    // s.push_back('"');
     auto a = in.peek();
     for (;;) {
         auto b = in.peek();
@@ -75,7 +75,7 @@ Tree EKiCadParser::ReadQuotedString(std::istream & in)
         s.push_back(c);
         a = b;
     }
-    s.push_back('"');
+    // s.push_back('"');
     return Tree{s, {}};
 }
 

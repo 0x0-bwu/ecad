@@ -5,6 +5,7 @@ add_library(Eextension
     gds/EGdsLayerMap.cpp
     gds/EGdsParser.cpp
     kicad/ECadExtKiCadHandler.cpp
+    kicad/EKiCadObjects.cpp
     kicad/EKiCadParser.cpp
     xfl/ECadExtXflHandler.cpp
     ECadExtension.cpp

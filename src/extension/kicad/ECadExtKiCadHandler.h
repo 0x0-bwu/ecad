@@ -20,9 +20,10 @@ public:
 private:
     void ExtractNode(const Tree & node);
     void ExtractLayer(const Tree & node);
+    void ExtractSetup(const Tree & node);
+    void ExtractStackup(const Tree & node);
     void ExtractNet(const Tree & node);
-    void ExtractNetClass(const Tree & node);
-    void ExtractModule(const Tree & node);
+    void ExtractFootprint(const Tree & node);
     void ExtractGrLine(const Tree & node);
     void ExtractSegment(const Tree & node);
     void ExtractVia(const Tree & node);
@@ -62,38 +63,23 @@ private:
         }(), ...);
     }
 
-    EIndex GetNetId(const std::string & name) const;
-    EIndex GetLayerId(const std::string & name) const;
-
-    Net * FindNetByName(const std::string & name) const;
-
 private:
     std::string m_filename;
     UPtr<Database> m_kicad{nullptr};
     Ptr<IDatabase> m_database{nullptr};
 
-    ///temp lut
-    std::unordered_map<std::string, Int64> m_net2IndexMap;
-    std::unordered_map<Int64, std::string> m_index2NetMap;
-    std::unordered_map<std::string, Int64> m_layer2IndexMap;
-    std::unordered_map<Int64, std::string> m_index2LayerMap;
-    std::unordered_map<std::string, Int64> m_comp2IndexMap;
-    std::unordered_map<std::string, Int64> m_inst2IndexMap;
-    std::unordered_map<std::string, EPair<Int64, Int64>> m_name2DiffPairNetMap;
-
     //func lut
     std::unordered_map<std::string, std::function<void(const Tree &)>> m_functions;
 
     //current state
-    struct Current
+    struct State
     {
-        Database * db = nullptr;
-        Instance * inst = nullptr;
-        Component * comp = nullptr;
         EIndex noNamePinId{0};
         EIndex noNamePadstackId{0};
+        Component * comp = nullptr;
+        void Reset() { *this = State{}; }
     };
-    Current m_current;
+    State m_current;
 };
 
 }//namespace kicad

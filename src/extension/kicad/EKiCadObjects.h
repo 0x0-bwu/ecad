@@ -97,32 +97,47 @@ struct Text
     std::string text{};
 };
 
-enum class LayerType { INVALID, POWER, SIGNAL, USER };
+enum class LayerGroup { INVALID, POWER, SIGNAL, USER };
+enum class LayerType
+{
+    INVALID,
+    SILK_SCREEN,
+    SOLDER_PASTE,
+    SOLDER_MASK,
+    CONDUCTING,
+    DIELECTRIC,
+};
 
 struct Layer
 {
     EIndex id{invalidIndex};
+    LayerGroup group{LayerGroup::INVALID};
     LayerType type{LayerType::INVALID};
+    EFloat thickness{0};
+    EFloat epsilonR{0};
+    EFloat lossTangent{0};
     std::string attr;
     std::string name;
-    EFloat thickness;
+    std::string material;
+
+    Layer(EIndex id, std::string name) : id(id), name(std::move(name)) {}
+
+    void SetGroup(const std::string & str);
+    void SetType(const std::string & str);
 };
 
 struct Pin
 {
     EIndex padId{invalidIndex};
-    EIndex compId{invalidIndex};
-    EIndex instId{invalidIndex};
     std::vector<EIndex> layers;
 
     Pin() = default;
-    Pin(EIndex padId, EIndex compId, EIndex instId) : padId(padId), compId(compId), instId(instId) {}
+    Pin(EIndex padId) : padId(padId) {}
 
 };
 
 struct Via
 {
-    EIndex id{invalidIndex};
     EIndex netId{invalidIndex};
     EFloat size{.0};
     EFloat drillSize{.0};
@@ -134,7 +149,6 @@ struct Via
  
 struct Segment
 {
-    EIndex id{invalidIndex};
     EIndex netId{invalidIndex};
     EFloat width{0};
     FPoint2D start{0, 0};
@@ -163,76 +177,30 @@ struct Padstack
     std::vector<FPoint2D> shapeCoords;
     std::vector<FPoint2D> shapePolygon;
     
-    void SetType(const std::string & str)
-    {
-        if ("smd" == str)
-            type = PadType::SMD;
-        else if ("thru_hole" == str)
-            type = PadType::THRU_HOLE;
-        else if ("connect" == str)
-            type = PadType::CONNECT;
-        else if ("np_thru_hole" == str)
-            type = PadType::NP_THRU_HOLE;
-        else
-            type = PadType::UNKNOWN;
-    }
-
-    void SetShape(const std::string & str)
-    {
-        if ("rect" == str)
-            shape = PadShape::RECT;
-        else if ("roundrect" == str)
-            shape = PadShape::ROUNDRECT;
-        else if ("circle" == str)
-            shape = PadShape::CIRCLE;
-        else if ("oval" == str)
-            shape = PadShape::OVAL;
-        else if ("trapezoid" == str)
-            shape = PadShape::TRAPEZOID;
-        else
-            shape = PadShape::UNKNOWN;
-    }
+    void SetType(const std::string & str);
+    void SetShape(const std::string & str);
 };
 
 struct Net
 {
     EIndex id{invalidIndex};
     EIndex netClassId{invalidIndex};
-    std::string name{"unknown"};
+    std::string name;
     std::vector<Pin> pins;
     std::vector<Via> vias;
     std::vector<Segment> segments;
     EPair<EIndex, EIndex> diffPair;
-    
-    Net() = default;
-    Net(EIndex id, std::string name, EIndex netClassId, EPair<EIndex, EIndex> diffPair)
-     : id(id), netClassId(netClassId), name(std::move(name)), diffPair(std::move(diffPair))
-    {
-    }
-};
-
-struct NetClass
-{
-    EIndex id{invalidIndex};
-    std::string name{"unknown"};
-    EFloat clearance{0};
-    EFloat traceWidth{0};
-    EFloat viaDia{0};
-    EFloat viaDrill{0};
-    EFloat uViaDia{0};
-    EFloat uViaDrill{0};
-
-    NetClass() = default;
-    NetClass(EIndex id, std::string name, EFloat clearance, EFloat traceWidth, EFloat viaDia, EFloat viaDrill, EFloat uViaDia, EFloat uViaDrill)
-     : id(id), name(std::move(name)), clearance(clearance), traceWidth(traceWidth), viaDia(viaDia), viaDrill(viaDrill), uViaDia(uViaDia), uViaDrill(uViaDrill)
-    {
-    }
+    Net(EIndex id, std::string name) : id(id), name(std::move(name)) {}
 };
 
 struct Component
 {
     bool flipped{false};
-    EIndex id{invalidIndex};
+    EIndex layerId{invalidIndex};
+    FPoint2D location{0, 0};
+    EFloat angle{0};
+    EFloat width{0};
+    EFloat height{0};
     std::string name;
     std::vector<Arc> arcs;
     std::vector<Line> lines;
@@ -240,7 +208,7 @@ struct Component
     std::vector<Padstack> pads;
     std::vector<Circle> circles;
 
-    Component(std::string name, EIndex id) : id(id), name(std::move(name)) {}
+    Component(std::string name) : name(std::move(name)) {}
 
     EIndex GetPadstackId(const std::string & name) const
     {
@@ -253,31 +221,29 @@ struct Component
     std::unordered_map<std::string, EIndex> pad2IndexMap;
 };
 
-struct Instance
-{
-    bool locked{false};
-    EIndex id{invalidIndex};
-    EIndex compId{invalidIndex};
-    EIndex layerId{invalidIndex};
-    std::string name{"unknown"};
-    std::string side{"unknown"};
-    EFloat x{0};
-    EFloat y{0};
-    EFloat angle{0};
-    EFloat width{0};
-    EFloat height{0};
-    std::unordered_map<std::string, EIndex> pinNetMap;
-};
-
 struct Database
 {
-    std::vector<Net> nets;
-    std::vector<NetClass> netClasses;
-    std::vector<Instance> instances;
-    std::vector<Component> components;
+    std::unordered_map<std::string, Component> components;
+    std::unordered_map<std::string, Layer> layers;
+    std::unordered_map<EIndex, Net> nets;
 
     std::vector<Pin> unconnectedPins;
     std::vector<Line> boundaryLines;
+
+    // lut
+    std::unordered_map<std::string_view, Ptr<Net>> netLut;
+
+    // add
+    Layer & AddLayer(EIndex id, std::string name);
+    Net & AddNet(EIndex id, std::string name);
+    Component & AddComponent(std::string name);
+
+    Ptr<Net> FindNet(EIndex id);
+    Ptr<Net> FindNet(const std::string & name);
+
+    Ptr<Layer> FindLayer(const std::string & name);
+
+
 
     bool isComponentId(EIndex id) const
     {
