@@ -34,6 +34,8 @@ private:
     void ExtractLine(const Tree & node);
     void ExtractPadstack(const Tree & node);
     void ExtractPad(const Tree & node);
+
+    void ExtractPoint2D(const Tree & node, std::vector<FPoint2D> & points);
     
     template <typename... Args>
     static void GetValue(const std::string & s, Args & ...args)
@@ -61,6 +63,18 @@ private:
                 std::advance(iter, 1);
             }
         }(), ...);
+    }
+
+    template <typename... Args>
+    static void GetValue(const std::vector<Tree> & branches, Args & ...args)
+    {
+        GetValue(branches.begin(), args...);
+    }
+
+    template <typename... Args>
+    static void TryGetValue(const std::vector<Tree> & branches, Args & ...args)
+    {
+        TryGetValue(branches.begin(), branches.end(), args...);
     }
 
 private:

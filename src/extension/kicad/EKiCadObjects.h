@@ -33,32 +33,6 @@ ECAD_ALWAYS_INLINE static constexpr std::string_view ECAD_KICAD_PCB_LAYER_FRONT_
 ECAD_ALWAYS_INLINE static constexpr std::string_view ECAD_KICAD_PCB_LAYER_BOTTOM_FAB_STR = "B.Fab";
 ECAD_ALWAYS_INLINE static constexpr std::string_view ECAD_KICAD_PCB_LAYER_FRONT_FAB_STR = "F.Fab";
 
-enum class PadType
-{
-    UNKNOWN,
-    SMD,
-    THRU_HOLE,
-    CONNECT,
-    NP_THRU_HOLE,
-};
-
-enum class PadShape
-{
-    UNKNOWN,
-    RECT,
-    ROUNDRECT,
-    CIRCLE,
-    OVAL,
-    TRAPEZOID,
-};
-
-enum class ViaType
-{
-    UNKNOWN,
-    THROUGH,
-    MICRO,
-    BLIND_BURIED,
-};
 struct Arc
 {
     EIndex layer{invalidIndex};
@@ -82,10 +56,17 @@ struct Circle
 };
 
 struct Poly
-{
+{   
+    enum class Type { UNKNOWN, SOLID };
+    enum class Fill { UNKNOWN, SOLID };
+    Type type{Type::UNKNOWN};
+    Fill fill{Fill::UNKNOWN}; 
     EIndex layer{invalidIndex};
     EFloat width{0};
     std::vector<FPoint2D> shape;
+
+    void SetType(const std::string & str);
+    void SetFill(const std::string & str);
 };
 
 struct Text
@@ -97,22 +78,13 @@ struct Text
     std::string text{};
 };
 
-enum class LayerGroup { INVALID, POWER, SIGNAL, USER };
-enum class LayerType
-{
-    INVALID,
-    SILK_SCREEN,
-    SOLDER_PASTE,
-    SOLDER_MASK,
-    CONDUCTING,
-    DIELECTRIC,
-};
-
 struct Layer
 {
+    enum class Group { UNKNOWN, POWER, SIGNAL, USER };
+    enum class Type { UNKNOWN, SILK_SCREEN, SOLDER_PASTE, SOLDER_MASK, CONDUCTING, DIELECTRIC };
     EIndex id{invalidIndex};
-    LayerGroup group{LayerGroup::INVALID};
-    LayerType type{LayerType::INVALID};
+    Group group{Group::UNKNOWN};
+    Type type{Type::UNKNOWN};
     EFloat thickness{0};
     EFloat epsilonR{0};
     EFloat lossTangent{0};
@@ -138,10 +110,11 @@ struct Pin
 
 struct Via
 {
+    enum class Type { UNKNOWN, THROUGH, MICRO, BLIND_BURIED };
     EIndex netId{invalidIndex};
     EFloat size{.0};
     EFloat drillSize{.0};
-    ViaType type{ViaType::UNKNOWN};
+    Type type{Type::UNKNOWN};
     FPoint2D pos{0, 0};
     std::string startLayer;
     std::string endLayer;
@@ -165,11 +138,13 @@ struct Rule
 
 struct Padstack
 {
+    enum class Type { UNKNOWN, SMD, THRU_HOLE, CONNECT, NP_THRU_HOLE };
+    enum class Shape { UNKNOWN, RECT, ROUNDRECT, CIRCLE, OVAL, TRAPEZOID }; 
     EIndex id{invalidIndex};
     std::string name{};
     Rule rule;
-    PadType type;
-    PadShape shape;
+    Type type{Type::UNKNOWN};
+    Shape shape{Shape::UNKNOWN};
     EFloat angle{0};
     EFloat roundRectRatio{0};
     FPoint2D pos;
@@ -241,14 +216,7 @@ struct Database
     Ptr<Net> FindNet(EIndex id);
     Ptr<Net> FindNet(const std::string & name);
 
-    Ptr<Layer> FindLayer(const std::string & name);
-
-
-
-    bool isComponentId(EIndex id) const
-    {
-        return id < components.size();
-    }    
+    Ptr<Layer> FindLayer(const std::string & name);   
 };
 
 } // namespace ecad::ext::kicad
