@@ -24,18 +24,18 @@ private:
     void ExtractStackup(const Tree & node);
     void ExtractNet(const Tree & node);
     void ExtractFootprint(const Tree & node);
-    void ExtractGrLine(const Tree & node);
     void ExtractSegment(const Tree & node);
+    void ExtractZone(const Tree & node);
     void ExtractVia(const Tree & node);
 
     void ExtractCircle(const Tree & node);
     void ExtractArc(const Tree & node);
     void ExtractPoly(const Tree & node);
     void ExtractLine(const Tree & node);
-    void ExtractPadstack(const Tree & node);
     void ExtractPad(const Tree & node);
 
-    void ExtractPoint2D(const Tree & node, std::vector<FPoint2D> & points);
+    void ExtractPoints(const Tree & node, Points & points);
+    void ExtractStroke(const Tree & node, Stroke & stroke);
     
     template <typename... Args>
     static void GetValue(const std::string & s, Args & ...args)
@@ -88,8 +88,7 @@ private:
     //current state
     struct State
     {
-        EIndex noNamePinId{0};
-        EIndex noNamePadstackId{0};
+        EIndex noNamePadId{0};
         Component * comp = nullptr;
         void Reset() { *this = State{}; }
     };

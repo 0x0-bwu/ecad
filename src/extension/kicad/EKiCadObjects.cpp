@@ -3,19 +3,19 @@
 namespace ecad::ext::kicad {
 
 
-ECAD_INLINE void Poly::SetType(const std::string & str)
+ECAD_INLINE void Stroke::SetType(const std::string & str)
 {
     if ("solid" == str)
         type = Type::SOLID;
 }
 
-ECAD_INLINE void Poly::SetFill(const std::string & str)
+ECAD_INLINE void Stroke::SetFill(const std::string & str)
 {
     if ("solid" == str)
         fill = Fill::SOLID;
 }
 
-ECAD_INLINE void Padstack::SetType(const std::string & str)
+ECAD_INLINE void Pad::SetType(const std::string & str)
 {
     if ("smd" == str)
         type = Type::SMD;
@@ -29,7 +29,7 @@ ECAD_INLINE void Padstack::SetType(const std::string & str)
         type = Type::UNKNOWN;
 }
 
-ECAD_INLINE void Padstack::SetShape(const std::string & str)
+ECAD_INLINE void Pad::SetShape(const std::string & str)
 {
     if ("rect" == str)
         shape = Shape::RECT;

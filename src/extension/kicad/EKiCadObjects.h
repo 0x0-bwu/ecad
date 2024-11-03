@@ -33,40 +33,41 @@ ECAD_ALWAYS_INLINE static constexpr std::string_view ECAD_KICAD_PCB_LAYER_FRONT_
 ECAD_ALWAYS_INLINE static constexpr std::string_view ECAD_KICAD_PCB_LAYER_BOTTOM_FAB_STR = "B.Fab";
 ECAD_ALWAYS_INLINE static constexpr std::string_view ECAD_KICAD_PCB_LAYER_FRONT_FAB_STR = "F.Fab";
 
-struct Arc
+using Points = std::vector<FPoint2D>;
+struct Stroke
 {
-    EIndex layer{invalidIndex};
-    EFloat angle{0}, width{0};
-    FPoint2D start{0, 0}, end{0, 0};
-};
-
-struct Line
-{ 
-    EIndex layer{invalidIndex};
-    Int64 angle{0};
-    EFloat width{0};
-    FPoint2D start{0, 0}, end{0, 0};
-};
-
-struct Circle
-{
-    EIndex layer{invalidIndex};
-    EFloat width{0}; //2 * radius
-    FPoint2D center{0, 0}, end{0, 0};
-};
-
-struct Poly
-{   
     enum class Type { UNKNOWN, SOLID };
     enum class Fill { UNKNOWN, SOLID };
     Type type{Type::UNKNOWN};
     Fill fill{Fill::UNKNOWN}; 
     EIndex layer{invalidIndex};
     EFloat width{0};
-    std::vector<FPoint2D> shape;
+    virtual ~Stroke() = default;
+    virtual void SetType(const std::string & str);
+    virtual void SetFill(const std::string & str);
+};
 
-    void SetType(const std::string & str);
-    void SetFill(const std::string & str);
+struct Arc : public Stroke
+{
+    EFloat angle{0};
+    FPoint2D start{0, 0}, end{0, 0};
+};
+
+struct Line : public Stroke
+{ 
+    ECoord angle{0};
+    FPoint2D start{0, 0}, end{0, 0};
+};
+
+struct Circle : public Stroke
+{
+    //width = 2 * radius
+    FPoint2D center{0, 0}, end{0, 0};
+};
+
+struct Poly : public Stroke
+{   
+    Points shape;
 };
 
 struct Text
@@ -98,60 +99,48 @@ struct Layer
     void SetType(const std::string & str);
 };
 
-struct Pin
-{
-    EIndex padId{invalidIndex};
-    std::vector<EIndex> layers;
-
-    Pin() = default;
-    Pin(EIndex padId) : padId(padId) {}
-
-};
-
 struct Via
 {
     enum class Type { UNKNOWN, THROUGH, MICRO, BLIND_BURIED };
+    Type type{Type::UNKNOWN};    
     EIndex netId{invalidIndex};
     EFloat size{.0};
     EFloat drillSize{.0};
-    Type type{Type::UNKNOWN};
     FPoint2D pos{0, 0};
-    std::string startLayer;
-    std::string endLayer;
+    std::array<EIndex, 2> layers{invalidIndex, invalidIndex};
 };
  
 struct Segment
 {
     EIndex netId{invalidIndex};
+    EIndex layerId{invalidIndex};
     EFloat width{0};
     FPoint2D start{0, 0};
     FPoint2D end{0, 0};
-    std::string layer{};
-    bool display{false};
 };
 
-struct Rule
+struct Zone
 {
-    EFloat radius{0};
-    EFloat clearance{0};
+    EIndex netId{invalidIndex};
+    EIndex layerId{invalidIndex};
+    Points polygon;
+    std::vector<Points> filledPolygons;
 };
 
-struct Padstack
+struct Pad
 {
     enum class Type { UNKNOWN, SMD, THRU_HOLE, CONNECT, NP_THRU_HOLE };
     enum class Shape { UNKNOWN, RECT, ROUNDRECT, CIRCLE, OVAL, TRAPEZOID }; 
-    EIndex id{invalidIndex};
-    std::string name{};
-    Rule rule;
     Type type{Type::UNKNOWN};
     Shape shape{Shape::UNKNOWN};
+    EIndex netId;
     EFloat angle{0};
-    EFloat roundRectRatio{0};
+    EFloat roundrectRatio{0};
     FPoint2D pos;
     FPoint2D size;
-    std::vector<FPoint2D> shapeCoords;
-    std::vector<FPoint2D> shapePolygon;
-    
+    std::string name{};
+    Points shapePolygon;
+    std::vector<EIndex> layers;
     void SetType(const std::string & str);
     void SetShape(const std::string & str);
 };
@@ -161,7 +150,6 @@ struct Net
     EIndex id{invalidIndex};
     EIndex netClassId{invalidIndex};
     std::string name;
-    std::vector<Pin> pins;
     std::vector<Via> vias;
     std::vector<Segment> segments;
     EPair<EIndex, EIndex> diffPair;
@@ -177,33 +165,25 @@ struct Component
     EFloat width{0};
     EFloat height{0};
     std::string name;
+    std::vector<Via> vias;
     std::vector<Arc> arcs;
+    std::vector<Pad> pads;
     std::vector<Line> lines;
     std::vector<Poly> polys;
-    std::vector<Padstack> pads;
+    std::vector<Zone> zones;
     std::vector<Circle> circles;
+    std::vector<Segment> segments;
 
+    Component() = default;
     Component(std::string name) : name(std::move(name)) {}
-
-    EIndex GetPadstackId(const std::string & name) const
-    {
-        auto iter = pad2IndexMap.find(name);
-        if (iter == pad2IndexMap.cend()) return invalidIndex;
-        return iter->second;
-    }
-
-    // lut
-    std::unordered_map<std::string, EIndex> pad2IndexMap;
+    virtual ~Component() = default;
 };
 
-struct Database
+struct Database : public Component
 {
     std::unordered_map<std::string, Component> components;
     std::unordered_map<std::string, Layer> layers;
     std::unordered_map<EIndex, Net> nets;
-
-    std::vector<Pin> unconnectedPins;
-    std::vector<Line> boundaryLines;
 
     // lut
     std::unordered_map<std::string_view, Ptr<Net>> netLut;
@@ -213,9 +193,9 @@ struct Database
     Net & AddNet(EIndex id, std::string name);
     Component & AddComponent(std::string name);
 
+    // find
     Ptr<Net> FindNet(EIndex id);
     Ptr<Net> FindNet(const std::string & name);
-
     Ptr<Layer> FindLayer(const std::string & name);   
 };
 
