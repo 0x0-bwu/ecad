@@ -73,6 +73,7 @@ void ecad_init_design(py::module_ & m)
             auto range = layout.RunThermalSimulation(simulationSetup, temperatures);
             return std::make_tuple(range.first, range.second, temperatures);
         })
+        .def("run_thermal_simulation", py::overload_cast<const EThermalTransientSimulationSetup &, const EThermalTransientExcitation &>(&ILayoutView::RunThermalSimulation))
     ;
 
     py::class_<IBondwire>(m, "Bondwire")

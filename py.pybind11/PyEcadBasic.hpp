@@ -361,6 +361,26 @@ void ecad_init_basic(py::module_ & m)
         .def_readwrite("solver_type", &EThermalStaticSettings::solverType)
     ;
 
+    py::class_<EThermalModelReductionSettings>(m, "ThermalModelReductionSettings")
+        .def_readwrite("order", &EThermalModelReductionSettings::order)
+        .def_readwrite("rom_load_file", &EThermalModelReductionSettings::romLoadFile)
+        .def_readwrite("rom_save_file", &EThermalModelReductionSettings::romSaveFile)
+    ;
+    
+    py::class_<EThermalTransientSettings, EThermalSettings>(m, "ThermalTransientSettings")
+        .def(py::init<size_t>())
+        .def_readwrite("verbose", &EThermalTransientSettings::verbose)
+        .def_readwrite("adaptive", &EThermalTransientSettings::adaptive)
+        .def_readwrite("temperature_depend", &EThermalTransientSettings::temperatureDepend)
+        .def_readwrite("step", &EThermalTransientSettings::step)
+        .def_readwrite("duration", &EThermalTransientSettings::duration)
+        .def_readwrite("absolute_error", &EThermalTransientSettings::absoluteError)
+        .def_readwrite("relative_error", &EThermalTransientSettings::relativeError)
+        .def_readwrite("min_sampling_interval", &EThermalTransientSettings::minSamplingInterval)
+        .def_readwrite("sampling_window", &EThermalTransientSettings::samplingWindow)
+        .def_readwrite("mor", &EThermalTransientSettings::mor)
+    ;
+
     py::class_<EThermalSimulationSetup>(m, "ThermalSimulationSetup")
         .def_readwrite("work_dir", &EThermalSimulationSetup::workDir)
         .def_readwrite("monitors", &EThermalSimulationSetup::monitors)
@@ -374,5 +394,10 @@ void ecad_init_basic(py::module_ & m)
     py::class_<EThermalStaticSimulationSetup, EThermalSimulationSetup>(m, "ThermalStaticSimulationSetup")
         .def(py::init<std::string, size_t, ENetIdSet>())
         .def_readwrite("settings", &EThermalStaticSimulationSetup::settings)
+    ;
+
+    py::class_<EThermalTransientSimulationSetup, EThermalSimulationSetup>(m, "ThermalTransientSimulationSetup")
+        .def(py::init<std::string, size_t, ENetIdSet>())
+        .def_readwrite("settings", &EThermalTransientSimulationSetup::settings)
     ;
 }

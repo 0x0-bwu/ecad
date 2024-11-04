@@ -44,11 +44,6 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
 void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, EFloat period, EFloat duty)
 {
     auto extractionSettings = ExtractionSettings(workDir);
-    // extractionSettings->meshSettings.genMeshByLayer = true;
-    // extractionSettings->meshSettings.imprintUpperLayer = true;
-    // extractionSettings->meshSettings.maxLen = 2;
-    // extractionSettings->meshSettings.minAlpha = 20;
-    // extractionSettings->layerCutSettings.layerTransitionRatio = 0;
 
     EThermalTransientSimulationSetup setup(workDir, eDataMgr.Threads(), {});
     setup.monitors = GetDieMonitors(layout);
