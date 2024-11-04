@@ -50,11 +50,11 @@ int main(int argc, char * argv[])
 {
     eDataMgr.Init(ecad::ELogLevel::Trace);
 
-    std::string filename = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "design" + ECAD_SEPS + "CAS300M12BM2.ecad";
+    std::string filename = generic::fs::DirName(__FILE__).string() + "/data/design/CAS300M12BM2.ecad";
     auto database = eDataMgr.LoadDatabase(filename);
     if (nullptr == database) return EXIT_FAILURE;
     auto cell = database->FindCellByName("Base");
-    std::string workDir = generic::fs::DirName(__FILE__).string() + ECAD_SEPS + "data" + ECAD_SEPS + "simulation" + ECAD_SEPS + "static";
+    std::string workDir = generic::fs::DirName(__FILE__).string() + "/data/simulation/static";
     auto layout = cell->GetFlattenedLayoutView();
     StaticThermalFlow(layout, workDir);
     ecad::EDataMgr::Instance().ShutDown();

@@ -17,7 +17,7 @@ class ECAD_API EThermalNetworkStaticSolver : public EThermalNetworkSolver
 public:
     using Scalar = Float32;
     EThermalNetworkStaticSolveSettings settings;
-    explicit EThermalNetworkStaticSolver() : settings("", 1) {}//wbtest
+    explicit EThermalNetworkStaticSolver() : settings("", 1) {}
     virtual ~EThermalNetworkStaticSolver() = default;
 
     template <typename ThermalNetworkBuilder>
@@ -27,6 +27,7 @@ public:
 class ECAD_API EThermalNetworkTransientSolver : public EThermalNetworkSolver
 {
 public:
+    using Scalar = Float32;
     EThermalNetworkTransientSolveSettings settings;
     explicit EThermalNetworkTransientSolver(const EThermalTransientExcitation & excitation);
     virtual ~EThermalNetworkTransientSolver() = default;

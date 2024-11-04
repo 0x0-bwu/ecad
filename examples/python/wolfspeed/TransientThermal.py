@@ -9,6 +9,7 @@ mgr = ecad.DataMgr
 def get_simulation_setup(layout, work_dir, cell_insts, components, force_rebuild = False) :
 
     extraction_setting = StaticThermal.get_extraction_setting(work_dir, force_rebuild)
+    extraction_setting.layer_cut_settings.layer_transition_ratio = 5
     simulation_setup = ecad.ThermalTransientSimulationSetup(work_dir, mgr.threads(), set())
     simulation_setup.set_extraction_settings(extraction_setting)
     simulation_setup.settings.env_temperature = ecad.Temperature(25, ecad.TemperatureUnit.CELSIUS)
@@ -19,9 +20,9 @@ def get_simulation_setup(layout, work_dir, cell_insts, components, force_rebuild
     simulation_setup.settings.step = 10
     simulation_setup.settings.temperature_depend = False
     simulation_setup.settings.sampling_window = 100
-    simulation_setup.settings.min_sampling_interval = 0.1
-    simulation_setup.settings.absolute_error = 1e-5
-    simulation_setup.settings.relative_error = 1e-5
+    simulation_setup.settings.min_sampling_interval = 0.001
+    simulation_setup.settings.absolute_error = 1e-2
+    simulation_setup.settings.relative_error = 1e-3
     simulation_setup.settings.adaptive = True
     simulation_setup.monitors = StaticThermal.get_die_monitors(layout, cell_insts, components)
     return simulation_setup

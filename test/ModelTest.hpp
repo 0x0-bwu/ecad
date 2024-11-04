@@ -11,16 +11,16 @@ using namespace ecad::model;
 void s_ctm_model_io_test()
 {
     std::string err;
-    std::string ctm = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5.tar.gz";
-    std::string ctmFolder = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5";
+    std::string ctm = ecad_test::GetTestDataPath() + "/ctm/test.tar.gz";
+    std::string ctmFolder = ecad_test::GetTestDataPath() + "/ctm/test";
     auto model = io::makeChipThermalModelFromCTMv1File(ctm, &err);
     BOOST_CHECK(generic::fs::PathExists(ctmFolder));
     generic::fs::RemoveDir(ctmFolder);
     BOOST_CHECK(err.empty());
     BOOST_CHECK(model);
 
-    std::string outFile = "rhsc_ctm_out_test";
-    std::string outFolder = ecad_test::GetTestDataPath() + "/ctm/rhsc_ctm5_out";
+    std::string outFile = "test";
+    std::string outFolder = ecad_test::GetTestDataPath() + "/ctm/out";
     bool res = io::GenerateCTMv1FileFromChipThermalModelV1(*model, outFolder, outFile, &err);
     BOOST_CHECK(res);
 }

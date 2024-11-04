@@ -43,6 +43,13 @@ if (ENABLE_PROFILING)
 	message("-- Enable GNU Profiling")
 endif()
 
+option(ENABLE_SANITIZER "Enable sanitizer" OFF)
+if (ENABLE_SANITIZER)
+	add_compile_options(-fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address -Wno-uninitialized)
+	add_link_options(-fsanitize=address -fno-omit-frame-pointer -fsanitize-recover=address)
+	message("-- Enable Sanitizer")
+endif()
+
 option(ENABLE_APPLE_ACCELERATE "Enable apple accelerate framework" OFF)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC -ffast-math -Wno-deprecated-declarations")

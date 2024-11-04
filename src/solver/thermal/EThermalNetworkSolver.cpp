@@ -105,24 +105,26 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
     using Model = typename ThermalNetworkBuilder::ModelType;
     
     size_t steps{0};
-    Samples<EFloat> samples;
-    TimeWindow<EFloat> window(settings.duration - settings.samplingWindow, settings.duration, settings.minSamplingInterval);
+    Samples<Scalar> samples;
+    TimeWindow<Scalar> window(settings.duration - settings.samplingWindow, settings.duration, settings.minSamplingInterval);
     ECAD_TRACE("duration: %1%, step: %2%, abs error: %3%, rel error: %4%", settings.duration, settings.step, settings.absoluteError, settings.relativeError);
     if (0 == settings.mor.order) {
         ECAD_EFFICIENCY_TRACK("transient orig")
-        using TransSolver = ThermalNetworkTransientSolver<EFloat>;
+        using TransSolver = ThermalNetworkTransientSolver<Scalar>;
         using StateType = typename TransSolver::StateType;
         using Sampler = typename TransSolver::Sampler;
         StateType initT(traits::EThermalModelTraits<Model>::Size(model), envT);
         if (settings.temperatureDepend) {
-            EFloat time = 0;
+            Scalar time = 0;
             while (time < settings.duration) {
                 if (settings.verbose)
                     ECAD_TRACE("time:%1%/%2%", time, settings.duration);
                 auto network = builder.Build(initT);
                 TransSolver solver(*network, envT, settings.probs);
                 Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
-                steps += solver.SolveAdaptive(initT, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
+                steps += settings.adaptive ?
+                         solver.SolveAdaptive(initT, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation) :
+                         solver.Solve(initT, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
                 time += settings.step;
             }
         }
@@ -130,17 +132,19 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
             auto network = builder.Build(initT);
             TransSolver solver(*network, envT, settings.probs);
             Sampler sampler(solver, samples, initT, window, settings.duration, settings.verbose);
-            steps = solver.SolveAdaptive(initT, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
+            steps = settings.adaptive ?
+                    solver.SolveAdaptive(initT, Scalar{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation) :
+                    solver.Solve(initT, Scalar{0}, settings.duration, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
         }
     }
     else {
         ECAD_EFFICIENCY_TRACK("transient mor")
-        using TransSolver = ThermalNetworkReducedTransientSolver<EFloat>;
+        using TransSolver = ThermalNetworkReducedTransientSolver<Scalar>;
         using StateType = typename TransSolver::StateType;
         using Sampler = typename TransSolver::Sampler;
         StateType initT(traits::EThermalModelTraits<Model>::Size(model), envT);
         if (settings.temperatureDepend) {
-            EFloat time = 0;
+            Scalar time = 0;
             while (time < settings.duration) {
                 ECAD_TRACE("time:%1%/%2%", time, settings.duration);
                 StateType initState;
@@ -148,7 +152,10 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
                 TransSolver solver(*network, envT, settings.probs, settings.mor.order, {}, {});
                 if (not solver.Im().Input2State(initT, initState)) return false;
                 Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
-                steps += solver.SolveAdaptive(initState, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
+                steps += settings.adaptive ?
+                         solver.SolveAdaptive(initState, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation) :
+                         solver.Solve(initState, time, settings.step, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
+
                 solver.Im().State2Output(initState, initT);
                 time += settings.step;
             }
@@ -159,7 +166,9 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
             TransSolver solver(*network, envT, settings.probs, settings.mor.order, settings.mor.romLoadFile, settings.mor.romSaveFile);
             if (not solver.Im().Input2State(initT, initState)) return false;
             Sampler sampler(solver, samples, initState, window, settings.duration, settings.verbose);
-            steps = solver.SolveAdaptive(initState, EFloat{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
+            steps = settings.adaptive ?
+                    solver.SolveAdaptive(initState, Scalar{0}, settings.duration, settings.step, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation) :
+                    solver.Solve(initState, Scalar{0}, settings.duration, settings.minSamplingInterval, settings.absoluteError, settings.relativeError, std::move(sampler), &m_excitation);
         }
     }
     for (auto & sample : samples) {
@@ -168,8 +177,8 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
             std::for_each(begin, sample.end(), [](auto & t){ t = ETemperature::Kelvins2Celsius(t); });
         }
        
-        minT = std::min(minT, *std::min_element(begin, sample.end()));
-        maxT = std::max(maxT, *std::max_element(begin, sample.end()));
+        minT = std::min<EFloat>(minT, *std::min_element(begin, sample.end()));
+        maxT = std::max<EFloat>(maxT, *std::max_element(begin, sample.end()));
     }
     if (settings.dumpResults && not settings.workDir.empty()) {
         auto filename = settings.workDir + ECAD_SEPS + "trans.txt";
@@ -252,7 +261,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkTransientSolver::Solve() co
     ECAD_EFFICIENCY_TRACK("grid thermal network transient solve")
     EPair<EFloat, EFloat> range;
     if (EThermalNetworkTransientSolver::template 
-        Solve<EGridThermalNetworkBuilder<EFloat>>(m_model, range.first, range.second))
+        Solve<EGridThermalNetworkBuilder<Scalar>>(m_model, range.first, range.second))
         return range;
     return {invalidFloat, invalidFloat};
 }
@@ -298,7 +307,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkTransientSolver::Solve() c
     ECAD_EFFICIENCY_TRACK("prism thermal network transient solve")
     EPair<EFloat, EFloat> range;
     if (EThermalNetworkTransientSolver::template 
-        Solve<EPrismThermalNetworkBuilder<EFloat>>(m_model, range.first, range.second))
+        Solve<EPrismThermalNetworkBuilder<Scalar>>(m_model, range.first, range.second))
         return range;
     return {invalidFloat, invalidFloat};
 
@@ -345,7 +354,7 @@ ECAD_INLINE EPair<EFloat, EFloat> EStackupPrismThermalNetworkTransientSolver::So
     ECAD_EFFICIENCY_TRACK("prism thermal network transient solve")
     EPair<EFloat, EFloat> range;
     if (EThermalNetworkTransientSolver::template 
-        Solve<EStackupPrismThermalNetworkBuilder<EFloat>>(m_model, range.first, range.second))
+        Solve<EStackupPrismThermalNetworkBuilder<Scalar>>(m_model, range.first, range.second))
         return range;
     return {invalidFloat, invalidFloat};
 }

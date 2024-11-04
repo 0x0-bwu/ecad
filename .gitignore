@@ -1,23 +1,5 @@
 #ignore files
-*.o
-*.a
-*.sp
 *.os
-*.so
-*.mf
-*.out
-*.tar
-*.exe
-*.png
-*.xml
-*.ctm
-*.vtk
-*.tar.gz
-*.DS_Store
-build
-build.debug
-build.release
-settings.json
-.VSCodeCounter
-.sconsign.dblite
-__pycache__
+build.*
+.vscode
+.DS_Store
