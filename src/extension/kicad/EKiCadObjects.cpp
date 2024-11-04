@@ -57,6 +57,8 @@ ECAD_INLINE void Layer::SetType(const std::string & str)
         type = Type::CONDUCTING;
     else if ("core" == str)
         type = Type::DIELECTRIC;
+    else if ("mixed" == str)
+        type = Type::MIXED;
 }
 
 ECAD_INLINE void Layer::SetGroup(const std::string & str)

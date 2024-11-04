@@ -82,7 +82,7 @@ struct Text
 struct Layer
 {
     enum class Group { UNKNOWN, POWER, SIGNAL, USER };
-    enum class Type { UNKNOWN, SILK_SCREEN, SOLDER_PASTE, SOLDER_MASK, CONDUCTING, DIELECTRIC };
+    enum class Type { UNKNOWN, SILK_SCREEN, SOLDER_PASTE, SOLDER_MASK, CONDUCTING, DIELECTRIC, MIXED };
     EIndex id{invalidIndex};
     Group group{Group::UNKNOWN};
     Type type{Type::UNKNOWN};

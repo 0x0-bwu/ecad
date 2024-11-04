@@ -205,7 +205,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
         layers.push_back(std::move(layer));
         elevation -= xflLyr.thickness;
     }
-    layout->AppendLayers(CloneHelper(layers));
+    layout->AppendLayers(std::move(layers));
 }
 
 ECAD_INLINE void ECadExtXflHandler::ImportNets(Ptr<ILayoutView> layout)

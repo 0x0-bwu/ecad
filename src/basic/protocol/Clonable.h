@@ -26,6 +26,7 @@ template <typename T, typename Deleter = std::default_delete<T> >
 ECAD_ALWAYS_INLINE std::vector<UPtr<T, Deleter> > CloneHelper(const std::vector<UPtr<T, Deleter> > & vt)
 {
     std::vector<UPtr<T, Deleter> > res;
+    res.reserve(vt.size());
     for(const auto & t : vt)
         res.push_back(CloneHelper<T, Deleter>(t));
     return res;

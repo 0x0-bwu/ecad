@@ -5,6 +5,7 @@
 namespace ecad {
 
 class ICell;
+class ILayer;
 class IDatabase;
 class ILayoutView;
 
@@ -18,6 +19,9 @@ public:
     Ptr<IDatabase> CreateDatabase(const std::string & name, Ptr<std::string> err = nullptr);
 
 private:
+    bool ExtractKiCadObjects(Ptr<std::string> err = nullptr);
+    bool CreateEcadObjects(Ptr<std::string> err = nullptr);
+
     void ExtractNode(const Tree & node);
     void ExtractLayer(const Tree & node);
     void ExtractSetup(const Tree & node);
@@ -84,7 +88,14 @@ private:
 
     //func lut
     std::unordered_map<std::string, std::function<void(const Tree &)>> m_functions;
-
+    
+    // kicad-ecad lut
+    struct Lut
+    {
+        std::unordered_map<EIndex, CPtr<ILayer>> layer;
+    };
+    Lut m_lut;
+    
     //current state
     struct State
     {

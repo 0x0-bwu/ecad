@@ -29,27 +29,57 @@ ECAD_INLINE ECadExtKiCadHandler::ECadExtKiCadHandler(const std::string & kicadFi
 ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
 {
     auto & eMgr = EDataMgr::Instance();
-    if (eMgr.OpenDatabase(name)){
-        if(err) *err = fmt::Fmt2Str("Error: database %1% is already exist.", name);
-        return nullptr;
-    }
+    m_database = eMgr.CreateDatabase(name);
+    if(nullptr == m_database) return nullptr;
 
+    if (not (ExtractKiCadObjects(err))) return nullptr;
+    if (not (CreateEcadObjects(err))) return nullptr;
+
+    return m_database;
+}
+
+ECAD_INLINE bool ECadExtKiCadHandler::ExtractKiCadObjects(Ptr<std::string> err)
+{
     Tree tree;
     EKiCadParser parser;
     if (not parser(m_filename.data(), tree)) {
         if(err) *err = fmt::Fmt2Str("Error: failed to parse %1%.", m_filename);
-        return nullptr; 
+        return false; 
     }
     
     m_kicad.reset(new Database);
     m_current.comp = m_kicad.get();
     for (auto & node : tree.branches)
         ExtractNode(node);
+    return true;
+}
 
-    m_database = eMgr.CreateDatabase(name);
-    if(nullptr == m_database) return nullptr;
+ECAD_INLINE bool ECadExtKiCadHandler::CreateEcadObjects(Ptr<std::string> err)
+{
+    ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
+    m_database->SetCoordUnits(coordUnits);
 
-    return m_database;
+    // top call
+    auto & eMgr = EDataMgr::Instance();
+    auto cell = eMgr.CreateCircuitCell(m_database, m_database->GetName());
+    auto layout = cell->GetLayoutView();
+
+    EFloat elevation{0};
+    std::vector<UPtr<ILayer> > layers;
+    for (const auto & [kName, kLayer] : m_kicad->layers) {
+        if (kLayer.id > ECAD_KICAD_PCB_LAYER_BOTTOM_ADHES_ID)
+            continue;
+        ELayerType type = kLayer.type == Layer::Type::CONDUCTING ?
+                          ELayerType::ConductingLayer : ELayerType::DielectricLayer;
+        auto conductingMat = kLayer.material.empty() ? sDefaultConductingMat : kLayer.material;
+        auto dielectricMat = kLayer.material.empty() ? sDefaultDielectricMat : kLayer.material;
+        auto layer = eMgr.CreateStackupLayer(kName, type, elevation, kLayer.thickness, conductingMat, dielectricMat);
+        m_lut.layer.emplace(kLayer.id, layer.get());
+        layers.emplace_back(std::move(layer));
+        elevation -= kLayer.thickness;
+    }
+    layout->AppendLayers(std::move(layers));
+    return true;
 }
 
 ECAD_INLINE void ECadExtKiCadHandler::ExtractNode(const Tree & node)
