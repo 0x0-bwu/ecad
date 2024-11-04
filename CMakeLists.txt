@@ -182,7 +182,7 @@ message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
-set(EXTRA_LIBS Threads::Threads dl boost_serialization ${PNG_LIBRARY} ${MALLOC_LIB})
+set(EXTRA_LIBS Threads::Threads dl ${PNG_LIBRARY} ${MALLOC_LIB})
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(examples)
