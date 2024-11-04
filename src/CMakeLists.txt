@@ -9,9 +9,7 @@ add_subdirectory(extraction)
 add_subdirectory(solver)
 add_subdirectory(simulation)
 
-add_library(Ecad SHARED
-EDataMgr.cpp
-)
+add_library(Ecad SHARED EDataMgr.cpp)
 
 target_link_libraries(Ecad
     Ebasic
@@ -23,6 +21,7 @@ target_link_libraries(Ecad
     Eextraction
     Esolver
     Esimulation
+    ${MALLOC_LIB}
+    ${PNG_LIBRARY} 
     boost_serialization
-    ${EXTRA_LIBS}
 )

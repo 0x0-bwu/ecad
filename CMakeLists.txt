@@ -161,6 +161,9 @@ add_compile_definitions(GENERIC_BOOST_GIL_IO_PNG_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 
+# Extra libraries
+set(EXTRA_LIBS Threads::Threads dl ${PNG_LIBRARY} ${MALLOC_LIB})
+
 # Message
 message(STATUS "BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "BOOST_INCLUDE_PATH: ${BOOST_INCLUDE_PATH}")
@@ -177,12 +180,12 @@ message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 message(STATUS "ENABLE_ASSERTION: ${ENABLE_ASSERTION}")
 message(STATUS "ENABLE_EXCEPTION: ${ENABLE_EXCEPTION}")
 message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
+message(STATUS "PROJECT_SOURCE_DIR: ${PROJECT_SOURCE_DIR}")
 
 # Tracting build time
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
-set(EXTRA_LIBS Threads::Threads dl ${PNG_LIBRARY} ${MALLOC_LIB})
 add_subdirectory(src)
 add_subdirectory(test)
 add_subdirectory(examples)
