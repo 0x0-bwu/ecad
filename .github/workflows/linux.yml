@@ -11,7 +11,10 @@ jobs:
             submodules: 'recursive'
     
       - name: Install dependency
-        run: sudo apt-get update && sudo apt-get install build-essential cmake ninja-build libeigen3-dev libpng-dev libjemalloc2
+        run: sudo apt-get update && sudo apt-get install build-essential cmake ninja-build libeigen3-dev libpng-dev
+
+      - name: Install jemalloc
+        uses: kaeawc/setup-jemalloc@v0.0.1
 
       - name: Install boost library
         uses: MarkusJx/install-boost@v2.4.4
