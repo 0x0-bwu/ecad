@@ -161,9 +161,6 @@ add_compile_definitions(GENERIC_BOOST_GIL_IO_PNG_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_SUPPORT)
 add_compile_definitions(ECAD_BOOST_SERIALIZATION_INCLUDE_UUID)
 
-# Extra libraries
-set(EXTRA_LIBS Threads::Threads dl ${PNG_LIBRARY} ${MALLOC_LIB})
-
 # Message
 message(STATUS "BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "BOOST_INCLUDE_PATH: ${BOOST_INCLUDE_PATH}")

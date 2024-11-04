@@ -23,5 +23,7 @@ target_link_libraries(Ecad
     Esimulation
     ${MALLOC_LIB}
     ${PNG_LIBRARY} 
+    Threads::Threads
     boost_serialization
+    dl
 )
