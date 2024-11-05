@@ -24,7 +24,7 @@ jobs:
         run: ls -al /home/runner/boost_1_83_0/boost/boost/lib
 
       - name: Build ecad
-        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && cmake -Bbuild.release -DENABLE_ASSERTION=ON -DENABLE_EXCEPTION=ON -DECAD_MALLOC_LIB=jemalloc -G Ninja && cmake --build build.release
+        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && cmake -Bbuild.release -DENABLE_ASSERTION=ON -DENABLE_EXCEPTION=ON -G Ninja && cmake --build build.release
 
       - name: Run unit test
         run: build.release/bin/EcadTest.exe
