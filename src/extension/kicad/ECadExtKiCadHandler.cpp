@@ -54,34 +54,6 @@ ECAD_INLINE bool ECadExtKiCadHandler::ExtractKiCadObjects(Ptr<std::string> err)
     return true;
 }
 
-ECAD_INLINE bool ECadExtKiCadHandler::CreateEcadObjects(Ptr<std::string> err)
-{
-    ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
-    m_database->SetCoordUnits(coordUnits);
-
-    // top call
-    auto & eMgr = EDataMgr::Instance();
-    auto cell = eMgr.CreateCircuitCell(m_database, m_database->GetName());
-    auto layout = cell->GetLayoutView();
-
-    EFloat elevation{0};
-    std::vector<UPtr<ILayer> > layers;
-    for (const auto & [kName, kLayer] : m_kicad->layers) {
-        if (kLayer.id > ECAD_KICAD_PCB_LAYER_BOTTOM_ADHES_ID)
-            continue;
-        ELayerType type = kLayer.type == Layer::Type::CONDUCTING ?
-                          ELayerType::ConductingLayer : ELayerType::DielectricLayer;
-        auto conductingMat = kLayer.material.empty() ? sDefaultConductingMat : kLayer.material;
-        auto dielectricMat = kLayer.material.empty() ? sDefaultDielectricMat : kLayer.material;
-        auto layer = eMgr.CreateStackupLayer(kName, type, elevation, kLayer.thickness, conductingMat, dielectricMat);
-        m_lut.layer.emplace(kLayer.id, layer.get());
-        layers.emplace_back(std::move(layer));
-        elevation -= kLayer.thickness;
-    }
-    layout->AppendLayers(std::move(layers));
-    return true;
-}
-
 ECAD_INLINE void ECadExtKiCadHandler::ExtractNode(const Tree & node)
 {
     auto iter = m_functions.find(node.value);
@@ -360,6 +332,66 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractStroke(const Tree & node, Stroke & 
     }
 }
 
+ECAD_INLINE bool ECadExtKiCadHandler::CreateEcadObjects(Ptr<std::string> err)
+{
+    ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
+    m_database->SetCoordUnits(coordUnits);
 
+    // top call
+    auto & eMgr = EDataMgr::Instance();
+    auto cell = eMgr.CreateCircuitCell(m_database, m_database->GetName());
+    auto layout = cell->GetLayoutView();
+
+    CreateEcadNets(layout);
+    CreateEcadLayers(layout);
+
+    return true;
+}
+
+ECAD_INLINE void ECadExtKiCadHandler::CreateEcadLayers(Ptr<ILayoutView> layout)
+{
+    auto & eMgr = EDataMgr::Instance();
+
+    EFloat elevation{0};
+    std::vector<UPtr<ILayer> > layers;
+    for (const auto & [kName, kLayer] : m_kicad->layers) {
+        if (kLayer.id > ECAD_KICAD_PCB_LAYER_BOTTOM_ADHES_ID)
+            continue;
+        ELayerType type = kLayer.type == Layer::Type::CONDUCTING ?
+                          ELayerType::ConductingLayer : ELayerType::DielectricLayer;
+        auto conductingMat = kLayer.material.empty() ? sDefaultConductingMat : kLayer.material;
+        auto dielectricMat = kLayer.material.empty() ? sDefaultDielectricMat : kLayer.material;
+        auto layer = eMgr.CreateStackupLayer(kName, type, elevation, kLayer.thickness, conductingMat, dielectricMat);
+        if (nullptr == layer) {
+            //todo, error
+            continue;
+        }
+        m_lut.layer.emplace(kLayer.id, layer.get());
+        layers.emplace_back(std::move(layer));
+        elevation -= kLayer.thickness;
+    }
+    layout->AppendLayers(std::move(layers));
+}
+
+ECAD_INLINE void ECadExtKiCadHandler::CreateEcadNets(Ptr<ILayoutView> layout)
+{
+    auto & eMgr = EDataMgr::Instance();
+    for (const auto & [kNetId, kNet] : m_kicad->nets) {
+        auto net = eMgr.CreateNet(layout, kNet.name);
+        if (nullptr == net) {
+            //todo, error
+            continue;
+        }
+        m_lut.net.emplace(kNetId, net);
+    }
+}
+
+ECAD_INLINE void ECadExtKiCadHandler::CreateLayoutBoundary(Ptr<ILayoutView> layout)
+{
+    auto & eMgr = EDataMgr::Instance();
+    EPolygonWithHolesData pwh;
+    auto shape = eMgr.CreateShapePolygonWithHoles(pwh);
+    layout->SetBoundary(std::move(shape));
+}
 
 } // namespace ecad::ext::kicad

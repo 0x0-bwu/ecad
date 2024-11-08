@@ -4,6 +4,7 @@
 #include "EKiCadParser.h"
 namespace ecad {
 
+class INet;
 class ICell;
 class ILayer;
 class IDatabase;
@@ -20,7 +21,6 @@ public:
 
 private:
     bool ExtractKiCadObjects(Ptr<std::string> err = nullptr);
-    bool CreateEcadObjects(Ptr<std::string> err = nullptr);
 
     void ExtractNode(const Tree & node);
     void ExtractLayer(const Tree & node);
@@ -40,6 +40,11 @@ private:
 
     void ExtractPoints(const Tree & node, Points & points);
     void ExtractStroke(const Tree & node, Stroke & stroke);
+
+    bool CreateEcadObjects(Ptr<std::string> err = nullptr);
+    void CreateEcadLayers(Ptr<ILayoutView> layout);
+    void CreateEcadNets(Ptr<ILayoutView> layout);
+    void CreateLayoutBoundary(Ptr<ILayoutView> layout);
     
     template <typename... Args>
     static void GetValue(const std::string & s, Args & ...args)
@@ -93,6 +98,7 @@ private:
     struct Lut
     {
         std::unordered_map<EIndex, CPtr<ILayer>> layer;
+        std::unordered_map<EIndex, CPtr<INet>> net;
     };
     Lut m_lut;
     
