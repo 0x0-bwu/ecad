@@ -17,6 +17,10 @@ public:
     EComponentDef(std::string name, CPtr<IDatabase> database);
     virtual ~EComponentDef();
 
+    ///Copy
+    EComponentDef(const EComponentDef & other);
+    EComponentDef & operator= (const EComponentDef & other);
+
     void SetDatabase(CPtr<IDatabase> database) override;
     CPtr<IDatabase> GetDatabase() const override;
 
@@ -27,8 +31,8 @@ public:
     void SetComponentType(EComponentType type) override;
     EComponentType GetComponentType() const override;
 
-    void SetBondingBox(const EBox2D & bbox) override;
-    const EBox2D & GetBondingBox() const override;
+    void SetBoundary(UPtr<EShape> boundary) override;
+    CPtr<EShape> GetBoundary() const override;
 
     void SetMaterial(const std::string & name) override;
     const std::string & GetMaterial() const override;
@@ -51,7 +55,7 @@ protected:
 
 protected:
     EComponentType m_type = EComponentType::Invalid;
-    EBox2D m_bondingBox;
+    UPtr<EShape> m_boundary;
     EFloat m_height = 0;
     EFloat m_solderHeight = 0;
     std::string m_material;

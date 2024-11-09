@@ -31,7 +31,7 @@ public:
     void SetDynamicPowerScenario(EScenarioId id) override;
     EScenarioId GetDynamicPowerScenario() const override;
 
-    EBox2D GetBoundingBox() const override;
+    UPtr<EShape> GetBoundary() const override;
 
     void SetFlipped(bool flipped) override;
     bool isFlipped() const override;

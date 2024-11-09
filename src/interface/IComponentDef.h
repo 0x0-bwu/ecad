@@ -1,5 +1,6 @@
 #pragma once
 #include "basic/ECadCommon.h"
+#include "basic/EShape.h"
 namespace ecad {
 class ICell;
 class IDatabase;
@@ -18,8 +19,8 @@ public:
     virtual void SetComponentType(EComponentType type) = 0;
     virtual EComponentType GetComponentType() const = 0;
 
-    virtual void SetBondingBox(const EBox2D & bbox) = 0;
-    virtual const EBox2D & GetBondingBox() const = 0;
+    virtual void SetBoundary(UPtr<EShape> boundary) = 0;
+    virtual CPtr<EShape> GetBoundary() const = 0;
 
     virtual void SetMaterial(const std::string & name) = 0;
     virtual const std::string & GetMaterial() const = 0;

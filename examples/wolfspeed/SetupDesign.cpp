@@ -104,7 +104,7 @@ Ptr<IComponentDef> CreateSicDieComponentDef(Ptr<IDatabase> database)
     sicDie->SetComponentType(EComponentType::IC);
     sicDie->SetSolderBallBumpHeight(0.1);
     sicDie->SetSolderFillingMaterial(MAT_SAC305.data());
-    sicDie->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-2.545, -2.02), FPoint2D(2.545, 2.02)));
+    sicDie->SetBoundary(eDataMgr.CreateShapeRectangle(database->GetCoordUnits(), FPoint2D(-2.545, -2.02), FPoint2D(2.545, 2.02)));
     sicDie->SetMaterial(MAT_SIC.data());
     sicDie->SetHeight(0.18);
 
@@ -124,7 +124,7 @@ Ptr<IComponentDef> CreateDiodeComponentDef(Ptr<IDatabase> database)
     diode->SetComponentType(EComponentType::IC);
     diode->SetSolderBallBumpHeight(0.1);
     diode->SetSolderFillingMaterial(MAT_SAC305.data());
-    diode->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-2.25, -2.25), FPoint2D(2.25, 2.25)));
+    diode->SetBoundary(eDataMgr.CreateShapeRectangle(database->GetCoordUnits(), FPoint2D(-2.25, -2.25), FPoint2D(2.25, 2.25)));
     diode->SetMaterial(MAT_SIC.data());
     diode->SetHeight(0.18);
 
@@ -145,8 +145,8 @@ Ptr<IComponentDef> CreateDiodeComponentDef(Ptr<IDatabase> database)
 Ptr<IComponentDef> CreateGateResistanceComponentDef(Ptr<IDatabase> database)
 {  
     auto r = eDataMgr.CreateComponentDef(database, RES_GATE.data());
-    r->SetBondingBox(eDataMgr.CreateBox(database->GetCoordUnits(), FPoint2D(-1.05, -0.65), FPoint2D(1.05, 0.65)));
-    r->SetMaterial(MAT_SIC.data());//wbtest
+    r->SetBoundary(eDataMgr.CreateShapeRectangle(database->GetCoordUnits(), FPoint2D(-1.05, -0.65), FPoint2D(1.05, 0.65)));
+    r->SetMaterial(MAT_SIC.data());
     r->SetHeight(0.5);
     return r;
 }

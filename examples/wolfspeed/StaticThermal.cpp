@@ -24,7 +24,8 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
             std::string name = cellInst + eDataMgr.HierSep() + component;
             auto cp = layout->FindComponentByName(name);
             retriever.GetComponentHeightThickness(cp, elevation, thickness);
-            auto ct = cp->GetBoundingBox().Center();
+            auto bonds = cp->GetBoundary(); { ECAD_ASSERT(bonds); }
+            auto ct = generic::geometry::Extent(bonds->GetContour()).Center();
             auto loc = layout->GetCoordUnits().toUnit(ct);
             monitors.emplace_back(loc[0], loc[1], elevation - 0.1 * thickness);
         }

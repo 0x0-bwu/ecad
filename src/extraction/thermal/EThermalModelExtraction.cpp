@@ -101,7 +101,13 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
                 continue;
             }
             auto lyrId = lyrMap.at(layer);
-            auto bbox = component->GetBoundingBox();
+            auto bond = component->GetBoundary();
+            if (nullptr == bond) {
+                ECAD_ASSERT(false);
+                continue;
+            }
+            //todo irregular component shape
+            auto bbox = bond->GetBBox();
             auto ll = mfInfo->GetIndex(bbox[0]);
             auto ur = mfInfo->GetIndex(bbox[1]);
             if (not ll.isValid() || not ur.isValid()) {

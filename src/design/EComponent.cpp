@@ -104,11 +104,18 @@ ECAD_INLINE EScenarioId EComponent::GetDynamicPowerScenario() const
     return m_scenario;
 }
 
-ECAD_INLINE EBox2D EComponent::GetBoundingBox() const
+ECAD_INLINE UPtr<EShape> EComponent::GetBoundary() const
 {
-    ERectangle bbox(m_compDef->GetBondingBox());
-    bbox.Transform(m_transform);
-    return bbox.shape;
+    if (auto bond = m_compDef->GetBoundary(); bond) {
+        auto clone = bond->Clone();
+        auto trans = ETransform2D{};
+        if (m_flipped) 
+            trans.Mirror() = EMirror2D::XY;
+        trans.Append(m_transform);
+        clone->Transform(trans);
+        return clone;
+    }
+    return nullptr;
 }
 
 ECAD_INLINE void EComponent::SetFlipped(bool flipped)
@@ -130,7 +137,11 @@ ECAD_INLINE bool EComponent::GetPinLocation(const std::string & name, EPoint2D &
 {
     auto pin = m_compDef->FindPinByName(name);
     if (nullptr == pin) return false;
-    loc = m_transform.GetTransform() * pin->GetLocation();
+    ETransform2D trans;
+    if (m_flipped)
+        trans.Mirror() = EMirror2D::XY;
+    trans.Append(m_transform);
+    loc = trans.GetTransform() * pin->GetLocation();
     return true; 
 }
 

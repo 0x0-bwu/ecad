@@ -26,7 +26,7 @@ void ecad_init_design(py::module_ & m)
 
     py::class_<IComponent>(m, "Component")
         .def("get_name", &IComponent::GetName, py::return_value_policy::reference)
-        .def("get_bounding_box", &IComponent::GetBoundingBox)
+        .def("get_boundary", &IComponent::GetBoundary, py::return_value_policy::reference)
         .def("set_loss_power", &IComponent::SetLossPower)
         .def("set_dynamic_power_scenario", &IComponent::SetDynamicPowerScenario)
     ;
@@ -111,7 +111,9 @@ void ecad_init_design(py::module_ & m)
         .def("set_component_type", &IComponentDef::SetComponentType)
         .def("set_solder_ball_bump_height", &IComponentDef::SetSolderBallBumpHeight)
         .def("set_solder_filling_material", &IComponentDef::SetSolderFillingMaterial)
-        .def("set_bonding_box", &IComponentDef::SetBondingBox)
+        .def("set_boundary", [](IComponentDef & compDef, CPtr<EShape> shape){
+            compDef.SetBoundary(shape->Clone());
+        })
         .def("set_material", &IComponentDef::SetMaterial)
         .def("set_height", &IComponentDef::SetHeight)
     ;

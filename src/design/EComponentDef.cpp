@@ -16,7 +16,7 @@ ECAD_INLINE void EComponentDef::serialize(Archive & ar, const unsigned int versi
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(ECollectionCollection);
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EDefinition);
     ar & boost::serialization::make_nvp("type", m_type);
-    ar & boost::serialization::make_nvp("bounding_box", m_bondingBox);
+    ar & boost::serialization::make_nvp("boundary", m_boundary);
     ar & boost::serialization::make_nvp("height", m_height);
     ar & boost::serialization::make_nvp("solder_height", m_solderHeight);
     ar & boost::serialization::make_nvp("material", m_material);
@@ -36,6 +36,25 @@ ECAD_INLINE EComponentDef::EComponentDef(std::string name, CPtr<IDatabase> datab
 {
     for(auto type : m_collectionTypes) 
         AddCollection(type);
+}
+
+ECAD_INLINE EComponentDef::EComponentDef(const EComponentDef & other)
+{
+    *this = other;
+}
+
+ECAD_INLINE EComponentDef & EComponentDef::operator= (const EComponentDef & other)
+{
+    EDefinition::operator=(other);
+    ECollectionCollection::operator=(other);
+    
+    m_type = other.m_type;
+    m_boundary = CloneHelper(other.m_boundary);
+    m_height = other.m_height;
+    m_solderHeight = other.m_solderHeight;
+    m_material = other.m_material;
+    m_solderFillingMaterial = other.m_solderFillingMaterial;
+    return *this;
 }
 
 ECAD_INLINE EComponentDef::~EComponentDef()
@@ -67,14 +86,14 @@ ECAD_INLINE EComponentType EComponentDef::GetComponentType() const
     return m_type;
 }
 
-ECAD_INLINE void EComponentDef::SetBondingBox(const EBox2D & bbox)
+ECAD_INLINE void EComponentDef::SetBoundary(UPtr<EShape> boundary)
 {
-    m_bondingBox = bbox;
+    m_boundary = std::move(boundary);
 }
 
-ECAD_INLINE const EBox2D & EComponentDef::GetBondingBox() const
+ECAD_INLINE CPtr<EShape> EComponentDef::GetBoundary() const
 {
-    return m_bondingBox;
+    return m_boundary.get();
 }
 
 ECAD_INLINE void EComponentDef::SetMaterial(const std::string & name)
@@ -131,9 +150,10 @@ ECAD_INLINE void EComponentDef::PrintImp(std::ostream & os) const
 {
     os << "COMPONENT DEFINE: " << m_name << ECAD_EOL;
     os << "TYPE: " << toString(m_type) << ECAD_EOL;
-    os << "BBOX: " << m_bondingBox << ECAD_EOL;
     os << "HEIGHT: " << m_height << ECAD_EOL;
     os << "MATERIAL: " << m_material << ECAD_EOL; 
+    if (m_boundary)
+        os << "BBOX: " << m_boundary->GetBBox() << ECAD_EOL;
 }
 
 

@@ -55,7 +55,7 @@ ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygo
 ECAD_INLINE void ELayerCutModelBuilder::AddComponent(CPtr<IComponent> component)
 {
     EFloat elevation, thickness;
-    auto boundary = generic::geometry::toPolygon(component->GetBoundingBox());
+    auto boundary = component->GetBoundary()->GetContour();
     auto material = m_layout->GetDatabase()->FindMaterialDefByName(component->GetComponentDef()->GetMaterial()); { ECAD_ASSERT(material) }
     [[maybe_unused]] auto check = m_retriever->GetComponentHeightThickness(component, elevation, thickness); { ECAD_ASSERT(check) }
 

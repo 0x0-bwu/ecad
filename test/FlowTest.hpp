@@ -36,7 +36,7 @@ void t_thermal_static_flow1()
     //component
     auto compDef = eDataMgr.CreateComponentDef(database, "CPMF-1200-S080B Z-FET");
     BOOST_CHECK(compDef);
-    compDef->SetBondingBox(eDataMgr.CreateBox(coordUnits, FPoint2D(-2000, -2000), FPoint2D(2000, 2000)));
+    compDef->SetBoundary(eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(-2000, -2000), FPoint2D(2000, 2000)));
     compDef->SetMaterial(matCu->GetName());
     compDef->SetHeight(365);
     compDef->SetSolderFillingMaterial(matCu->GetName());
@@ -155,7 +155,7 @@ void t_thermal_static_flow2()
     BOOST_CHECK(compDef);
     compDef->SetSolderBallBumpHeight(100);
     compDef->SetSolderFillingMaterial(matSolder->GetName());
-    compDef->SetBondingBox(eDataMgr.CreateBox(coordUnits, FPoint2D(-2000, -2000), FPoint2D(2000, 2000)));
+    compDef->SetBoundary(eDataMgr.CreateShapeRectangle(coordUnits, FPoint2D(-2000, -2000), FPoint2D(2000, 2000)));
     compDef->SetMaterial(matSiC->GetName());
     compDef->SetHeight(365);
 

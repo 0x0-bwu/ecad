@@ -11,6 +11,11 @@ namespace ecad::wrapper {
         {
             PYBIND11_OVERRIDE_PURE(EPolygonData, EShape, GetContour);
         }
+
+        EBox2D GetBBox() const
+        {
+            PYBIND11_OVERRIDE_PURE(EBox2D, EShape, GetBBox);
+        }
     };
 
     class PyECadSettings : public ECadSettings
@@ -264,6 +269,7 @@ void ecad_init_basic(py::module_ & m)
 
     py::class_<EShape, PyShape>(m, "Shape")
         .def("get_contour", &EShape::GetContour)
+        .def("get_bbox", &EShape::GetBBox)
     ;
 
     py::enum_<ETemperatureUnit>(m, "TemperatureUnit")

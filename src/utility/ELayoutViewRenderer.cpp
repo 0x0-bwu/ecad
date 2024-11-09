@@ -36,13 +36,17 @@ ECAD_INLINE bool ELayoutViewRenderer::RendererPNG(CPtr<ILayoutView> layout)
     //components
     auto compIter = layout->GetComponentIter();
     while (auto * comp = compIter->Next()) {
-        auto bbox = comp->GetBoundingBox();
+        auto bond = comp->GetBoundary();
+        if (not bond) continue;;
         if (not m_settings.selectLayers.empty()) {
             auto layer = comp->GetPlacementLayer();
             if (m_settings.selectLayers.count(layer))
                 continue;
         }
-        outs.emplace_back(toPolygon(bbox));
+        auto pwh = bond->GetPolygonWithHoles();
+        outs.emplace_back(std::move(pwh.outline));
+        for (auto & h : pwh.holes)
+            outs.emplace_back(std::move(h));
     }
 
     //primitives

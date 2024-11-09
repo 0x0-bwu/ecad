@@ -74,7 +74,7 @@ def setup_design(name, chip_locations, work_dir, save = True) :
         sic_die.set_component_type(ecad.ComponentType.IC)
         sic_die.set_solder_ball_bump_height(0.1)
         sic_die.set_solder_filling_material(MAT_SAC305)
-        sic_die.set_bonding_box(mgr.create_box(database.coord_units, ecad.FPoint2D(-2.545, -2.02), ecad.FPoint2D(2.545, 2.02)))        
+        sic_die.set_boundary(mgr.create_shape_rectangle(database.coord_units, ecad.FPoint2D(-2.545, -2.02), ecad.FPoint2D(2.545, 2.02)))        
         sic_die.set_material(MAT_SIC)
         sic_die.set_height(0.18)
 
@@ -92,7 +92,7 @@ def setup_design(name, chip_locations, work_dir, save = True) :
         diode.set_component_type(ecad.ComponentType.IC)
         diode.set_solder_ball_bump_height(0.1)
         diode.set_solder_filling_material(MAT_SAC305)
-        diode.set_bonding_box(mgr.create_box(database.coord_units, ecad.FPoint2D(-2.25, -2.25), ecad.FPoint2D(2.25, 2.25)))
+        diode.set_boundary(mgr.create_shape_rectangle(database.coord_units, ecad.FPoint2D(-2.25, -2.25), ecad.FPoint2D(2.25, 2.25)))
         diode.set_material(MAT_SIC)
         diode.set_height(0.18)
 
@@ -111,7 +111,7 @@ def setup_design(name, chip_locations, work_dir, save = True) :
     
     def create_gate_resistance_component_def(database) :
         r = mgr.create_component_def(database, RES_GATE)
-        r.set_bonding_box(mgr.create_box(database.coord_units, ecad.FPoint2D(-1.05, -0.65), ecad.FPoint2D(1.05, 0.65)))
+        r.set_boundary(mgr.create_shape_rectangle(database.coord_units, ecad.FPoint2D(-1.05, -0.65), ecad.FPoint2D(1.05, 0.65)))
         r.set_material(MAT_SIC)
         r.set_height(0.5)
         return r
@@ -394,7 +394,9 @@ def setup_design(name, chip_locations, work_dir, save = True) :
         for name in ['Die1', 'Die2', 'Die3', 'Diode1', 'Diode2', 'Diode3'] :
             comp = layout.find_component_by_name(name)
             assert(comp)
-            comp_boxes.append(comp.get_bounding_box())
+            bond = comp.get_boundary()
+            assert(bond)
+            comp_boxes.append(bond.get_bbox())
             if not ecad.geom.contains(outline, comp_boxes[-1], True) :
                 return False
         
