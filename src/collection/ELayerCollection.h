@@ -35,9 +35,11 @@ public:
     std::string GetNextLayerName(const std::string & base) const;
 
 protected:
-    ///Copy
-    Ptr<ELayerCollection> CloneImp() const override;
     UPtr<ILayerMap> MakeLayerIdOrdered();
+
+protected:
+    virtual ECollectionType GetType() const override { return ECollectionType::Layer; }
+    virtual Ptr<ELayerCollection> CloneImp() const override;
 };
 
 }//namespace ecad

@@ -33,7 +33,7 @@ public:
 
     size_t Size() const override;
 protected:
-    ///Copy
+    virtual ECollectionType GetType() const override { return ECollectionType::PadstackInst; }
     virtual Ptr<EPadstackInstCollection> CloneImp() const override { return new EPadstackInstCollection(*this); }
 };
 

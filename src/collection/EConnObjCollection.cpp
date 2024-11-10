@@ -25,9 +25,8 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EConnObjCollection)
 
 ECAD_INLINE EConnObjCollection::EConnObjCollection()
 {
-    m_type = ECollectionType::ConnObj;
-    for(auto type : m_collectionTypes) 
-        AddCollection(type);}
+    ECollectionCollection::Init();
+}
 
 ECAD_INLINE EConnObjCollection::~EConnObjCollection()
 {
@@ -62,7 +61,7 @@ ECAD_INLINE ConnObjIter EConnObjCollection::GetConnObjIter() const
 ECAD_INLINE size_t EConnObjCollection::Size() const
 {
     size_t count = 0;
-    for(auto type : m_collectionTypes){
+    for(auto type : GetCollectionTypes()){
         count += GetCollection(type)->Size();
     }
     return count;

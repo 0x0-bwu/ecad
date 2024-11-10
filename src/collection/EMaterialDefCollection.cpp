@@ -23,7 +23,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialDefCollection)
 
 ECAD_INLINE EMaterialDefCollection::EMaterialDefCollection()
 {
-    m_type = ECollectionType::MaterialDef;
 }
 
 ECAD_INLINE EMaterialDefCollection::~EMaterialDefCollection()
@@ -39,17 +38,6 @@ ECAD_INLINE EMaterialDefCollection & EMaterialDefCollection::operator= (const EM
 {
     BaseCollection::operator=(other);
     return *this;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> EMaterialDefCollection::AddDefinitionCollection(EDefinitionType type)
-{
-    return nullptr;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> EMaterialDefCollection::GetDefinitionCollection(EDefinitionType type) const
-{
-    if(type == EDefinitionType::MaterialDef) return const_cast<Ptr<EMaterialDefCollection> >(this);
-    return nullptr;
 }
 
 ECAD_INLINE Ptr<IDefinition> EMaterialDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)

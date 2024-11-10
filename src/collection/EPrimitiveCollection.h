@@ -34,12 +34,11 @@ public:
 
     PrimitiveIter GetPrimitiveIter() const override;
     UPtr<IPrimitive> PopBack() override;
-
     size_t Size() const override;
     void Clear() override;
     
 protected:
-    ///Copy
+    virtual ECollectionType GetType() const override { return ECollectionType::Primitive; }
     virtual Ptr<EPrimitiveCollection> CloneImp() const override { return new EPrimitiveCollection(*this); }
 };
 

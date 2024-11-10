@@ -33,12 +33,12 @@ public:
     void Clear() override;
 
 protected:
-    ///Copy
-    Ptr<ENetCollection> CloneImp() const override;
-
-protected:
     void BuildNetIdLUT() const;
     void ResetNetIdLUT();
+
+protected:
+    virtual ECollectionType GetType() const override { return ECollectionType::Net; }
+    virtual Ptr<ENetCollection> CloneImp() const override;
 
 protected:
     EUidGenerator m_uidGen;

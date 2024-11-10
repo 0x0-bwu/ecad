@@ -9,11 +9,6 @@ namespace ecad {
 class ICell;
 class ECAD_API ELayoutView : public ECollectionCollection, public EObject, public ILayoutView
 {
-    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 5> m_collectionTypes = { ECollectionType::HierarchyObj,
-                                                                                             ECollectionType::ConnObj,
-                                                                                             ECollectionType::Layer,
-                                                                                             ECollectionType::Model,
-                                                                                             ECollectionType::Net };
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     ELayoutView();
 public:
@@ -127,10 +122,13 @@ public:
 
     ///Modify
     bool ModifyStackupLayerThickness(const std::string & name, EFloat thickness) override;
+
 protected:
-    ///Copy
-    virtual Ptr<ELayoutView> CloneImp() const override { return new ELayoutView(*this); }
     virtual void SyncCloneReference(ECloneOption option);
+
+protected:
+    virtual ECollectionTypes GetCollectionTypes() const override;
+    virtual Ptr<ELayoutView> CloneImp() const override { return new ELayoutView(*this); }
 
 protected:
     mutable UPtr<EShape> m_boundary;

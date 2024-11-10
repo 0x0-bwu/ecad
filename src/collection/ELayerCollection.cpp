@@ -21,7 +21,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayerCollection)
 
 ECAD_INLINE ELayerCollection::ELayerCollection()
 {
-    m_type = ECollectionType::Layer;
 }
 
 ECAD_INLINE ELayerCollection::~ELayerCollection()

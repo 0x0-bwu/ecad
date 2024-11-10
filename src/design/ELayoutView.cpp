@@ -59,8 +59,7 @@ ECAD_INLINE ELayoutView::ELayoutView(std::string name, Ptr<ICell> cell)
  : EObject(std::move(name))
  , m_cell(cell)
 {
-    for(auto type : m_collectionTypes) 
-        AddCollection(type);
+    ECollectionCollection::Init();
 }
 
 ECAD_INLINE ELayoutView::~ELayoutView()
@@ -406,6 +405,17 @@ ECAD_INLINE void ELayoutView::SyncCloneReference(ECloneOption option)
     [[maybe_unused]] auto nc = GetNetCollection();
     [[maybe_unused]] auto lc = GetLayerCollection();
     //todo
+}
+
+ECAD_INLINE ECollectionTypes ELayoutView::GetCollectionTypes() const
+{
+    return { 
+        ECollectionType::HierarchyObj,
+        ECollectionType::ConnObj,
+        ECollectionType::Layer,
+        ECollectionType::Model,
+        ECollectionType::Net
+    }; 
 }
 
 }//namesapce ecad

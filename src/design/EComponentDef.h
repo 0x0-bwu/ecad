@@ -9,8 +9,6 @@ class IPadstackDef;
 class IComponentDefPin;
 class ECAD_API EComponentDef : public EDefinition, public ECollectionCollection, public IComponentDef
 {
-    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 1> m_collectionTypes = { ECollectionType::ComponentDefPin };
-
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
     EComponentDef();
 public:
@@ -49,7 +47,7 @@ public:
     Ptr<IComponentDefPin> CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef = nullptr, ELayerId lyr = noLayer) override;
     Ptr<IComponentDefPin> FindPinByName(const std::string & name) const override;
 protected:
-    ///Copy
+    virtual ECollectionTypes GetCollectionTypes() const override { return { ECollectionType::ComponentDefPin }; }
     virtual Ptr<EComponentDef> CloneImp() const override { return new EComponentDef(*this); }
     virtual void PrintImp(std::ostream & os) const override;
 

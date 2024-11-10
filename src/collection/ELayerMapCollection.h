@@ -23,8 +23,6 @@ public:
     ELayerMapCollection(const ELayerMapCollection & other);
     ELayerMapCollection & operator= (const ELayerMapCollection & other);
 
-    Ptr<IDefinitionCollection> AddDefinitionCollection(EDefinitionType type) override;
-    Ptr<IDefinitionCollection> GetDefinitionCollection(EDefinitionType type) const override;
     Ptr<IDefinition> AddDefinition(const std::string & name, UPtr<IDefinition> definition) override;
     Ptr<IDefinition> GetDefinition(const std::string & name, EDefinitionType type) const override;
     std::string GetNextDefName(const std::string & base, EDefinitionType type) const override;
@@ -35,7 +33,7 @@ public:
     void Clear() override;
 
 protected:
-    ///Copy
+    virtual ECollectionType GetType() const override { return ECollectionType::LayerMap; }
     virtual Ptr<ELayerMapCollection> CloneImp() const override { return new ELayerMapCollection(*this); }
     virtual void PrintImp(std::ostream & os) const override;
 };

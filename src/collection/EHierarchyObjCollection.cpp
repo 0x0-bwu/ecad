@@ -24,9 +24,7 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EHierarchyObjCollection)
 
 ECAD_INLINE EHierarchyObjCollection::EHierarchyObjCollection()
 {
-    m_type = ECollectionType::HierarchyObj;
-    for(auto type : m_collectionTypes) 
-        AddCollection(type);
+    ECollectionCollection::Init();
 }
 
 ECAD_INLINE EHierarchyObjCollection::~EHierarchyObjCollection()
@@ -62,7 +60,7 @@ ECAD_INLINE HierarchyObjIter EHierarchyObjCollection::GetHierarchyObjIter() cons
 ECAD_INLINE size_t EHierarchyObjCollection::Size() const
 {
     size_t count = 0;
-    for(auto type : m_collectionTypes){
+    for (auto type : GetCollectionTypes()){
         count+= GetCollection(type)->Size();
     }
     return count;

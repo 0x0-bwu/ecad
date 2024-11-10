@@ -21,7 +21,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackDefCollection)
 
 ECAD_INLINE EPadstackDefCollection::EPadstackDefCollection()
 {
-    m_type = ECollectionType::PadstackDef;
 }
 
 ECAD_INLINE EPadstackDefCollection::~EPadstackDefCollection()
@@ -37,17 +36,6 @@ ECAD_INLINE EPadstackDefCollection & EPadstackDefCollection::operator= (const EP
 {
     BaseCollection::operator=(other);
     return *this;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> EPadstackDefCollection::AddDefinitionCollection(EDefinitionType type)
-{
-    return nullptr;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> EPadstackDefCollection::GetDefinitionCollection(EDefinitionType type) const
-{
-    if(type == EDefinitionType::PadstackDef) return const_cast<Ptr<EPadstackDefCollection> >(this);
-    return nullptr;
 }
 
 ECAD_INLINE Ptr<IDefinition> EPadstackDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)

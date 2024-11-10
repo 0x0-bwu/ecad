@@ -20,7 +20,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(ECellCollection)
 
 ECAD_INLINE ECellCollection::ECellCollection()
 {
-    m_type = ECollectionType::Cell;
 }
 
 ECAD_INLINE ECellCollection::~ECellCollection()
@@ -36,17 +35,6 @@ ECAD_INLINE ECellCollection & ECellCollection::operator= (const ECellCollection 
 {
     BaseCollection::operator=(other);
     return *this;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> ECellCollection::AddDefinitionCollection(EDefinitionType type)
-{
-    return nullptr;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> ECellCollection::GetDefinitionCollection(EDefinitionType type) const
-{
-    if(type == EDefinitionType::Cell) return const_cast<Ptr<ECellCollection> >(this);
-    return nullptr;
 }
 
 ECAD_INLINE Ptr<IDefinition> ECellCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)

@@ -1,6 +1,7 @@
 #pragma once
 #include "basic/ECollection.h"
 #include <unordered_map>
+#include <set>
 namespace ecad {
 
 class INetCollection;
@@ -20,6 +21,7 @@ class IHierarchyObjCollection;
 class IPadstackInstCollection;
 class IPadstackInstCollection;
 class IComponentDefPinCollection;
+using ECollectionTypes = std::set<ECollectionType>;
 class ECAD_API ECollectionCollection : public EUnorderedMapCollection<ECollectionType, UPtr<ICollection> >
 {
     using BaseCollection = EUnorderedMapCollection<ECollectionType, UPtr<ICollection> >;
@@ -55,7 +57,9 @@ public:
     size_t Size() const override;
     void Clear() override;
 protected:
-    ///Copy
+    virtual void Init() { for (auto type : GetCollectionTypes()) AddCollection(type); }
+    virtual ECollectionTypes GetCollectionTypes() const { ECAD_ASSERT(false); return {}; }
+    virtual ECollectionType GetType() const override { return ECollectionType::Collection; }
     virtual Ptr<ECollectionCollection> CloneImp() const override { return new ECollectionCollection(*this); }
 };
 

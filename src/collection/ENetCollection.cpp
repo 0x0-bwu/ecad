@@ -20,7 +20,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(ENetCollection)
 
 ECAD_INLINE ENetCollection::ENetCollection()
 {
-    m_type = ECollectionType::Net;
 }
 
 ECAD_INLINE ENetCollection::~ENetCollection()

@@ -29,7 +29,7 @@ public:
     void Clear() override;
     
 protected:
-    ///Copy
+    virtual ECollectionType GetType() const override { return ECollectionType::CellInst; }
     virtual Ptr<ECellInstCollection> CloneImp() const override { return new ECellInstCollection(*this); }
 };
 

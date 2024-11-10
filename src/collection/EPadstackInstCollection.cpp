@@ -23,7 +23,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackInstCollection)
 
 ECAD_INLINE EPadstackInstCollection::EPadstackInstCollection()
 {
-    m_type = ECollectionType::PadstackInst;
 }
 
 ECAD_INLINE EPadstackInstCollection::~EPadstackInstCollection()

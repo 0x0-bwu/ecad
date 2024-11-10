@@ -33,7 +33,7 @@ public:
     void Clear() override;
 
 protected:
-    ///Copy
+    virtual ECollectionType GetType() const override { return ECollectionType::Component; }
     virtual Ptr<EComponentCollection> CloneImp() const override { return new EComponentCollection(*this); }
 };
 }//namespace ecad

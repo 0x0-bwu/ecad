@@ -8,7 +8,7 @@ class ECAD_API EDefinitionCollection : public ECollectionCollection, public IDef
 {
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
-    EDefinitionCollection() = default;
+    EDefinitionCollection();
     virtual ~EDefinitionCollection() = default;
 
     ///Copy
@@ -23,7 +23,8 @@ public:
     virtual void SetDatabase(CPtr<IDatabase> database) override;
     virtual size_t Size() const override;
 protected:
-    ///Copy
+    ECollectionTypes GetCollectionTypes() const override { return {}; }
+    virtual ECollectionType GetType() const override { return ECollectionType::Definition; }
     virtual Ptr<EDefinitionCollection> CloneImp() const override { return new EDefinitionCollection(*this); }
 };
 

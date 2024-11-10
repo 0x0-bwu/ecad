@@ -9,8 +9,6 @@ namespace ecad {
 class ECAD_API EHierarchyObjCollection : public ECollectionCollection, public IHierarchyObjCollection
 {
     friend class EHierarchyObjIterator;
-    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 2> m_collectionTypes = { ECollectionType::CellInst,
-                                                                                             ECollectionType::Component };
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     EHierarchyObjCollection();
@@ -26,7 +24,8 @@ public:
     HierarchyObjIter GetHierarchyObjIter() const override;
     size_t Size() const override;
 protected:
-    ///Copy
+    virtual ECollectionTypes GetCollectionTypes() const override { return {ECollectionType::CellInst, ECollectionType::Component}; };
+    virtual ECollectionType GetType() const override { return ECollectionType::HierarchyObj; }
     virtual Ptr<EHierarchyObjCollection> CloneImp() const override { return new EHierarchyObjCollection(*this); }
 };
 

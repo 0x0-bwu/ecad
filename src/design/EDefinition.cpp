@@ -11,7 +11,7 @@ ECAD_INLINE void EDefinition::serialize(Archive & ar, const unsigned int version
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EDefinition, IDefinition>();
-    // ar & boost::serialization::make_nvp("database", m_database);
+    // ar & boost::serialization::make_nvp("database", m_database); 
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EObject);
 }
     

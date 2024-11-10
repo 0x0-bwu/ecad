@@ -34,8 +34,7 @@ ECAD_INLINE EComponentDef::EComponentDef()
 ECAD_INLINE EComponentDef::EComponentDef(std::string name, CPtr<IDatabase> database)
  : EDefinition(std::move(name), database)
 {
-    for(auto type : m_collectionTypes) 
-        AddCollection(type);
+    ECollectionCollection::Init();
 }
 
 ECAD_INLINE EComponentDef::EComponentDef(const EComponentDef & other)

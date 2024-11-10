@@ -19,7 +19,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDefPinCollection)
 
 ECAD_INLINE EComponentDefPinCollection::EComponentDefPinCollection()
 {
-    m_type = ECollectionType::ComponentDefPin;
 }
 
 ECAD_INLINE EComponentDefPinCollection::~EComponentDefPinCollection()

@@ -21,7 +21,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EPrimitiveCollection)
 
 ECAD_INLINE EPrimitiveCollection::EPrimitiveCollection()
 {
-    m_type = ECollectionType::Primitive;
 }
 
 ECAD_INLINE EPrimitiveCollection::~EPrimitiveCollection()

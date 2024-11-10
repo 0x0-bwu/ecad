@@ -19,7 +19,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentCollection)
 
 ECAD_INLINE EComponentCollection::EComponentCollection()
 {
-    m_type = ECollectionType::Component;
 }
 
 ECAD_INLINE EComponentCollection::~EComponentCollection()

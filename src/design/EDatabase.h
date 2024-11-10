@@ -69,7 +69,6 @@ public:
     virtual void Clear() override;
 
 protected:
-    ///Copy
     virtual Ptr<EDatabase> CloneImp() const override { return new EDatabase(*this); }
     
 protected:

@@ -18,6 +18,11 @@ ECAD_INLINE void EDefinitionCollection::serialize(Archive & ar, const unsigned i
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EDefinitionCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
+ECAD_INLINE EDefinitionCollection::EDefinitionCollection()
+{
+    ECollectionCollection::Init();
+}
+
 ECAD_INLINE EDefinitionCollection::EDefinitionCollection(const EDefinitionCollection & other)
 {
     *this = other;

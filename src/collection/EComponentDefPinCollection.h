@@ -27,8 +27,8 @@ public:
     void Clear() override;
 
 protected:
-    ///Copy
-    Ptr<EComponentDefPinCollection> CloneImp() const override;
+    virtual ECollectionType GetType() const override { return ECollectionType::ComponentDefPin; }
+    virtual Ptr<EComponentDefPinCollection> CloneImp() const override;
 };
 
 }//namespace ecad

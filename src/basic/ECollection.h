@@ -15,34 +15,22 @@ class ECAD_API ECollection : public ICollection
     {
         ECAD_UNUSED(version)
         boost::serialization::void_cast_register<ECollection, ICollection>();
-        ar & boost::serialization::make_nvp("type", m_type);
     }
 
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 public:
-    ECollection() : m_type(ECollectionType::Invalid) {}
+    ECollection() {}
     virtual ~ECollection() = default;
+    virtual size_t Size() const override { ECAD_ASSERT(false); return 0; };
+    virtual void Clear() override { ECAD_ASSERT(false); }
 
-    ///Copy
-    ECollection(const ECollection & other) { *this = other; }
-    ECollection & operator= (const ECollection & other)
-    {
-        m_type = other.m_type;
-        return *this;
-    }
-
-    virtual void Clear() override {}
-    virtual size_t Size() const override { return 0; }
 protected:
-    ///Copy
+    virtual ECollectionType GetType() const override { ECAD_ASSERT(false); return ECollectionType::Invalid; }
     virtual Ptr<ECollection> CloneImp() const override { return new ECollection(*this); }
     virtual void PrintImp(std::ostream & os) const override
     {
-        os << "COLLECTION: " << toString(m_type) << ECAD_EOL;
+        os << "COLLECTION: " << toString(GetType()) << ECAD_EOL;
     }
-
-protected:
-    ECollectionType m_type;
 };
 
 template <typename Key, typename T,

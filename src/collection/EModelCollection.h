@@ -28,7 +28,7 @@ public:
     void Clear() override;
 
 protected:
-    ///Copy
+    virtual ECollectionType GetType() const override { return ECollectionType::Model; }
     virtual Ptr<EModelCollection> CloneImp() const override { return new EModelCollection(*this); }
 };
 

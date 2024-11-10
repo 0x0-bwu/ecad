@@ -8,6 +8,9 @@ public:
     virtual ~ICollection() = default;
     virtual size_t Size() const = 0;
     virtual void Clear() = 0;
+
+protected:
+    virtual ECollectionType GetType() const = 0;
 };
 }//namespace ecad
 ECAD_SERIALIZATION_ABSTRACT_CLASS(ecad::ICollection)

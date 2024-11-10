@@ -20,7 +20,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(ECellInstCollection)
 
 ECAD_INLINE ECellInstCollection::ECellInstCollection()
 {
-    m_type = ECollectionType::CellInst;
 }
 
 ECAD_INLINE ECellInstCollection::~ECellInstCollection()

@@ -22,7 +22,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDefCollection)
 
 ECAD_INLINE EComponentDefCollection::EComponentDefCollection()
 {
-    m_type = ECollectionType::ComponentDef;
 }
 
 ECAD_INLINE EComponentDefCollection::~EComponentDefCollection()
@@ -38,17 +37,6 @@ ECAD_INLINE EComponentDefCollection & EComponentDefCollection::operator= (const 
 {
     BaseCollection::operator=(other);
     return *this;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> EComponentDefCollection::AddDefinitionCollection(EDefinitionType type)
-{
-    return nullptr;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> EComponentDefCollection::GetDefinitionCollection(EDefinitionType type) const
-{
-    if(type == EDefinitionType::ComponentDef) return const_cast<Ptr<EComponentDefCollection> >(this);
-    return nullptr;
 }
 
 ECAD_INLINE Ptr<IDefinition> EComponentDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)

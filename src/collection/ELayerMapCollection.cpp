@@ -22,7 +22,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayerMapCollection)
 
 ECAD_INLINE ELayerMapCollection::ELayerMapCollection()
 {
-    m_type = ECollectionType::LayerMap;
 }
 
 ECAD_INLINE ELayerMapCollection::~ELayerMapCollection()
@@ -38,17 +37,6 @@ ECAD_INLINE ELayerMapCollection & ELayerMapCollection::operator= (const ELayerMa
 {
     BaseCollection::operator=(other);
     return *this;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> ELayerMapCollection::AddDefinitionCollection(EDefinitionType type)
-{
-    return nullptr;
-}
-
-ECAD_INLINE Ptr<IDefinitionCollection> ELayerMapCollection::GetDefinitionCollection(EDefinitionType type) const
-{
-    if(type == EDefinitionType::LayerMap) return const_cast<Ptr<ELayerMapCollection> >(this);
-    return nullptr;
 }
 
 ECAD_INLINE Ptr<IDefinition> ELayerMapCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)

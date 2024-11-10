@@ -9,8 +9,6 @@ namespace ecad {
 class ECAD_API EConnObjCollection : public ECollectionCollection, public IConnObjCollection
 {
     friend class EConnObjIterator;
-    ECAD_ALWAYS_INLINE static constexpr std::array<ECollectionType, 2> m_collectionTypes = { ECollectionType::Primitive,
-                                                                                             ECollectionType::PadstackInst };
     ECAD_SERIALIZATION_FUNCTIONS_DECLARATION
 public:
     EConnObjCollection();
@@ -27,7 +25,8 @@ public:
     size_t Size() const override;
     
 protected:
-    ///Copy
+    virtual ECollectionTypes GetCollectionTypes() const override { return {ECollectionType::Primitive, ECollectionType::PadstackInst}; }
+    virtual ECollectionType GetType() const override { return ECollectionType::ConnObj; }
     virtual Ptr<EConnObjCollection> CloneImp() const override { return new EConnObjCollection(*this); }
 };
 

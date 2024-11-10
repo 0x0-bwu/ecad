@@ -34,7 +34,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(ECollectionCollection)
 
 ECAD_INLINE ECollectionCollection::ECollectionCollection()
 {
-    m_type = ECollectionType::Collection;
 }
 
 ECAD_INLINE ECollectionCollection::~ECollectionCollection()

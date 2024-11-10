@@ -19,7 +19,6 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EModelCollection)
 
 ECAD_INLINE EModelCollection::EModelCollection()
 {
-    m_type = ECollectionType::Model;
 }
 
 ECAD_INLINE EModelCollection::~EModelCollection()
