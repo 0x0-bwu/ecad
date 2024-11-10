@@ -81,4 +81,4 @@ ECAD_INLINE Ptr<EComponentDefPinCollection> EComponentDefPinCollection::CloneImp
     return new EComponentDefPinCollection(*this);
 }
 
-}//namesapce ecad
+}//namespace ecad

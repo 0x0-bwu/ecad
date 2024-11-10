@@ -36,15 +36,15 @@ public:
     Ptr<IMaterialPropValue> GetPropValue() override;
 
     void SetSimpleProperty(const EFloat & value) override;
-    void SetAnsiotropicProerty(const std::array<EFloat, 3> & values) override;
+    void SetAnisotropicProperty(const std::array<EFloat, 3> & values) override;
     void SetTensorProperty(const std::array<EFloat, 9> & values) override;
 
     bool GetSimpleProperty(EFloat & value) const override;
-    bool GetAnsiotropicProperty(size_t row, EFloat & value) const override;
+    bool GetAnisotropicProperty(size_t row, EFloat & value) const override;
     bool GetTensorProperty(size_t row, size_t col, EFloat & value) const override;
 
     bool GetSimpleProperty(EFloat index, EFloat & value) const override;
-    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override;
+    bool GetAnisotropicProperty(EFloat index, size_t row, EFloat & value) const override;
     bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override;
 
     //1x1-simple, 3x1-anisotropic, 3x3-tensor
@@ -74,7 +74,7 @@ public:
     Ptr<IMaterialPropTable> GetPropTable() override;
 
     bool GetSimpleProperty(EFloat index, EFloat & value) const override { ECAD_ASSERT(false/*todo*/) return false; }
-    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override { ECAD_ASSERT(false/*todo*/) return false; }
+    bool GetAnisotropicProperty(EFloat index, size_t row, EFloat & value) const override { ECAD_ASSERT(false/*todo*/) return false; }
     bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override { ECAD_ASSERT(false/*todo*/) return false; }
 
 protected:
@@ -98,7 +98,7 @@ public:
     Ptr<IMaterialPropPolynomial> GetPropPolynomial() override;
 
     bool GetSimpleProperty(EFloat index, EFloat & value) const override;
-    bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const override;
+    bool GetAnisotropicProperty(EFloat index, size_t row, EFloat & value) const override;
     bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const override;
 
     //1x1-simple, 3x1-anisotropic, 3x3-tensor

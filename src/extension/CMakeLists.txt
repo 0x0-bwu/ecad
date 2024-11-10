@@ -1,4 +1,4 @@
-add_library(Eextension
+add_library(EcadExtension
     dmcdom/ECadExtDmcDomHandler.cpp
     gds/ECadExtGdsHandler.cpp
     gds/EGdsFileIO.cpp

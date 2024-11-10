@@ -19,18 +19,18 @@ struct ECAD_API ETransformData2D
     bool isScaled() const { return math::NE<EFloat>(scale, 1); }
     bool isRotated() const { return math::NE<EFloat>(rotation, 0); }
     bool isMirrored() const { return mirror != EMirror2D::No; }
-    bool isOffseted() const { return offset != EPoint2D(0, 0); }
-    bool isTransformed() const { return isScaled() || isRotated() || isMirrored() || isOffseted(); }
+    bool isOffsetted() const { return offset != EPoint2D(0, 0); }
+    bool isTransformed() const { return isScaled() || isRotated() || isMirrored() || isOffsetted(); }
 
     Transform GetTransform() const
     {
         using namespace ::generic::geometry;
-        Transform transfrom;
-        if(isScaled()) transfrom = makeScaleTransform2D<EFloat>(scale) * transfrom;
-        if(isRotated()) transfrom = makeRotateTransform2D<EFloat>(rotation) * transfrom;
-        if(isMirrored()) transfrom = makeMirroredTransform2D<EFloat>(static_cast<Axis>(mirror)) * transfrom;
-        if(isOffseted()) transfrom = makeShiftTransform2D<EFloat>(offset) * transfrom;
-        return transfrom;
+        Transform transform;
+        if(isScaled()) transform = makeScaleTransform2D<EFloat>(scale) * transform;
+        if(isRotated()) transform = makeRotateTransform2D<EFloat>(rotation) * transform;
+        if(isMirrored()) transform = makeMirroredTransform2D<EFloat>(static_cast<Axis>(mirror)) * transform;
+        if(isOffsetted()) transform = makeShiftTransform2D<EFloat>(offset) * transform;
+        return transform;
     }
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 private:

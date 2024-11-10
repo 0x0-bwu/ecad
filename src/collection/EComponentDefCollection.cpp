@@ -95,4 +95,4 @@ ECAD_INLINE void EComponentDefCollection::PrintImp(std::ostream & os) const
 }
 
 
-}//namesapce ecad
+}//namespace ecad

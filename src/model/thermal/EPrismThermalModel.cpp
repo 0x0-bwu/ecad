@@ -60,7 +60,7 @@ CPtr<IMaterialDefCollection> EPrismThermalModel::GetMaterialLibrary() const
     return m_layout->GetDatabase()->GetMaterialDefCollection();
 }
 
-ECAD_INLINE void EPrismThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc)
+ECAD_INLINE void EPrismThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBoundaryCondition bc)
 {
     m_blockBCs.at(orient).emplace_back(std::move(block), std::move(bc));
 }

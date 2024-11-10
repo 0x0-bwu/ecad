@@ -158,7 +158,7 @@ ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateSimpleMaterialProp(EFloat value)
     return UPtr<IMaterialProp>(new EMaterialPropValue(value));
 }
 
-ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values)
+ECAD_INLINE UPtr<IMaterialProp> EDataMgr::CreateAnisotropicMaterialProp(const std::array<EFloat, 3> & values)
 {
     return UPtr<IMaterialProp>(new EMaterialPropValue(values));
 }

@@ -29,8 +29,8 @@ void t_grid_thermal_model_solver_test()
     ECAD_TRACE("total nodes: %1%", model->TotalGrids());
 
     //htc
-    model->SetUniformBC(EOrientation::Top, EThermalBondaryCondition(200000, EThermalBondaryConditionType::HTC));
-    model->SetUniformBC(EOrientation::Bot, EThermalBondaryCondition(200000, EThermalBondaryConditionType::HTC));
+    model->SetUniformBC(EOrientation::Top, EThermalBoundaryCondition(200000, EThermalBoundaryConditionType::HTC));
+    model->SetUniformBC(EOrientation::Bot, EThermalBoundaryCondition(200000, EThermalBoundaryConditionType::HTC));
 
     std::vector<EFloat> results;
     EGridThermalNetworkStaticSolver solver(*model);

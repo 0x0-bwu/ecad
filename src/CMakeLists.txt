@@ -12,15 +12,15 @@ add_subdirectory(simulation)
 add_library(Ecad SHARED EDataMgr.cpp)
 
 target_link_libraries(Ecad
-    Ebasic
-    Ecollection
-    Edesign
-    Eutility
-    Emodel
-    Eextension
-    Eextraction
-    Esolver
-    Esimulation
+    EcadBasic
+    EcadCollection
+    EcadDesign
+    EcadUtility
+    EcadModel
+    EcadExtension
+    EcadExtraction
+    EcadSolver
+    EcadSimulation
     ${MALLOC_LIB}
     ${PNG_LIBRARY} 
     Threads::Threads

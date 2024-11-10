@@ -7,7 +7,7 @@ UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string 
 {
     EFloat htc = 5000;
     EPrismThermalModelExtractionSettings prismSettings(workDir, EDataMgr::Instance().Threads(), {});
-    prismSettings.botUniformBC.type = EThermalBondaryCondition::BCType::HTC;
+    prismSettings.botUniformBC.type = EThermalBoundaryCondition::BCType::HTC;
     prismSettings.botUniformBC.value = htc;
     prismSettings.meshSettings.genMeshByLayer = true;
     if (prismSettings.meshSettings.genMeshByLayer)
@@ -22,11 +22,11 @@ UPtr<EPrismThermalModelExtractionSettings> ExtractionSettings(const std::string 
     prismSettings.layerCutSettings.dumpSketchImg = true;
 
     EFloat topHTC = htc;
-    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, -8.7}, {-20.35, -4.7}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, 11.5}, {9.75, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, -17}, {9.75, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, 11.5}, {-2.55, 17}), EThermalBondaryCondition::BCType::HTC, topHTC);
-    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, -17}, {-2.55, -11.5}), EThermalBondaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, 4.7}, {-20.35, 8.7}), EThermalBoundaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-29.35, -8.7}, {-20.35, -4.7}), EThermalBoundaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, 11.5}, {9.75, 17}), EThermalBoundaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({2.75, -17}, {9.75, -11.5}), EThermalBoundaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, 11.5}, {-2.55, 17}), EThermalBoundaryCondition::BCType::HTC, topHTC);
+    prismSettings.AddBlockBC(EOrientation::Top, FBox2D({-7.75, -17}, {-2.55, -11.5}), EThermalBoundaryCondition::BCType::HTC, topHTC);
     return std::make_unique<EPrismThermalModelExtractionSettings>(prismSettings);
 }

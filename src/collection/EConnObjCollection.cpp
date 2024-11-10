@@ -128,4 +128,4 @@ ECAD_INLINE void EConnObjIterator::Move(EConnObjIterator && other)
     other.m_padstackInstIter = nullptr;
 }
 
-}//namesapce ecad
+}//namespace ecad

@@ -1,4 +1,4 @@
-add_library(Eutility
+add_library(EcadUtility
     EFlattenUtility.cpp
     ELayout2CtmUtility.cpp
     ELayoutConnectivity.cpp

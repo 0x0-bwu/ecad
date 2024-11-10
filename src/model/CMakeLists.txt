@@ -1,4 +1,4 @@
-add_library(Emodel
+add_library(EcadModel
     geometry/utils/ELayerCutModelBuilder.cpp
     geometry/utils/ELayerCutModelQuery.cpp
     geometry/ELayerCutModel.cpp

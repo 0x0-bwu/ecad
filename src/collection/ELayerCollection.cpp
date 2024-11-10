@@ -155,4 +155,4 @@ ECAD_INLINE UPtr<ILayerMap> ELayerCollection::MakeLayerIdOrdered()
     return lyrMap;
 }
 
-}//namesapce ecad
+}//namespace ecad

@@ -28,7 +28,7 @@ ECAD_INLINE bool EGridDataTable::AddSample(EFloat key, EGridData data)
 {
     if(data.Width() != m_size.x || data.Height() != m_size.y) return false;
 
-    ResetInterpolater();
+    ResetInterpolator();
     m_dataTable.insert(std::make_pair(key, std::move(data)));
     return true;
 }
@@ -54,7 +54,7 @@ ECAD_INLINE EFloat EGridDataTable::Query(EFloat key, size_t x, size_t y, bool * 
         return (m_dataTable.crbegin()->second)(x, y);
     }
     else {
-        BuildInterpolater();
+        BuildInterpolator();
         return (*(*m_interpolator)(x, y))(key);
     }
 }
@@ -97,7 +97,7 @@ ECAD_INLINE bool EGridDataTable::NeedInterpolation() const
     return false;
 } 
 
-ECAD_INLINE void EGridDataTable::BuildInterpolater() const
+ECAD_INLINE void EGridDataTable::BuildInterpolator() const
 {
     if(m_interpolator) return;
     m_interpolator.reset(new EGridInterpolator(m_size.x, m_size.y, nullptr));
@@ -118,7 +118,7 @@ ECAD_INLINE void EGridDataTable::BuildInterpolater() const
     }
 }
 
-ECAD_INLINE void EGridDataTable::ResetInterpolater()
+ECAD_INLINE void EGridDataTable::ResetInterpolator()
 {
     m_interpolator.reset(nullptr);
 }
@@ -358,7 +358,7 @@ ECAD_INLINE const std::vector<SPtr<EThermalPowerModel> > & EGridThermalModel::Ge
     return m_stackupLayers.at(layer).GetPowerModels();
 }
 
-ECAD_INLINE void EGridThermalModel::AddBlockBC(EOrientation orient, ESize2D ll, ESize2D ur, EThermalBondaryCondition bc)
+ECAD_INLINE void EGridThermalModel::AddBlockBC(EOrientation orient, ESize2D ll, ESize2D ur, EThermalBoundaryCondition bc)
 {
     auto & bcs = EOrientation::Top == orient ? m_topBlockBCs : m_botBlockBCs;
     bcs.emplace_back(std::array<ESize2D, 2>{std::move(ll), std::move(ur)}, std::move(bc));

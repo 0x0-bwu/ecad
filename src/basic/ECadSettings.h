@@ -225,7 +225,7 @@ struct ELayerCutModelExtractionSettings : public ECadSettings
 
 using ELayerCutModelBuildSettings = ELayerCutModelExtractionSettings;
 
-struct EThermalBondaryCondition
+struct EThermalBoundaryCondition
 {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     friend class boost::serialization::access;
@@ -238,19 +238,19 @@ struct EThermalBondaryCondition
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-    using BCType = EThermalBondaryConditionType;
+    using BCType = EThermalBoundaryConditionType;
     BCType type{BCType::HTC};
     EFloat value{invalidFloat};
-    EThermalBondaryCondition() = default;
-    EThermalBondaryCondition(EFloat value, BCType type) : type(type), value(value) {}
+    EThermalBoundaryCondition() = default;
+    EThermalBoundaryCondition(EFloat value, BCType type) : type(type), value(value) {}
     bool isValid() const { return ecad::isValid(value); }
 
-    bool operator== (const EThermalBondaryCondition & settings) const
+    bool operator== (const EThermalBoundaryCondition & settings) const
     {
         return type == settings.type && math::EQ(value, settings.value);
     }
 
-    bool operator != (const EThermalBondaryCondition & settings) const
+    bool operator != (const EThermalBoundaryCondition & settings) const
     {
         return not (*this == settings);
     }
@@ -275,14 +275,14 @@ struct EThermalModelExtractionSettings : public ECadSettings, public Clonable<ET
         ar & boost::serialization::make_nvp("env_temperature", envTemperature);
     }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
-    using BCType = EThermalBondaryConditionType;
-    using BlockBoundaryCondition = std::pair<FBox2D, EThermalBondaryCondition>;
+    using BCType = EThermalBoundaryConditionType;
+    using BlockBoundaryCondition = std::pair<FBox2D, EThermalBoundaryCondition>;
     virtual ~EThermalModelExtractionSettings() = default;
     bool forceRebuild{false};
     size_t threads;
     std::string workDir;
-    EThermalBondaryCondition topUniformBC;
-    EThermalBondaryCondition botUniformBC;
+    EThermalBoundaryCondition topUniformBC;
+    EThermalBoundaryCondition botUniformBC;
     std::vector<BlockBoundaryCondition> topBlockBC;
     std::vector<BlockBoundaryCondition> botBlockBC;
     ETemperature envTemperature{25, ETemperatureUnit::Celsius};
@@ -292,9 +292,9 @@ struct EThermalModelExtractionSettings : public ECadSettings, public Clonable<ET
     virtual void AddBlockBC(EOrientation orient, FBox2D block, BCType type, EFloat value)
     {
         if (EOrientation::Top == orient)
-            topBlockBC.emplace_back(std::move(block), EThermalBondaryCondition(value, type));
+            topBlockBC.emplace_back(std::move(block), EThermalBoundaryCondition(value, type));
         if (EOrientation::Bot == orient)
-            botBlockBC.emplace_back(std::move(block), EThermalBondaryCondition(value, type));
+            botBlockBC.emplace_back(std::move(block), EThermalBoundaryCondition(value, type));
     }
 
     virtual bool operator== (const ECadSettings & settings) const override

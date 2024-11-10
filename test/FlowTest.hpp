@@ -27,8 +27,8 @@ void t_thermal_static_flow1()
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell"); BOOST_CHECK(topCell);
     auto topLayout = topCell->GetLayoutView(); BOOST_CHECK(topLayout);
-    auto topBouds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
-    topLayout->SetBoundary(std::move(topBouds));
+    auto topBonds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
+    topLayout->SetBoundary(std::move(topBonds));
 
     auto iLyrTopCu = topLayout->AppendLayer(eDataMgr.CreateStackupLayer("TopCu", ELayerType::ConductingLayer, 0, 400, matCu->GetName(), matCu->GetName()));
     BOOST_CHECK(iLyrTopCu != ELayerId::noLayer);
@@ -66,7 +66,7 @@ void t_thermal_static_flow1()
     gridSettings.dumpTemperatureFile = true;
     gridSettings.metalFractionMappingSettings.grid =  {xGrid, static_cast<size_t>(xGrid * EFloat(bbox.Width()) / bbox.Length())};
     gridSettings.metalFractionMappingSettings.mergeGeomBeforeMapping = false;
-    gridSettings.botUniformBC.type = EThermalBondaryConditionType::HTC;
+    gridSettings.botUniformBC.type = EThermalBoundaryConditionType::HTC;
     gridSettings.botUniformBC.value = 2750;
     auto model1 = layout->ExtractThermalModel(gridSettings); BOOST_CHECK(model1);
 
@@ -122,8 +122,8 @@ void t_thermal_static_flow2()
     //top cell
     auto topCell = eDataMgr.CreateCircuitCell(database, "TopCell"); BOOST_CHECK(topCell);
     auto topLayout = topCell->GetLayoutView(); BOOST_CHECK(topLayout);
-    auto topBouds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
-    topLayout->SetBoundary(std::move(topBouds));
+    auto topBonds = std::make_unique<EPolygon>(eDataMgr.CreatePolygon(coordUnits, {{-5000, -5000}, {86000, -5000}, {86000, 31000}, {-5000, 31000}}));
+    topLayout->SetBoundary(std::move(topBonds));
 
     BOOST_CHECK(eDataMgr.CreateNet(topLayout, "Gate"));
     BOOST_CHECK(eDataMgr.CreateNet(topLayout, "Drain"));
@@ -344,7 +344,7 @@ void t_thermal_static_flow2()
     prismSettings.meshSettings.minAlpha = 20;
     prismSettings.meshSettings.minLen = 1e-2;
     prismSettings.meshSettings.maxLen = 500;
-    prismSettings.botUniformBC.type = EThermalBondaryConditionType::HTC;
+    prismSettings.botUniformBC.type = EThermalBoundaryConditionType::HTC;
     prismSettings.botUniformBC.value = 2750;
 
     EThermalStaticSimulationSetup setup(prismSettings.workDir, 4, {});

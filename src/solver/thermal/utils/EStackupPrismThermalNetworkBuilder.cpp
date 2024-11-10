@@ -62,8 +62,8 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(c
                 auto r1 = dist2edge / kxy / vArea;
 
                 auto kNb = this->GetMatThermalConductivity(nbEle.matId, iniT.at(nid));
-                auto kNbxy = 0.5 * (kNb[0] + kNb[1]);
-                auto r2 = (dist - dist2edge) / kNbxy / vArea;
+                auto kNbXY = 0.5 * (kNb[0] + kNb[1]);
+                auto r2 = (dist - dist2edge) / kNbXY / vArea;
                 network->SetR(i, nid, r1 + r2);
             }
         }
@@ -73,11 +73,11 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(c
         auto nTop = neighbors.at(PrismElement::TOP_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nTop) {
             if (nullptr != topBC && topBC->isValid()) {
-                if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
+                if (EThermalBoundaryCondition::BCType::HTC == topBC->type) {
                     network->SetHTC(i, topBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlux == topBC->type) {
+                else if (EThermalBoundaryCondition::BCType::HeatFlux == topBC->type) {
                     auto heatFlow = topBC->value * hArea;
                     network->SetHF(i, heatFlow);
                     if (heatFlow > 0)
@@ -102,11 +102,11 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(c
                 network->SetR(i, nTop, r);
             }
             if (ratio > 0 && nullptr != topBC && topBC->isValid()) {
-                if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
+                if (EThermalBoundaryCondition::BCType::HTC == topBC->type) {
                     network->SetHTC(i, topBC->value * hArea * ratio);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlux == topBC->type) {
+                else if (EThermalBoundaryCondition::BCType::HeatFlux == topBC->type) {
                     auto heatFlow = topBC->value * hArea * ratio;
                     network->SetHF(i, heatFlow);
                     if (heatFlow > 0)
@@ -122,11 +122,11 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(c
         auto nBot = neighbors.at(PrismElement::BOT_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nBot) {
             if (nullptr != botBC && botBC->isValid()) {
-                if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
+                if (EThermalBoundaryCondition::BCType::HTC == botBC->type) {
                     network->SetHTC(i, botBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlux == botBC->type) {
+                else if (EThermalBoundaryCondition::BCType::HeatFlux == botBC->type) {
                     network->SetHF(i, botBC->value);
                     if (botBC->value > 0)
                         summary.iHeatFlow += botBC->value;
@@ -150,11 +150,11 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(c
                 network->SetR(i, nBot, r);
             }
             if (ratio > 0 && nullptr != botBC && botBC->isValid()) {
-                if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
+                if (EThermalBoundaryCondition::BCType::HTC == botBC->type) {
                     network->SetHTC(i, botBC->value * hArea * ratio);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlux == botBC->type) {
+                else if (EThermalBoundaryCondition::BCType::HeatFlux == botBC->type) {
                     auto heatFlow = botBC->value * hArea * ratio;
                     network->SetHF(i, heatFlow);
                     if (heatFlow > 0)
@@ -186,7 +186,7 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<N
         std::vector<RtVal> results;
         if (not block.second.isValid()) return;
         auto value = block.second.value;
-        if (EThermalBondaryCondition::BCType::HeatFlux == block.second.type)
+        if (EThermalBoundaryCondition::BCType::HeatFlux == block.second.type)
             value /= block.first.Area() * model.CoordScale2Meter(2);
 
         for (size_t lyr = 0; lyr <  model.TotalLayers(); ++lyr) {
@@ -199,7 +199,7 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<N
                                    PrismElement::BOT_NEIGHBOR_INDEX ;
                 if (element.neighbors.at(nid) != noNeighbor) continue;
                 auto area = this->GetPrismTopBotArea(result.second);
-                if (EThermalBondaryCondition::BCType::HeatFlux == block.second.type) {
+                if (EThermalBoundaryCondition::BCType::HeatFlux == block.second.type) {
                     auto heatFlow = value * area;
                     network->SetHF(result.second, heatFlow);
                     if (heatFlow > 0)

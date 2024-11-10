@@ -83,7 +83,7 @@ ECAD_INLINE void EMaterialPropValue::SetSimpleProperty(const EFloat & value)
     m_values.assign(1, value);
 }
 
-ECAD_INLINE void EMaterialPropValue::SetAnsiotropicProerty(const std::array<EFloat, 3> & values)
+ECAD_INLINE void EMaterialPropValue::SetAnisotropicProperty(const std::array<EFloat, 3> & values)
 {
     m_values.resize(3);
     for(size_t i = 0; i < 3; ++i)
@@ -103,7 +103,7 @@ ECAD_INLINE bool EMaterialPropValue::GetSimpleProperty(EFloat & value) const
     return true; 
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetAnsiotropicProperty(size_t row, EFloat & value) const
+ECAD_INLINE bool EMaterialPropValue::GetAnisotropicProperty(size_t row, EFloat & value) const
 {
     if(row >= 3) return false;
     if(m_values.size() == 1)
@@ -124,7 +124,7 @@ ECAD_INLINE bool EMaterialPropValue::GetTensorProperty(size_t row, size_t col, E
     if(m_values.size() == 1)
         return GetSimpleProperty(value);
     else if(m_values.size() ==3)
-        return GetAnsiotropicProperty(row, value);
+        return GetAnisotropicProperty(row, value);
     else {
         value = m_values.at(row * 3 + col);
         return true;
@@ -136,9 +136,9 @@ ECAD_INLINE bool EMaterialPropValue::GetSimpleProperty([[maybe_unused]] EFloat i
     return GetSimpleProperty(value);
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetAnsiotropicProperty([[maybe_unused]] EFloat index, size_t row, EFloat & value) const
+ECAD_INLINE bool EMaterialPropValue::GetAnisotropicProperty([[maybe_unused]] EFloat index, size_t row, EFloat & value) const
 {
-    return GetAnsiotropicProperty(row, value);
+    return GetAnisotropicProperty(row, value);
 }
 
 ECAD_INLINE bool EMaterialPropValue::GetTensorProperty([[maybe_unused]] EFloat index, size_t row, size_t col, EFloat & value) const
@@ -219,7 +219,7 @@ ECAD_INLINE bool EMaterialPropPolynomial::GetSimpleProperty(EFloat index, EFloat
     return true;
 }
 
-ECAD_INLINE bool EMaterialPropPolynomial::GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const
+ECAD_INLINE bool EMaterialPropPolynomial::GetAnisotropicProperty(EFloat index, size_t row, EFloat & value) const
 {
     const auto & coeffs = 3 == m_coefficients.size() ? m_coefficients.at(row) : m_coefficients.front();
     value = Calculate(coeffs, index);

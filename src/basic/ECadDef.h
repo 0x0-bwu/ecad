@@ -243,6 +243,6 @@ ECAD_ALWAYS_INLINE std::string toString(EModelType type)
     }
 }
 
-enum class EThermalBondaryConditionType { HTC, HeatFlux, /*Temperature*/ /*not work currently*/};
+enum class EThermalBoundaryConditionType { HTC, HeatFlux, /*Temperature*/ /*not work currently*/};
 
 }//namespace ecad

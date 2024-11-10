@@ -168,7 +168,7 @@ protected:
     EPrismThermalModel();
 public:
     friend class utils::EPrismThermalModelQuery;
-    using BlockBC = std::pair<EBox2D, EThermalBondaryCondition>;
+    using BlockBC = std::pair<EBox2D, EThermalBoundaryCondition>;
     using PrismTemplate = tri::Triangulation<EPoint2D>;
     
     explicit EPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings);
@@ -179,7 +179,7 @@ public:
 
     CPtr<IMaterialDefCollection> GetMaterialLibrary() const;
 
-    void AddBlockBC(EOrientation orient, EBox2D block, EThermalBondaryCondition bc);
+    void AddBlockBC(EOrientation orient, EBox2D block, EThermalBoundaryCondition bc);
     const std::vector<BlockBC> & GetBlockBCs(EOrientation orient) const { return m_blockBCs.at(orient); }
 
     PrismLayer & AppendLayer(PrismLayer layer);

@@ -418,4 +418,4 @@ ECAD_INLINE ECollectionTypes ELayoutView::GetCollectionTypes() const
     }; 
 }
 
-}//namesapce ecad
+}//namespace ecad

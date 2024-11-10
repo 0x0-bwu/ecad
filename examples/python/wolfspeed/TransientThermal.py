@@ -20,7 +20,7 @@ def get_simulation_setup(layout, work_dir, cell_insts, components, force_rebuild
     simulation_setup.settings.step = 10
     simulation_setup.settings.temperature_depend = False
     simulation_setup.settings.sampling_window = 100
-    simulation_setup.settings.min_sampling_interval = 0.001
+    simulation_setup.settings.min_sampling_interval = 0.01
     simulation_setup.settings.absolute_error = 1e-2
     simulation_setup.settings.relative_error = 1e-3
     simulation_setup.settings.adaptive = True

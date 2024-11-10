@@ -16,7 +16,7 @@ public:
     virtual Ptr<IMaterialPropTable> GetPropTable() = 0;
     virtual Ptr<IMaterialPropPolynomial> GetPropPolynomial() = 0;
     virtual bool GetSimpleProperty(EFloat index, EFloat & value) const = 0;
-    virtual bool GetAnsiotropicProperty(EFloat index, size_t row, EFloat & value) const = 0;
+    virtual bool GetAnisotropicProperty(EFloat index, size_t row, EFloat & value) const = 0;
     virtual bool GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const = 0;
 };
 
@@ -27,11 +27,11 @@ public:
     virtual ~IMaterialPropValue() = default;
 
     virtual void SetSimpleProperty(const EFloat & value) = 0;
-    virtual void SetAnsiotropicProerty(const std::array<EFloat, 3> & values) = 0;
+    virtual void SetAnisotropicProperty(const std::array<EFloat, 3> & values) = 0;
     virtual void SetTensorProperty(const std::array<EFloat, 9> & values) = 0;
 
     virtual bool GetSimpleProperty(EFloat & value) const = 0;
-    virtual bool GetAnsiotropicProperty(size_t row, EFloat & value) const = 0;
+    virtual bool GetAnisotropicProperty(size_t row, EFloat & value) const = 0;
     virtual bool GetTensorProperty(size_t row, size_t col, EFloat & value) const = 0;
 
     //1x1-simple, 3x1-anisotropic, 3x3-tensor

@@ -69,12 +69,12 @@ ECAD_INLINE size_t EBlockPowerModel::Size() const
     return (ur.y - ll.y + 1) * (ur.x - ll.x + 1);
 }
 
-ECAD_INLINE void EThermalModel::SetUniformBC(EOrientation orient, EThermalBondaryCondition bc)
+ECAD_INLINE void EThermalModel::SetUniformBC(EOrientation orient, EThermalBoundaryCondition bc)
 {
     m_uniformBC.emplace(orient, std::move(bc));
 }
 
-ECAD_INLINE CPtr<EThermalBondaryCondition> EThermalModel::GetUniformBC(EOrientation orient) const
+ECAD_INLINE CPtr<EThermalBoundaryCondition> EThermalModel::GetUniformBC(EOrientation orient) const
 {
     auto iter = m_uniformBC.find(orient);
     if (iter == m_uniformBC.cend()) return nullptr;

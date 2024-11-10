@@ -1,3 +1,3 @@
-add_library(Esimulation
+add_library(EcadSimulation
     thermal/EThermalSimulation.cpp
 )

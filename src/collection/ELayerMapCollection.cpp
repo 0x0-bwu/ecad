@@ -94,4 +94,4 @@ ECAD_INLINE void ELayerMapCollection::PrintImp(std::ostream & os) const
     }
 }
 
-}//namesapce ecad
+}//namespace ecad

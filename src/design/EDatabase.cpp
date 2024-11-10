@@ -300,4 +300,4 @@ ECAD_INLINE void EDatabase::Clear()
     EDefinitionCollection::Clear();
 }
 
-}//namesapce ecad
+}//namespace ecad

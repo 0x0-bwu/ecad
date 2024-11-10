@@ -106,4 +106,4 @@ ECAD_INLINE void EMaterialDefCollection::PrintImp(std::ostream & os) const
     }
 }
 
-}//namesapce ecad
+}//namespace ecad

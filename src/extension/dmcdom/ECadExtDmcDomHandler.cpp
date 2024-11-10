@@ -25,7 +25,7 @@ ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & 
 {
     EDmcData data;
 
-    auto getSiglyrs = [](const std::string & viaLayer, int & lyr1, int & lyr2)
+    auto getSigLayers = [](const std::string & viaLayer, int & lyr1, int & lyr2)
     {
         if(viaLayer.size() < 1) return false;
         if(viaLayer.size() == 1) { lyr1 = lyr2 = -1; return true; }
@@ -48,7 +48,7 @@ ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & 
     data.isVia = sigLyr.front() == 'V';
     if(!data.isVia) data.sigLyr1 = std::stoi(sigLyr);
     else {
-        if(!getSiglyrs(sigLyr, data.sigLyr1, data.sigLyr2))
+        if(!getSigLayers(sigLyr, data.sigLyr1, data.sigLyr2))
             return false;
     }
 

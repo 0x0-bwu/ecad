@@ -84,4 +84,4 @@ ECAD_INLINE void EPadstackDefCollection::Clear()
     BaseCollection::Clear();
 }
 
-}//namesapce ecad
+}//namespace ecad

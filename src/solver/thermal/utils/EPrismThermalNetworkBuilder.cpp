@@ -93,8 +93,8 @@ ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(const st
                 auto r1 = dist2edge / kxy / vArea;
 
                 auto kNb = GetMatThermalConductivity(nbEle.matId, iniT.at(nid));
-                auto kNbxy = 0.5 * (kNb[0] + kNb[1]);
-                auto r2 = (dist - dist2edge) / kNbxy / vArea;
+                auto kNbXY = 0.5 * (kNb[0] + kNb[1]);
+                auto r2 = (dist - dist2edge) / kNbXY / vArea;
                 network->SetR(i, nid, r1 + r2);
             }
         }
@@ -104,11 +104,11 @@ ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(const st
         auto nTop = neighbors.at(PrismElement::TOP_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nTop) {
             if (nullptr != topBC && topBC->isValid()) {
-                if (EThermalBondaryCondition::BCType::HTC == topBC->type) {
+                if (EThermalBoundaryCondition::BCType::HTC == topBC->type) {
                     network->SetHTC(i, topBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlux == topBC->type) {
+                else if (EThermalBoundaryCondition::BCType::HeatFlux == topBC->type) {
                     auto heatFlow = topBC->value * hArea;
                     network->SetHF(i, heatFlow);
                     if (heatFlow > 0)
@@ -129,11 +129,11 @@ ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(const st
         auto nBot = neighbors.at(PrismElement::BOT_NEIGHBOR_INDEX);
         if (tri::noNeighbor == nBot) {
             if (nullptr != botBC && botBC->isValid()) {
-                if (EThermalBondaryCondition::BCType::HTC == botBC->type) {
+                if (EThermalBoundaryCondition::BCType::HTC == botBC->type) {
                     network->SetHTC(i, botBC->value * hArea);
                     summary.boundaryNodes += 1;
                 }
-                else if (EThermalBondaryCondition::BCType::HeatFlux == botBC->type) {
+                else if (EThermalBoundaryCondition::BCType::HeatFlux == botBC->type) {
                     auto heatFlow = botBC->value * hArea;
                     network->SetHF(i, heatFlow);
                     if (heatFlow > 0)
@@ -184,10 +184,10 @@ ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::BuildLineElement(const std
             else if (index < nbIndex) {
                 const auto & lineNb = m_model.GetLine(m_model.LineLocalIndex(nbIndex));
                 auto kNb = GetMatThermalConductivity(lineNb.matId, iniT.at(index));
-                auto avekNb = (kNb[0] + kNb[1] + kNb[2]) / 3;
+                auto aveKNb = (kNb[0] + kNb[1] + kNb[2]) / 3;
                 auto areaNb = GetLineArea(nbIndex);
                 auto lNb = GetLineLength(nbIndex);
-                auto r = 0.5 * l / aveK / area + 0.5 * lNb / avekNb / areaNb;
+                auto r = 0.5 * l / aveK / area + 0.5 * lNb / aveKNb / areaNb;
                 network->SetR(index, nbIndex, r);
             }
         };
@@ -221,7 +221,7 @@ ECAD_INLINE void EPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<Network>
                                    PrismElement::BOT_NEIGHBOR_INDEX ;
                 if (element.neighbors.at(nid) != noNeighbor) continue;
                 auto area = GetPrismTopBotArea(result.second);
-                if (EThermalBondaryCondition::BCType::HeatFlux == block.second.type) {
+                if (EThermalBoundaryCondition::BCType::HeatFlux == block.second.type) {
                     auto heatFlow = value * area;
                     network->SetHF(result.second, heatFlow);
                     if (heatFlow > 0)
@@ -352,7 +352,7 @@ ECAD_INLINE std::array<EFloat, 3> EPrismThermalNetworkBuilder<Scalar>::GetMatThe
     std::array<EFloat, 3> result;
     auto material = m_model.GetMaterialLibrary()->FindMaterialDefById(matId); { ECAD_ASSERT(material) }
     for (size_t i = 0; i < result.size(); ++i) {
-        [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::ThermalConductivity)->GetAnsiotropicProperty(refT, i, result[i]);
+        [[maybe_unused]] auto check = material->GetProperty(EMaterialPropId::ThermalConductivity)->GetAnisotropicProperty(refT, i, result[i]);
         ECAD_ASSERT(check)
     }
     return result;

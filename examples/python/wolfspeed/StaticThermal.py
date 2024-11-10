@@ -25,10 +25,10 @@ def get_die_monitors(layout, cell_insts, components) :
                 monitors.append(ecad.FPoint3D(location.x, location.y, elevation - 0.1 * thickness))
         return monitors
 
-def get_extraction_setting(work_dir, forse_rebuild) :
+def get_extraction_setting(work_dir, force_rebuild) :
     htc = 5000
     prism_settings = ecad.PrismThermalModelExtractionSettings(work_dir, mgr.threads(), set())
-    prism_settings.bot_uniform_bc.type = ecad.ThermalBondaryConditionType.HTC
+    prism_settings.bot_uniform_bc.type = ecad.ThermalBoundaryConditionType.HTC
     prism_settings.bot_uniform_bc.value = htc
     prism_settings.mesh_settings.gen_mesh_by_layer = True
     if prism_settings.mesh_settings.gen_mesh_by_layer :
@@ -41,15 +41,15 @@ def get_extraction_setting(work_dir, forse_rebuild) :
     prism_settings.mesh_settings.dump_mesh_file = True
     prism_settings.layer_cut_settings.layer_transition_ratio = 3
     prism_settings.layer_cut_settings.dump_sketch_img = True
-    prism_settings.force_rebuild = forse_rebuild
+    prism_settings.force_rebuild = force_rebuild
 
     top_htc = htc
-    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-29.35, 4.7, -20.35, 8.7), ecad.ThermalBondaryConditionType.HTC, top_htc)
-    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-29.35, -8.7, -20.35, -4.7), ecad.ThermalBondaryConditionType.HTC, top_htc)
-    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(2.75, 11.5, 9.75, 17), ecad.ThermalBondaryConditionType.HTC, top_htc)
-    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(2.75, -17, 9.75, -11.5), ecad.ThermalBondaryConditionType.HTC, top_htc)
-    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-7.75, 11.5, -2.55, 17), ecad.ThermalBondaryConditionType.HTC, top_htc)
-    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-7.75, -17, -2.55, -11.5), ecad.ThermalBondaryConditionType.HTC, top_htc)
+    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-29.35, 4.7, -20.35, 8.7), ecad.ThermalBoundaryConditionType.HTC, top_htc)
+    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-29.35, -8.7, -20.35, -4.7), ecad.ThermalBoundaryConditionType.HTC, top_htc)
+    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(2.75, 11.5, 9.75, 17), ecad.ThermalBoundaryConditionType.HTC, top_htc)
+    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(2.75, -17, 9.75, -11.5), ecad.ThermalBoundaryConditionType.HTC, top_htc)
+    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-7.75, 11.5, -2.55, 17), ecad.ThermalBoundaryConditionType.HTC, top_htc)
+    prism_settings.add_block_bc(ecad.Orientation.TOP, ecad.FBox2D(-7.75, -17, -2.55, -11.5), ecad.ThermalBoundaryConditionType.HTC, top_htc)
     return prism_settings
 
 def get_simulation_setup(layout, work_dir, cell_insts, components, force_rebuild = False) :

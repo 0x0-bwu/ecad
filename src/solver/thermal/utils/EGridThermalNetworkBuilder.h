@@ -22,8 +22,8 @@ public:
 
 private:
     void ApplyHeatFlowForLayer(const std::vector<Scalar> & iniT, const EGridDataTable & dataTable, size_t layer, Network & network) const;
-    void ApplyUniformBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, Network & network) const;
-    void ApplyBlockBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, Network & network) const;
+    void ApplyUniformBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, Network & network) const;
+    void ApplyBlockBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, Network & network) const;
 
 public:
     EFloat GetMetalComposite(const ESize3D & index) const;
@@ -33,7 +33,7 @@ public:
     std::array<EFloat, 3> GetConductingMatK(const ESize3D & index, EFloat refT) const;
     std::array<EFloat, 3> GetDielectricMatK(const ESize3D & index, EFloat refT) const;
     std::array<EFloat, 3> GetConductingMatK(size_t layer, EFloat refT) const;
-    std::array<EFloat, 3> GetDielectircMatK(size_t layer, EFloat refT) const;
+    std::array<EFloat, 3> GetDielectricMatK(size_t layer, EFloat refT) const;
     std::array<EFloat, 3> GetDefaultAirK() const;
 
     EFloat GetCompositeMatC(const ESize3D & index, EFloat z, EFloat area, EFloat refT) const;
@@ -128,5 +128,5 @@ ECAD_ALWAYS_INLINE bool EGridThermalNetworkBuilder<Scalar>::isValid(const ESize3
 //     const EGridThermalModel & m_model;
 //     const ESize3D m_size;
 // };
-}//namesapce solver
+}//namespace solver
 }//namespace ecad

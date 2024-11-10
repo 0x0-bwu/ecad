@@ -83,4 +83,4 @@ ECAD_INLINE void ECellCollection::Clear()
     BaseCollection::Clear();
 }
 
-}//namesapce ecad
+}//namespace ecad

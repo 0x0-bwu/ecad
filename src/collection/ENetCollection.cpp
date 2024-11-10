@@ -116,4 +116,4 @@ ECAD_INLINE void ENetCollection::ResetNetIdLUT()
     m_netIdNameMap.reset();
 }
 
-}//namesapce ecad
+}//namespace ecad

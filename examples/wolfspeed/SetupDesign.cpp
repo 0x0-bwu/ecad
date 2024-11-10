@@ -574,7 +574,7 @@ Ptr<ILayoutView> SetupDesign(const std::string & name, const std::vector<EFloat>
     ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
     database->SetCoordUnits(coordUnits);
 
-    //bindwire solder
+    //bondwire solder
     auto thinBwSolderDef = CreateBondwireSolderJoints(database, "Thin Solder Joints", THIN_BONDWIRE_RADIUS);
     auto thickBwSolderDef = CreateBondwireSolderJoints(database, "Thick Solder Joins", THICK_BONDWIRE_RADIUS);
 

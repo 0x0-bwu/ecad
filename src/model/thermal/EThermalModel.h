@@ -22,13 +22,13 @@ class ECAD_API EThermalModel : public IModel
 public:
     virtual ~EThermalModel() = default;
 
-    virtual void SetUniformBC(EOrientation orient, EThermalBondaryCondition bc);
-    virtual CPtr<EThermalBondaryCondition> GetUniformBC(EOrientation orient) const;
+    virtual void SetUniformBC(EOrientation orient, EThermalBoundaryCondition bc);
+    virtual CPtr<EThermalBoundaryCondition> GetUniformBC(EOrientation orient) const;
 
     virtual void SearchElementIndices(const std::vector<FPoint3D> & monitors, std::vector<size_t> & indices) const {};
 
 protected:
-    std::unordered_map<EOrientation, EThermalBondaryCondition> m_uniformBC;
+    std::unordered_map<EOrientation, EThermalBoundaryCondition> m_uniformBC;
 };
 
 using EGridData = OccupancyGridMap<EFloat>;
@@ -54,8 +54,8 @@ public:
     bool NeedInterpolation() const;
 
 private:
-    void BuildInterpolater() const;
-    void ResetInterpolater();
+    void BuildInterpolator() const;
+    void ResetInterpolator();
 
 private:
     ESize2D m_size;
@@ -104,6 +104,6 @@ public:
     size_t Size() const;
 };
 
-}//namesapce model
-}//namespace ecad
+} // namespace model
+} // namespace ecad
 ECAD_SERIALIZATION_CLASS_EXPORT_KEY(ecad::model::EThermalModel)

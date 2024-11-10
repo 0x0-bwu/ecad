@@ -53,7 +53,10 @@ ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::AddDefinitionColle
         case EDefinitionType::ComponentDef : {
             return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::AddCollection(ECollectionType::ComponentDef));
         }
-        default : return nullptr;
+        default : {
+            ECAD_ASSERT(false);
+            return nullptr;
+        }
     }
 }
 
@@ -76,7 +79,10 @@ ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::GetDefinitionColle
         case EDefinitionType::ComponentDef : {
             return dynamic_cast<Ptr<IDefinitionCollection> >(ECollectionCollection::GetCollection(ECollectionType::ComponentDef));
         }
-        default : return nullptr;
+        default : { 
+            ECAD_ASSERT(false);
+            return nullptr;
+        }
     } 
 }
 

@@ -167,9 +167,9 @@ void ecad_init_basic(py::module_ & m)
         .value("MOLDING", EComponentType::Molding)
     ;
 
-    py::enum_<EThermalBondaryConditionType>(m, "ThermalBondaryConditionType")
-        .value("HTC", EThermalBondaryConditionType::HTC)
-        .value("HEAT_FLUX", EThermalBondaryConditionType::HeatFlux)
+    py::enum_<EThermalBoundaryConditionType>(m, "ThermalBoundaryConditionType")
+        .value("HTC", EThermalBoundaryConditionType::HTC)
+        .value("HEAT_FLUX", EThermalBoundaryConditionType::HeatFlux)
     ;
 
     py::enum_<EThermalNetworkStaticSolverType>(m, "ThermalNetworkStaticSolverType")
@@ -309,7 +309,7 @@ void ecad_init_basic(py::module_ & m)
         .def_readwrite("select_nets", &ELayoutPolygonMergeSettings::selectNets)
     ;
 
-    py::class_<ELayerCutModelExtractionSettings>(m, "LayerCutModelExtractionSettgins")
+    py::class_<ELayerCutModelExtractionSettings>(m, "LayerCutModelExtractionSettings")
         .def_readwrite("dump_sketch_img", &ELayerCutModelExtractionSettings::dumpSketchImg)
         .def_readwrite("layer_cut_precision", &ELayerCutModelExtractionSettings::layerCutPrecision)
         .def_readwrite("layer_transition_ratio", &ELayerCutModelExtractionSettings::layerTransitionRatio)
@@ -325,10 +325,10 @@ void ecad_init_basic(py::module_ & m)
         .def_readwrite("imprint_upper_layer", &EPrismMeshSettings::imprintUpperLayer)
     ;
 
-    py::class_<EThermalBondaryCondition>(m, "ThermalBondaryCondition")
-        .def_readwrite("type", &EThermalBondaryCondition::type)
-        .def_readwrite("value", &EThermalBondaryCondition::value)
-        .def("is_valid", &EThermalBondaryCondition::isValid)
+    py::class_<EThermalBoundaryCondition>(m, "ThermalBoundaryCondition")
+        .def_readwrite("type", &EThermalBoundaryCondition::type)
+        .def_readwrite("value", &EThermalBoundaryCondition::value)
+        .def("is_valid", &EThermalBoundaryCondition::isValid)
     ;
 
     py::class_<EThermalModelExtractionSettings, PyThermalModelExtractionSettings>(m, "ThermalModelExtractionSettings")

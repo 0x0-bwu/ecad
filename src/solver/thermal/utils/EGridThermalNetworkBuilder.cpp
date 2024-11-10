@@ -133,7 +133,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyHeatFlowForLayer(const
 }
 
 template <typename Scalar>
-ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyUniformBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, Network & network) const
+ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyUniformBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, Network & network) const
 {
     if (not bc.isValid()) return;
     auto value = bc.value;    
@@ -142,12 +142,12 @@ ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyUniformBoundaryConditi
             auto grid = ESize3D(x, y, layer);
             auto index = GetFlattenIndex(grid);
             switch(bc.type) {
-                case EThermalBondaryCondition::BCType::HTC : {
+                case EThermalBoundaryCondition::BCType::HTC : {
                     summary.boundaryNodes += 1;
                     network.SetHTC(index, GetZGridArea() * value);
                     break;
                 }
-                case EThermalBondaryCondition::BCType::HeatFlux : {
+                case EThermalBoundaryCondition::BCType::HeatFlux : {
                     auto heatFlow = GetZGridArea() * value;
                     if(heatFlow > 0) summary.iHeatFlow += heatFlow;
                     else summary.oHeatFlow += heatFlow;
@@ -163,7 +163,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyUniformBoundaryConditi
 }
 
 template <typename Scalar>
-ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyBlockBoundaryConditionForLayer(const EThermalBondaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, Network & network) const
+ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyBlockBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, Network & network) const
 {
     if (not bc.isValid()) return;
     auto value = bc.value;
@@ -172,12 +172,12 @@ ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyBlockBoundaryCondition
             auto grid = ESize3D(x, y, layer);
             auto index = GetFlattenIndex(grid);
             switch(bc.type) {
-                case EThermalBondaryCondition::BCType::HTC : {
+                case EThermalBoundaryCondition::BCType::HTC : {
                     summary.boundaryNodes += 1;
                     network.SetHTC(index, GetZGridArea() * value);
                     break;
                 }
-                case EThermalBondaryCondition::BCType::HeatFlux : {
+                case EThermalBoundaryCondition::BCType::HeatFlux : {
                     auto heatFlow = value * GetZGridArea();
                     if(heatFlow > 0) summary.iHeatFlow += heatFlow;
                     else summary.oHeatFlow += heatFlow;
@@ -234,7 +234,7 @@ template <typename Scalar>
 ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielectricMatK(const ESize3D & index, EFloat refT) const
 {
     ECAD_UNUSED(refT)
-    return GetDielectircMatK(index.z, refT);
+    return GetDielectricMatK(index.z, refT);
 }
 
 template <typename Scalar>
@@ -246,7 +246,7 @@ ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetConduct
 }
 
 template <typename Scalar>
-ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielectircMatK(size_t layer, EFloat refT) const
+ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielectricMatK(size_t layer, EFloat refT) const
 {
     //todo
     ECAD_UNUSED(refT)

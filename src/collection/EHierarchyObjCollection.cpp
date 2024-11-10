@@ -127,4 +127,4 @@ ECAD_INLINE void EHierarchyObjIterator::Move(EHierarchyObjIterator && other)
     other.m_componentIter = nullptr;
 }
 
-}//namesapce ecad
+}//namespace ecad

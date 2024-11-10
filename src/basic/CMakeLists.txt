@@ -1,3 +1,3 @@
-add_library(Ebasic
+add_library(EcadBasic
     EShape.cpp
 )

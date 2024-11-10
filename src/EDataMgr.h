@@ -54,7 +54,7 @@ public:
     Ptr<IMaterialDef> CreateMaterialDef(Ptr<IDatabase> database, const std::string & name);
     Ptr<IMaterialDef> FindMaterialDefByName(CPtr<IDatabase> database, const std::string & name);
     UPtr<IMaterialProp> CreateSimpleMaterialProp(EFloat value);
-    UPtr<IMaterialProp> CreateAnsiotropicMaterialProp(const std::array<EFloat, 3> & values);
+    UPtr<IMaterialProp> CreateAnisotropicMaterialProp(const std::array<EFloat, 3> & values);
     UPtr<IMaterialProp> CreateTensorMateriaProp(const std::array<EFloat, 9> & values);
     UPtr<IMaterialProp> CreatePolynomialMaterialProp(std::vector<std::vector<EFloat>> coefficients);
 

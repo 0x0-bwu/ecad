@@ -1,4 +1,4 @@
-add_library(Ecollection
+add_library(EcadCollection
     ECellCollection.cpp
     ECellInstCollection.cpp
     ECollectionCollection.cpp

@@ -95,4 +95,4 @@ ECAD_INLINE size_t EPadstackInstCollection::Size() const
 }
 
 
-}//namesapce ecad
+}//namespace ecad

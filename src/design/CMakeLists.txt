@@ -1,4 +1,4 @@
-add_library(Edesign
+add_library(EcadDesign
     ECell.cpp
     ECellInst.cpp
     EComponent.cpp
