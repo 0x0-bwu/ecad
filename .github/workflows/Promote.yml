@@ -1,5 +1,5 @@
-name: linux
-run-name: ecad test
+name: Promote
+run-name: Promote
 on:
   push:
     branches:
@@ -50,10 +50,6 @@ jobs:
 
       - name: Create pull request
         if: success()
-        uses: peter-evans/create-pull-request@v7.0.5
-        with:
-          base: dev
-          delete-branch: false
-          branch: master
-          title: "Automated PR: Tests succeeded"
-          token: ${{ secrets.REPO_TOKEN }}
+        run: gh pr create -B master -H dev --title 'Merge dev into master' --body 'created by github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
