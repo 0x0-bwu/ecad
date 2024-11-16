@@ -46,10 +46,10 @@ jobs:
         run: build.release/bin/KiCAD_JetsonNano.exe
 
       - name: Run python example - WolfSpeed Setup Design
-        run: export LD_PRELOAD="/lib/x86_64-linux-gnu/libjemalloc.so /lib/x86_64-linux-gnu/libasan.so" && python examples/python/wolfspeed/SetupDesign.py
+        run: export LD_PRELOAD="/lib/x86_64-linux-gnu/libjemalloc.so /lib/x86_64-linux-gnu/libasan.so.6" && python examples/python/wolfspeed/SetupDesign.py
     
       - name: Run python example - WolfSpeed Static Thermal
-        run: export LD_PRELOAD="/lib/x86_64-linux-gnu/libjemalloc.so /lib/x86_64-linux-gnu/libasan.so" && python examples/python/wolfspeed/StaticThermal.py
+        run: export LD_PRELOAD="/lib/x86_64-linux-gnu/libjemalloc.so /lib/x86_64-linux-gnu/libasan.so.6" && python examples/python/wolfspeed/StaticThermal.py
 
       - name: Create pull request
         if: success()
