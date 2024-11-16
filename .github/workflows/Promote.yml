@@ -28,15 +28,15 @@ jobs:
         run: ls -al /home/runner/boost_1_83_0/boost/boost/lib
 
       - name: Build ecad
-        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && cmake -Bbuild.release -DECAD_MALLOC_LIB=jemalloc -DENABLE_ASSERTION=ON -DENABLE_EXCEPTION=ON -DENABLE_ASAN=ON -DBUILD_PYECAD=OFF -G Ninja && cmake --build build.release
+        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && cmake -Bbuild.release -DECAD_MALLOC_LIB=jemalloc -DENABLE_ASSERTION=ON -DENABLE_EXCEPTION=ON -DENABLE_ASAN=ON -G Ninja && cmake --build build.release
       
-      - name: List Dependency
+      - name: List dependency
         run: ldd build.release/lib/libEcad.so
-        
+
       - name: Run unit test
         run: build.release/bin/EcadTest.exe
         
-      - name: Run cxx example - WolfSpeed SetupDesign
+      - name: Run cxx example - WolfSpeed Setup Design
         run: build.release/bin/WolfSpeed_SetupDesign.exe
 
       - name: Run cxx example - WolfSpeed Static Thermal
@@ -45,14 +45,11 @@ jobs:
       - name: Run cxx example - KiCAD Jetson Nano
         run: build.release/bin/KiCAD_JetsonNano.exe
 
-      - name: Build PyEcad
-        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && rm -rf build.release && cmake -Bbuild.release -DENABLE_ASSERTION=ON -DENABLE_EXCEPTION=ON -DBUILD_PYECAD=ON -DBUILD_ECAD_TEST=OFF -DBUILD_ECAD_EXAMPLES=OFF -G Ninja && cmake --build build.release
-
       - name: Run python example - WolfSpeed Setup Design
-        run: python examples/python/wolfspeed/SetupDesign.py
+        run: export LD_PRELOAD="/lib/x86_64-linux-gnu/libjemalloc.so /lib/x86_64-linux-gnu/libasan.so" && python examples/python/wolfspeed/SetupDesign.py
     
       - name: Run python example - WolfSpeed Static Thermal
-        run: python examples/python/wolfspeed/StaticThermal.py
+        run: export LD_PRELOAD="/lib/x86_64-linux-gnu/libjemalloc.so /lib/x86_64-linux-gnu/libasan.so" && python examples/python/wolfspeed/StaticThermal.py
 
       - name: Create pull request
         if: success()
