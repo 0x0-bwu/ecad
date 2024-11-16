@@ -18,7 +18,11 @@ ECAD_INLINE EGdsParser::EGdsParser(EGdsReader & reader)
 }
 
 ECAD_INLINE EGdsParser::~EGdsParser()
-{
+{   
+    if (m_buffer) {
+        delete [] m_buffer;
+        m_buffer = nullptr;
+    }
 }
 
 ECAD_INLINE bool EGdsParser::operator() (std::string_view filename)
