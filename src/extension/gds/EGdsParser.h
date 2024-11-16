@@ -25,8 +25,8 @@ protected:
 
 protected:
     EGdsReader & m_reader;
-    Ptr<char> m_buffer;
-    Ptr<char> m_bptr;
+    Ptr<char> m_buffer{nullptr};
+    Ptr<char> m_bptr{nullptr};
     size_t m_bcap;//buffer capacity
     size_t m_blen;//current buffer size, from m_bptr to m_buffer + m_bcap
 };
