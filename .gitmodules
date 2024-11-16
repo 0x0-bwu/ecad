@@ -1,7 +1,7 @@
 [submodule "3rdparty/generic"]
 	path = 3rdparty/generic
 	url = git@github.com:0x0-bwu/generic.git
-	branch = dev
+	branch = master
 [submodule "3rdparty/pybind11"]
 	path = 3rdparty/pybind11
 	url = https://github.com/pybind/pybind11.git
