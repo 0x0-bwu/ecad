@@ -43,7 +43,7 @@ jobs:
         run: build.release/bin/KiCAD_JetsonNano.exe
 
       - name: Build PyEcad
-        run: rm -rf build.release && cmake -Bbuild.release -DENABLE_ASSERTION=ON -DENABLE_EXCEPTION=ON -DBUILD_PYECAD=ON -DBUILD_ECAD_TEST=OFF -DBUILD_ECAD_EXAMPLES=OFF -G Ninja && cmake --build build.release
+        run: export BOOST_PATH=/home/runner/boost_1_83_0/boost/boost && rm -rf build.release && cmake -Bbuild.release -DENABLE_ASSERTION=ON -DENABLE_EXCEPTION=ON -DBUILD_PYECAD=ON -DBUILD_ECAD_TEST=OFF -DBUILD_ECAD_EXAMPLES=OFF -G Ninja && cmake --build build.release
 
       - name: Run python example - WolfSpeed Setup Design
         run: python examples/python/wolfspeed/SetupDesign.py
