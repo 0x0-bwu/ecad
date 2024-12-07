@@ -82,6 +82,7 @@ set(DYLIB_SUFFIX "so")
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
   	add_definitions(-DBOOST_STACKTRACE_GNU_SOURCE_NOT_REQUIRED)
+	include_directories(/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include)
 
   	find_program(HOMEBREW_EXECUTABLE brew)
   	mark_as_advanced(FORCE HOMEBREW_EXECUTABLE)
