@@ -81,7 +81,7 @@ ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt
     std::ofstream ofs(archive);
     if (not ofs.is_open()) return false;
 
-    unsigned int version = toInt(CURRENT_VERSION);
+    unsigned int version = CURRENT_VERSION.toInt();
     if (fmt == EArchiveFormat::TXT) {
         boost::archive::text_oarchive oa(ofs);
         oa & boost::serialization::make_nvp("version", version);
@@ -122,7 +122,7 @@ ECAD_INLINE bool EDatabase::Load(const std::string & archive, EArchiveFormat fmt
         ia & boost::serialization::make_nvp("version", version);
         serialize(ia, version);
     }
-    m_version = fromInt(version);
+    m_version = EVersion(version);
     return true;
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT

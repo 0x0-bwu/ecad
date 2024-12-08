@@ -273,7 +273,7 @@ namespace thermal::solver {
                 if (generic::fs::FileExists(romLoadFile)) {
                     if (std::ifstream ifs(romLoadFile); ifs.is_open()) {
                         boost::archive::binary_iarchive ia(ifs);
-                        boost::serialization::serialize(ia, rom, ecad::toInt(ecad::CURRENT_VERSION));
+                        boost::serialization::serialize(ia, rom, ecad::CURRENT_VERSION.toInt());
                         ECAD_TRACE("load rom from file %1%", romLoadFile);
                         loadFromFile = true;
                     }
@@ -290,7 +290,7 @@ namespace thermal::solver {
                         generic::fs::CreateDir(generic::fs::DirName(romSaveFile));
                         if (std::ofstream ofs(romSaveFile); ofs.is_open()) {
                             boost::archive::binary_oarchive oa(ofs);
-                            boost::serialization::serialize(oa, rom, ecad::toInt(ecad::CURRENT_VERSION));
+                            boost::serialization::serialize(oa, rom, ecad::CURRENT_VERSION.toInt());
                             ECAD_TRACE("save rom to file %1%", romSaveFile);
                         }
                     }

@@ -16,7 +16,7 @@ std::vector<FPoint3D> GetDieMonitors(CPtr<ILayoutView> layout)
 {
     EFloat elevation, thickness;
     std::vector<FPoint3D> monitors;
-    utils::ELayoutRetriever retriever(layout);
+    ecad::utils::ELayoutRetriever retriever(layout);
     std::vector<std::string> cellInsts{"TopBridge1", "TopBridge2", "BotBridge1", "BotBridge2"};
     std::vector<std::string> components{"Die1", "Die2", "Die3"};
     for(const auto & cellInst : cellInsts) {

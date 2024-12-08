@@ -55,7 +55,7 @@ void ecad_init_basic(py::module_ & m)
         ECAD LIBRARY beta
     )pbdoc";
 
-    m.attr("__version__") = toString(CURRENT_VERSION);
+    m.attr("__version__") = CURRENT_VERSION.toString();
 
     m.def("coord_to_point2d", &Coord2Point2D<ECoord>);
     m.def("coord_to_fpoint2d", &Coord2Point2D<FCoord>);

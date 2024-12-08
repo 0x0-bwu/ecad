@@ -4,7 +4,7 @@
 
 void ecad_init_utility(py::module_ & m)
 {
-    using namespace utils;
+    using namespace ecad::utils;
     py::class_<ELayoutRetriever>(m, "LayoutRetriever")
         .def(py::init<CPtr<ILayoutView>>())
         .def("get_component_height_thickness", [](const ELayoutRetriever & retriever, CPtr<IComponent> comp){

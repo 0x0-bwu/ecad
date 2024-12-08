@@ -35,8 +35,6 @@ using ECoord = Int64;
 using ESize = size_t;
 using EIndex = ESize;
 
-
-
 using EPoint2D = generic::geometry::Point2D<ECoord>;
 using FPoint2D = generic::geometry::Point2D<FCoord>;
 using EPoint3D = generic::geometry::Point3D<ECoord>;
@@ -78,6 +76,7 @@ ECAD_ALWAYS_INLINE static constexpr EFloat maxFloat = std::numeric_limits<EFloat
 
 template <typename NumType>
 ECAD_ALWAYS_INLINE  bool isValid(NumType value) { return value != std::numeric_limits<NumType>::max(); }
+
 }//namespace ecad
 
 #define ECAD_TRACE(args...) generic::log::Trace(args)
