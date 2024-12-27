@@ -9,7 +9,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EMaterialDefCollection::serialize(Archive & ar, const unsigned int version)
+void EMaterialDefCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialDefCollection, IMaterialDefCollection>();
@@ -21,26 +21,26 @@ ECAD_INLINE void EMaterialDefCollection::serialize(Archive & ar, const unsigned 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialDefCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EMaterialDefCollection::EMaterialDefCollection()
+EMaterialDefCollection::EMaterialDefCollection()
 {
 }
 
-ECAD_INLINE EMaterialDefCollection::~EMaterialDefCollection()
+EMaterialDefCollection::~EMaterialDefCollection()
 {
 }
 
-ECAD_INLINE EMaterialDefCollection::EMaterialDefCollection(const EMaterialDefCollection & other)
+EMaterialDefCollection::EMaterialDefCollection(const EMaterialDefCollection & other)
 {
     *this = other;
 }
     
-ECAD_INLINE EMaterialDefCollection & EMaterialDefCollection::operator= (const EMaterialDefCollection & other)
+EMaterialDefCollection & EMaterialDefCollection::operator= (const EMaterialDefCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IDefinition> EMaterialDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
+Ptr<IDefinition> EMaterialDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
 {
     auto type = definition->GetDefinitionType();
     auto materialDef = dynamic_cast<Ptr<IMaterialDef> >(definition.get());
@@ -51,20 +51,20 @@ ECAD_INLINE Ptr<IDefinition> EMaterialDefCollection::AddDefinition(const std::st
     return GetDefinition(name, type);
 }
 
-ECAD_INLINE Ptr<IDefinition> EMaterialDefCollection::GetDefinition(const std::string & name, EDefinitionType type) const
+Ptr<IDefinition> EMaterialDefCollection::GetDefinition(const std::string & name, EDefinitionType type) const
 {
     if(type == EDefinitionType::MaterialDef && BaseCollection::Count(name))
         return dynamic_cast<Ptr<IDefinition> >(BaseCollection::At(name).get());
     return nullptr;
 }
 
-ECAD_INLINE std::string EMaterialDefCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
+std::string EMaterialDefCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
 {
     if(type == EDefinitionType::MaterialDef) return NextKey(*this, base);
     return std::string{};
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EMaterialDefCollection::FindMaterialDefById(EMaterialId id) const
+Ptr<IMaterialDef> EMaterialDefCollection::FindMaterialDefById(EMaterialId id) const
 {
     auto iter = m_idLut.find(id);
     if (iter != m_idLut.cend())
@@ -72,7 +72,7 @@ ECAD_INLINE Ptr<IMaterialDef> EMaterialDefCollection::FindMaterialDefById(EMater
     return nullptr;
 }
 
-ECAD_INLINE void EMaterialDefCollection::SetDatabase(CPtr<IDatabase> database)
+void EMaterialDefCollection::SetDatabase(CPtr<IDatabase> database)
 {
     auto matIter = GetMaterialDefIter();
     while(auto mat = matIter->Next()) {
@@ -81,23 +81,23 @@ ECAD_INLINE void EMaterialDefCollection::SetDatabase(CPtr<IDatabase> database)
 }
 
 
-ECAD_INLINE MaterialDefIter EMaterialDefCollection::GetMaterialDefIter() const
+MaterialDefIter EMaterialDefCollection::GetMaterialDefIter() const
 {
     return MaterialDefIter(new EMaterialDefIterator(*this));
 }
 
-ECAD_INLINE size_t EMaterialDefCollection::Size() const
+size_t EMaterialDefCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void EMaterialDefCollection::Clear()
+void EMaterialDefCollection::Clear()
 {
     BaseCollection::Clear();
     m_idLut.clear();
 }
 
-ECAD_INLINE void EMaterialDefCollection::PrintImp(std::ostream & os) const
+void EMaterialDefCollection::PrintImp(std::ostream & os) const
 {
     BaseCollection::PrintImp(os);
     for (const auto & [name, def] : m_collection) {

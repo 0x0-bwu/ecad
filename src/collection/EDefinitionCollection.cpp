@@ -8,7 +8,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EDefinitionCollection::serialize(Archive & ar, const unsigned int version)
+void EDefinitionCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EDefinitionCollection, IDefinitionCollection>();
@@ -18,23 +18,23 @@ ECAD_INLINE void EDefinitionCollection::serialize(Archive & ar, const unsigned i
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EDefinitionCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EDefinitionCollection::EDefinitionCollection()
+EDefinitionCollection::EDefinitionCollection()
 {
     ECollectionCollection::Init();
 }
 
-ECAD_INLINE EDefinitionCollection::EDefinitionCollection(const EDefinitionCollection & other)
+EDefinitionCollection::EDefinitionCollection(const EDefinitionCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EDefinitionCollection & EDefinitionCollection::operator= (const EDefinitionCollection & other)
+EDefinitionCollection & EDefinitionCollection::operator= (const EDefinitionCollection & other)
 {
     ECollectionCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::AddDefinitionCollection(EDefinitionType type)
+Ptr<IDefinitionCollection> EDefinitionCollection::AddDefinitionCollection(EDefinitionType type)
 {
     switch(type)
     {
@@ -60,7 +60,7 @@ ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::AddDefinitionColle
     }
 }
 
-ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::GetDefinitionCollection(EDefinitionType type) const
+Ptr<IDefinitionCollection> EDefinitionCollection::GetDefinitionCollection(EDefinitionType type) const
 {
     switch(type)
     {
@@ -86,34 +86,34 @@ ECAD_INLINE Ptr<IDefinitionCollection> EDefinitionCollection::GetDefinitionColle
     } 
 }
 
-ECAD_INLINE Ptr<IDefinition> EDefinitionCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
+Ptr<IDefinition> EDefinitionCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
 {
     auto dc = GetDefinitionCollection(definition->GetDefinitionType());
     if(dc) return dc->AddDefinition(name, std::move(definition));
     return nullptr;
 }
 
-ECAD_INLINE Ptr<IDefinition> EDefinitionCollection::GetDefinition(const std::string & name, EDefinitionType type) const
+Ptr<IDefinition> EDefinitionCollection::GetDefinition(const std::string & name, EDefinitionType type) const
 {
     auto dc = GetDefinitionCollection(type);
     if(dc) return dc->GetDefinition(name, type);
     return nullptr;
 }
 
-ECAD_INLINE std::string EDefinitionCollection::GetNextDefName(const std::string & name, EDefinitionType type) const
+std::string EDefinitionCollection::GetNextDefName(const std::string & name, EDefinitionType type) const
 {
     auto dc = GetDefinitionCollection(type);
     if(dc) return dc->GetNextDefName(name, type);
     return std::string{};  
 }
 
-ECAD_INLINE void EDefinitionCollection::SetDatabase(CPtr<IDatabase> database)
+void EDefinitionCollection::SetDatabase(CPtr<IDatabase> database)
 {
     for (auto & collection : m_collection)
         dynamic_cast<Ptr<IDefinitionCollection>>(collection.second.get())->SetDatabase(database);
 }
 
-ECAD_INLINE size_t EDefinitionCollection::Size() const
+size_t EDefinitionCollection::Size() const
 {
     return ECollectionCollection::Size();
 }

@@ -7,7 +7,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EComponentDefPinCollection::serialize(Archive & ar, const unsigned int version)
+void EComponentDefPinCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDefPinCollection, IComponentDefPinCollection>();
@@ -17,32 +17,32 @@ ECAD_INLINE void EComponentDefPinCollection::serialize(Archive & ar, const unsig
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDefPinCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EComponentDefPinCollection::EComponentDefPinCollection()
+EComponentDefPinCollection::EComponentDefPinCollection()
 {
 }
 
-ECAD_INLINE EComponentDefPinCollection::~EComponentDefPinCollection()
+EComponentDefPinCollection::~EComponentDefPinCollection()
 {
 }
 
-ECAD_INLINE EComponentDefPinCollection::EComponentDefPinCollection(const EComponentDefPinCollection & other)
+EComponentDefPinCollection::EComponentDefPinCollection(const EComponentDefPinCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EComponentDefPinCollection & EComponentDefPinCollection::operator= (const EComponentDefPinCollection & other)
+EComponentDefPinCollection & EComponentDefPinCollection::operator= (const EComponentDefPinCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::AddPin(UPtr<IComponentDefPin> pin)
+Ptr<IComponentDefPin> EComponentDefPinCollection::AddPin(UPtr<IComponentDefPin> pin)
 {
     Append(std::move(pin));
     return Back().get();
 }
     
-ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
+Ptr<IComponentDefPin> EComponentDefPinCollection::CreatePin(const std::string & name, EPoint2D loc, EPinIOType type, CPtr<IPadstackDef> psDef, ELayerId lyr)
 {
     auto pin = new EComponentDefPin(name);
     pin->SetLocation(loc);
@@ -52,7 +52,7 @@ ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::CreatePin(const st
     return AddPin(UPtr<IComponentDefPin>(pin));
 }
 
-ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::FindPinByName(const std::string & name) const
+Ptr<IComponentDefPin> EComponentDefPinCollection::FindPinByName(const std::string & name) const
 {
     auto pinIter = GetComponentDefPinIter();
     while (auto * pin = pinIter->Next()) {
@@ -61,22 +61,22 @@ ECAD_INLINE Ptr<IComponentDefPin> EComponentDefPinCollection::FindPinByName(cons
     return nullptr;
 }
 
-ECAD_INLINE ComponentDefPinIter EComponentDefPinCollection::GetComponentDefPinIter() const
+ComponentDefPinIter EComponentDefPinCollection::GetComponentDefPinIter() const
 {
     return ComponentDefPinIter(new EComponentDefPinIterator(*this));
 }
 
-ECAD_INLINE size_t EComponentDefPinCollection::Size() const
+size_t EComponentDefPinCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void EComponentDefPinCollection::Clear()
+void EComponentDefPinCollection::Clear()
 {
     return BaseCollection::Clear();
 }
 
-ECAD_INLINE Ptr<EComponentDefPinCollection> EComponentDefPinCollection::CloneImp() const
+Ptr<EComponentDefPinCollection> EComponentDefPinCollection::CloneImp() const
 {
     return new EComponentDefPinCollection(*this);
 }

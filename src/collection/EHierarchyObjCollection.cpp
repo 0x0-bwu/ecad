@@ -12,7 +12,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EHierarchyObjCollection::serialize(Archive & ar, const unsigned int version)
+void EHierarchyObjCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EHierarchyObjCollection, IHierarchyObjCollection>();
@@ -22,42 +22,42 @@ ECAD_INLINE void EHierarchyObjCollection::serialize(Archive & ar, const unsigned
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EHierarchyObjCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EHierarchyObjCollection::EHierarchyObjCollection()
+EHierarchyObjCollection::EHierarchyObjCollection()
 {
     ECollectionCollection::Init();
 }
 
-ECAD_INLINE EHierarchyObjCollection::~EHierarchyObjCollection()
+EHierarchyObjCollection::~EHierarchyObjCollection()
 {
 }
 
-ECAD_INLINE EHierarchyObjCollection::EHierarchyObjCollection(const EHierarchyObjCollection & other)
+EHierarchyObjCollection::EHierarchyObjCollection(const EHierarchyObjCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EHierarchyObjCollection & EHierarchyObjCollection::operator= (const EHierarchyObjCollection & other)
+EHierarchyObjCollection & EHierarchyObjCollection::operator= (const EHierarchyObjCollection & other)
 {
     ECollectionCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<ICellInstCollection> EHierarchyObjCollection::GetCellInstCollection() const
+Ptr<ICellInstCollection> EHierarchyObjCollection::GetCellInstCollection() const
 {
     return ECollectionCollection::CellInstCollection();
 }
 
-ECAD_INLINE Ptr<IComponentCollection> EHierarchyObjCollection::GetComponentCollection() const
+Ptr<IComponentCollection> EHierarchyObjCollection::GetComponentCollection() const
 {
     return ECollectionCollection::ComponentCollection();
 }
 
-ECAD_INLINE HierarchyObjIter EHierarchyObjCollection::GetHierarchyObjIter() const
+HierarchyObjIter EHierarchyObjCollection::GetHierarchyObjIter() const
 {
     return HierarchyObjIter(new EHierarchyObjIterator(*this));
 }
 
-ECAD_INLINE size_t EHierarchyObjCollection::Size() const
+size_t EHierarchyObjCollection::Size() const
 {
     size_t count = 0;
     for (auto type : GetCollectionTypes()){
@@ -66,59 +66,59 @@ ECAD_INLINE size_t EHierarchyObjCollection::Size() const
     return count;
 }
 
-ECAD_INLINE EHierarchyObjIterator::EHierarchyObjIterator(const EHierarchyObjCollection & collection)
+EHierarchyObjIterator::EHierarchyObjIterator(const EHierarchyObjCollection & collection)
 {
     m_cellInstIter = collection.GetCellInstCollection()->GetCellInstIter();
     m_componentIter = collection.GetComponentCollection()->GetComponentIter();
 }
 
-ECAD_INLINE EHierarchyObjIterator::~EHierarchyObjIterator()
+EHierarchyObjIterator::~EHierarchyObjIterator()
 {
 }
 
-ECAD_INLINE EHierarchyObjIterator::EHierarchyObjIterator(const EHierarchyObjIterator & other)
+EHierarchyObjIterator::EHierarchyObjIterator(const EHierarchyObjIterator & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EHierarchyObjIterator & EHierarchyObjIterator::operator= (const EHierarchyObjIterator & other)
+EHierarchyObjIterator & EHierarchyObjIterator::operator= (const EHierarchyObjIterator & other)
 {
     m_cellInstIter = other.m_cellInstIter->Clone();
     m_componentIter = other.m_componentIter->Clone();
     return *this;
 }
 
-ECAD_INLINE EHierarchyObjIterator::EHierarchyObjIterator(EHierarchyObjIterator && other)
+EHierarchyObjIterator::EHierarchyObjIterator(EHierarchyObjIterator && other)
 {
     Move(std::forward<EHierarchyObjIterator>(other));
 }
 
-ECAD_INLINE EHierarchyObjIterator & EHierarchyObjIterator::operator= (EHierarchyObjIterator && other)
+EHierarchyObjIterator & EHierarchyObjIterator::operator= (EHierarchyObjIterator && other)
 { 
     Move(std::forward<EHierarchyObjIterator>(other));
     return *this;
 }
 
-ECAD_INLINE Ptr<IHierarchyObj> EHierarchyObjIterator::Next()
+Ptr<IHierarchyObj> EHierarchyObjIterator::Next()
 {
     if(auto p = dynamic_cast<Ptr<IHierarchyObj> >(m_cellInstIter->Next()); p) return p;
     if(auto p = dynamic_cast<Ptr<IHierarchyObj> >(m_componentIter->Next()); p) return p;
     return nullptr;
 }
 
-ECAD_INLINE Ptr<IHierarchyObj> EHierarchyObjIterator::Current()
+Ptr<IHierarchyObj> EHierarchyObjIterator::Current()
 {
     if(m_cellInstIter->Current()) return dynamic_cast<Ptr<IHierarchyObj> >(m_cellInstIter->Current());
     
     return nullptr;
 }
 
-ECAD_INLINE HierarchyObjIter EHierarchyObjIterator::Clone() const
+HierarchyObjIter EHierarchyObjIterator::Clone() const
 {
     return HierarchyObjIter(new EHierarchyObjIterator(*this));
 }
 
-ECAD_INLINE void EHierarchyObjIterator::Move(EHierarchyObjIterator && other)
+void EHierarchyObjIterator::Move(EHierarchyObjIterator && other)
 {
     m_cellInstIter = std::move(other.m_cellInstIter);
     m_componentIter = std::move(other.m_componentIter);

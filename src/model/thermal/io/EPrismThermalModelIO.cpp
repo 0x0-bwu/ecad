@@ -3,7 +3,7 @@
 namespace ecad::model::io {
 
 template <typename Scalar>
-ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismThermalModel & model, const std::vector<Scalar> * temperature, std::string * err)
+bool GenerateVTKFile(std::string_view filename, const EPrismThermalModel & model, const std::vector<Scalar> * temperature, std::string * err)
 {
     if (not fs::CreateDir(fs::DirName(filename))) {
         if (err) *err = "Error: fail to create folder " + fs::DirName(filename).string();
@@ -67,7 +67,7 @@ ECAD_INLINE bool GenerateVTKFile(std::string_view filename, const EPrismThermalM
     return true;
 }
 
-template ECAD_INLINE bool GenerateVTKFile<Float32>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float32> * temperature, std::string * err);
-template ECAD_INLINE bool GenerateVTKFile<Float64>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float64> * temperature, std::string * err);
+template bool GenerateVTKFile<Float32>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float32> * temperature, std::string * err);
+template bool GenerateVTKFile<Float64>(std::string_view filename, const EPrismThermalModel & model, const std::vector<Float64> * temperature, std::string * err);
 
 } // namespace ecad::model::io

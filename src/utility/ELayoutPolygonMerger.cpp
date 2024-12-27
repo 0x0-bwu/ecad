@@ -18,7 +18,7 @@ namespace utils {
 
 using namespace generic;
 using namespace generic::geometry;
-ECAD_INLINE ELayoutPolygonMerger::ELayoutPolygonMerger(Ptr<ILayoutView> layout)
+ELayoutPolygonMerger::ELayoutPolygonMerger(Ptr<ILayoutView> layout)
  : m_layout(layout), m_settings(1, {})
 {
     std::vector<CPtr<IStackupLayer> > layers;
@@ -35,16 +35,16 @@ ECAD_INLINE ELayoutPolygonMerger::ELayoutPolygonMerger(Ptr<ILayoutView> layout)
     }
 }
 
-ECAD_INLINE ELayoutPolygonMerger::~ELayoutPolygonMerger()
+ELayoutPolygonMerger::~ELayoutPolygonMerger()
 {
 }
 
-ECAD_INLINE void ELayoutPolygonMerger::SetLayoutMergeSettings(ELayoutPolygonMergeSettings settings)
+void ELayoutPolygonMerger::SetLayoutMergeSettings(ELayoutPolygonMergeSettings settings)
 {
     m_settings = std::move(settings);
 }
 
-ECAD_INLINE void ELayoutPolygonMerger::Merge()
+void ELayoutPolygonMerger::Merge()
 {
     ECAD_EFFICIENCY_TRACK("layout polygon merge")
 
@@ -58,7 +58,7 @@ ECAD_INLINE void ELayoutPolygonMerger::Merge()
     FillPolygonsBackToLayout();
 }
 
-ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
+void ELayoutPolygonMerger::FillPolygonsFromLayout()
 {
     m_netIdNameMap.clear();
     m_primTobeRemove.clear();
@@ -97,7 +97,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsFromLayout()
     }
 }
 
-ECAD_INLINE void ELayoutPolygonMerger::MergeLayers()
+void ELayoutPolygonMerger::MergeLayers()
 {
     if(m_settings.threads > 1) {
         thread::ThreadPool pool(m_settings.threads);
@@ -110,7 +110,7 @@ ECAD_INLINE void ELayoutPolygonMerger::MergeLayers()
     }
 }
 
-ECAD_INLINE void ELayoutPolygonMerger::MergeOneLayer(Ptr<LayerMerger> merger)
+void ELayoutPolygonMerger::MergeOneLayer(Ptr<LayerMerger> merger)
 {
     typename LayerMerger::MergeSettings settings;
     //todo, add settings
@@ -121,7 +121,7 @@ ECAD_INLINE void ELayoutPolygonMerger::MergeOneLayer(Ptr<LayerMerger> merger)
     runner.Run();
 }
 
-ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
+void ELayoutPolygonMerger::FillPolygonsBackToLayout()
 {
     using PolygonData = typename LayerMerger::PolygonData;
     auto primitives = m_layout->GetPrimitiveCollection();
@@ -152,7 +152,7 @@ ECAD_INLINE void ELayoutPolygonMerger::FillPolygonsBackToLayout()
     }
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layerId, Ptr<EShape> shape)
+bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layerId, Ptr<EShape> shape)
 {
     if (nullptr == shape) return false;
     if (not shape->isValid()) return false;
@@ -197,7 +197,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::FillOneShape(ENetId netId, ELayerId layer
     return true;
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WritePngFiles(std::string_view filename, size_t width)
+bool ELayoutPolygonMerger::WritePngFiles(std::string_view filename, size_t width)
 {
     auto dir = fs::DirName(filename);
     if (not fs::CreateDir(dir)) return false;
@@ -210,7 +210,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WritePngFiles(std::string_view filename, 
     return res;   
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(std::string_view filename, Ptr<LayerMerger> merger, size_t width)
+bool ELayoutPolygonMerger::WritePngFileForOneLayer(std::string_view filename, Ptr<LayerMerger> merger, size_t width)
 {
     using PolygonData = typename LayerMerger::PolygonData;
 
@@ -228,7 +228,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WritePngFileForOneLayer(std::string_view 
     return GeometryIO::WritePNG(filename, outs.begin(), outs.end(), width);
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(std::string_view filename)
+bool ELayoutPolygonMerger::WriteVtkFiles(std::string_view filename)
 {
     auto dir = fs::DirName(filename);
     if (not fs::CreateDir(dir)) return false;
@@ -241,7 +241,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFiles(std::string_view filename)
     return res;
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(std::string_view filename, Ptr<LayerMerger> merger)
+bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(std::string_view filename, Ptr<LayerMerger> merger)
 {
     using PolygonData = typename LayerMerger::PolygonData;
 
@@ -259,7 +259,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WriteVtkFileForOneLayer(std::string_view 
     return GeometryIO::WriteVTK<Polygon2D<ECoord> >(filename, outs.begin(), outs.end());
 }
 
-ECAD_INLINE bool ELayoutPolygonMerger::WriteDomDmcFiles(std::string_view filename)
+bool ELayoutPolygonMerger::WriteDomDmcFiles(std::string_view filename)
 {
     auto dir = fs::DirName(filename);
     if (not fs::CreateDir(dir)) return false;
@@ -282,7 +282,7 @@ ECAD_INLINE bool ELayoutPolygonMerger::WriteDomDmcFiles(std::string_view filenam
     return true;
 }
 
-ECAD_INLINE void ELayoutPolygonMerger::WriteDomDmcForOneLayer(std::fstream & dom, std::fstream & dmc, ELayerId layerId, Ptr<LayerMerger> merger)
+void ELayoutPolygonMerger::WriteDomDmcForOneLayer(std::fstream & dom, std::fstream & dmc, ELayerId layerId, Ptr<LayerMerger> merger)
 {
     using PolygonData = typename LayerMerger::PolygonData;
     int lyrId = static_cast<int>(layerId);

@@ -9,7 +9,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EHierarchyObj::serialize(Archive & ar, const unsigned int version)
+void EHierarchyObj::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EHierarchyObj, IHierarchyObj>();
@@ -21,31 +21,31 @@ ECAD_INLINE void EHierarchyObj::serialize(Archive & ar, const unsigned int versi
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EHierarchyObj)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EHierarchyObj::EHierarchyObj()
+EHierarchyObj::EHierarchyObj()
  : EHierarchyObj(std::string{}, nullptr)
 {
 }
 
-ECAD_INLINE EHierarchyObj::EHierarchyObj(std::string name, CPtr<ILayoutView> refLayout)
+EHierarchyObj::EHierarchyObj(std::string name, CPtr<ILayoutView> refLayout)
  : EObject(name), m_refLayout(refLayout)
 {
 }
 
-ECAD_INLINE EHierarchyObj::~EHierarchyObj()
+EHierarchyObj::~EHierarchyObj()
 {
 }
 
-ECAD_INLINE void EHierarchyObj::SetRefLayoutView(CPtr<ILayoutView> refLayout)
+void EHierarchyObj::SetRefLayoutView(CPtr<ILayoutView> refLayout)
 {
     m_refLayout = refLayout;
 }
 
-ECAD_INLINE CPtr<ILayoutView> EHierarchyObj::GetRefLayoutView() const
+CPtr<ILayoutView> EHierarchyObj::GetRefLayoutView() const
 {
     return m_refLayout;
 }
 
-ECAD_INLINE void EHierarchyObj::PrintImp(std::ostream & os) const
+void EHierarchyObj::PrintImp(std::ostream & os) const
 {
     os << "TRANSFORM: " << m_transform.GetTransform() << ECAD_EOL;
 }

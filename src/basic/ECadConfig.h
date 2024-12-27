@@ -8,7 +8,6 @@
 #else
 #    define ECAD_API 
 #endif
-#define ECAD_INLINE
 #define ECAD_ALWAYS_INLINE inline
 #define ECAD_EOL GENERIC_DEFAULT_EOL
 #define ECAD_SEPS GENERIC_FOLDER_SEPS

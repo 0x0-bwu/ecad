@@ -7,7 +7,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EPadstackDef::serialize(Archive & ar, const unsigned int version)
+void EPadstackDef::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ECAD_UNUSED(version)
@@ -19,49 +19,49 @@ ECAD_INLINE void EPadstackDef::serialize(Archive & ar, const unsigned int versio
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackDef)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EPadstackDef::EPadstackDef()
+EPadstackDef::EPadstackDef()
  : EPadstackDef(std::string{}, nullptr)
 {
 }
 
-ECAD_INLINE EPadstackDef::EPadstackDef(std::string name, CPtr<IDatabase> database)
+EPadstackDef::EPadstackDef(std::string name, CPtr<IDatabase> database)
  : EDefinition(std::move(name), database)
  , m_data(nullptr)
 {
 }
 
-ECAD_INLINE EPadstackDef::~EPadstackDef()
+EPadstackDef::~EPadstackDef()
 {
 }
 
-ECAD_INLINE EPadstackDef::EPadstackDef(const EPadstackDef & other)
+EPadstackDef::EPadstackDef(const EPadstackDef & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EPadstackDef & EPadstackDef::operator= (const EPadstackDef & other)
+EPadstackDef & EPadstackDef::operator= (const EPadstackDef & other)
 {
     EDefinition::operator=(other);
     m_data = CloneHelper(other.m_data);
     return *this;
 }
 
-ECAD_INLINE void EPadstackDef::SetDatabase(CPtr<IDatabase> database)
+void EPadstackDef::SetDatabase(CPtr<IDatabase> database)
 {
     EDefinition::SetDatabase(database);
 }
 
-ECAD_INLINE void EPadstackDef::SetPadstackDefData(UPtr<IPadstackDefData> data)
+void EPadstackDef::SetPadstackDefData(UPtr<IPadstackDefData> data)
 {
     m_data = std::move(data);
 }
 
-ECAD_INLINE Ptr<IPadstackDefData> EPadstackDef::GetPadstackDefData() const
+Ptr<IPadstackDefData> EPadstackDef::GetPadstackDefData() const
 {
     return m_data.get();
 }
 
-ECAD_INLINE EDefinitionType EPadstackDef::GetDefinitionType() const
+EDefinitionType EPadstackDef::GetDefinitionType() const
 {
     return EDefinitionType::PadstackDef;
 }

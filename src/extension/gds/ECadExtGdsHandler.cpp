@@ -13,10 +13,10 @@ namespace gds {
 
 namespace fmt = generic::fmt;
 
-ECAD_INLINE ECadExtGdsHandler::ECadExtGdsHandler(const std::string & gdsFile, const std::string & lyrMapFile)
+ECadExtGdsHandler::ECadExtGdsHandler(const std::string & gdsFile, const std::string & lyrMapFile)
  : m_gdsFile(gdsFile), m_lyrMapFile(lyrMapFile){}
 
-ECAD_INLINE Ptr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
+Ptr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
 {
     EGdsDB db;
     EGdsReader reader(db);
@@ -81,7 +81,7 @@ ECAD_INLINE Ptr<IDatabase> ECadExtGdsHandler::CreateDatabase(const std::string &
     return m_database;
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportOneCell(const EGdsCell & cell, Ptr<ICell> iCell)
+void ECadExtGdsHandler::ImportOneCell(const EGdsCell & cell, Ptr<ICell> iCell)
 {
     EDataMgr::Instance();
     auto iLayoutView = iCell->GetLayoutView();
@@ -108,7 +108,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOneCell(const EGdsCell & cell, Ptr<ICe
     }
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportOnePolygon(CPtr<EGdsPolygon> polygon, Ptr<ILayoutView> iLayoutView)
+void ECadExtGdsHandler::ImportOnePolygon(CPtr<EGdsPolygon> polygon, Ptr<ILayoutView> iLayoutView)
 {
     if(nullptr == polygon) return;
 
@@ -126,7 +126,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOnePolygon(CPtr<EGdsPolygon> polygon, 
     else eMgr.CreateGeometry2D(iLayoutView, *(eLyrIds.begin()), noNet, std::move(eShape));
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportOnePath(CPtr<EGdsPath> path, Ptr<ILayoutView> iLayoutView)
+void ECadExtGdsHandler::ImportOnePath(CPtr<EGdsPath> path, Ptr<ILayoutView> iLayoutView)
 {
     if(nullptr == path) return;
 
@@ -144,7 +144,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOnePath(CPtr<EGdsPath> path, Ptr<ILayo
     else eMgr.CreateGeometry2D(iLayoutView, *(eLyrIds.begin()), noNet, std::move(eShape));
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportOneText(CPtr<EGdsText> text, Ptr<ILayoutView> iLayoutView)
+void ECadExtGdsHandler::ImportOneText(CPtr<EGdsText> text, Ptr<ILayoutView> iLayoutView)
 {
     if(nullptr == text) return;
 
@@ -160,7 +160,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOneText(CPtr<EGdsText> text, Ptr<ILayo
     }
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportCellReferences(const EGdsCell & cell, Ptr<ICell> iCell)
+void ECadExtGdsHandler::ImportCellReferences(const EGdsCell & cell, Ptr<ICell> iCell)
 {
     EDataMgr::Instance();
     auto iLayoutView = iCell->GetLayoutView();
@@ -182,7 +182,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportCellReferences(const EGdsCell & cell, 
     }   
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportOneCellReference(CPtr<EGdsCellReference> ref, Ptr<ILayoutView> iLayoutView)
+void ECadExtGdsHandler::ImportOneCellReference(CPtr<EGdsCellReference> ref, Ptr<ILayoutView> iLayoutView)
 {
    if(nullptr == ref) return;
     auto & eMgr = EDataMgr::Instance();
@@ -197,7 +197,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOneCellReference(CPtr<EGdsCellReferenc
     eMgr.CreateCellInst(iLayoutView, name, iLayoutViewDef, transform);
 }
 
-ECAD_INLINE void ECadExtGdsHandler::ImportOneCellRefArray(CPtr<EGdsCellRefArray> arr, Ptr<ILayoutView> iLayoutView)
+void ECadExtGdsHandler::ImportOneCellRefArray(CPtr<EGdsCellRefArray> arr, Ptr<ILayoutView> iLayoutView)
 {
     if(nullptr == arr) return;
     auto & eMgr = EDataMgr::Instance();
@@ -214,7 +214,7 @@ ECAD_INLINE void ECadExtGdsHandler::ImportOneCellRefArray(CPtr<EGdsCellRefArray>
     }
 }
 
-ECAD_INLINE void ECadExtGdsHandler::Reset()
+void ECadExtGdsHandler::Reset()
 {
     m_database = nullptr;
     m_layerIdMap.clear();

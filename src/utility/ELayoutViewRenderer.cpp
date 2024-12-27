@@ -8,12 +8,12 @@
 namespace ecad {
 namespace utils {
 using namespace generic::geometry;
-ECAD_INLINE ELayoutViewRenderer::ELayoutViewRenderer(const ELayoutViewRendererSettings & settings)
+ELayoutViewRenderer::ELayoutViewRenderer(const ELayoutViewRendererSettings & settings)
  : m_settings(settings)
 {
 }
 
-ECAD_INLINE bool ELayoutViewRenderer::Renderer(CPtr<ILayoutView> layout)
+bool ELayoutViewRenderer::Renderer(CPtr<ILayoutView> layout)
 {
     switch (m_settings.format) {
         case ELayoutViewRendererSettings::Format::PNG :
@@ -23,7 +23,7 @@ ECAD_INLINE bool ELayoutViewRenderer::Renderer(CPtr<ILayoutView> layout)
     }
 }
 
-ECAD_INLINE bool ELayoutViewRenderer::RendererPNG(CPtr<ILayoutView> layout)
+bool ELayoutViewRenderer::RendererPNG(CPtr<ILayoutView> layout)
 {   
     using namespace generic::geometry;
     

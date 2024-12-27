@@ -4,7 +4,7 @@
 namespace ecad {
 namespace model {
 namespace utils {
-ECAD_INLINE EPrismThermalModelQuery::EPrismThermalModelQuery(CPtr<EPrismThermalModel> model, bool lazyBuild)
+EPrismThermalModelQuery::EPrismThermalModelQuery(CPtr<EPrismThermalModel> model, bool lazyBuild)
  : m_model(model)
 {
     if (not lazyBuild) {
@@ -15,28 +15,28 @@ ECAD_INLINE EPrismThermalModelQuery::EPrismThermalModelQuery(CPtr<EPrismThermalM
     }
 }
 
-ECAD_INLINE void EPrismThermalModelQuery::SearchPrismInstances(const EBox2D & area, std::vector<RtVal> & results) const
+void EPrismThermalModelQuery::SearchPrismInstances(const EBox2D & area, std::vector<RtVal> & results) const
 {
     results.clear();
     auto rtree = BuildIndexTree();
     rtree->query(boost::geometry::index::covered_by(area), std::back_inserter(results));
 }
 
-ECAD_INLINE void EPrismThermalModelQuery::SearchPrismInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const
+void EPrismThermalModelQuery::SearchPrismInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const
 {
     results.clear();
     auto rtree = BuildLayerIndexTree(layer);
     rtree->query(boost::geometry::index::covered_by(area), std::back_inserter(results));
 }
 
-ECAD_INLINE void EPrismThermalModelQuery::SearchNearestPrismInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const
+void EPrismThermalModelQuery::SearchNearestPrismInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const
 {
     results.clear();
     auto rtree = BuildLayerIndexTree(layer);
     rtree->query(boost::geometry::index::nearest(pt, k), std::back_inserter(results));
 }
 
-ECAD_INLINE size_t EPrismThermalModelQuery::NearestLayer(EFloat height) const
+size_t EPrismThermalModelQuery::NearestLayer(EFloat height) const
 {
     using namespace generic::math;
     const auto & layers = m_model->layers;
@@ -49,7 +49,7 @@ ECAD_INLINE size_t EPrismThermalModelQuery::NearestLayer(EFloat height) const
     return layers.size() - 1;
 }
 
-ECAD_INLINE CPtr<EPrismThermalModelQuery::Rtree> EPrismThermalModelQuery::BuildIndexTree() const
+CPtr<EPrismThermalModelQuery::Rtree> EPrismThermalModelQuery::BuildIndexTree() const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (nullptr == m_rtree) {
@@ -66,7 +66,7 @@ ECAD_INLINE CPtr<EPrismThermalModelQuery::Rtree> EPrismThermalModelQuery::BuildI
     return m_rtree.get();
 }
 
-ECAD_INLINE CPtr<EPrismThermalModelQuery::Rtree> EPrismThermalModelQuery::BuildLayerIndexTree(size_t layer) const
+CPtr<EPrismThermalModelQuery::Rtree> EPrismThermalModelQuery::BuildLayerIndexTree(size_t layer) const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();

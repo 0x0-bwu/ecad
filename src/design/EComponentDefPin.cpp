@@ -7,7 +7,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EComponentDefPin::serialize(Archive & ar, const unsigned int version)
+void EComponentDefPin::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDefPin, IComponentDefPin>();
@@ -21,55 +21,55 @@ ECAD_INLINE void EComponentDefPin::serialize(Archive & ar, const unsigned int ve
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDefPin)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EComponentDefPin::EComponentDefPin()
+EComponentDefPin::EComponentDefPin()
  : EObject(std::string{})
 {
 }
 
-ECAD_INLINE EComponentDefPin::EComponentDefPin(const std::string & name)
+EComponentDefPin::EComponentDefPin(const std::string & name)
  : EObject(name)
 {
 }
 
-ECAD_INLINE EComponentDefPin::~EComponentDefPin()
+EComponentDefPin::~EComponentDefPin()
 {
 }
 
-ECAD_INLINE void EComponentDefPin::SetIOType(EPinIOType type)
+void EComponentDefPin::SetIOType(EPinIOType type)
 {
     m_type = type;
 }
 
-ECAD_INLINE EPinIOType EComponentDefPin::GetIOType() const
+EPinIOType EComponentDefPin::GetIOType() const
 {
     return m_type;
 }
 
-ECAD_INLINE void EComponentDefPin::SetLocation(EPoint2D location)
+void EComponentDefPin::SetLocation(EPoint2D location)
 {
     m_location = location;
 }
 
-ECAD_INLINE const EPoint2D & EComponentDefPin::GetLocation() const
+const EPoint2D & EComponentDefPin::GetLocation() const
 {
     return m_location;
 }
 
-ECAD_INLINE void EComponentDefPin::SetPadstackDef(CPtr<IPadstackDef> def)
+void EComponentDefPin::SetPadstackDef(CPtr<IPadstackDef> def)
 {
     m_padstackDef = def;
 }
     
-ECAD_INLINE CPtr<IPadstackDef> EComponentDefPin::GetPadstackDef() const
+CPtr<IPadstackDef> EComponentDefPin::GetPadstackDef() const
 {
     return m_padstackDef;
 }
 
-ECAD_INLINE void EComponentDefPin::SetLayerId(ELayerId lyrId)
+void EComponentDefPin::SetLayerId(ELayerId lyrId)
 {
     m_layer = lyrId;
 }
-ECAD_INLINE ELayerId EComponentDefPin::GetLayerId() const
+ELayerId EComponentDefPin::GetLayerId() const
 {
     return m_layer;
 }

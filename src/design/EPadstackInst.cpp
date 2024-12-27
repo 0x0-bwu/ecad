@@ -10,7 +10,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EPadstackInst::serialize(Archive & ar, const unsigned int version)
+void EPadstackInst::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPadstackInst, IPadstackInst>();
@@ -26,67 +26,67 @@ ECAD_INLINE void EPadstackInst::serialize(Archive & ar, const unsigned int versi
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackInst)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EPadstackInst::EPadstackInst()
+EPadstackInst::EPadstackInst()
  : EPadstackInst(std::string{}, nullptr, noNet)
 {
 }
 
-ECAD_INLINE EPadstackInst::EPadstackInst(std::string name, CPtr<IPadstackDef> def, ENetId net)
+EPadstackInst::EPadstackInst(std::string name, CPtr<IPadstackDef> def, ENetId net)
  : EConnObj(std::move(name), net)
  , m_def(def)
 {
 }
 
-ECAD_INLINE EPadstackInst::~EPadstackInst()
+EPadstackInst::~EPadstackInst()
 {
 }
 
-ECAD_INLINE void EPadstackInst::SetNet(ENetId net)
+void EPadstackInst::SetNet(ENetId net)
 {
     EConnObj::SetNet(net);
 }
 
-ECAD_INLINE ENetId EPadstackInst::GetNet() const
+ENetId EPadstackInst::GetNet() const
 {
     return EConnObj::GetNet();
 }
 
-ECAD_INLINE void EPadstackInst::SetLayerRange(ELayerId top, ELayerId bot)
+void EPadstackInst::SetLayerRange(ELayerId top, ELayerId bot)
 {
     m_topLyr = top; m_botLyr = bot;
 }
 
-ECAD_INLINE void EPadstackInst::SetLayerMap(CPtr<ILayerMap> layerMap)
+void EPadstackInst::SetLayerMap(CPtr<ILayerMap> layerMap)
 {
     m_layerMap = layerMap;
 }
 
-ECAD_INLINE CPtr<ILayerMap> EPadstackInst::GetLayerMap() const
+CPtr<ILayerMap> EPadstackInst::GetLayerMap() const
 {
     return m_layerMap;
 }
 
-ECAD_INLINE void EPadstackInst::GetLayerRange(ELayerId & top, ELayerId & bot) const
+void EPadstackInst::GetLayerRange(ELayerId & top, ELayerId & bot) const
 {
     top = m_topLyr; bot = m_botLyr;
 }
 
-ECAD_INLINE CPtr<IPadstackDef> EPadstackInst::GetPadstackDef() const
+CPtr<IPadstackDef> EPadstackInst::GetPadstackDef() const
 {
     return m_def;
 }
 
-ECAD_INLINE bool EPadstackInst::isLayoutPin() const
+bool EPadstackInst::isLayoutPin() const
 {
     return m_isLayoutPin;
 }
 
-ECAD_INLINE void EPadstackInst::SetIsLayoutPin(bool isPin)
+void EPadstackInst::SetIsLayoutPin(bool isPin)
 {
     m_isLayoutPin = isPin;
 }
 
-ECAD_INLINE UPtr<EShape> EPadstackInst::GetLayerShape(ELayerId lyr) const
+UPtr<EShape> EPadstackInst::GetLayerShape(ELayerId lyr) const
 {
     auto min = std::min(m_topLyr, m_botLyr);
     auto max = std::max(m_topLyr, m_botLyr);

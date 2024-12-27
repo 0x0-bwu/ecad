@@ -8,7 +8,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EPadstackDefCollection::serialize(Archive & ar, const unsigned int version)
+void EPadstackDefCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPadstackDefCollection, IPadstackDefCollection>();
@@ -19,26 +19,26 @@ ECAD_INLINE void EPadstackDefCollection::serialize(Archive & ar, const unsigned 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackDefCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EPadstackDefCollection::EPadstackDefCollection()
+EPadstackDefCollection::EPadstackDefCollection()
 {
 }
 
-ECAD_INLINE EPadstackDefCollection::~EPadstackDefCollection()
+EPadstackDefCollection::~EPadstackDefCollection()
 {
 }
 
-ECAD_INLINE EPadstackDefCollection::EPadstackDefCollection(const EPadstackDefCollection & other)
+EPadstackDefCollection::EPadstackDefCollection(const EPadstackDefCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EPadstackDefCollection & EPadstackDefCollection::operator= (const EPadstackDefCollection & other)
+EPadstackDefCollection & EPadstackDefCollection::operator= (const EPadstackDefCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IDefinition> EPadstackDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
+Ptr<IDefinition> EPadstackDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
 {
     auto type = definition->GetDefinitionType();
     auto padstackDef = dynamic_cast<Ptr<IPadstackDef> >(definition.get());
@@ -48,20 +48,20 @@ ECAD_INLINE Ptr<IDefinition> EPadstackDefCollection::AddDefinition(const std::st
     return GetDefinition(name, type);
 }
 
-ECAD_INLINE Ptr<IDefinition> EPadstackDefCollection::GetDefinition(const std::string & name, EDefinitionType type) const
+Ptr<IDefinition> EPadstackDefCollection::GetDefinition(const std::string & name, EDefinitionType type) const
 {
     if(type == EDefinitionType::PadstackDef && BaseCollection::Count(name))
         return dynamic_cast<Ptr<IDefinition> >(BaseCollection::At(name).get());
     return nullptr;
 }
 
-ECAD_INLINE std::string EPadstackDefCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
+std::string EPadstackDefCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
 {
     if(type == EDefinitionType::PadstackDef) return NextKey(*this, base);
     return std::string{};
 }
 
-ECAD_INLINE void EPadstackDefCollection::SetDatabase(CPtr<IDatabase> database)
+void EPadstackDefCollection::SetDatabase(CPtr<IDatabase> database)
 {
     auto psIter = GetPadstackDefIter();
     while(auto ps = psIter->Next()){
@@ -69,17 +69,17 @@ ECAD_INLINE void EPadstackDefCollection::SetDatabase(CPtr<IDatabase> database)
     }
 }
 
-ECAD_INLINE PadstackDefIter EPadstackDefCollection::GetPadstackDefIter() const
+PadstackDefIter EPadstackDefCollection::GetPadstackDefIter() const
 {
     return PadstackDefIter(new EPadstackDefIterator(*this));
 }
 
-ECAD_INLINE size_t EPadstackDefCollection::Size() const
+size_t EPadstackDefCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void EPadstackDefCollection::Clear()
+void EPadstackDefCollection::Clear()
 {
     BaseCollection::Clear();
 }

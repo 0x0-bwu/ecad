@@ -20,7 +20,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EDatabase::serialize(Archive & ar, const unsigned int version)
+void EDatabase::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
 
@@ -38,12 +38,12 @@ ECAD_INLINE void EDatabase::serialize(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EDatabase)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EDatabase::EDatabase()
+EDatabase::EDatabase()
  : EDatabase(std::string{})
 {
 }
 
-ECAD_INLINE EDatabase::EDatabase(std::string name)
+EDatabase::EDatabase(std::string name)
  : EObject(std::move(name))
 {
     EDefinitionCollection::AddDefinitionCollection(EDefinitionType::ComponentDef);
@@ -53,16 +53,16 @@ ECAD_INLINE EDatabase::EDatabase(std::string name)
     EDefinitionCollection::AddDefinitionCollection(EDefinitionType::Cell);
 }
 
-ECAD_INLINE EDatabase::~EDatabase()
+EDatabase::~EDatabase()
 {
 }
 
-ECAD_INLINE EDatabase::EDatabase(const EDatabase & other)
+EDatabase::EDatabase(const EDatabase & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EDatabase & EDatabase::operator= (const EDatabase & other)
+EDatabase & EDatabase::operator= (const EDatabase & other)
 {
     EDefinitionCollection::operator=(other);
     EDefinitionCollection::SetDatabase(this);
@@ -73,7 +73,7 @@ ECAD_INLINE EDatabase & EDatabase::operator= (const EDatabase & other)
 }
 
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
-ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt) const
+bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt) const
 {
     auto dir = generic::fs::DirName(archive);
     if (not generic::fs::CreateDir(dir)) return false;
@@ -101,7 +101,7 @@ ECAD_INLINE bool EDatabase::Save(const std::string & archive, EArchiveFormat fmt
     return true;
 }
 
-ECAD_INLINE bool EDatabase::Load(const std::string & archive, EArchiveFormat fmt)
+bool EDatabase::Load(const std::string & archive, EArchiveFormat fmt)
 {
     std::ifstream ifs(archive);
     if(!ifs.is_open()) return false;
@@ -127,27 +127,27 @@ ECAD_INLINE bool EDatabase::Load(const std::string & archive, EArchiveFormat fmt
 }
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE void EDatabase::SetCoordUnits(const ECoordUnits & u)
+void EDatabase::SetCoordUnits(const ECoordUnits & u)
 {
     m_coordUnits = u;
 }
 
-ECAD_INLINE const ECoordUnits & EDatabase::GetCoordUnits() const
+const ECoordUnits & EDatabase::GetCoordUnits() const
 {
     return m_coordUnits;
 }
 
-ECAD_INLINE std::string EDatabase::GetNextDefName(const std::string & base, EDefinitionType type) const
+std::string EDatabase::GetNextDefName(const std::string & base, EDefinitionType type) const
 {
     return EDefinitionCollection::GetNextDefName(base, type);
 }
 
-ECAD_INLINE Ptr<ICellCollection> EDatabase::GetCellCollection() const
+Ptr<ICellCollection> EDatabase::GetCellCollection() const
 {
     return dynamic_cast<Ptr<ICellCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::Cell));
 }
 
-ECAD_INLINE Ptr<ICell> EDatabase::CreateCircuitCell(const std::string & name)
+Ptr<ICell> EDatabase::CreateCircuitCell(const std::string & name)
 {
     if(EDefinitionCollection::GetDefinition(name, EDefinitionType::Cell)) return nullptr;
 
@@ -155,12 +155,12 @@ ECAD_INLINE Ptr<ICell> EDatabase::CreateCircuitCell(const std::string & name)
     return dynamic_cast<Ptr<ICell> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(cell)));
 }
 
-ECAD_INLINE Ptr<ICell> EDatabase::FindCellByName(const std::string & name) const
+Ptr<ICell> EDatabase::FindCellByName(const std::string & name) const
 {
     return dynamic_cast<Ptr<ICell> >(EDefinitionCollection::GetDefinition(name, EDefinitionType::Cell));
 }
 
-ECAD_INLINE bool EDatabase::GetCircuitCells(std::vector<Ptr<ICell> > & cells) const
+bool EDatabase::GetCircuitCells(std::vector<Ptr<ICell> > & cells) const
 {
     cells.clear();
     auto cellIter = GetCellCollection()->GetCellIter();
@@ -171,23 +171,23 @@ ECAD_INLINE bool EDatabase::GetCircuitCells(std::vector<Ptr<ICell> > & cells) co
     return cells.size() > 0;
 }
 
-ECAD_INLINE bool EDatabase::GetTopCells(std::vector<Ptr<ICell> > & cells) const
+bool EDatabase::GetTopCells(std::vector<Ptr<ICell> > & cells) const
 {
     return utils::EFlattenUtility::GetTopCells(const_cast<Ptr<EDatabase> >(this), cells);
 }
 
-ECAD_INLINE bool EDatabase::Flatten(Ptr<ICell> cell, size_t threads) const
+bool EDatabase::Flatten(Ptr<ICell> cell, size_t threads) const
 {
     utils::EFlattenUtility utility;
     return utility.Flatten(const_cast<Ptr<EDatabase> >(this), cell, threads);
 }
 
-ECAD_INLINE Ptr<IMaterialDefCollection> EDatabase::GetMaterialDefCollection() const
+Ptr<IMaterialDefCollection> EDatabase::GetMaterialDefCollection() const
 {
     return dynamic_cast<Ptr<IMaterialDefCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::MaterialDef));
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EDatabase::CreateMaterialDef(const std::string & name)
+Ptr<IMaterialDef> EDatabase::CreateMaterialDef(const std::string & name)
 {
     if (EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef)) return nullptr;
 
@@ -195,25 +195,25 @@ ECAD_INLINE Ptr<IMaterialDef> EDatabase::CreateMaterialDef(const std::string & n
     return dynamic_cast<Ptr<IMaterialDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(new EMaterialDef(name, this, id))));
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EDatabase::FindMaterialDefByName(const std::string & name) const
+Ptr<IMaterialDef> EDatabase::FindMaterialDefByName(const std::string & name) const
 {
     auto material = EDefinitionCollection::GetDefinition(name, EDefinitionType::MaterialDef);
     return dynamic_cast<Ptr<IMaterialDef> >(material);
 }
 
-ECAD_INLINE Ptr<IMaterialDef> EDatabase::FindMaterialDefById(EMaterialId id) const
+Ptr<IMaterialDef> EDatabase::FindMaterialDefById(EMaterialId id) const
 {
     auto matLib = dynamic_cast<Ptr<EMaterialDefCollection>>(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::MaterialDef));
     ECAD_ASSERT(nullptr != matLib);
     return matLib->FindMaterialDefById(id);
 }
 
-ECAD_INLINE Ptr<IComponentDefCollection> EDatabase::GetComponentDefCollection() const
+Ptr<IComponentDefCollection> EDatabase::GetComponentDefCollection() const
 {
     return dynamic_cast<Ptr<IComponentDefCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::ComponentDef));
 }
 
-ECAD_INLINE Ptr<IComponentDef> EDatabase::CreateComponentDef(const std::string & name)
+Ptr<IComponentDef> EDatabase::CreateComponentDef(const std::string & name)
 {
     if(EDefinitionCollection::GetDefinition(name, EDefinitionType::ComponentDef)) return nullptr;
 
@@ -221,18 +221,18 @@ ECAD_INLINE Ptr<IComponentDef> EDatabase::CreateComponentDef(const std::string &
     return dynamic_cast<Ptr<IComponentDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(compDef)));
 }
 
-ECAD_INLINE Ptr<IComponentDef> EDatabase::FindComponentDefByName(const std::string & name) const
+Ptr<IComponentDef> EDatabase::FindComponentDefByName(const std::string & name) const
 {
     auto compDef = EDefinitionCollection::GetDefinition(name, EDefinitionType::ComponentDef);
     return dynamic_cast<Ptr<IComponentDef> >(compDef);
 }
 
-ECAD_INLINE Ptr<ILayerMapCollection> EDatabase::GetLayerMapCollection() const
+Ptr<ILayerMapCollection> EDatabase::GetLayerMapCollection() const
 {
     return dynamic_cast<Ptr<ILayerMapCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::LayerMap));
 }
 
-ECAD_INLINE Ptr<ILayerMap> EDatabase::CreateLayerMap(const std::string & name)
+Ptr<ILayerMap> EDatabase::CreateLayerMap(const std::string & name)
 {
     if(EDefinitionCollection::GetDefinition(name, EDefinitionType::LayerMap)) return nullptr;
 
@@ -240,13 +240,13 @@ ECAD_INLINE Ptr<ILayerMap> EDatabase::CreateLayerMap(const std::string & name)
     return dynamic_cast<Ptr<ILayerMap> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(layerMap)));
 }
 
-ECAD_INLINE Ptr<ILayerMap> EDatabase::FindLayerMapByName(const std::string & name) const
+Ptr<ILayerMap> EDatabase::FindLayerMapByName(const std::string & name) const
 {
     auto layerMap = EDefinitionCollection::GetDefinition(name, EDefinitionType::LayerMap);
     return dynamic_cast<Ptr<ILayerMap> >(layerMap);
 }
 
-ECAD_INLINE bool EDatabase::AddLayerMap(UPtr<ILayerMap> layerMap)
+bool EDatabase::AddLayerMap(UPtr<ILayerMap> layerMap)
 {
     auto name = layerMap->GetName();
     if(EDefinitionCollection::GetDefinition(name, EDefinitionType::LayerMap)) return false;
@@ -256,12 +256,12 @@ ECAD_INLINE bool EDatabase::AddLayerMap(UPtr<ILayerMap> layerMap)
     return res != nullptr;
 }
 
-ECAD_INLINE Ptr<IPadstackDefCollection> EDatabase::GetPadstackDefCollection() const
+Ptr<IPadstackDefCollection> EDatabase::GetPadstackDefCollection() const
 {
     return dynamic_cast<Ptr<IPadstackDefCollection> >(EDefinitionCollection::GetDefinitionCollection(EDefinitionType::PadstackDef));
 }
 
-ECAD_INLINE Ptr<IPadstackDef> EDatabase::CreatePadstackDef(const std::string & name)
+Ptr<IPadstackDef> EDatabase::CreatePadstackDef(const std::string & name)
 {
     if(EDefinitionCollection::GetDefinition(name, EDefinitionType::PadstackDef)) return nullptr;
 
@@ -269,33 +269,33 @@ ECAD_INLINE Ptr<IPadstackDef> EDatabase::CreatePadstackDef(const std::string & n
     return dynamic_cast<Ptr<IPadstackDef> >(EDefinitionCollection::AddDefinition(name, UPtr<IDefinition>(padstackDef)));
 }
 
-ECAD_INLINE Ptr<IPadstackDef> EDatabase::FindPadstackDefByName(const std::string & name) const
+Ptr<IPadstackDef> EDatabase::FindPadstackDefByName(const std::string & name) const
 {
     auto psDef = EDefinitionCollection::GetDefinition(name, EDefinitionType::PadstackDef);
     return dynamic_cast<Ptr<IPadstackDef> >(psDef);
 }
 
-ECAD_INLINE CellIter EDatabase::GetCellIter() const
+CellIter EDatabase::GetCellIter() const
 {
     return GetCellCollection()->GetCellIter();
 }
 
-ECAD_INLINE LayerMapIter EDatabase::GetLayerMapIter() const
+LayerMapIter EDatabase::GetLayerMapIter() const
 {
     return GetLayerMapCollection()->GetLayerMapIter();
 }
 
-ECAD_INLINE MaterialDefIter EDatabase::GetMaterialDefIter() const
+MaterialDefIter EDatabase::GetMaterialDefIter() const
 {
     return GetMaterialDefCollection()->GetMaterialDefIter();
 }
 
-ECAD_INLINE PadstackDefIter EDatabase::GetPadstackDefIter() const
+PadstackDefIter EDatabase::GetPadstackDefIter() const
 {
     return GetPadstackDefCollection()->GetPadstackDefIter();
 }
 
-ECAD_INLINE void EDatabase::Clear()
+void EDatabase::Clear()
 {
     EDefinitionCollection::Clear();
 }

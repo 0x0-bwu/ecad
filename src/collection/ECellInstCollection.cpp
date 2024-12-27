@@ -8,7 +8,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ECellInstCollection::serialize(Archive & ar, const unsigned int version)
+void ECellInstCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ECellInstCollection, ICellInstCollection>();
@@ -18,32 +18,32 @@ ECAD_INLINE void ECellInstCollection::serialize(Archive & ar, const unsigned int
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ECellInstCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ECellInstCollection::ECellInstCollection()
+ECellInstCollection::ECellInstCollection()
 {
 }
 
-ECAD_INLINE ECellInstCollection::~ECellInstCollection()
+ECellInstCollection::~ECellInstCollection()
 {
 }
 
-ECAD_INLINE ECellInstCollection::ECellInstCollection(const ECellInstCollection & other)
+ECellInstCollection::ECellInstCollection(const ECellInstCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE ECellInstCollection & ECellInstCollection::operator= (const ECellInstCollection & other)
+ECellInstCollection & ECellInstCollection::operator= (const ECellInstCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<ICellInst> ECellInstCollection::AddCellInst(UPtr<ICellInst> cellInst)
+Ptr<ICellInst> ECellInstCollection::AddCellInst(UPtr<ICellInst> cellInst)
 {
    Append(std::move(cellInst));
    return Back().get();  
 }
 
-ECAD_INLINE Ptr<ICellInst> ECellInstCollection::CreateCellInst(Ptr<ILayoutView> reflayout, const std::string & name,
+Ptr<ICellInst> ECellInstCollection::CreateCellInst(Ptr<ILayoutView> reflayout, const std::string & name,
                                                                Ptr<ILayoutView> defLayout, const ETransform2D & transform)
 {
     auto cellInst = new ECellInst(name, reflayout, defLayout);
@@ -52,17 +52,17 @@ ECAD_INLINE Ptr<ICellInst> ECellInstCollection::CreateCellInst(Ptr<ILayoutView> 
     return Back().get();
 }
 
-ECAD_INLINE CellInstIter ECellInstCollection::GetCellInstIter() const
+CellInstIter ECellInstCollection::GetCellInstIter() const
 {
     return CellInstIter(new ECellInstIterator(*this));
 }
 
-ECAD_INLINE size_t ECellInstCollection::Size() const
+size_t ECellInstCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void ECellInstCollection::Clear()
+void ECellInstCollection::Clear()
 {
     BaseCollection::Clear();
 }

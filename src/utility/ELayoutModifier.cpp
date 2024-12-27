@@ -3,7 +3,7 @@
 namespace ecad {
 namespace utils {
 
-ECAD_INLINE bool ELayoutModifier::ModifyStackupLayerThickness(Ptr<ILayoutView> layout, const std::string & name, EFloat thickness)
+bool ELayoutModifier::ModifyStackupLayerThickness(Ptr<ILayoutView> layout, const std::string & name, EFloat thickness)
 {
     auto layer = layout->FindLayerByName(name);
     if (nullptr == layer) return false;
@@ -15,7 +15,7 @@ ECAD_INLINE bool ELayoutModifier::ModifyStackupLayerThickness(Ptr<ILayoutView> l
     return true;
 }
 
-ECAD_INLINE void ELayoutModifier::UpdateLayerStackupElevation(Ptr<ILayoutView> layout)
+void ELayoutModifier::UpdateLayerStackupElevation(Ptr<ILayoutView> layout)
 {
     std::vector<Ptr<IStackupLayer> > stackupLayers;
     layout->GetStackupLayers(stackupLayers);

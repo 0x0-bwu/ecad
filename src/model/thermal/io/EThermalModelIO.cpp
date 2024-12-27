@@ -6,7 +6,7 @@
 #include "generic/tools/Format.hpp"
 namespace ecad::model::io {
 
-ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(std::string_view filename, size_t reduceOrder, std::string * err)
+UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(std::string_view filename, size_t reduceOrder, std::string * err)
 {
     auto ctm = makeChipThermalModelFromCTMv1File(filename, err);
     if(nullptr == ctm) return nullptr;
@@ -14,7 +14,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1File(std::strin
     return makeGridThermalModelFromCTMv1Model(*ctm, reduceOrder, err);
 }
 
-ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const EChipThermalModelV1 & ctm, size_t reduceOrder, std::string * err)
+UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const EChipThermalModelV1 & ctm, size_t reduceOrder, std::string * err)
 {
     CPtr<EChipThermalModelV1> pCtm = &ctm;
     UPtr<EChipThermalModelV1> rdCtm = nullptr;
@@ -81,7 +81,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeGridThermalModelFromCTMv1Model(const ECh
     return model;
 }
 
-ECAD_INLINE UPtr<EChipThermalModelV1> makeChipThermalModelV1FromGridThermalModel(const EGridThermalModel & model, bool encrypted, size_t reduceOrder, std::string * err)
+UPtr<EChipThermalModelV1> makeChipThermalModelV1FromGridThermalModel(const EGridThermalModel & model, bool encrypted, size_t reduceOrder, std::string * err)
 {
     FCoord resX, resY;
     model.GetResolution(resX, resY);

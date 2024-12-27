@@ -13,7 +13,7 @@ namespace ecad::ext::dmcdom {
 
 using namespace generic;
 namespace fmt = generic::fmt;
-ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EFloat scale)
+bool ParseDomLine(const std::string & line , std::vector<EPoint2D> & points, EFloat scale)
 {
     double x{0}, y{0};
     std::stringstream(line) >> x >> y;
@@ -21,7 +21,7 @@ ECAD_INLINE bool ParseDomLine(const std::string & line , std::vector<EPoint2D> &
     return true;
 }
 
-ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & record, EFloat scale)
+bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & record, EFloat scale)
 {
     EDmcData data;
 
@@ -61,10 +61,10 @@ ECAD_INLINE bool ParseDmcLine(const std::string & line, std::vector<EDmcData> & 
     return true;
 }
 
-ECAD_INLINE ECadExtDmcDomHandler::ECadExtDmcDomHandler(const std::string & dmc, const std::string & dom, ECoordUnits units)
+ECadExtDmcDomHandler::ECadExtDmcDomHandler(const std::string & dmc, const std::string & dom, ECoordUnits units)
  : m_dmc(dmc), m_dom(dom), m_units(units) {}
 
-ECAD_INLINE Ptr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::string & name, std::string * err)
+Ptr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::string & name, std::string * err)
 {
     auto & mgr = EDataMgr::Instance();
     if(mgr.OpenDatabase(name)){
@@ -187,7 +187,7 @@ ECAD_INLINE Ptr<IDatabase> ECadExtDmcDomHandler::CreateDatabase(const std::strin
     return database;
 }
 
-ECAD_INLINE bool ECadExtDmcDomHandler::ParseDomFile(std::string_view filename, std::vector<EPoint2D> & points, std::string * err)
+bool ECadExtDmcDomHandler::ParseDomFile(std::string_view filename, std::vector<EPoint2D> & points, std::string * err)
 {
     std::ifstream in(filename.data());
     if (not in.is_open()) return false;
@@ -211,7 +211,7 @@ ECAD_INLINE bool ECadExtDmcDomHandler::ParseDomFile(std::string_view filename, s
     return true;
 }
 
-ECAD_INLINE bool ECadExtDmcDomHandler::ParseDmcFile(std::string_view filename, std::vector<EDmcData> & record, std::string * err)
+bool ECadExtDmcDomHandler::ParseDmcFile(std::string_view filename, std::vector<EDmcData> & record, std::string * err)
 {
     std::ifstream in(filename.data());
     if (not in.is_open()) return false;

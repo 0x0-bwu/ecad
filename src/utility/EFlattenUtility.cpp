@@ -8,7 +8,7 @@
 namespace ecad {
 namespace utils {
 
-ECAD_INLINE bool EFlattenUtility::Flatten(Ptr<IDatabase> database, Ptr<ICell> cell, size_t threads)
+bool EFlattenUtility::Flatten(Ptr<IDatabase> database, Ptr<ICell> cell, size_t threads)
 {
     ECAD_EFFICIENCY_TRACK("flatten")
 
@@ -24,7 +24,7 @@ ECAD_INLINE bool EFlattenUtility::Flatten(Ptr<IDatabase> database, Ptr<ICell> ce
     return executor.Run(*flattenFlow);
 }
 
-ECAD_INLINE UPtr<ECellNodeMap> EFlattenUtility::BuildCellNodeMap(Ptr<IDatabase> database)
+UPtr<ECellNodeMap> EFlattenUtility::BuildCellNodeMap(Ptr<IDatabase> database)
 {
     if(nullptr == database) return nullptr;
 
@@ -49,7 +49,7 @@ ECAD_INLINE UPtr<ECellNodeMap> EFlattenUtility::BuildCellNodeMap(Ptr<IDatabase> 
     return cellNodeMap;
 }
 
-ECAD_INLINE bool EFlattenUtility::GetTopCells(Ptr<IDatabase> database, std::vector<Ptr<ICell> > & tops)
+bool EFlattenUtility::GetTopCells(Ptr<IDatabase> database, std::vector<Ptr<ICell> > & tops)
 {
     tops.clear();
     auto cellNodeMap = BuildCellNodeMap(database);
@@ -64,7 +64,7 @@ ECAD_INLINE bool EFlattenUtility::GetTopCells(Ptr<IDatabase> database, std::vect
     return not tops.empty();
 }
 
-ECAD_INLINE void EFlattenUtility::ScheduleFlattenTasks(Ptr<FlattenFlow> flattenFlow, Ptr<FlattenNode> successor, const ECellNode & node)
+void EFlattenUtility::ScheduleFlattenTasks(Ptr<FlattenFlow> flattenFlow, Ptr<FlattenNode> successor, const ECellNode & node)
 {
     auto task = flattenFlow->Emplace(std::bind(&EFlattenUtility::FlattenOneCell, this, node.cell), node.cell->GetName());
     if(successor) task->Precede(successor);
@@ -72,7 +72,7 @@ ECAD_INLINE void EFlattenUtility::ScheduleFlattenTasks(Ptr<FlattenFlow> flattenF
         ScheduleFlattenTasks(flattenFlow, task, *dependent);
 }
 
-ECAD_INLINE void EFlattenUtility::FlattenOneCell(Ptr<ICell> cell)
+void EFlattenUtility::FlattenOneCell(Ptr<ICell> cell)
 {
     std::lock_guard<std::mutex> lock(m_flattenMutex);
     cell->GetFlattenedLayoutView();

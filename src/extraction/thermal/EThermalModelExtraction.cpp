@@ -19,7 +19,7 @@ using namespace ecad::model;
 using namespace ecad::utils;
 using namespace generic::geometry;
 
-ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayoutView> layout, const EThermalModelExtractionSettings & settings)
+UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayoutView> layout, const EThermalModelExtractionSettings & settings)
 {
     if (auto gridSettings = dynamic_cast<CPtr<EGridThermalModelExtractionSettings>>(&settings); gridSettings)
         return GenerateGridThermalModel(layout, *gridSettings);
@@ -31,7 +31,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateThermalModel(Ptr<ILayo
     return nullptr;
 }
 
-ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout, const EGridThermalModelExtractionSettings & settings)
+UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<ILayoutView> layout, const EGridThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate grid thermal model")
 
@@ -158,7 +158,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateGridThermalModel(Ptr<I
     return std::unique_ptr<IModel>(model);
 }
 
-ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const std::vector<EPoint2D> & steinerPoints, const ECoordUnits & coordUnits, const EPrismMeshSettings & meshSettings, 
+bool GenerateMesh(const std::vector<EPolygonData> & polygons, const std::vector<EPoint2D> & steinerPoints, const ECoordUnits & coordUnits, const EPrismMeshSettings & meshSettings, 
                                 tri::Triangulation<EPoint2D> & triangulation, std::string meshFile)
 {
     ECAD_TRACE("refine mesh, minAlpha: %1%, minLen: %2%, maxLen: %3%, tolerance: %4%, ite: %5%", 
@@ -180,7 +180,7 @@ ECAD_INLINE bool GenerateMesh(const std::vector<EPolygonData> & polygons, const 
     return true;
 }
 
-ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<ILayoutView> layout, const EPrismThermalModelExtractionSettings & settings)
+UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<ILayoutView> layout, const EPrismThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate prism thermal model")
     auto model = new EPrismThermalModel(layout, settings);
@@ -315,7 +315,7 @@ ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GeneratePrismThermalModel(Ptr<
     return std::unique_ptr<IModel>(model);
 }
 
-ECAD_INLINE UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalModel(Ptr<ILayoutView> layout, const EPrismThermalModelExtractionSettings & settings)
+UPtr<IModel> EThermalModelExtraction::GenerateStackupPrismThermalModel(Ptr<ILayoutView> layout, const EPrismThermalModelExtractionSettings & settings)
 {
     ECAD_EFFICIENCY_TRACK("generate stackup prism thermal model")
     auto model = new EStackupPrismThermalModel(layout, settings);

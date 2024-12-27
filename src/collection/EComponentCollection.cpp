@@ -7,7 +7,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EComponentCollection::serialize(Archive & ar, const unsigned int version)
+void EComponentCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentCollection, EComponentCollection>();
@@ -17,26 +17,26 @@ ECAD_INLINE void EComponentCollection::serialize(Archive & ar, const unsigned in
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EComponentCollection::EComponentCollection()
+EComponentCollection::EComponentCollection()
 {
 }
 
-ECAD_INLINE EComponentCollection::~EComponentCollection()
+EComponentCollection::~EComponentCollection()
 {
 }
 
-ECAD_INLINE EComponentCollection::EComponentCollection(const EComponentCollection & other)
+EComponentCollection::EComponentCollection(const EComponentCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EComponentCollection & EComponentCollection::operator= (const EComponentCollection & other)
+EComponentCollection & EComponentCollection::operator= (const EComponentCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IComponent> EComponentCollection::AddComponent(UPtr<IComponent> component)
+Ptr<IComponent> EComponentCollection::AddComponent(UPtr<IComponent> component)
 {
     auto name = component->GetName();
     if (Count(name)) {
@@ -48,7 +48,7 @@ ECAD_INLINE Ptr<IComponent> EComponentCollection::AddComponent(UPtr<IComponent> 
     return nullptr;
 }
 
-ECAD_INLINE Ptr<IComponent> EComponentCollection::CreateComponent(const std::string & name, CPtr<ILayoutView> refLayout, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped)
+Ptr<IComponent> EComponentCollection::CreateComponent(const std::string & name, CPtr<ILayoutView> refLayout, CPtr<IComponentDef> compDef, ELayerId layer, const ETransform2D & transform, bool flipped)
 {
     auto component = new EComponent(name, refLayout, compDef);
     component->SetPlacementLayer(layer);
@@ -59,24 +59,24 @@ ECAD_INLINE Ptr<IComponent> EComponentCollection::CreateComponent(const std::str
     return nullptr;
 }
 
-ECAD_INLINE ComponentIter EComponentCollection::GetComponentIter() const
+ComponentIter EComponentCollection::GetComponentIter() const
 {
     return ComponentIter(new EComponentIterator(*this));
 }
 
-ECAD_INLINE Ptr<IComponent> EComponentCollection::FindComponentByName(const std::string & name) const
+Ptr<IComponent> EComponentCollection::FindComponentByName(const std::string & name) const
 {
     auto iter = m_collection.find(name);
     if (iter == m_collection.cend()) return nullptr;
     return iter->second.get();
 }
 
-ECAD_INLINE size_t EComponentCollection::Size() const
+size_t EComponentCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void EComponentCollection::Clear()
+void EComponentCollection::Clear()
 {
     return BaseCollection::Clear();
 }

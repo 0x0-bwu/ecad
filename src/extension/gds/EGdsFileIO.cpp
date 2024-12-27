@@ -7,16 +7,16 @@ namespace ecad {
 namespace ext {
 namespace gds {
 
-ECAD_INLINE EGdsReader::EGdsReader(EGdsDB & db)
+EGdsReader::EGdsReader(EGdsDB & db)
  : m_db(db)
 {
 }
 
-ECAD_INLINE EGdsReader::~EGdsReader()
+EGdsReader::~EGdsReader()
 {
 }
 
-ECAD_INLINE bool EGdsReader::operator() (std::string_view filename)
+bool EGdsReader::operator() (std::string_view filename)
 {
     // calculate file size 
     std::ifstream in (filename.data());
@@ -36,7 +36,7 @@ ECAD_INLINE bool EGdsReader::operator() (std::string_view filename)
 	return res; 
 }
 
-ECAD_INLINE void EGdsReader::Reset()
+void EGdsReader::Reset()
 {
     m_string.clear();
     m_sname.clear(); 
@@ -56,27 +56,27 @@ ECAD_INLINE void EGdsReader::Reset()
     m_points.clear();
 }
 
-ECAD_INLINE void EGdsReader::PrintUnsupportedRecords()
+void EGdsReader::PrintUnsupportedRecords()
 {
     //todo
 }
 
-ECAD_INLINE void EGdsReader::ReadBitArray(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
+void EGdsReader::ReadBitArray(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
 {
     ReadInteger(recordType, dataType, data);
 }
 
-ECAD_INLINE void EGdsReader::ReadInteger2(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
+void EGdsReader::ReadInteger2(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
 {
     ReadInteger(recordType, dataType, data);
 }
 
-ECAD_INLINE void EGdsReader::ReadInteger4(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
+void EGdsReader::ReadInteger4(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
 {
     ReadInteger(recordType, dataType, data);   
 }
 
-ECAD_INLINE void EGdsReader::ReadInteger(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
+void EGdsReader::ReadInteger(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<int> & data)
 {
     ECAD_UNUSED(dataType)
     switch (recordType)
@@ -140,17 +140,17 @@ ECAD_INLINE void EGdsReader::ReadInteger(const EGdsRecords::EnumType & recordTyp
     }
 }
 
-ECAD_INLINE void EGdsReader::ReadReal4(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<double> & data)
+void EGdsReader::ReadReal4(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<double> & data)
 {
     ReadFloat(recordType, dataType, data);
 }
 
-ECAD_INLINE void EGdsReader::ReadReal8(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<double> & data)
+void EGdsReader::ReadReal8(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<double> & data)
 {
     ReadFloat(recordType, dataType, data);
 }
 
-ECAD_INLINE void EGdsReader::ReadFloat(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<double> & data)
+void EGdsReader::ReadFloat(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::vector<double> & data)
 {
     ECAD_UNUSED(dataType)
     switch (recordType)
@@ -177,7 +177,7 @@ ECAD_INLINE void EGdsReader::ReadFloat(const EGdsRecords::EnumType & recordType,
     }
 }
 
-ECAD_INLINE void EGdsReader::ReadString(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::string & data)
+void EGdsReader::ReadString(const EGdsRecords::EnumType & recordType, const EGdsData::EnumType & dataType, const std::string & data)
 {
     ECAD_ASSERT(dataType == EGdsData::STRING)
     switch (recordType)
@@ -211,7 +211,7 @@ ECAD_INLINE void EGdsReader::ReadString(const EGdsRecords::EnumType & recordType
     }   
 }
 
-ECAD_INLINE void EGdsReader::ReadBeginEnd(const EGdsRecords::EnumType & recordType)
+void EGdsReader::ReadBeginEnd(const EGdsRecords::EnumType & recordType)
 {
     switch (recordType)
     {

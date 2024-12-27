@@ -5,7 +5,7 @@
 
 namespace ecad::model::utils {
 
-ECAD_INLINE ELayerCutModelBuilder::ELayerCutModelBuilder(CPtr<ILayoutView> layout, Ptr<ELayerCutModel> model, ELayerCutModelBuildSettings settings)
+ELayerCutModelBuilder::ELayerCutModelBuilder(CPtr<ILayoutView> layout, Ptr<ELayerCutModel> model, ELayerCutModelBuildSettings settings)
  : m_layout(layout), m_model(model)
 {
     m_model->m_settings = std::move(settings);
@@ -13,7 +13,7 @@ ECAD_INLINE ELayerCutModelBuilder::ELayerCutModelBuilder(CPtr<ILayoutView> layou
     m_retriever = std::make_unique<ecad::utils::ELayoutRetriever>(m_layout);
 }
 
-ECAD_INLINE void ELayerCutModelBuilder::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness)
+void ELayerCutModelBuilder::AddShape(ENetId netId, EMaterialId solidMat, EMaterialId holeMat, CPtr<EShape> shape, EFloat elevation, EFloat thickness)
 {
     if (m_model->m_settings.addCircleCenterAsSteinerPoint) {
         if (EShapeType::Circle == shape->GetShapeType()) {
@@ -30,7 +30,7 @@ ECAD_INLINE void ELayerCutModelBuilder::AddShape(ENetId netId, EMaterialId solid
     else AddPolygon(netId, solidMat, shape->GetContour(), false, elevation, thickness);
 }
 
-ECAD_INLINE size_t ELayerCutModelBuilder::AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness)
+size_t ELayerCutModelBuilder::AddPolygon(ENetId netId, EMaterialId matId, EPolygonData polygon, bool isHole, EFloat elevation, EFloat thickness)
 {
     auto layerRange = GetLayerRange(elevation, thickness);
     if (not layerRange.isValid()) return invalidIndex;
@@ -42,7 +42,7 @@ ECAD_INLINE size_t ELayerCutModelBuilder::AddPolygon(ENetId netId, EMaterialId m
     return m_model->m_polygons.size() - 1;
 };
 
-ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EScenarioId scen, SPtr<ELookupTable1D> power, EFloat elevation, EFloat thickness, EFloat pwrPosition, EFloat pwrThickness)
+bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygonData polygon, EScenarioId scen, SPtr<ELookupTable1D> power, EFloat elevation, EFloat thickness, EFloat pwrPosition, EFloat pwrThickness)
 {
     auto index = AddPolygon(ENetId::noNet, matId, std::move(polygon), false, elevation, thickness);
     if (invalidIndex == index) return false;
@@ -52,7 +52,7 @@ ECAD_INLINE bool ELayerCutModelBuilder::AddPowerBlock(EMaterialId matId, EPolygo
     return true;
 }
 
-ECAD_INLINE void ELayerCutModelBuilder::AddComponent(CPtr<IComponent> component)
+void ELayerCutModelBuilder::AddComponent(CPtr<IComponent> component)
 {
     EFloat elevation, thickness;
     auto boundary = component->GetBoundary()->GetContour();
@@ -74,12 +74,12 @@ ECAD_INLINE void ELayerCutModelBuilder::AddComponent(CPtr<IComponent> component)
     }
 }
 
-ECAD_INLINE void ELayerCutModelBuilder::AddBondwire(ELayerCutModel::Bondwire bw)
+void ELayerCutModelBuilder::AddBondwire(ELayerCutModel::Bondwire bw)
 {
     m_model->m_bondwires.emplace_back(std::move(bw));
 }
 
-ECAD_INLINE void ELayerCutModelBuilder::AddImprintBox(const EBox2D & box)
+void ELayerCutModelBuilder::AddImprintBox(const EBox2D & box)
 {
     m_model->m_ranges.emplace_back(ELayerCutModel::LayerRange());
     m_model->m_polygons.emplace_back(generic::geometry::toPolygon(box));
@@ -87,17 +87,17 @@ ECAD_INLINE void ELayerCutModelBuilder::AddImprintBox(const EBox2D & box)
     m_model->m_nets.emplace_back(ENetId::noNet);
 }
 
-ECAD_INLINE CPtr<ELayerCutModelBuilder::LayoutRetriever> ELayerCutModelBuilder::GetLayoutRetriever() const
+CPtr<ELayerCutModelBuilder::LayoutRetriever> ELayerCutModelBuilder::GetLayoutRetriever() const
 {
     return m_retriever.get();
 }
 
-ECAD_INLINE ELayerCutModel::Height ELayerCutModelBuilder::GetHeight(EFloat height) const
+ELayerCutModel::Height ELayerCutModelBuilder::GetHeight(EFloat height) const
 {
     return m_model->GetHeight(height);
 }
 
-ECAD_INLINE ELayerCutModel::LayerRange ELayerCutModelBuilder::GetLayerRange(EFloat elevation, EFloat thickness) const
+ELayerCutModel::LayerRange ELayerCutModelBuilder::GetLayerRange(EFloat elevation, EFloat thickness) const
 {
     return m_model->GetLayerRange(elevation, thickness);
 }

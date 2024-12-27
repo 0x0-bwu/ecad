@@ -50,7 +50,7 @@ ECAD_API UPtr<EChipThermalModelV1> makeChipThermalModelFromCTMv1File(std::string
     return model;
 }
 
-ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModelV1 & model, std::string_view dirName, std::string_view filename, std::string * err)
+bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModelV1 & model, std::string_view dirName, std::string_view filename, std::string * err)
 {
     auto ctmDir = std::string(dirName) + GENERIC_FOLDER_SEPS + std::string(filename);
     if (not CreateDir(ctmDir)) {
@@ -108,7 +108,7 @@ ECAD_INLINE bool GenerateCTMv1FileFromChipThermalModelV1(const EChipThermalModel
     return true;
 }
 
-ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, std::string_view dirName, std::string * err)
+bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, std::string_view dirName, std::string * err)
 {
     using namespace detail;
     if (not CreateDir(dirName)) return false;
@@ -135,7 +135,7 @@ ECAD_INLINE bool GenerateCTMv1ImageProfiles(const EChipThermalModelV1 & model, s
 }
 
 namespace detail {
-ECAD_INLINE std::string UntarCTMv1File(std::string_view filename, std::string * err)
+std::string UntarCTMv1File(std::string_view filename, std::string * err)
 {
     if (not FileExists(filename)) {
         if(err) *err = Fmt2Str("Error: file %1% not exists!", filename);
@@ -155,7 +155,7 @@ ECAD_INLINE std::string UntarCTMv1File(std::string_view filename, std::string * 
     return res == 0 ? untarDir : std::string{};
 }
 
-ECAD_INLINE bool ParseCTMv1HeaderFile(std::string_view filename, ECTMv1Header & header, std::string * err)
+bool ParseCTMv1HeaderFile(std::string_view filename, ECTMv1Header & header, std::string * err)
 {
     std::ifstream fp(filename.data(), std::ios::in);
     if (not fp.good()) {
@@ -331,7 +331,7 @@ ECAD_INLINE bool ParseCTMv1HeaderFile(std::string_view filename, ECTMv1Header & 
     return true;
 }
 
-ECAD_INLINE bool ParseCTMv1PowerFile(std::string_view filename, EGridData & powers, std::string * err)
+bool ParseCTMv1PowerFile(std::string_view filename, EGridData & powers, std::string * err)
 {
     std::ifstream fp(filename.data(), std::ios::in | std::ios::binary);
     if (not fp.good()) {
@@ -379,7 +379,7 @@ ECAD_API bool ParseCTMv1DensityFile(std::string_view filename, const size_t size
     return true;
 }
 
-ECAD_INLINE bool WriteCTMv1HeaderFile(std::string_view filename, const ECTMv1Header & header, std::string * err)
+bool WriteCTMv1HeaderFile(std::string_view filename, const ECTMv1Header & header, std::string * err)
 {
     std::ofstream out(filename.data());
     if (not out.is_open()) {
@@ -451,7 +451,7 @@ ECAD_INLINE bool WriteCTMv1HeaderFile(std::string_view filename, const ECTMv1Hea
     return true;
 }
 
-ECAD_INLINE bool WriteCTMv1PowerFile(std::string_view filename, const EGridData & powers, std::string * err)
+bool WriteCTMv1PowerFile(std::string_view filename, const EGridData & powers, std::string * err)
 {
     std::ofstream out(filename.data(), std::ios::out |std::ios::binary);
     if(!out.is_open()) {
@@ -468,7 +468,7 @@ ECAD_INLINE bool WriteCTMv1PowerFile(std::string_view filename, const EGridData 
     return true;
 }
 
-ECAD_INLINE bool WriteCTMv1DensityFile(std::string_view filename, const size_t size, EFloat res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err)
+bool WriteCTMv1DensityFile(std::string_view filename, const size_t size, EFloat res, const FPoint2D & ref, const std::vector<SPtr<EGridData> > & density, std::string * err)
 {
     if (density.empty()) return false;
     for (const auto & layer : density) {
@@ -514,7 +514,7 @@ ECAD_INLINE bool WriteCTMv1DensityFile(std::string_view filename, const size_t s
     return true;
 }
 
-ECAD_INLINE bool GenerateCTMv1Package(std::string_view dirName, const std::string & packName, bool removeDir, std::string * err)
+bool GenerateCTMv1Package(std::string_view dirName, const std::string & packName, bool removeDir, std::string * err)
 {
     std::string cmd = Fmt2Str("tar zcf %1% -C %2% .", packName, dirName);
     int res = std::system(cmd.c_str());

@@ -10,21 +10,21 @@
 namespace ecad {
 namespace utils {
     
-ECAD_INLINE ELayout2CtmUtility::ELayout2CtmUtility(Ptr<ILayoutView> layout)
+ELayout2CtmUtility::ELayout2CtmUtility(Ptr<ILayoutView> layout)
  : m_layout(layout)
 {
 }
 
-ECAD_INLINE ELayout2CtmUtility::~ELayout2CtmUtility()
+ELayout2CtmUtility::~ELayout2CtmUtility()
 {
 }
     
-ECAD_INLINE void ELayout2CtmUtility::SetLayout2CtmSettings(const ELayout2CtmSettings & settings)
+void ELayout2CtmUtility::SetLayout2CtmSettings(const ELayout2CtmSettings & settings)
 {
     m_settings = settings;
 }
 
-ECAD_INLINE bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
+bool ELayout2CtmUtility::GenerateCTMv1File(std::string * err)
 {
     if(nullptr == m_layout) return false;
     if(m_settings.dirName.empty() || m_settings.filename.empty()) return false;

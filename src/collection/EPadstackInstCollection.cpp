@@ -11,7 +11,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EPadstackInstCollection::serialize(Archive & ar, const unsigned int version)
+void EPadstackInstCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EPadstackInstCollection, IPadstackInstCollection>();
@@ -21,33 +21,33 @@ ECAD_INLINE void EPadstackInstCollection::serialize(Archive & ar, const unsigned
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPadstackInstCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EPadstackInstCollection::EPadstackInstCollection()
+EPadstackInstCollection::EPadstackInstCollection()
 {
 }
 
-ECAD_INLINE EPadstackInstCollection::~EPadstackInstCollection()
+EPadstackInstCollection::~EPadstackInstCollection()
 {
 }
 
-ECAD_INLINE EPadstackInstCollection::EPadstackInstCollection(const EPadstackInstCollection & other)
+EPadstackInstCollection::EPadstackInstCollection(const EPadstackInstCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EPadstackInstCollection & EPadstackInstCollection::operator= (const EPadstackInstCollection & other)
+EPadstackInstCollection & EPadstackInstCollection::operator= (const EPadstackInstCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IPadstackInst> EPadstackInstCollection::AddPadstackInst(UPtr<IPadstackInst> psInst)
+Ptr<IPadstackInst> EPadstackInstCollection::AddPadstackInst(UPtr<IPadstackInst> psInst)
 {
     Append(std::move(psInst));
     return Back().get();
 }
 
 
-ECAD_INLINE Ptr<IPadstackInst> EPadstackInstCollection::CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,
+Ptr<IPadstackInst> EPadstackInstCollection::CreatePadstackInst(const std::string & name, CPtr<IPadstackDef> def, ENetId net,
                                                                             ELayerId topLyr,ELayerId botLyr, CPtr<ILayerMap> layerMap,
                                                                             const ETransform2D & transform)
 {
@@ -59,7 +59,7 @@ ECAD_INLINE Ptr<IPadstackInst> EPadstackInstCollection::CreatePadstackInst(const
     return AddPadstackInst(UPtr<IPadstackInst>(inst));
 }
 
-ECAD_INLINE void EPadstackInstCollection::Map(CPtr<ILayerMap> lyrMap)
+void EPadstackInstCollection::Map(CPtr<ILayerMap> lyrMap)
 {
     ELayerId top, bot;
     std::unordered_map<CPtr<ILayerMap>, CPtr<ILayerMap> > lyrMaps;
@@ -84,12 +84,12 @@ ECAD_INLINE void EPadstackInstCollection::Map(CPtr<ILayerMap> lyrMap)
     }
 }
 
-ECAD_INLINE PadstackInstIter EPadstackInstCollection::GetPadstackInstIter() const
+PadstackInstIter EPadstackInstCollection::GetPadstackInstIter() const
 {
     return PadstackInstIter(new EPadstackInstIterator(*this));
 }
 
-ECAD_INLINE size_t EPadstackInstCollection::Size() const
+size_t EPadstackInstCollection::Size() const
 {
     return BaseCollection::Size();
 }

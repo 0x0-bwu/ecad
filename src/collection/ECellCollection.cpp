@@ -8,7 +8,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ECellCollection::serialize(Archive & ar, const unsigned int version)
+void ECellCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ECellCollection, ICellCollection>();
@@ -18,26 +18,26 @@ ECAD_INLINE void ECellCollection::serialize(Archive & ar, const unsigned int ver
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ECellCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ECellCollection::ECellCollection()
+ECellCollection::ECellCollection()
 {
 }
 
-ECAD_INLINE ECellCollection::~ECellCollection()
+ECellCollection::~ECellCollection()
 {
 }
 
-ECAD_INLINE ECellCollection::ECellCollection(const ECellCollection & other)
+ECellCollection::ECellCollection(const ECellCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE ECellCollection & ECellCollection::operator= (const ECellCollection & other)
+ECellCollection & ECellCollection::operator= (const ECellCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IDefinition> ECellCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
+Ptr<IDefinition> ECellCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
 {
     auto type = definition->GetDefinitionType();
     auto cell = dynamic_cast<Ptr<ICell> >(definition.get());
@@ -47,20 +47,20 @@ ECAD_INLINE Ptr<IDefinition> ECellCollection::AddDefinition(const std::string & 
     return GetDefinition(name, type);
 }
 
-ECAD_INLINE Ptr<IDefinition> ECellCollection::GetDefinition(const std::string & name, EDefinitionType type) const
+Ptr<IDefinition> ECellCollection::GetDefinition(const std::string & name, EDefinitionType type) const
 {
     if(type == EDefinitionType::Cell && BaseCollection::Count(name))
         return dynamic_cast<Ptr<IDefinition> >(BaseCollection::At(name).get());
     return nullptr;
 }
 
-ECAD_INLINE std::string ECellCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
+std::string ECellCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
 {
     if(type == EDefinitionType::Cell) return NextKey(*this, base);
     return std::string{};
 }
 
-ECAD_INLINE void ECellCollection::SetDatabase(CPtr<IDatabase> database)
+void ECellCollection::SetDatabase(CPtr<IDatabase> database)
 {
     auto cellIter = GetCellIter();
     while(auto cell = cellIter->Next()){
@@ -68,17 +68,17 @@ ECAD_INLINE void ECellCollection::SetDatabase(CPtr<IDatabase> database)
     }
 }
 
-ECAD_INLINE CellIter ECellCollection::GetCellIter() const
+CellIter ECellCollection::GetCellIter() const
 {
     return CellIter(new ECellIterator(*this));
 }
 
-ECAD_INLINE size_t ECellCollection::Size() const
+size_t ECellCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void ECellCollection::Clear()
+void ECellCollection::Clear()
 {
     BaseCollection::Clear();
 }

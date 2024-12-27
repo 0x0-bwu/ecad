@@ -3,20 +3,20 @@
 namespace ecad {
 namespace model {
 namespace utils {
-ECAD_INLINE EThermalModelReduction::~EThermalModelReduction()
+EThermalModelReduction::~EThermalModelReduction()
 {
 }
 
-ECAD_INLINE EChipThermalModelV1Reduction::EChipThermalModelV1Reduction(EChipThermalModelV1 & model)
+EChipThermalModelV1Reduction::EChipThermalModelV1Reduction(EChipThermalModelV1 & model)
  : m_model(model)
 {
 }
 
-ECAD_INLINE EChipThermalModelV1Reduction::~EChipThermalModelV1Reduction()
+EChipThermalModelV1Reduction::~EChipThermalModelV1Reduction()
 {
 }
 
-ECAD_INLINE bool EChipThermalModelV1Reduction::Reduce()
+bool EChipThermalModelV1Reduction::Reduce()
 {
     if (m_model.header.tiles.x <= 1 || m_model.header.tiles.y <= 1) return false;
 
@@ -42,16 +42,16 @@ ECAD_INLINE bool EChipThermalModelV1Reduction::Reduce()
     return true;
 }
 
-ECAD_INLINE EGridThermalModelReduction::EGridThermalModelReduction(EGridThermalModel & model)
+EGridThermalModelReduction::EGridThermalModelReduction(EGridThermalModel & model)
  : m_model(model)
 {
 }
 
-ECAD_INLINE EGridThermalModelReduction::~EGridThermalModelReduction()
+EGridThermalModelReduction::~EGridThermalModelReduction()
 {
 }
 
-ECAD_INLINE bool EGridThermalModelReduction::Reduce()
+bool EGridThermalModelReduction::Reduce()
 {
     if(m_model.m_size.x <= 1 || m_model.m_size.y <= 1) return false;
 
@@ -88,7 +88,7 @@ ECAD_INLINE bool EGridThermalModelReduction::Reduce()
     return true;
 }
 
-ECAD_INLINE UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel & model, size_t order)
+UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel & model, size_t order)
 {
     auto copy = model;
     while(order != 0) {
@@ -99,7 +99,7 @@ ECAD_INLINE UPtr<EGridThermalModel> makeReductionModel(const EGridThermalModel &
     return std::make_unique<EGridThermalModel>(std::move(copy));
 }
 
-ECAD_INLINE UPtr<EChipThermalModelV1> makeReductionModel(const EChipThermalModelV1 & model, size_t order)
+UPtr<EChipThermalModelV1> makeReductionModel(const EChipThermalModelV1 & model, size_t order)
 {
     auto copy = model;
     while(order != 0) {
@@ -112,7 +112,7 @@ ECAD_INLINE UPtr<EChipThermalModelV1> makeReductionModel(const EChipThermalModel
 
 namespace detail {
 
-ECAD_INLINE ESize2D Reduce(const ESize2D & size, ReduceIndexMethod method)
+ESize2D Reduce(const ESize2D & size, ReduceIndexMethod method)
 {
     ESize2D result;
     switch (method) {
@@ -130,7 +130,7 @@ ECAD_INLINE ESize2D Reduce(const ESize2D & size, ReduceIndexMethod method)
     return result;
 }
 
-ECAD_INLINE EGridData Reduce(const EGridData & data, ReduceValueMethod method)
+EGridData Reduce(const EGridData & data, ReduceValueMethod method)
 {
     size_t nx = data.Width(), ny = data.Height();
     ESize2D size = Reduce(ESize2D(nx, ny), ReduceIndexMethod::Ceil);
@@ -181,7 +181,7 @@ ECAD_INLINE EGridData Reduce(const EGridData & data, ReduceValueMethod method)
     return result;
 }
 
-ECAD_INLINE UPtr<EGridDataTable> Reduce(const EGridDataTable & data, ReduceValueMethod method)
+UPtr<EGridDataTable> Reduce(const EGridDataTable & data, ReduceValueMethod method)
 {
     auto size = data.GetTableSize();
     auto keys = data.GetAllKeys();

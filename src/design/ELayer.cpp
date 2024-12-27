@@ -8,7 +8,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ELayer::serialize(Archive & ar, const unsigned int version)
+void ELayer::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ELayer, ILayer>();
@@ -20,43 +20,43 @@ ECAD_INLINE void ELayer::serialize(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayer)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ELayer::ELayer()
+ELayer::ELayer()
  : ELayer(std::string{}, noLayer)
 {
 }
 
-ECAD_INLINE ELayer::ELayer(std::string name, ELayerId id)
+ELayer::ELayer(std::string name, ELayerId id)
  : EObject(std::move(name))
  , m_layerId(id)
  , m_layerType(ELayerType::Invalid)
 {    
 }
 
-ECAD_INLINE ELayer::~ELayer()
+ELayer::~ELayer()
 {
 }
 
-ECAD_INLINE void ELayer::SetLayerId(ELayerId id)
+void ELayer::SetLayerId(ELayerId id)
 {
     m_layerId= id;
 }
 
-ECAD_INLINE ELayerId ELayer::GetLayerId() const
+ELayerId ELayer::GetLayerId() const
 {
     return m_layerId;
 }
 
-ECAD_INLINE ELayerType ELayer::GetLayerType() const
+ELayerType ELayer::GetLayerType() const
 {
     return m_layerType;
 }
     
-ECAD_INLINE Ptr<IStackupLayer> ELayer::GetStackupLayerFromLayer()
+Ptr<IStackupLayer> ELayer::GetStackupLayerFromLayer()
 {
     return dynamic_cast<Ptr<IStackupLayer> >(this);
 }
 
-ECAD_INLINE Ptr<IViaLayer> ELayer::GetViaLayerFromLayer()
+Ptr<IViaLayer> ELayer::GetViaLayerFromLayer()
 {
     return dynamic_cast<Ptr<IViaLayer> >(this);   
 }
@@ -64,7 +64,7 @@ ECAD_INLINE Ptr<IViaLayer> ELayer::GetViaLayerFromLayer()
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EStackupLayer::serialize(Archive & ar, const unsigned int version)
+void EStackupLayer::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EStackupLayer, IStackupLayer>();
@@ -78,76 +78,76 @@ ECAD_INLINE void EStackupLayer::serialize(Archive & ar, const unsigned int versi
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EStackupLayer)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EStackupLayer::EStackupLayer()
+EStackupLayer::EStackupLayer()
  : EStackupLayer(std::string{}, ELayerType::Invalid)
 {
 }
 
-ECAD_INLINE EStackupLayer::EStackupLayer(const std::string & name, ELayerType type)
+EStackupLayer::EStackupLayer(const std::string & name, ELayerType type)
  : ELayer(name)
 {
     m_layerType = type;
 }
 
-ECAD_INLINE EStackupLayer::~EStackupLayer()
+EStackupLayer::~EStackupLayer()
 {
 }
 
-ECAD_INLINE std::string EStackupLayer::GetName() const
+std::string EStackupLayer::GetName() const
 {
     return ELayer::GetName();
 }
-ECAD_INLINE void EStackupLayer::SetLayerId(ELayerId id)
+void EStackupLayer::SetLayerId(ELayerId id)
 {
     return ELayer::SetLayerId(id);
 }
 
-ECAD_INLINE ELayerId EStackupLayer::GetLayerId() const
+ELayerId EStackupLayer::GetLayerId() const
 {
     return ELayer::GetLayerId();
 }
 
-ECAD_INLINE ELayerType EStackupLayer::GetLayerType() const
+ELayerType EStackupLayer::GetLayerType() const
 {
     return ELayer::GetLayerType();
 }
 
-ECAD_INLINE void EStackupLayer::SetElevation(EFloat elevation)
+void EStackupLayer::SetElevation(EFloat elevation)
 {
     m_elevation = elevation;
 }
 
-ECAD_INLINE EFloat EStackupLayer::GetElevation() const
+EFloat EStackupLayer::GetElevation() const
 {
     return m_elevation;
 }
 
-ECAD_INLINE void EStackupLayer::SetThickness(EFloat thickness)
+void EStackupLayer::SetThickness(EFloat thickness)
 {
     m_thickness = thickness;
 }
 
-ECAD_INLINE EFloat EStackupLayer::GetThickness() const
+EFloat EStackupLayer::GetThickness() const
 {
     return m_thickness;
 }
 
-ECAD_INLINE void EStackupLayer::SetConductingMaterial(const std::string & material)
+void EStackupLayer::SetConductingMaterial(const std::string & material)
 {
     m_conductingMat = material;
 }
 
-ECAD_INLINE const std::string & EStackupLayer::GetConductingMaterial() const
+const std::string & EStackupLayer::GetConductingMaterial() const
 {
     return m_conductingMat;
 }
 
-ECAD_INLINE void EStackupLayer::SetDielectricMaterial(const std::string & material)
+void EStackupLayer::SetDielectricMaterial(const std::string & material)
 {
     m_dielectricMat = material;
 }
 
-ECAD_INLINE const std::string & EStackupLayer::GetDielectricMaterial() const
+const std::string & EStackupLayer::GetDielectricMaterial() const
 {
     return m_dielectricMat;
 }
@@ -155,7 +155,7 @@ ECAD_INLINE const std::string & EStackupLayer::GetDielectricMaterial() const
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EViaLayer::serialize(Archive & ar, const unsigned int version)
+void EViaLayer::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EViaLayer, IViaLayer>();
@@ -167,18 +167,18 @@ ECAD_INLINE void EViaLayer::serialize(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EViaLayer)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EViaLayer::EViaLayer()
+EViaLayer::EViaLayer()
  : EViaLayer(std::string{})
 {
 }
 
-ECAD_INLINE EViaLayer::EViaLayer(const std::string & name)
+EViaLayer::EViaLayer(const std::string & name)
  : ELayer(name)
 {
     m_layerType = ELayerType::DielectricLayer;
 }
 
-ECAD_INLINE EViaLayer::~EViaLayer()
+EViaLayer::~EViaLayer()
 {
 }
 

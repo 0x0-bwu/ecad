@@ -9,7 +9,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EComponentDefCollection::serialize(Archive & ar, const unsigned int version)
+void EComponentDefCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EComponentDefCollection, IComponentDefCollection>();
@@ -20,26 +20,26 @@ ECAD_INLINE void EComponentDefCollection::serialize(Archive & ar, const unsigned
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EComponentDefCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EComponentDefCollection::EComponentDefCollection()
+EComponentDefCollection::EComponentDefCollection()
 {
 }
 
-ECAD_INLINE EComponentDefCollection::~EComponentDefCollection()
+EComponentDefCollection::~EComponentDefCollection()
 {
 }
 
-ECAD_INLINE EComponentDefCollection::EComponentDefCollection(const EComponentDefCollection & other)
+EComponentDefCollection::EComponentDefCollection(const EComponentDefCollection & other)
 {
     *this = other;
 }
     
-ECAD_INLINE EComponentDefCollection & EComponentDefCollection::operator= (const EComponentDefCollection & other)
+EComponentDefCollection & EComponentDefCollection::operator= (const EComponentDefCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE Ptr<IDefinition> EComponentDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
+Ptr<IDefinition> EComponentDefCollection::AddDefinition(const std::string & name, UPtr<IDefinition> definition)
 {
     auto type = definition->GetDefinitionType();
     auto componentDef = dynamic_cast<Ptr<IComponentDef> >(definition.get());
@@ -49,20 +49,20 @@ ECAD_INLINE Ptr<IDefinition> EComponentDefCollection::AddDefinition(const std::s
     return GetDefinition(name, type);
 }
 
-ECAD_INLINE Ptr<IDefinition> EComponentDefCollection::GetDefinition(const std::string & name, EDefinitionType type) const
+Ptr<IDefinition> EComponentDefCollection::GetDefinition(const std::string & name, EDefinitionType type) const
 {
     if(type == EDefinitionType::ComponentDef && BaseCollection::Count(name))
         return dynamic_cast<Ptr<IDefinition> >(BaseCollection::At(name).get());
     return nullptr;
 }
 
-ECAD_INLINE std::string EComponentDefCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
+std::string EComponentDefCollection::GetNextDefName(const std::string & base, EDefinitionType type) const
 {
     if(type == EDefinitionType::ComponentDef) return NextKey(*this, base);
     return std::string{};
 }
 
-ECAD_INLINE void EComponentDefCollection::SetDatabase(CPtr<IDatabase> database)
+void EComponentDefCollection::SetDatabase(CPtr<IDatabase> database)
 {
     auto compDefIter = GetComponentDefIter();
     while(auto compDef = compDefIter->Next()) {
@@ -70,22 +70,22 @@ ECAD_INLINE void EComponentDefCollection::SetDatabase(CPtr<IDatabase> database)
     }
 }
 
-ECAD_INLINE ComponentDefIter EComponentDefCollection::GetComponentDefIter() const
+ComponentDefIter EComponentDefCollection::GetComponentDefIter() const
 {
     return ComponentDefIter(new EComponentDefIterator(*this));
 }
 
-ECAD_INLINE size_t EComponentDefCollection::Size() const
+size_t EComponentDefCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void EComponentDefCollection::Clear()
+void EComponentDefCollection::Clear()
 {
     BaseCollection::Clear();
 }
 
-ECAD_INLINE void EComponentDefCollection::PrintImp(std::ostream & os) const
+void EComponentDefCollection::PrintImp(std::ostream & os) const
 {
     BaseCollection::PrintImp(os);
     for (const auto & [name, def] : m_collection) {

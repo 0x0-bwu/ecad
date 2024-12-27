@@ -8,7 +8,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EConnObj::serialize(Archive & ar, const unsigned int version)
+void EConnObj::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EConnObj, IConnObj>();
@@ -19,18 +19,18 @@ ECAD_INLINE void EConnObj::serialize(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EConnObj)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EConnObj::EConnObj()
+EConnObj::EConnObj()
  : EConnObj(std::string{})
 {
 }
 
-ECAD_INLINE EConnObj::EConnObj(std::string name, ENetId net)
+EConnObj::EConnObj(std::string name, ENetId net)
  : EObject(std::move(name))
  , m_net(net)
 {
 }
 
-ECAD_INLINE EConnObj::~EConnObj()
+EConnObj::~EConnObj()
 {
 }
 

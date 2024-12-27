@@ -13,7 +13,7 @@ namespace ecad::model {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EPrismThermalModel::serialize(Archive & ar, const unsigned int version)
+void EPrismThermalModel::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EThermalModel);
@@ -33,24 +33,24 @@ ECAD_INLINE void EPrismThermalModel::serialize(Archive & ar, const unsigned int 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EPrismThermalModel)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EPrismThermalModel::EPrismThermalModel()
+EPrismThermalModel::EPrismThermalModel()
  : m_layout(nullptr), m_settings("", 1, {})
 {
 }
 
-ECAD_INLINE EPrismThermalModel::EPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings)
+EPrismThermalModel::EPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings)
  : m_layout(layout), m_settings(std::move(settings))
 {
     m_blockBCs.emplace(EOrientation::Top, std::vector<BlockBC>{});
     m_blockBCs.emplace(EOrientation::Bot, std::vector<BlockBC>{});
 }
 
-ECAD_INLINE void EPrismThermalModel::SetLayerPrismTemplate(size_t layer, SPtr<PrismTemplate> prismTemplate)
+void EPrismThermalModel::SetLayerPrismTemplate(size_t layer, SPtr<PrismTemplate> prismTemplate)
 {
     m_prismTemplates.emplace(layer, prismTemplate);
 }
 
-ECAD_INLINE SPtr<EPrismThermalModel::PrismTemplate> EPrismThermalModel::GetLayerPrismTemplate(size_t layer) const
+SPtr<EPrismThermalModel::PrismTemplate> EPrismThermalModel::GetLayerPrismTemplate(size_t layer) const
 {
     return m_prismTemplates.at(layer);
 }
@@ -60,17 +60,17 @@ CPtr<IMaterialDefCollection> EPrismThermalModel::GetMaterialLibrary() const
     return m_layout->GetDatabase()->GetMaterialDefCollection();
 }
 
-ECAD_INLINE void EPrismThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBoundaryCondition bc)
+void EPrismThermalModel::AddBlockBC(EOrientation orient, EBox2D block, EThermalBoundaryCondition bc)
 {
     m_blockBCs.at(orient).emplace_back(std::move(block), std::move(bc));
 }
 
-ECAD_INLINE PrismLayer & EPrismThermalModel::AppendLayer(PrismLayer layer)
+PrismLayer & EPrismThermalModel::AppendLayer(PrismLayer layer)
 {
     return layers.emplace_back(std::move(layer));
 }
 
-ECAD_INLINE LineElement & EPrismThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current, size_t scenario)
+LineElement & EPrismThermalModel::AddLineElement(FPoint3D start, FPoint3D end, ENetId netId, EMaterialId matId, EFloat radius, EFloat current, size_t scenario)
 {
     ECAD_ASSERT(TotalPrismElements() > 0/*should add after build prism model*/)
     LineElement & element = m_lines.emplace_back(LineElement{});
@@ -85,7 +85,7 @@ ECAD_INLINE LineElement & EPrismThermalModel::AddLineElement(FPoint3D start, FPo
     return element;
 }
 
-ECAD_INLINE void EPrismThermalModel::BuildPrismModel(EFloat scaleH2Unit, EFloat scale2Meter)
+void EPrismThermalModel::BuildPrismModel(EFloat scaleH2Unit, EFloat scale2Meter)
 {
     m_scaleH2Unit = scaleH2Unit;
     m_scale2Meter = scale2Meter;
@@ -149,7 +149,7 @@ ECAD_INLINE void EPrismThermalModel::BuildPrismModel(EFloat scaleH2Unit, EFloat 
     }
 }
 
-ECAD_INLINE void EPrismThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm)
+void EPrismThermalModel::AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm)
 {
     utils::EPrismThermalModelQuery query(this);
     for (const auto & bondwire : lcm->GetAllBondwires()) {

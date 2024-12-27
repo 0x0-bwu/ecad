@@ -9,7 +9,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void EMaterialProp::serialize(Archive & ar, const unsigned int version)
+void EMaterialProp::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialProp, IMaterialProp>();
@@ -18,7 +18,7 @@ ECAD_INLINE void EMaterialProp::serialize(Archive & ar, const unsigned int versi
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialProp)
 
 template <typename Archive>
-ECAD_INLINE void EMaterialPropValue::serialize(Archive & ar, const unsigned int version)
+void EMaterialPropValue::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialPropValue, IMaterialPropValue>();
@@ -29,7 +29,7 @@ ECAD_INLINE void EMaterialPropValue::serialize(Archive & ar, const unsigned int 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropValue)
 
 template <typename Archive>
-ECAD_INLINE void EMaterialPropTable::serialize(Archive & ar, const unsigned int version)
+void EMaterialPropTable::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialPropTable, IMaterialPropTable>();
@@ -41,7 +41,7 @@ ECAD_INLINE void EMaterialPropTable::serialize(Archive & ar, const unsigned int 
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropTable)
 
 template <typename Archive>
-ECAD_INLINE void EMaterialPropPolynomial::serialize(Archive & ar, const unsigned int version)
+void EMaterialPropPolynomial::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<EMaterialPropPolynomial, IMaterialPropPolynomial>();
@@ -53,57 +53,57 @@ ECAD_SERIALIZATION_FUNCTIONS_IMP(EMaterialPropPolynomial)
 
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EMaterialPropValue::EMaterialPropValue(const std::array<EFloat, 9> & values)
+EMaterialPropValue::EMaterialPropValue(const std::array<EFloat, 9> & values)
 {
     m_values.assign(values.begin(), values.end());
 }
 
-ECAD_INLINE EMaterialPropValue::EMaterialPropValue(const std::array<EFloat, 3> & values)
+EMaterialPropValue::EMaterialPropValue(const std::array<EFloat, 3> & values)
 {
     m_values.assign(values.begin(), values.end());
 }
 
-ECAD_INLINE EMaterialPropValue::EMaterialPropValue(EFloat value)
+EMaterialPropValue::EMaterialPropValue(EFloat value)
 {
     m_values.assign(1, value);
 }
 
-ECAD_INLINE EMaterialPropValue::EMaterialPropValue()
+EMaterialPropValue::EMaterialPropValue()
 {
     m_values.assign(1, invalidFloat);
 }
 
-ECAD_INLINE Ptr<IMaterialPropValue> EMaterialPropValue::GetPropValue()
+Ptr<IMaterialPropValue> EMaterialPropValue::GetPropValue()
 {
     return dynamic_cast<Ptr<IMaterialPropValue> >(this);
 }
 
-ECAD_INLINE void EMaterialPropValue::SetSimpleProperty(const EFloat & value)
+void EMaterialPropValue::SetSimpleProperty(const EFloat & value)
 {
     m_values.assign(1, value);
 }
 
-ECAD_INLINE void EMaterialPropValue::SetAnisotropicProperty(const std::array<EFloat, 3> & values)
+void EMaterialPropValue::SetAnisotropicProperty(const std::array<EFloat, 3> & values)
 {
     m_values.resize(3);
     for(size_t i = 0; i < 3; ++i)
         m_values[i] = values[i];
 }
 
-ECAD_INLINE void EMaterialPropValue::SetTensorProperty(const std::array<EFloat, 9> & values)
+void EMaterialPropValue::SetTensorProperty(const std::array<EFloat, 9> & values)
 {
     m_values.resize(9);
     for(size_t i = 0; i < 9; ++i)
         m_values[i] = values[i];
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetSimpleProperty(EFloat & value) const
+bool EMaterialPropValue::GetSimpleProperty(EFloat & value) const
 {
     value = m_values.at(0);
     return true; 
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetAnisotropicProperty(size_t row, EFloat & value) const
+bool EMaterialPropValue::GetAnisotropicProperty(size_t row, EFloat & value) const
 {
     if(row >= 3) return false;
     if(m_values.size() == 1)
@@ -118,7 +118,7 @@ ECAD_INLINE bool EMaterialPropValue::GetAnisotropicProperty(size_t row, EFloat &
     }
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetTensorProperty(size_t row, size_t col, EFloat & value) const
+bool EMaterialPropValue::GetTensorProperty(size_t row, size_t col, EFloat & value) const
 {
     if(row >= 3 || col >= 3) return false;
     if(m_values.size() == 1)
@@ -131,22 +131,22 @@ ECAD_INLINE bool EMaterialPropValue::GetTensorProperty(size_t row, size_t col, E
     }
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetSimpleProperty([[maybe_unused]] EFloat index, EFloat & value) const
+bool EMaterialPropValue::GetSimpleProperty([[maybe_unused]] EFloat index, EFloat & value) const
 {
     return GetSimpleProperty(value);
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetAnisotropicProperty([[maybe_unused]] EFloat index, size_t row, EFloat & value) const
+bool EMaterialPropValue::GetAnisotropicProperty([[maybe_unused]] EFloat index, size_t row, EFloat & value) const
 {
     return GetAnisotropicProperty(row, value);
 }
 
-ECAD_INLINE bool EMaterialPropValue::GetTensorProperty([[maybe_unused]] EFloat index, size_t row, size_t col, EFloat & value) const
+bool EMaterialPropValue::GetTensorProperty([[maybe_unused]] EFloat index, size_t row, size_t col, EFloat & value) const
 {
     return GetTensorProperty(row, col, value);
 }
 
-ECAD_INLINE void EMaterialPropValue::GetDimensions(size_t & row, size_t & col) const
+void EMaterialPropValue::GetDimensions(size_t & row, size_t & col) const
 {
     if (m_values.size() == 1) {
         row = 1; col = 1; return;
@@ -159,27 +159,27 @@ ECAD_INLINE void EMaterialPropValue::GetDimensions(size_t & row, size_t & col) c
     }
 }
 
-ECAD_INLINE EMaterialPropTable::EMaterialPropTable()
+EMaterialPropTable::EMaterialPropTable()
  : m_dependency(EMatDependency::Temperature)
 {
 }
 
-ECAD_INLINE EMaterialPropTable::EMaterialPropTable(EMatDependency dependency)
+EMaterialPropTable::EMaterialPropTable(EMatDependency dependency)
  : m_dependency(dependency)
 {
 }
 
-ECAD_INLINE Ptr<IMaterialPropTable> EMaterialPropTable::GetPropTable()
+Ptr<IMaterialPropTable> EMaterialPropTable::GetPropTable()
 {
     return dynamic_cast<Ptr<IMaterialPropTable> >(this);
 }
 
-ECAD_INLINE EMaterialPropTable::EMaterialPropTable(const EMaterialPropTable & other)
+EMaterialPropTable::EMaterialPropTable(const EMaterialPropTable & other)
 {
     *this = other;
 }
 
-ECAD_INLINE EMaterialPropTable & EMaterialPropTable::operator= (const EMaterialPropTable & other)
+EMaterialPropTable & EMaterialPropTable::operator= (const EMaterialPropTable & other)
 {
     m_dependency = other.m_dependency;
     m_values.clear();
@@ -189,21 +189,21 @@ ECAD_INLINE EMaterialPropTable & EMaterialPropTable::operator= (const EMaterialP
     return *this;  
 }
 
-ECAD_INLINE EMaterialPropPolynomial::EMaterialPropPolynomial(std::vector<std::vector<EFloat>> coefficients)
+EMaterialPropPolynomial::EMaterialPropPolynomial(std::vector<std::vector<EFloat>> coefficients)
  : m_coefficients(std::move(coefficients))
 {
 }
 
-ECAD_INLINE EMaterialPropPolynomial::EMaterialPropPolynomial()
+EMaterialPropPolynomial::EMaterialPropPolynomial()
 {
 }
 
-ECAD_INLINE Ptr<IMaterialPropPolynomial> EMaterialPropPolynomial::GetPropPolynomial()
+Ptr<IMaterialPropPolynomial> EMaterialPropPolynomial::GetPropPolynomial()
 {
     return dynamic_cast<Ptr<IMaterialPropPolynomial> >(this);
 }
 
-ECAD_INLINE EFloat EMaterialPropPolynomial::Calculate(const std::vector<EFloat> & coefficients, EFloat index)
+EFloat EMaterialPropPolynomial::Calculate(const std::vector<EFloat> & coefficients, EFloat index)
 {
     ECAD_ASSERT(not coefficients.empty())
     EFloat value = coefficients.front();
@@ -212,21 +212,21 @@ ECAD_INLINE EFloat EMaterialPropPolynomial::Calculate(const std::vector<EFloat> 
     return value;
 }
 
-ECAD_INLINE bool EMaterialPropPolynomial::GetSimpleProperty(EFloat index, EFloat & value) const
+bool EMaterialPropPolynomial::GetSimpleProperty(EFloat index, EFloat & value) const
 {
     const auto & coeffs = m_coefficients.front();
     value = Calculate(coeffs, index);
     return true;
 }
 
-ECAD_INLINE bool EMaterialPropPolynomial::GetAnisotropicProperty(EFloat index, size_t row, EFloat & value) const
+bool EMaterialPropPolynomial::GetAnisotropicProperty(EFloat index, size_t row, EFloat & value) const
 {
     const auto & coeffs = 3 == m_coefficients.size() ? m_coefficients.at(row) : m_coefficients.front();
     value = Calculate(coeffs, index);
     return true;
 }
 
-ECAD_INLINE bool EMaterialPropPolynomial::GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const
+bool EMaterialPropPolynomial::GetTensorProperty(EFloat index, size_t row, size_t col, EFloat & value) const
 {
     const auto & coeffs = 9 == m_coefficients.size() ? m_coefficients.at(row * 3 + col) :
                         (3 == m_coefficients.size() ? m_coefficients.at(row) : m_coefficients.front());
@@ -235,7 +235,7 @@ ECAD_INLINE bool EMaterialPropPolynomial::GetTensorProperty(EFloat index, size_t
 }
 
     //1x1-simple, 3x1-anisotropic, 3x3-tensor
-ECAD_INLINE void EMaterialPropPolynomial::GetDimensions(size_t & row, size_t & col) const
+void EMaterialPropPolynomial::GetDimensions(size_t & row, size_t & col) const
 {
     if (1 == m_coefficients.size()) {
         row = 1; col = 1;

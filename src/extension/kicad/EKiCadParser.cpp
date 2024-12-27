@@ -2,11 +2,11 @@
 #include "EKiCadObjects.h"
 namespace ecad::ext::kicad {
 
-ECAD_INLINE EKiCadParser::EKiCadParser()
+EKiCadParser::EKiCadParser()
 {
 }
 
-ECAD_INLINE bool EKiCadParser::operator() (std::string_view filename, Tree & tree)
+bool EKiCadParser::operator() (std::string_view filename, Tree & tree)
 {
     std::ifstream in(filename.data());
     if (not in.good()) {

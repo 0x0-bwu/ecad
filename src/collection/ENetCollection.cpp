@@ -7,7 +7,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void ENetCollection::serialize(Archive & ar, const unsigned int version)
+void ENetCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ENetCollection, INetCollection>();
@@ -18,37 +18,37 @@ ECAD_INLINE void ENetCollection::serialize(Archive & ar, const unsigned int vers
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ENetCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ENetCollection::ENetCollection()
+ENetCollection::ENetCollection()
 {
 }
 
-ECAD_INLINE ENetCollection::~ENetCollection()
+ENetCollection::~ENetCollection()
 {
 }
 
-ECAD_INLINE ENetCollection::ENetCollection(const ENetCollection & other)
+ENetCollection::ENetCollection(const ENetCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE ENetCollection & ENetCollection::operator= (const ENetCollection & other)
+ENetCollection & ENetCollection::operator= (const ENetCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE std::string ENetCollection::NextNetName(const std::string & name) const
+std::string ENetCollection::NextNetName(const std::string & name) const
 {
     return NextKey(*this, name);
 }
 
-ECAD_INLINE Ptr<INet> ENetCollection::FindNetByName(const std::string & name) const
+Ptr<INet> ENetCollection::FindNetByName(const std::string & name) const
 {
     if(!Count(name)) return nullptr;
     return At(name).get();
 }
 
-ECAD_INLINE Ptr<INet> ENetCollection::FindNetByNetId(ENetId netId) const
+Ptr<INet> ENetCollection::FindNetByNetId(ENetId netId) const
 {
     BuildNetIdLUT();
     auto iter = m_netIdNameMap->find(netId);
@@ -56,7 +56,7 @@ ECAD_INLINE Ptr<INet> ENetCollection::FindNetByNetId(ENetId netId) const
     return FindNetByName(iter->second);
 }
 
-ECAD_INLINE Ptr<INet> ENetCollection::CreateNet(const std::string & name)
+Ptr<INet> ENetCollection::CreateNet(const std::string & name)
 {
     if(Count(name)) return nullptr;
 
@@ -67,7 +67,7 @@ ECAD_INLINE Ptr<INet> ENetCollection::CreateNet(const std::string & name)
     return net;
 }
 
-ECAD_INLINE Ptr<INet> ENetCollection::AddNet(UPtr<INet> net)
+Ptr<INet> ENetCollection::AddNet(UPtr<INet> net)
 {
     auto name = NextNetName(net->GetName());
     net->SetName(name);
@@ -78,29 +78,29 @@ ECAD_INLINE Ptr<INet> ENetCollection::AddNet(UPtr<INet> net)
 }
 
 
-ECAD_INLINE NetIter ENetCollection::GetNetIter() const
+NetIter ENetCollection::GetNetIter() const
 {
     return NetIter(new ENetIterator(*this));
 }
 
-ECAD_INLINE size_t ENetCollection::Size() const
+size_t ENetCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE void ENetCollection::Clear()
+void ENetCollection::Clear()
 {
     ResetNetIdLUT();
     m_uidGen.Reset();
     BaseCollection::Clear();
 }
 
-ECAD_INLINE Ptr<ENetCollection> ENetCollection::CloneImp() const
+Ptr<ENetCollection> ENetCollection::CloneImp() const
 {
     return new ENetCollection(*this);
 }
 
-ECAD_INLINE void ENetCollection::BuildNetIdLUT() const
+void ENetCollection::BuildNetIdLUT() const
 {
     if(nullptr == m_netIdNameMap) {
         m_netIdNameMap = std::make_unique<NetIdNameMap>();
@@ -111,7 +111,7 @@ ECAD_INLINE void ENetCollection::BuildNetIdLUT() const
     }
 }
 
-ECAD_INLINE void ENetCollection::ResetNetIdLUT()
+void ENetCollection::ResetNetIdLUT()
 {
     m_netIdNameMap.reset();
 }

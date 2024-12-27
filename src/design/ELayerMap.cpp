@@ -7,7 +7,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void ELayerMap::serialize(Archive & ar, const unsigned int version)
+void ELayerMap::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ELayerMap, ILayerMap>();
@@ -18,43 +18,43 @@ ECAD_INLINE void ELayerMap::serialize(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayerMap)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ELayerMap::ELayerMap()
+ELayerMap::ELayerMap()
  : ELayerMap(std::string{}, nullptr)
 {
 }
 
-ECAD_INLINE ELayerMap::ELayerMap(std::string name, CPtr<IDatabase> database)
+ELayerMap::ELayerMap(std::string name, CPtr<IDatabase> database)
  : EDefinition(std::move(name), database)
 {
     SetMapping(ELayerId::noLayer, ELayerId::noLayer);
     SetMapping(ELayerId::ComponentLayer, ELayerId::ComponentLayer);
 }
 
-ECAD_INLINE ELayerMap::~ELayerMap()
+ELayerMap::~ELayerMap()
 {
 }
 
-ECAD_INLINE void ELayerMap::SetDatabase(CPtr<IDatabase> database)
+void ELayerMap::SetDatabase(CPtr<IDatabase> database)
 {
     return EDefinition::SetDatabase(database);
 }
 
-ECAD_INLINE CPtr<IDatabase> ELayerMap::GetDatabase() const
+CPtr<IDatabase> ELayerMap::GetDatabase() const
 {
     return EDefinition::GetDatabase();
 }
 
-ECAD_INLINE EDefinitionType ELayerMap::GetDefinitionType() const
+EDefinitionType ELayerMap::GetDefinitionType() const
 {
     return EDefinitionType::LayerMap;
 }
 
-ECAD_INLINE void ELayerMap::SetMapping(ELayerId from, ELayerId to)
+void ELayerMap::SetMapping(ELayerId from, ELayerId to)
 {
     m_layerIdMap.insert(LayerIdMap::value_type(from, to));
 }
 
-ECAD_INLINE void ELayerMap::MappingLeft(CPtr<ILayerMap> layerMap)
+void ELayerMap::MappingLeft(CPtr<ILayerMap> layerMap)
 {
     LayerIdMap layerIdMap;
     auto iter = m_layerIdMap.left.begin();
@@ -63,7 +63,7 @@ ECAD_INLINE void ELayerMap::MappingLeft(CPtr<ILayerMap> layerMap)
     m_layerIdMap = std::move(layerIdMap);
 }
 
-ECAD_INLINE void ELayerMap::MappingRight(CPtr<ILayerMap> layerMap)
+void ELayerMap::MappingRight(CPtr<ILayerMap> layerMap)
 {
     LayerIdMap layerIdMap;
     auto iter = m_layerIdMap.left.begin();
@@ -72,13 +72,13 @@ ECAD_INLINE void ELayerMap::MappingRight(CPtr<ILayerMap> layerMap)
     m_layerIdMap = std::move(layerIdMap);
 }
 
-ECAD_INLINE ELayerId ELayerMap::GetMappingForward(ELayerId from) const
+ELayerId ELayerMap::GetMappingForward(ELayerId from) const
 {
     if(!m_layerIdMap.left.count(from)) return noLayer;
     return m_layerIdMap.left.at(from);
 }
 
-ECAD_INLINE ELayerId ELayerMap::GetMappingBackward(ELayerId to) const
+ELayerId ELayerMap::GetMappingBackward(ELayerId to) const
 {
     if(!m_layerIdMap.right.count(to)) return noLayer;
     return m_layerIdMap.right.at(to);

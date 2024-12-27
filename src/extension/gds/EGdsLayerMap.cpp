@@ -7,40 +7,40 @@ namespace ecad {
 namespace ext {
 namespace gds {
 
-ECAD_INLINE const std::list<EGdsLayer> & EGdsLayerMap::GetAllLayers() const
+const std::list<EGdsLayer> & EGdsLayerMap::GetAllLayers() const
 {
     return m_layers;
 }
 
-ECAD_INLINE CPtr<EGdsLayer> EGdsLayerMap::GetLayer(int id) const
+CPtr<EGdsLayer> EGdsLayerMap::GetLayer(int id) const
 {
     auto iter = m_lyrIdMap.find(id);
     if(iter == m_lyrIdMap.end()) return nullptr;
     else return iter->second;
 }
 
-ECAD_INLINE void EGdsLayerMap::AddLayer(EGdsLayer layer)
+void EGdsLayerMap::AddLayer(EGdsLayer layer)
 {
     m_layers.emplace_back(std::move(layer));
     m_lyrIdMap.insert(std::make_pair(m_layers.back().layerId, &(m_layers.back())));
 }
 
-ECAD_INLINE void EGdsLayerMap::Clear()
+void EGdsLayerMap::Clear()
 {
     m_layers.clear();
     m_lyrIdMap.clear();
 }
 
-ECAD_INLINE EGdsLayerMapParser::EGdsLayerMapParser(EGdsLayerMap & layerMap)
+EGdsLayerMapParser::EGdsLayerMapParser(EGdsLayerMap & layerMap)
  : m_layerMap(layerMap)
 {
 }
 
-ECAD_INLINE EGdsLayerMapParser::~EGdsLayerMapParser()
+EGdsLayerMapParser::~EGdsLayerMapParser()
 {
 }
 
-ECAD_INLINE bool EGdsLayerMapParser::operator() (std::string_view filename)
+bool EGdsLayerMapParser::operator() (std::string_view filename)
 {
     std::ifstream fp(filename.data());
     if(!fp.good()) return false;
@@ -51,7 +51,7 @@ ECAD_INLINE bool EGdsLayerMapParser::operator() (std::string_view filename)
     return res;
 }
 
-ECAD_INLINE bool EGdsLayerMapParser::operator() (std::istream & fp)
+bool EGdsLayerMapParser::operator() (std::istream & fp)
 {
     std::string line;
     while(!fp.eof()){
@@ -67,7 +67,7 @@ ECAD_INLINE bool EGdsLayerMapParser::operator() (std::istream & fp)
     return true;
 }
 
-ECAD_INLINE bool EGdsLayerMapParser::ParseOneLine(const std::string & line, EGdsLayer & layer)
+bool EGdsLayerMapParser::ParseOneLine(const std::string & line, EGdsLayer & layer)
 {
     using namespace generic::str;
 

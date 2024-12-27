@@ -5,7 +5,7 @@
 namespace ecad {
 namespace utils {
 
-ECAD_INLINE bool ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ICellInst> cellInst)
+bool ELayoutMergeUtility::Merge(Ptr<ILayoutView> layout, CPtr<ICellInst> cellInst)
 {
     auto other = cellInst->GetFlattenedLayoutView();
     if(layout == other) return false;

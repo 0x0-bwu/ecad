@@ -8,7 +8,7 @@ namespace ecad {
 namespace ext {
 namespace gds {
 
-ECAD_INLINE EGdsParser::EGdsParser(EGdsReader & reader)
+EGdsParser::EGdsParser(EGdsReader & reader)
  : m_reader(reader)
 {
     m_bcap = 4 * 1024;// 4KB
@@ -17,7 +17,7 @@ ECAD_INLINE EGdsParser::EGdsParser(EGdsReader & reader)
     m_bptr = m_buffer;
 }
 
-ECAD_INLINE EGdsParser::~EGdsParser()
+EGdsParser::~EGdsParser()
 {   
     if (m_buffer) {
         delete [] m_buffer;
@@ -25,7 +25,7 @@ ECAD_INLINE EGdsParser::~EGdsParser()
     }
 }
 
-ECAD_INLINE bool EGdsParser::operator() (std::string_view filename)
+bool EGdsParser::operator() (std::string_view filename)
 {
     std::ifstream fp(filename.data());
     if (not fp.good()) {
@@ -38,7 +38,7 @@ ECAD_INLINE bool EGdsParser::operator() (std::string_view filename)
     return res;
 }
 
-ECAD_INLINE bool EGdsParser::operator() (std::istream & fp)
+bool EGdsParser::operator() (std::istream & fp)
 {
 	unsigned char * noByteArray;
 	int noRead;
@@ -249,7 +249,7 @@ ECAD_INLINE bool EGdsParser::operator() (std::istream & fp)
 	return true;
 }
 
-ECAD_INLINE const char * EGdsParser::Parse(std::istream & fp, int & noRead, size_t n)
+const char * EGdsParser::Parse(std::istream & fp, int & noRead, size_t n)
 {
     if(m_blen < n){
         if(m_bcap < n * 2){
@@ -291,13 +291,13 @@ ECAD_INLINE const char * EGdsParser::Parse(std::istream & fp, int & noRead, size
     }
 }
 
-ECAD_INLINE void EGdsParser::FindRecordType(int numeric, EGdsRecords::EnumType & recordType, int & expectedDataType)
+void EGdsParser::FindRecordType(int numeric, EGdsRecords::EnumType & recordType, int & expectedDataType)
 {
     recordType = GdsRecordType(numeric);
     expectedDataType = GdsRecordExpectedData(recordType);
 }
 
-ECAD_INLINE void EGdsParser::FindDataType(int numeric, EGdsData::EnumType & dataType)
+void EGdsParser::FindDataType(int numeric, EGdsData::EnumType & dataType)
 {
     dataType = GdsDataType(numeric);
 }

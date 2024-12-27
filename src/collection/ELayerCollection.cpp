@@ -9,7 +9,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ELayerCollection::serialize(Archive & ar, const unsigned int version)
+void ELayerCollection::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ELayerCollection, ILayerCollection>();
@@ -19,26 +19,26 @@ ECAD_INLINE void ELayerCollection::serialize(Archive & ar, const unsigned int ve
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayerCollection)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ELayerCollection::ELayerCollection()
+ELayerCollection::ELayerCollection()
 {
 }
 
-ECAD_INLINE ELayerCollection::~ELayerCollection()
+ELayerCollection::~ELayerCollection()
 {
 }
 
-ECAD_INLINE ELayerCollection::ELayerCollection(const ELayerCollection & other)
+ELayerCollection::ELayerCollection(const ELayerCollection & other)
 {
     *this = other;
 }
 
-ECAD_INLINE ELayerCollection & ELayerCollection::operator= (const ELayerCollection & other)
+ELayerCollection & ELayerCollection::operator= (const ELayerCollection & other)
 {
     BaseCollection::operator=(other);
     return *this;
 }
 
-ECAD_INLINE ELayerId ELayerCollection::AppendLayer(UPtr<ILayer> layer)
+ELayerId ELayerCollection::AppendLayer(UPtr<ILayer> layer)
 {
     auto id = static_cast<ELayerId>(Size());
     layer->SetLayerId(id);
@@ -46,7 +46,7 @@ ECAD_INLINE ELayerId ELayerCollection::AppendLayer(UPtr<ILayer> layer)
     return id;
 }
 
-ECAD_INLINE std::vector<ELayerId> ELayerCollection::AppendLayers(std::vector<UPtr<ILayer> > layers)
+std::vector<ELayerId> ELayerCollection::AppendLayers(std::vector<UPtr<ILayer> > layers)
 {
     std::vector<ELayerId> ids(layers.size());
     for(size_t i = 0; i < layers.size(); ++i)
@@ -54,7 +54,7 @@ ECAD_INLINE std::vector<ELayerId> ELayerCollection::AppendLayers(std::vector<UPt
     return ids;
 }
 
-ECAD_INLINE UPtr<ILayerMap> ELayerCollection::AddDefaultDielectricLayers()
+UPtr<ILayerMap> ELayerCollection::AddDefaultDielectricLayers()
 {
     auto curr = m_collection.begin();
     auto next = curr; next++;
@@ -70,7 +70,7 @@ ECAD_INLINE UPtr<ILayerMap> ELayerCollection::AddDefaultDielectricLayers()
     return MakeLayerIdOrdered();
 }
 
-ECAD_INLINE UPtr<ILayerMap> ELayerCollection::GetDefaultLayerMap() const
+UPtr<ILayerMap> ELayerCollection::GetDefaultLayerMap() const
 {
     auto lyrMap = UPtr<ILayerMap>(new ELayerMap);
     for(const auto & layer : m_collection){
@@ -80,7 +80,7 @@ ECAD_INLINE UPtr<ILayerMap> ELayerCollection::GetDefaultLayerMap() const
     return lyrMap;
 }
 
-ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const
+void ELayerCollection::GetStackupLayers(std::vector<Ptr<IStackupLayer> > & layers) const
 {
     layers.clear();
     for(const auto & layer : m_collection) {
@@ -89,7 +89,7 @@ ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<Ptr<IStackupLaye
     }
 }
 
-ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const
+void ELayerCollection::GetStackupLayers(std::vector<CPtr<IStackupLayer> > & layers) const
 {
     layers.clear();
     for(const auto & layer : m_collection) {
@@ -98,24 +98,24 @@ ECAD_INLINE void ELayerCollection::GetStackupLayers(std::vector<CPtr<IStackupLay
     }
 }
 
-ECAD_INLINE LayerIter ELayerCollection::GetLayerIter() const
+LayerIter ELayerCollection::GetLayerIter() const
 {
     return LayerIter(new ELayerIterator(*this));
 }
 
-ECAD_INLINE size_t ELayerCollection::Size() const
+size_t ELayerCollection::Size() const
 {
     return BaseCollection::Size();
 }
 
-ECAD_INLINE Ptr<ILayer> ELayerCollection::FindLayerByLayerId(ELayerId lyrId) const
+Ptr<ILayer> ELayerCollection::FindLayerByLayerId(ELayerId lyrId) const
 {
     size_t index = static_cast<size_t>(lyrId);
     if(index >= Size()) return nullptr;
     return At(index).get();
 }
 
-ECAD_INLINE Ptr<ILayer> ELayerCollection::FindLayerByName(const std::string & name) const
+Ptr<ILayer> ELayerCollection::FindLayerByName(const std::string & name) const
 {
     for(const auto & layer : m_collection){
         if(name == layer->GetName())
@@ -124,7 +124,7 @@ ECAD_INLINE Ptr<ILayer> ELayerCollection::FindLayerByName(const std::string & na
     return nullptr;
 }
 
-ECAD_INLINE std::string ELayerCollection::GetNextLayerName(const std::string & base) const
+std::string ELayerCollection::GetNextLayerName(const std::string & base) const
 {
     if(nullptr == FindLayerByName(base)) return base;
     size_t index = 1;
@@ -136,12 +136,12 @@ ECAD_INLINE std::string ELayerCollection::GetNextLayerName(const std::string & b
     return "";
 }
 
-ECAD_INLINE Ptr<ELayerCollection> ELayerCollection::CloneImp() const
+Ptr<ELayerCollection> ELayerCollection::CloneImp() const
 {
     return new ELayerCollection(*this);
 }
 
-ECAD_INLINE UPtr<ILayerMap> ELayerCollection::MakeLayerIdOrdered()
+UPtr<ILayerMap> ELayerCollection::MakeLayerIdOrdered()
 {
     auto lyrMap = UPtr<ILayerMap>(new ELayerMap);
     for(size_t i = 0; i < m_collection.size(); ++i){

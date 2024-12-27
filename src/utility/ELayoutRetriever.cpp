@@ -6,12 +6,12 @@
 namespace ecad {
 namespace utils {
 
-ECAD_INLINE ELayoutRetriever::ELayoutRetriever(CPtr<ILayoutView> layout)
+ELayoutRetriever::ELayoutRetriever(CPtr<ILayoutView> layout)
  : m_layout(layout)
 {
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetLayerStackupHeightThickness(EFloat & elevation, EFloat & thickness) const
+bool ELayoutRetriever::GetLayerStackupHeightThickness(EFloat & elevation, EFloat & thickness) const
 {
     if (m_lyrHeightsMap.empty()) BuildLayerHeightsMap();
     std::vector<CPtr<IStackupLayer> > stackupLayers;
@@ -24,7 +24,7 @@ ECAD_INLINE bool ELayoutRetriever::GetLayerStackupHeightThickness(EFloat & eleva
     return true;
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetLayerHeightThickness(ELayerId layerId, EFloat & elevation, EFloat & thickness) const
+bool ELayoutRetriever::GetLayerHeightThickness(ELayerId layerId, EFloat & elevation, EFloat & thickness) const
 {
     if (m_lyrHeightsMap.empty()) BuildLayerHeightsMap();
     auto iter = m_lyrHeightsMap.find(layerId);
@@ -34,12 +34,12 @@ ECAD_INLINE bool ELayoutRetriever::GetLayerHeightThickness(ELayerId layerId, EFl
     return true;
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetLayerHeightThickness(CPtr<ILayer> layer, EFloat & elevation, EFloat & thickness) const
+bool ELayoutRetriever::GetLayerHeightThickness(CPtr<ILayer> layer, EFloat & elevation, EFloat & thickness) const
 {
     return GetLayerHeightThickness(layer->GetLayerId(), elevation, thickness);
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetComponentHeightThickness(CPtr<IComponent> component, EFloat & elevation, EFloat & thickness) const
+bool ELayoutRetriever::GetComponentHeightThickness(CPtr<IComponent> component, EFloat & elevation, EFloat & thickness) const
 {
     if (m_lyrHeightsMap.empty()) BuildLayerHeightsMap();
     auto iter = m_lyrHeightsMap.find(component->GetPlacementLayer());
@@ -51,7 +51,7 @@ ECAD_INLINE bool ELayoutRetriever::GetComponentHeightThickness(CPtr<IComponent> 
     return true;
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetComponentBallBumpThickness(CPtr<IComponent> component, EFloat & elevation, EFloat & thickness) const
+bool ELayoutRetriever::GetComponentBallBumpThickness(CPtr<IComponent> component, EFloat & elevation, EFloat & thickness) const
 {
     if (m_lyrHeightsMap.empty()) BuildLayerHeightsMap();
     auto iter = m_lyrHeightsMap.find(component->GetPlacementLayer());
@@ -63,7 +63,7 @@ ECAD_INLINE bool ELayoutRetriever::GetComponentBallBumpThickness(CPtr<IComponent
     return true;
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetBondwireHeight(CPtr<IBondwire> bondwire, EFloat & start, EFloat & end, bool & startFlipped, bool & endFlipped) const
+bool ELayoutRetriever::GetBondwireHeight(CPtr<IBondwire> bondwire, EFloat & start, EFloat & end, bool & startFlipped, bool & endFlipped) const
 {
     EFloat elevation, thickness;
     auto getHeight = [&](bool start, EFloat & height) {
@@ -93,7 +93,7 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireHeight(CPtr<IBondwire> bondwire, E
     return true;
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights) const
+bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights) const
 {
     switch (bondwire->GetBondwireType())
     {
@@ -107,7 +107,7 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegments(CPtr<IBondwire> bondwire,
     }
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetBondwireSegmentsWithMinSeg(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights, size_t minSeg) const
+bool ELayoutRetriever::GetBondwireSegmentsWithMinSeg(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights, size_t minSeg) const
 {
     if (pt2ds.empty()) {
         auto res =  GetBondwireSegments(bondwire, pt2ds, heights);
@@ -133,7 +133,7 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegmentsWithMinSeg(CPtr<IBondwire>
     return GetBondwireSegmentsWithMinSeg(bondwire, pt2ds, heights, minSeg);
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetBondwireSegmentsWithMaxLen(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights, ECoord maxLen) const
+bool ELayoutRetriever::GetBondwireSegmentsWithMaxLen(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights, ECoord maxLen) const
 {
     if (not GetBondwireSegments(bondwire, pt2ds, heights)) return false;
     auto maxLenSq = maxLen * maxLen;
@@ -175,7 +175,7 @@ ECAD_INLINE bool ELayoutRetriever::GetBondwireSegmentsWithMaxLen(CPtr<IBondwire>
     return true;
 }
 
-ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireStartSolderJointParameters(CPtr<IBondwire> bondwire, EFloat & elevation, EFloat & thickness, std::string & material) const
+UPtr<EShape> ELayoutRetriever::GetBondwireStartSolderJointParameters(CPtr<IBondwire> bondwire, EFloat & elevation, EFloat & thickness, std::string & material) const
 {
     auto shape = GetBondwireStartSolderJointShape(bondwire, thickness);
     if (nullptr == shape) return nullptr;
@@ -187,7 +187,7 @@ ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireStartSolderJointParameters
     return shape;
 }
 
-ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireEndSolderJointParameters(CPtr<IBondwire> bondwire, EFloat & elevation, EFloat & thickness, std::string & material) const
+UPtr<EShape> ELayoutRetriever::GetBondwireEndSolderJointParameters(CPtr<IBondwire> bondwire, EFloat & elevation, EFloat & thickness, std::string & material) const
 {
     auto shape = GetBondwireEndSolderJointShape(bondwire, thickness);
     if (nullptr == shape) return nullptr;
@@ -199,7 +199,7 @@ ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireEndSolderJointParameters(C
     return shape;
 }
 
-ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireStartSolderJointShape(CPtr<IBondwire> bondwire, EFloat & thickness) const
+UPtr<EShape> ELayoutRetriever::GetBondwireStartSolderJointShape(CPtr<IBondwire> bondwire, EFloat & thickness) const
 {
     auto sj = bondwire->GetSolderJoints();
     if (nullptr == sj) return nullptr;
@@ -214,7 +214,7 @@ ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireStartSolderJointShape(CPtr
     return shapeInst;
 }
 
-ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireEndSolderJointShape(CPtr<IBondwire> bondwire, EFloat & thickness) const
+UPtr<EShape> ELayoutRetriever::GetBondwireEndSolderJointShape(CPtr<IBondwire> bondwire, EFloat & thickness) const
 {
     auto sj = bondwire->GetSolderJoints();
     if (nullptr == sj) return nullptr;
@@ -229,7 +229,7 @@ ECAD_INLINE UPtr<EShape> ELayoutRetriever::GetBondwireEndSolderJointShape(CPtr<I
     return shapeInst;
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetSimpleBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights) const
+bool ELayoutRetriever::GetSimpleBondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights) const
 {
    //simple
     pt2ds.resize(4);
@@ -245,7 +245,7 @@ ECAD_INLINE bool ELayoutRetriever::GetSimpleBondwireSegments(CPtr<IBondwire> bon
     return true;  
 }
 
-ECAD_INLINE bool ELayoutRetriever::GetJedec4BondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights) const
+bool ELayoutRetriever::GetJedec4BondwireSegments(CPtr<IBondwire> bondwire, std::vector<EPoint2D> & pt2ds, std::vector<EFloat> & heights) const
 {
    //JEDEC4
     pt2ds.resize(4);
@@ -260,7 +260,7 @@ ECAD_INLINE bool ELayoutRetriever::GetJedec4BondwireSegments(CPtr<IBondwire> bon
     return true;  
 }
 
-ECAD_INLINE CPtr<IStackupLayer> ELayoutRetriever::SearchStackupLayer(EFloat height) const
+CPtr<IStackupLayer> ELayoutRetriever::SearchStackupLayer(EFloat height) const
 {
     if (m_lyrHeightsMap.empty()) BuildLayerHeightsMap();
     std::vector<CPtr<IStackupLayer> > stackupLayers;
@@ -276,7 +276,7 @@ ECAD_INLINE CPtr<IStackupLayer> ELayoutRetriever::SearchStackupLayer(EFloat heig
     return nullptr;
 }
 
-ECAD_INLINE UPtr<EShape> ELayoutRetriever::CalculateLayoutBoundaryShape(CPtr<ILayoutView> layout)
+UPtr<EShape> ELayoutRetriever::CalculateLayoutBoundaryShape(CPtr<ILayoutView> layout)
 {
     if(nullptr == layout) return nullptr;
 
@@ -319,7 +319,7 @@ ECAD_INLINE UPtr<EShape> ELayoutRetriever::CalculateLayoutBoundaryShape(CPtr<ILa
     return std::unique_ptr<EShape>(boundary);
 }
 
-ECAD_INLINE void ELayoutRetriever::BuildLayerHeightsMap() const
+void ELayoutRetriever::BuildLayerHeightsMap() const
 {
     m_lyrHeightsMap.clear();
     std::vector<CPtr<IStackupLayer> > stackupLayers;

@@ -7,17 +7,17 @@
 #include "generic/thread/ThreadPool.hpp"
 
 namespace ecad::model::utils {
-ECAD_INLINE EStackupPrismThermalModelBuilder::EStackupPrismThermalModelBuilder(Ptr<EStackupPrismThermalModel> model)
+EStackupPrismThermalModelBuilder::EStackupPrismThermalModelBuilder(Ptr<EStackupPrismThermalModel> model)
  : m_model(model)
 {
     m_query.reset(new EStackupPrismThermalModelQuery(m_model));
 }
 
-ECAD_INLINE EStackupPrismThermalModelBuilder::~EStackupPrismThermalModelBuilder()
+EStackupPrismThermalModelBuilder::~EStackupPrismThermalModelBuilder()
 {
 }
 
-ECAD_INLINE void EStackupPrismThermalModelBuilder::BuildPrismModel(EFloat scaleH2Unit, EFloat scale2Meter, size_t threads)
+void EStackupPrismThermalModelBuilder::BuildPrismModel(EFloat scaleH2Unit, EFloat scale2Meter, size_t threads)
 {
     m_model->m_scaleH2Unit = scaleH2Unit;
     m_model->m_scale2Meter = scale2Meter;
@@ -57,7 +57,7 @@ ECAD_INLINE void EStackupPrismThermalModelBuilder::BuildPrismModel(EFloat scaleH
     else BuildPrismInstanceTopBotNeighbors(0, m_model->TotalPrismElements());
 }
 
-ECAD_INLINE void EStackupPrismThermalModelBuilder::BuildPrismInstanceTopBotNeighbors(size_t start, size_t end)
+void EStackupPrismThermalModelBuilder::BuildPrismInstanceTopBotNeighbors(size_t start, size_t end)
 {
     using RtVal = model::utils::EStackupPrismThermalModelQuery::RtVal;
     for (size_t i = start; i < end; ++i) {
@@ -97,7 +97,7 @@ ECAD_INLINE void EStackupPrismThermalModelBuilder::BuildPrismInstanceTopBotNeigh
     }
 }
 
-ECAD_INLINE void EStackupPrismThermalModelBuilder::AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm)
+void EStackupPrismThermalModelBuilder::AddBondWiresFromLayerCutModel(CPtr<ELayerCutModel> lcm)
 {
     for (const auto & bondwire : lcm->GetAllBondwires()) {
         const auto & pts = bondwire.pt2ds;
@@ -131,7 +131,7 @@ ECAD_INLINE void EStackupPrismThermalModelBuilder::AddBondWiresFromLayerCutModel
     }
 }
 
-ECAD_INLINE EFloat EStackupPrismThermalModelBuilder::GetIntersectArea(const ETriangle2D & t1, const ETriangle2D & t2)
+EFloat EStackupPrismThermalModelBuilder::GetIntersectArea(const ETriangle2D & t1, const ETriangle2D & t2)
 {
     EFloat area = 0;
     std::vector<EPolygonData> output;

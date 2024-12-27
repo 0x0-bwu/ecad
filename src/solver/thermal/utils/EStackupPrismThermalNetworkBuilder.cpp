@@ -12,13 +12,13 @@ namespace ecad::solver {
 using namespace ecad::model;
 
 template <typename Scalar>
-ECAD_INLINE EStackupPrismThermalNetworkBuilder<Scalar>::EStackupPrismThermalNetworkBuilder(const ModelType & model)
+EStackupPrismThermalNetworkBuilder<Scalar>::EStackupPrismThermalNetworkBuilder(const ModelType & model)
  : EPrismThermalNetworkBuilder<Scalar>(model)
 {
 }
 
 template <typename Scalar>
-ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(const std::vector<Scalar> & iniT, Ptr<Network> network, size_t start, size_t end) const
+void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(const std::vector<Scalar> & iniT, Ptr<Network> network, size_t start, size_t end) const
 {
     const auto & model = this->m_model;
     auto topBC = model.GetUniformBC(EOrientation::Top);
@@ -170,7 +170,7 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::BuildPrismElement(c
 }
 
 template <typename Scalar>
-ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<Network> network) const
+void EStackupPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<Network> network) const
 {
     const auto & model = this->m_model;
     const auto & topBCs = model.GetBlockBCs(EOrientation::Top);
@@ -220,6 +220,6 @@ ECAD_INLINE void EStackupPrismThermalNetworkBuilder<Scalar>::ApplyBlockBCs(Ptr<N
         applyBlockBC(block, false);
 }
 
-template ECAD_INLINE class EStackupPrismThermalNetworkBuilder<Float32>;
-template ECAD_INLINE class EStackupPrismThermalNetworkBuilder<Float64>;
+template class EStackupPrismThermalNetworkBuilder<Float32>;
+template class EStackupPrismThermalNetworkBuilder<Float64>;
 } // namespace ecad::solver

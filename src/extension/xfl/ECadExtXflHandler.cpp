@@ -12,10 +12,10 @@ namespace xfl {
 
 namespace fmt = generic::fmt;
 
-ECAD_INLINE ECadExtXflHandler::ECadExtXflHandler(const std::string & xflFile, size_t circleDiv)
+ECadExtXflHandler::ECadExtXflHandler(const std::string & xflFile, size_t circleDiv)
  : m_xflFile(xflFile), m_circleDiv(circleDiv) {}
 
-ECAD_INLINE Ptr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string & name, std::string * err)
+Ptr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string & name, std::string * err)
 {
     auto & mgr = EDataMgr::Instance();
     if(mgr.OpenDatabase(name)){
@@ -72,7 +72,7 @@ ECAD_INLINE Ptr<IDatabase> ECadExtXflHandler::CreateDatabase(const std::string &
     return m_database;
 }
 
-ECAD_INLINE void ECadExtXflHandler::ImportComponentDefs()
+void ECadExtXflHandler::ImportComponentDefs()
 {
     // auto & mgr = EDataMgr::Instance();
     
@@ -83,7 +83,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportComponentDefs()
     }
 }
 
-ECAD_INLINE void ECadExtXflHandler::ImportMaterialDefs()
+void ECadExtXflHandler::ImportMaterialDefs()
 {
     auto & mgr = EDataMgr::Instance();
 
@@ -111,7 +111,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportMaterialDefs()
     }
 }
 
-ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
+void ECadExtXflHandler::ImportPadstackDefs()
 {
     auto & mgr = EDataMgr::Instance();
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
@@ -176,7 +176,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportPadstackDefs()
 
 }
 
-ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
+void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
 {
     auto & mgr = EDataMgr::Instance();
 
@@ -208,7 +208,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportLayers(Ptr<ILayoutView> layout)
     layout->AppendLayers(std::move(layers));
 }
 
-ECAD_INLINE void ECadExtXflHandler::ImportNets(Ptr<ILayoutView> layout)
+void ECadExtXflHandler::ImportNets(Ptr<ILayoutView> layout)
 {
     auto & mgr = EDataMgr::Instance();
 
@@ -222,7 +222,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportNets(Ptr<ILayoutView> layout)
     }
 }
 
-ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
+void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
 {
     auto & mgr = EDataMgr::Instance();
     EShapeGetter eShapeGetter(m_scale, m_circleDiv);
@@ -351,7 +351,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportConnObjs(Ptr<ILayoutView> layout)
     }
 }
 
-ECAD_INLINE void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
+void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
 {
     if(!m_xflDB->hasBoardGeom) return;
     auto & mgr = EDataMgr::Instance();
@@ -389,7 +389,7 @@ ECAD_INLINE void ECadExtXflHandler::ImportBoardGeom(Ptr<ILayoutView> layout)
     layout->SetBoundary(std::move(ePolygon));
 }
 
-ECAD_INLINE void ECadExtXflHandler::Reset()
+void ECadExtXflHandler::Reset()
 {
     m_scale = 1.0;
 
@@ -403,7 +403,7 @@ ECAD_INLINE void ECadExtXflHandler::Reset()
     m_padstackInstNames.clear();
 }
 
-ECAD_INLINE std::string ECadExtXflHandler::GetNextPadstackInstName(const std::string & defName)
+std::string ECadExtXflHandler::GetNextPadstackInstName(const std::string & defName)
 {
     size_t index = 1;
     while(true) {
@@ -418,7 +418,7 @@ ECAD_INLINE std::string ECadExtXflHandler::GetNextPadstackInstName(const std::st
 }
 
 //<layer, isVoid>
-ECAD_INLINE bool ECadExtXflHandler::isHole(const InstObject & instObj) const
+bool ECadExtXflHandler::isHole(const InstObject & instObj) const
 {
     if(auto * instPolygon = boost::get<InstPolygon>(&instObj)) return instPolygon->isVoid;
     else if(auto * instRect = boost::get<InstRectangle>(&instObj)) return instRect->isVoid;
@@ -430,7 +430,7 @@ ECAD_INLINE bool ECadExtXflHandler::isHole(const InstObject & instObj) const
     return false;
 }
 
-ECAD_INLINE std::pair<int, UPtr<EShape> > ECadExtXflHandler::makeEShapeFromInstObject(EDataMgr * mgr, const EShapeGetter & eShapeGetter, const InstObject & instObj) const
+std::pair<int, UPtr<EShape> > ECadExtXflHandler::makeEShapeFromInstObject(EDataMgr * mgr, const EShapeGetter & eShapeGetter, const InstObject & instObj) const
 {
     //inst polygon
     if(auto * instPolygon = boost::get<InstPolygon>(&instObj)) {

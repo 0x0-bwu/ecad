@@ -6,7 +6,7 @@ namespace ecad {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
 
 template <typename Archive>
-ECAD_INLINE void ENet::serialize(Archive & ar, const unsigned int version)
+void ENet::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ENet, INet>();
@@ -17,31 +17,31 @@ ECAD_INLINE void ENet::serialize(Archive & ar, const unsigned int version)
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ENet)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ENet::ENet()
+ENet::ENet()
  : ENet(std::string{})
 {
 }
 
-ECAD_INLINE ENet::ENet(std::string name)
+ENet::ENet(std::string name)
  : EObject(std::move(name))
 {
 }
 
-ECAD_INLINE ENet::~ENet()
+ENet::~ENet()
 {
 }
 
-ECAD_INLINE ENetId ENet::GetNetId() const
+ENetId ENet::GetNetId() const
 {
     return m_netId;
 }
 
-ECAD_INLINE void ENet::SetNetId(ENetId id)
+void ENet::SetNetId(ENetId id)
 {
     m_netId = id;
 }
 
-ECAD_INLINE Ptr<ENet> ENet::CloneImp() const
+Ptr<ENet> ENet::CloneImp() const
 {
     return new ENet(*this);
 }

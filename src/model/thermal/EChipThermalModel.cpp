@@ -7,16 +7,16 @@ namespace model {
 
 using namespace generic::fmt;
 
-ECAD_INLINE EChipThermalModelV1::~EChipThermalModelV1()
+EChipThermalModelV1::~EChipThermalModelV1()
 {
 }
 
-ECAD_INLINE EChipThermalModelV1::EChipThermalModelV1(const EChipThermalModelV1 & other)
+EChipThermalModelV1::EChipThermalModelV1(const EChipThermalModelV1 & other)
 {
     *this = other;
 }
     
-ECAD_INLINE EChipThermalModelV1 & EChipThermalModelV1::operator= (const EChipThermalModelV1 & other)
+EChipThermalModelV1 & EChipThermalModelV1::operator= (const EChipThermalModelV1 & other)
 {
     EThermalModel::operator=(other);
     header = other.header;
@@ -27,12 +27,12 @@ ECAD_INLINE EChipThermalModelV1 & EChipThermalModelV1::operator= (const EChipThe
     return *this;
 }
 
-ECAD_INLINE EChipThermalModelV1::EChipThermalModelV1(EChipThermalModelV1 && other)
+EChipThermalModelV1::EChipThermalModelV1(EChipThermalModelV1 && other)
 {
     *this = other;
 }
 
-ECAD_INLINE EChipThermalModelV1 & EChipThermalModelV1::operator= (EChipThermalModelV1 && other)
+EChipThermalModelV1 & EChipThermalModelV1::operator= (EChipThermalModelV1 && other)
 {
     if(this != &other) {
         header = std::move(other.header);
@@ -50,7 +50,7 @@ ECAD_INLINE EChipThermalModelV1 & EChipThermalModelV1::operator= (EChipThermalMo
 }
 
 
-ECAD_INLINE std::string EChipThermalModelV1::GetLastMatelLayerInStackup() const
+std::string EChipThermalModelV1::GetLastMatelLayerInStackup() const
 {
     auto stackup = GetLayerStackup();
     if(nullptr == stackup) return std::string{};
@@ -66,7 +66,7 @@ ECAD_INLINE std::string EChipThermalModelV1::GetLastMatelLayerInStackup() const
     return std::string{};
 }
 
-ECAD_INLINE bool EChipThermalModelV1::GetLayerHeightThickness(const std::string & name, EFloat & height, EFloat & thickness) const
+bool EChipThermalModelV1::GetLayerHeightThickness(const std::string & name, EFloat & height, EFloat & thickness) const
 {
     //if metal
     for(const auto & layer : header.metalLayers) {
@@ -91,13 +91,13 @@ ECAD_INLINE bool EChipThermalModelV1::GetLayerHeightThickness(const std::string 
     return false;
 }
 
-ECAD_INLINE CPtr<ECTMv1LayerStackup> EChipThermalModelV1::GetLayerStackup(std::string * info) const
+CPtr<ECTMv1LayerStackup> EChipThermalModelV1::GetLayerStackup(std::string * info) const
 {
     BuildLayerStackup(info);
     return m_layerStackup.get();
 }
 
-ECAD_INLINE bool EChipThermalModelV1::isMetalLayer(const std::string & name) const
+bool EChipThermalModelV1::isMetalLayer(const std::string & name) const
 {
     for(const auto & layer : header.metalLayers) {
         if(layer.name == name) return true;
@@ -105,7 +105,7 @@ ECAD_INLINE bool EChipThermalModelV1::isMetalLayer(const std::string & name) con
     return false;
 }
 
-ECAD_INLINE void EChipThermalModelV1::BuildLayerStackup(std::string * info) const
+void EChipThermalModelV1::BuildLayerStackup(std::string * info) const
 {
     if(m_layerStackup) return;
 

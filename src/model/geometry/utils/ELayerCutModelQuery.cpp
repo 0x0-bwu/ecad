@@ -4,7 +4,7 @@
 namespace ecad {
 namespace model {
 namespace utils {
-ECAD_INLINE ELayerCutModelQuery::ELayerCutModelQuery(CPtr<ELayerCutModel> model)
+ELayerCutModelQuery::ELayerCutModelQuery(CPtr<ELayerCutModel> model)
  : m_model(model)
 {
     const auto & layerPolygons = m_model->m_lyrPolygons;
@@ -21,7 +21,7 @@ ECAD_INLINE ELayerCutModelQuery::ELayerCutModelQuery(CPtr<ELayerCutModel> model)
     }
 }
 
-ECAD_INLINE size_t ELayerCutModelQuery::SearchPolygon(size_t layer, const EPoint2D & pt) const
+size_t ELayerCutModelQuery::SearchPolygon(size_t layer, const EPoint2D & pt) const
 {
     if (not m_model->hasPolygon(layer)) return invalidIndex;
 

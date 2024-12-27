@@ -9,7 +9,7 @@ namespace ecad::model {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void EStackupPrismThermalModel::serialize(Archive & ar, const unsigned int version)
+void EStackupPrismThermalModel::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     ar & BOOST_SERIALIZATION_BASE_OBJECT_NVP(EPrismThermalModel);
@@ -18,7 +18,7 @@ ECAD_INLINE void EStackupPrismThermalModel::serialize(Archive & ar, const unsign
 ECAD_SERIALIZATION_FUNCTIONS_IMP(EStackupPrismThermalModel)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE EStackupPrismThermalModel::EStackupPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings)
+EStackupPrismThermalModel::EStackupPrismThermalModel(CPtr<ILayoutView> layout, EPrismThermalModelExtractionSettings settings)
  : EPrismThermalModel(layout, std::move(settings))
 {
 }

@@ -8,7 +8,7 @@ namespace ecad::model {
 #ifdef ECAD_BOOST_SERIALIZATION_SUPPORT
     
 template <typename Archive>
-ECAD_INLINE void ELayerCutModel::serialize(Archive & ar, const unsigned int version)
+void ELayerCutModel::serialize(Archive & ar, const unsigned int version)
 {
     ECAD_UNUSED(version)
     boost::serialization::void_cast_register<ELayerCutModel, IModel>();
@@ -29,12 +29,12 @@ ECAD_INLINE void ELayerCutModel::serialize(Archive & ar, const unsigned int vers
 ECAD_SERIALIZATION_FUNCTIONS_IMP(ELayerCutModel)
 #endif//ECAD_BOOST_SERIALIZATION_SUPPORT
 
-ECAD_INLINE ELayerCutModel::PowerBlock::PowerBlock(size_t polygon, LayerRange range, EScenarioId scen, SPtr<ELookupTable1D> power)
+ELayerCutModel::PowerBlock::PowerBlock(size_t polygon, LayerRange range, EScenarioId scen, SPtr<ELookupTable1D> power)
  : polygon(polygon), range(std::move(range)), scen(scen), power(power)
 {
 }
 
-ECAD_INLINE bool ELayerCutModel::WriteImgView(std::string_view filename, size_t width) const
+bool ELayerCutModel::WriteImgView(std::string_view filename, size_t width) const
 {
     auto shapes = m_polygons;
     for (const auto & bw : m_bondwires)
@@ -42,7 +42,7 @@ ECAD_INLINE bool ELayerCutModel::WriteImgView(std::string_view filename, size_t 
     return generic::geometry::GeometryIO::WritePNG(filename, shapes.begin(), shapes.end(), width);
 }
 
-ECAD_INLINE void ELayerCutModel::BuildLayerPolygonLUT(EFloat vTransitionRatio)
+void ELayerCutModel::BuildLayerPolygonLUT(EFloat vTransitionRatio)
 {
     m_layerOrder.clear();
     m_height2Index.clear();
@@ -106,17 +106,17 @@ ECAD_INLINE void ELayerCutModel::BuildLayerPolygonLUT(EFloat vTransitionRatio)
     }
 }
 
-ECAD_INLINE size_t ELayerCutModel::TotalLayers() const
+size_t ELayerCutModel::TotalLayers() const
 {
     return m_layerOrder.size() - 1;
 }
 
-ECAD_INLINE bool ELayerCutModel::hasPolygon(size_t layer) const
+bool ELayerCutModel::hasPolygon(size_t layer) const
 {
     return m_lyrPolygons.count(layer);
 }
 
-ECAD_INLINE bool ELayerCutModel::GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const
+bool ELayerCutModel::GetLayerHeightThickness(size_t layer, EFloat & elevation, EFloat & thickness) const
 {
     if (layer >= TotalLayers()) return false;
     elevation = EFloat(m_layerOrder.at(layer)) / m_vScale2Int;
@@ -124,29 +124,29 @@ ECAD_INLINE bool ELayerCutModel::GetLayerHeightThickness(size_t layer, EFloat & 
     return true;
 }
 
-ECAD_INLINE size_t ELayerCutModel::GetLayerIndexByHeight(Height height) const
+size_t ELayerCutModel::GetLayerIndexByHeight(Height height) const
 {
     auto iter = m_height2Index.find(height);
     if (iter == m_height2Index.cend()) return invalidIndex;
     return iter->second;
 }
 
-ECAD_INLINE const EPolygonData & ELayerCutModel::GetLayoutBoundary() const
+const EPolygonData & ELayerCutModel::GetLayoutBoundary() const
 {
     return m_polygons.front();
 }
 
-ECAD_INLINE ELayerCutModel::Height ELayerCutModel::GetHeight(EFloat height) const
+ELayerCutModel::Height ELayerCutModel::GetHeight(EFloat height) const
 {
     return std::round(height * m_vScale2Int);
 }
 
-ECAD_INLINE ELayerCutModel::LayerRange ELayerCutModel::GetLayerRange(EFloat elevation, EFloat thickness) const
+ELayerCutModel::LayerRange ELayerCutModel::GetLayerRange(EFloat elevation, EFloat thickness) const
 {
     return LayerRange{GetHeight(elevation), GetHeight(elevation - thickness)};
 }
 
-ECAD_INLINE std::vector<EPolygonData> ELayerCutModel::GetLayerPolygons(size_t layer) const
+std::vector<EPolygonData> ELayerCutModel::GetLayerPolygons(size_t layer) const
 {
     auto indices = GetLayerPolygonIndices(layer);
     std::vector<EPolygonData> polygons; polygons.reserve(indices->size());
@@ -154,7 +154,7 @@ ECAD_INLINE std::vector<EPolygonData> ELayerCutModel::GetLayerPolygons(size_t la
     return polygons;
 }
 
-ECAD_INLINE bool ELayerCutModel::SliceOverheightLayers(std::list<LayerRange> & ranges, EFloat ratio)
+bool ELayerCutModel::SliceOverheightLayers(std::list<LayerRange> & ranges, EFloat ratio)
 {
     auto slice = [](const LayerRange & r)
     {

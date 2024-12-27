@@ -5,7 +5,7 @@ namespace ecad::ext::kicad {
 
 using namespace generic;
 
-ECAD_INLINE ECadExtKiCadHandler::ECadExtKiCadHandler(const std::string & kicadFile)
+ECadExtKiCadHandler::ECadExtKiCadHandler(const std::string & kicadFile)
  : m_filename(kicadFile)
 {
     m_functions.emplace("layers"   , std::bind(&ECadExtKiCadHandler::ExtractLayer    , this, std::placeholders::_1));
@@ -26,7 +26,7 @@ ECAD_INLINE ECadExtKiCadHandler::ECadExtKiCadHandler(const std::string & kicadFi
     m_functions.emplace("gr_circle", std::bind(&ECadExtKiCadHandler::ExtractCircle   , this, std::placeholders::_1));
 }
 
-ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
+Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string & name, Ptr<std::string> err)
 {
     auto & eMgr = EDataMgr::Instance();
     m_database = eMgr.CreateDatabase(name);
@@ -38,7 +38,7 @@ ECAD_INLINE Ptr<IDatabase> ECadExtKiCadHandler::CreateDatabase(const std::string
     return m_database;
 }
 
-ECAD_INLINE bool ECadExtKiCadHandler::ExtractKiCadObjects(Ptr<std::string> err)
+bool ECadExtKiCadHandler::ExtractKiCadObjects(Ptr<std::string> err)
 {
     Tree tree;
     EKiCadParser parser;
@@ -54,14 +54,14 @@ ECAD_INLINE bool ECadExtKiCadHandler::ExtractKiCadObjects(Ptr<std::string> err)
     return true;
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractNode(const Tree & node)
+void ECadExtKiCadHandler::ExtractNode(const Tree & node)
 {
     auto iter = m_functions.find(node.value);
     if (iter != m_functions.cend())
         iter->second(node);
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractLayer(const Tree & node)
+void ECadExtKiCadHandler::ExtractLayer(const Tree & node)
 {
     for (const auto & sub : node.branches) {   
         EIndex id = std::stoi(sub.value);         
@@ -73,13 +73,13 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractLayer(const Tree & node)
     }
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractSetup(const Tree & node)
+void ECadExtKiCadHandler::ExtractSetup(const Tree & node)
 {
     for (const auto & sub : node.branches)
         ExtractNode(sub);
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractStackup(const Tree & node)
+void ECadExtKiCadHandler::ExtractStackup(const Tree & node)
 {
     for (const auto & sub : node.branches) {
         if ("layer" == sub.value) {
@@ -103,7 +103,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractStackup(const Tree & node)
 }
 
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractNet(const Tree & node)
+void ECadExtKiCadHandler::ExtractNet(const Tree & node)
 {
     EIndex netId{invalidIndex};
     auto & netName = node.branches.at(1).value;
@@ -111,7 +111,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractNet(const Tree & node)
     m_kicad->AddNet(netId, netName);
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractFootprint(const Tree & node)
+void ECadExtKiCadHandler::ExtractFootprint(const Tree & node)
 {
     auto iter = node.branches.begin();
     auto & comp = m_kicad->AddComponent(iter->value);
@@ -133,7 +133,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractFootprint(const Tree & node)
     m_current.comp = m_kicad.get();
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractSegment(const Tree & node)
+void ECadExtKiCadHandler::ExtractSegment(const Tree & node)
 {
     Segment segment;
     for (const auto & sub : node.branches) {
@@ -153,7 +153,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractSegment(const Tree & node)
     m_current.comp->segments.emplace_back(std::move(segment));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractZone(const Tree & node)
+void ECadExtKiCadHandler::ExtractZone(const Tree & node)
 {
     Zone zone;
     for (const auto & sub : node.branches) {
@@ -179,7 +179,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractZone(const Tree & node)
     m_current.comp->zones.emplace_back(std::move(zone));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractVia(const Tree & node)
+void ECadExtKiCadHandler::ExtractVia(const Tree & node)
 {
     Via via;
     via.type = Via::Type::THROUGH;
@@ -204,7 +204,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractVia(const Tree & node)
     m_current.comp->vias.emplace_back(std::move(via));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractCircle(const Tree & node)
+void ECadExtKiCadHandler::ExtractCircle(const Tree & node)
 {
     Circle circle;
     for (const auto & sub : node.branches) {
@@ -218,7 +218,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractCircle(const Tree & node)
     m_current.comp->circles.emplace_back(std::move(circle));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractPoly(const Tree & node)
+void ECadExtKiCadHandler::ExtractPoly(const Tree & node)
 {
     Poly poly;
     for (const auto & sub : node.branches) {
@@ -230,7 +230,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractPoly(const Tree & node)
     m_current.comp->polys.emplace_back(std::move(poly));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractArc(const Tree & node)
+void ECadExtKiCadHandler::ExtractArc(const Tree & node)
 {
     Arc arc;
     GetValue(node.branches.at(0).branches, arc.start[0], arc.start[1]);
@@ -240,7 +240,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractArc(const Tree & node)
     m_current.comp->arcs.emplace_back(std::move(arc));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractLine(const Tree & node)
+void ECadExtKiCadHandler::ExtractLine(const Tree & node)
 {
     Line line;
     for (const auto & sub : node.branches) {
@@ -254,7 +254,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractLine(const Tree & node)
     m_current.comp->lines.emplace_back(std::move(line));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractPad(const Tree & node)
+void ECadExtKiCadHandler::ExtractPad(const Tree & node)
 {
     Pad pad;
     auto iter = node.branches.begin();
@@ -303,7 +303,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractPad(const Tree & node)
     m_current.comp->pads.emplace_back(std::move(pad));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractPoints(const Tree & node, std::vector<FPoint2D> & points)
+void ECadExtKiCadHandler::ExtractPoints(const Tree & node, std::vector<FPoint2D> & points)
 {
     points.clear();
     points.reserve(node.branches.size());
@@ -316,7 +316,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractPoints(const Tree & node, std::vect
         points.pop_back();
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::ExtractStroke(const Tree & node, Stroke & stroke)
+void ECadExtKiCadHandler::ExtractStroke(const Tree & node, Stroke & stroke)
 {
     for (const auto & sub : node.branches) {
         if ("width" == sub.value)
@@ -332,7 +332,7 @@ ECAD_INLINE void ECadExtKiCadHandler::ExtractStroke(const Tree & node, Stroke & 
     }
 }
 
-ECAD_INLINE bool ECadExtKiCadHandler::CreateEcadObjects(Ptr<std::string> err)
+bool ECadExtKiCadHandler::CreateEcadObjects(Ptr<std::string> err)
 {
     ECoordUnits coordUnits(ECoordUnits::Unit::Millimeter);
     m_database->SetCoordUnits(coordUnits);
@@ -348,7 +348,7 @@ ECAD_INLINE bool ECadExtKiCadHandler::CreateEcadObjects(Ptr<std::string> err)
     return true;
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::CreateEcadLayers(Ptr<ILayoutView> layout)
+void ECadExtKiCadHandler::CreateEcadLayers(Ptr<ILayoutView> layout)
 {
     auto & eMgr = EDataMgr::Instance();
 
@@ -373,7 +373,7 @@ ECAD_INLINE void ECadExtKiCadHandler::CreateEcadLayers(Ptr<ILayoutView> layout)
     layout->AppendLayers(std::move(layers));
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::CreateEcadNets(Ptr<ILayoutView> layout)
+void ECadExtKiCadHandler::CreateEcadNets(Ptr<ILayoutView> layout)
 {
     auto & eMgr = EDataMgr::Instance();
     for (const auto & [kNetId, kNet] : m_kicad->nets) {
@@ -386,7 +386,7 @@ ECAD_INLINE void ECadExtKiCadHandler::CreateEcadNets(Ptr<ILayoutView> layout)
     }
 }
 
-ECAD_INLINE void ECadExtKiCadHandler::CreateLayoutBoundary(Ptr<ILayoutView> layout)
+void ECadExtKiCadHandler::CreateLayoutBoundary(Ptr<ILayoutView> layout)
 {
     auto & eMgr = EDataMgr::Instance();
     EPolygonWithHolesData pwh;

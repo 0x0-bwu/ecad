@@ -13,7 +13,7 @@ using namespace generic::str;
 using namespace generic::fmt;
 using namespace generic::fs;
 
-ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, std::string_view filename, std::string * err)
+bool GenerateTxtProfile(const EGridThermalModel & model, std::string_view filename, std::string * err)
 {
     CreateDir(DirName(filename));    
     std::ofstream out(filename.data());
@@ -75,7 +75,7 @@ ECAD_INLINE bool GenerateTxtProfile(const EGridThermalModel & model, std::string
 
 namespace detail {
 
-ECAD_INLINE bool GenerateImageProfile(std::string_view filename, const EGridData & data, double min, double max)
+bool GenerateImageProfile(std::string_view filename, const EGridData & data, double min, double max)
 {
     if(min > max)
         std::swap(min, max);

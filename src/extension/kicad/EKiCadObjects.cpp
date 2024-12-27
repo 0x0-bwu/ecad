@@ -3,19 +3,19 @@
 namespace ecad::ext::kicad {
 
 
-ECAD_INLINE void Stroke::SetType(const std::string & str)
+void Stroke::SetType(const std::string & str)
 {
     if ("solid" == str)
         type = Type::SOLID;
 }
 
-ECAD_INLINE void Stroke::SetFill(const std::string & str)
+void Stroke::SetFill(const std::string & str)
 {
     if ("solid" == str)
         fill = Fill::SOLID;
 }
 
-ECAD_INLINE void Pad::SetType(const std::string & str)
+void Pad::SetType(const std::string & str)
 {
     if ("smd" == str)
         type = Type::SMD;
@@ -29,7 +29,7 @@ ECAD_INLINE void Pad::SetType(const std::string & str)
         type = Type::UNKNOWN;
 }
 
-ECAD_INLINE void Pad::SetShape(const std::string & str)
+void Pad::SetShape(const std::string & str)
 {
     if ("rect" == str)
         shape = Shape::RECT;
@@ -45,7 +45,7 @@ ECAD_INLINE void Pad::SetShape(const std::string & str)
         shape = Shape::UNKNOWN;
 }
 
-ECAD_INLINE void Layer::SetType(const std::string & str)
+void Layer::SetType(const std::string & str)
 {
     if ("Top Silk Screen" == str or "Bottom Silk Screen" == str)
         type = Type::SILK_SCREEN;
@@ -61,7 +61,7 @@ ECAD_INLINE void Layer::SetType(const std::string & str)
         type = Type::MIXED;
 }
 
-ECAD_INLINE void Layer::SetGroup(const std::string & str)
+void Layer::SetGroup(const std::string & str)
 {
     if ("power" == str)
         group = Group::POWER;
@@ -71,40 +71,40 @@ ECAD_INLINE void Layer::SetGroup(const std::string & str)
         group = Group::USER;
 }
 
-ECAD_INLINE Layer & Database::AddLayer(EIndex id, std::string name)
+Layer & Database::AddLayer(EIndex id, std::string name)
 {
     auto & layer = layers.emplace(name, Layer(id, name)).first->second;
     return layer;
 }
 
-ECAD_INLINE Net & Database::AddNet(EIndex id, std::string name)
+Net & Database::AddNet(EIndex id, std::string name)
 {
     auto & net = nets.emplace(id, Net(id, name)).first->second;
     netLut.emplace(net.name.c_str(), &net);
     return net;
 }
 
-ECAD_INLINE Component & Database::AddComponent(std::string name)
+Component & Database::AddComponent(std::string name)
 {
     auto & comp = components.emplace(name, Component(std::move(name))).first->second;
     return comp;
 }
 
-ECAD_INLINE Ptr<Net> Database::FindNet(EIndex id)
+Ptr<Net> Database::FindNet(EIndex id)
 {
     auto iter = nets.find(id);
     if (iter == nets.end()) return nullptr;
     return &(iter->second);
 }
 
-ECAD_INLINE Ptr<Net> Database::FindNet(const std::string & name)
+Ptr<Net> Database::FindNet(const std::string & name)
 {
     auto iter = netLut.find(name.c_str());
     if (iter == netLut.end()) return nullptr;
     return iter->second;
 }
 
-ECAD_INLINE Ptr<Layer> Database::FindLayer(const std::string & name)
+Ptr<Layer> Database::FindLayer(const std::string & name)
 {
     auto iter = layers.find(name);
     if (iter == layers.end()) return nullptr;

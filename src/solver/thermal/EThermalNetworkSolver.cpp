@@ -13,7 +13,7 @@ namespace ecad::solver {
 
 using namespace ecad::model;
 
-ECAD_INLINE std::pair<std::set<size_t>, std::vector<size_t> > GetProbsAndPermutation(const std::vector<size_t> & indices)
+std::pair<std::set<size_t>, std::vector<size_t> > GetProbsAndPermutation(const std::vector<size_t> & indices)
 {
     size_t index{0};
     std::set<size_t> probs(indices.begin(), indices.end());
@@ -25,7 +25,7 @@ ECAD_INLINE std::pair<std::set<size_t>, std::vector<size_t> > GetProbsAndPermuta
 }
 
 template <typename Scalar>
-ECAD_INLINE Scalar CalculateResidual(const std::vector<Scalar> & v1, const std::vector<Scalar> & v2, bool maximumRes)
+Scalar CalculateResidual(const std::vector<Scalar> & v1, const std::vector<Scalar> & v2, bool maximumRes)
 {
     ECAD_ASSERT(v1.size() == v2.size())
     Scalar residual = 0;
@@ -38,7 +38,7 @@ ECAD_INLINE Scalar CalculateResidual(const std::vector<Scalar> & v1, const std::
 }
 
 template <typename ThermalNetworkBuilder>
-ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<Scalar> & results) const
+bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, std::vector<Scalar> & results) const
 {
     auto envT = settings.envTemperature.inKelvins();
     ThermalNetworkBuilder builder(model);
@@ -83,9 +83,9 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
 }
 
 using StaticSolverNumType = typename EThermalNetworkStaticSolver::Scalar;
-ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EGridThermalNetworkBuilder<StaticSolverNumType>>(const EGridThermalModel & model, std::vector<StaticSolverNumType> & results) const;
-ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EPrismThermalNetworkBuilder<StaticSolverNumType>>(const EPrismThermalModel & model, std::vector<StaticSolverNumType> & results) const;
-ECAD_INLINE template bool EThermalNetworkStaticSolver::Solve<EStackupPrismThermalNetworkBuilder<StaticSolverNumType>>(const EStackupPrismThermalModel & model, std::vector<StaticSolverNumType> & results) const;
+template bool EThermalNetworkStaticSolver::Solve<EGridThermalNetworkBuilder<StaticSolverNumType>>(const EGridThermalModel & model, std::vector<StaticSolverNumType> & results) const;
+template bool EThermalNetworkStaticSolver::Solve<EPrismThermalNetworkBuilder<StaticSolverNumType>>(const EPrismThermalModel & model, std::vector<StaticSolverNumType> & results) const;
+template bool EThermalNetworkStaticSolver::Solve<EStackupPrismThermalNetworkBuilder<StaticSolverNumType>>(const EStackupPrismThermalModel & model, std::vector<StaticSolverNumType> & results) const;
 
 EThermalNetworkTransientSolver::EThermalNetworkTransientSolver(const EThermalTransientExcitation & excitation)
  : settings("", 1), m_excitation(excitation)
@@ -93,7 +93,7 @@ EThermalNetworkTransientSolver::EThermalNetworkTransientSolver(const EThermalTra
 }
 
 template <typename ThermalNetworkBuilder>
-ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, EFloat & minT, EFloat & maxT) const
+bool EThermalNetworkTransientSolver::Solve(const typename ThermalNetworkBuilder::ModelType & model, EFloat & minT, EFloat & maxT) const
 {
     using namespace thermal::solver;
 
@@ -195,17 +195,17 @@ ECAD_INLINE bool EThermalNetworkTransientSolver::Solve(const typename ThermalNet
     return steps > 0;  
 }
 
-ECAD_INLINE EGridThermalNetworkSolver::EGridThermalNetworkSolver(const EGridThermalModel & model)
+EGridThermalNetworkSolver::EGridThermalNetworkSolver(const EGridThermalModel & model)
  : m_model(model)
 {
 }
 
-ECAD_INLINE EGridThermalNetworkStaticSolver::EGridThermalNetworkStaticSolver(const EGridThermalModel & model)
+EGridThermalNetworkStaticSolver::EGridThermalNetworkStaticSolver(const EGridThermalModel & model)
  : EGridThermalNetworkSolver(model)
 {
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
+EPair<EFloat, EFloat> EGridThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
 {
     ECAD_EFFICIENCY_TRACK("grid thermal network static solve")
 
@@ -251,12 +251,12 @@ ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkStaticSolver::Solve(std::ve
     return {minT, maxT};
 }
 
-ECAD_INLINE EGridThermalNetworkTransientSolver::EGridThermalNetworkTransientSolver(const EGridThermalModel & model, const EThermalTransientExcitation & excitation)
+EGridThermalNetworkTransientSolver::EGridThermalNetworkTransientSolver(const EGridThermalModel & model, const EThermalTransientExcitation & excitation)
  : EGridThermalNetworkSolver(model), EThermalNetworkTransientSolver(excitation)
 {
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkTransientSolver::Solve() const
+EPair<EFloat, EFloat> EGridThermalNetworkTransientSolver::Solve() const
 {
     ECAD_EFFICIENCY_TRACK("grid thermal network transient solve")
     EPair<EFloat, EFloat> range;
@@ -266,17 +266,17 @@ ECAD_INLINE EPair<EFloat, EFloat> EGridThermalNetworkTransientSolver::Solve() co
     return {invalidFloat, invalidFloat};
 }
 
-ECAD_INLINE EPrismThermalNetworkSolver::EPrismThermalNetworkSolver(const EPrismThermalModel & model)
+EPrismThermalNetworkSolver::EPrismThermalNetworkSolver(const EPrismThermalModel & model)
  : m_model(model)
 {
 }
 
-ECAD_INLINE EPrismThermalNetworkStaticSolver::EPrismThermalNetworkStaticSolver(const EPrismThermalModel & model)
+EPrismThermalNetworkStaticSolver::EPrismThermalNetworkStaticSolver(const EPrismThermalModel & model)
  : EPrismThermalNetworkSolver(model)
 {
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
+EPair<EFloat, EFloat> EPrismThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
 {
     ECAD_EFFICIENCY_TRACK("prism thermal network static solve")
     std::vector<Scalar> results;
@@ -297,12 +297,12 @@ ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkStaticSolver::Solve(std::v
     return {minT, maxT};
 }
 
-ECAD_INLINE EPrismThermalNetworkTransientSolver::EPrismThermalNetworkTransientSolver(const EPrismThermalModel & model, const EThermalTransientExcitation & excitation)
+EPrismThermalNetworkTransientSolver::EPrismThermalNetworkTransientSolver(const EPrismThermalModel & model, const EThermalTransientExcitation & excitation)
  : EPrismThermalNetworkSolver(model), EThermalNetworkTransientSolver(excitation)
 {
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkTransientSolver::Solve() const
+EPair<EFloat, EFloat> EPrismThermalNetworkTransientSolver::Solve() const
 {
     ECAD_EFFICIENCY_TRACK("prism thermal network transient solve")
     EPair<EFloat, EFloat> range;
@@ -313,17 +313,17 @@ ECAD_INLINE EPair<EFloat, EFloat> EPrismThermalNetworkTransientSolver::Solve() c
 
 }
 
-ECAD_INLINE EStackupPrismThermalNetworkSolver::EStackupPrismThermalNetworkSolver(const EStackupPrismThermalModel & model)
+EStackupPrismThermalNetworkSolver::EStackupPrismThermalNetworkSolver(const EStackupPrismThermalModel & model)
  : m_model(model)
 {
 }
 
-ECAD_INLINE EStackupPrismThermalNetworkStaticSolver::EStackupPrismThermalNetworkStaticSolver(const EStackupPrismThermalModel & model)
+EStackupPrismThermalNetworkStaticSolver::EStackupPrismThermalNetworkStaticSolver(const EStackupPrismThermalModel & model)
  : EStackupPrismThermalNetworkSolver(model)
 {
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> EStackupPrismThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
+EPair<EFloat, EFloat> EStackupPrismThermalNetworkStaticSolver::Solve(std::vector<EFloat> & temperatures) const
 {
     ECAD_EFFICIENCY_TRACK("stackup prism thermal network static solve")
     std::vector<Scalar> results;
@@ -344,12 +344,12 @@ ECAD_INLINE EPair<EFloat, EFloat> EStackupPrismThermalNetworkStaticSolver::Solve
     return {minT, maxT};
 }
 
-ECAD_INLINE EStackupPrismThermalNetworkTransientSolver::EStackupPrismThermalNetworkTransientSolver(const EStackupPrismThermalModel & model, const EThermalTransientExcitation & excitation)
+EStackupPrismThermalNetworkTransientSolver::EStackupPrismThermalNetworkTransientSolver(const EStackupPrismThermalModel & model, const EThermalTransientExcitation & excitation)
  : EStackupPrismThermalNetworkSolver(model), EThermalNetworkTransientSolver(excitation)
 {
 }
 
-ECAD_INLINE EPair<EFloat, EFloat> EStackupPrismThermalNetworkTransientSolver::Solve() const
+EPair<EFloat, EFloat> EStackupPrismThermalNetworkTransientSolver::Solve() const
 {
     ECAD_EFFICIENCY_TRACK("prism thermal network transient solve")
     EPair<EFloat, EFloat> range;

@@ -7,13 +7,13 @@ using namespace ecad::model;
 inline static constexpr EFloat THERMAL_RD = 0.01;
 
 template <typename Scalar>
-ECAD_INLINE EGridThermalNetworkBuilder<Scalar>::EGridThermalNetworkBuilder(const ModelType & model)
+EGridThermalNetworkBuilder<Scalar>::EGridThermalNetworkBuilder(const ModelType & model)
  : m_model(model), m_size(model.ModelSize())
 {
 }
 
 template <typename Scalar>
-ECAD_INLINE UPtr<typename EGridThermalNetworkBuilder<Scalar>::Network> EGridThermalNetworkBuilder<Scalar>::Build(const std::vector<Scalar> & iniT) const
+UPtr<typename EGridThermalNetworkBuilder<Scalar>::Network> EGridThermalNetworkBuilder<Scalar>::Build(const std::vector<Scalar> & iniT) const
 {
     const size_t size = m_model.TotalGrids(); 
     if (iniT.size() != size) return nullptr;
@@ -115,7 +115,7 @@ ECAD_INLINE UPtr<typename EGridThermalNetworkBuilder<Scalar>::Network> EGridTher
 }
 
 template <typename Scalar>
-ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyHeatFlowForLayer(const std::vector<Scalar> & iniT, const EGridDataTable & dataTable, size_t layer, Network & network) const
+void EGridThermalNetworkBuilder<Scalar>::ApplyHeatFlowForLayer(const std::vector<Scalar> & iniT, const EGridDataTable & dataTable, size_t layer, Network & network) const
 {
     bool success;
     for (size_t x = 0; x < m_size.x; ++x) {
@@ -133,7 +133,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyHeatFlowForLayer(const
 }
 
 template <typename Scalar>
-ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyUniformBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, Network & network) const
+void EGridThermalNetworkBuilder<Scalar>::ApplyUniformBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, Network & network) const
 {
     if (not bc.isValid()) return;
     auto value = bc.value;    
@@ -163,7 +163,7 @@ ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyUniformBoundaryConditi
 }
 
 template <typename Scalar>
-ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyBlockBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, Network & network) const
+void EGridThermalNetworkBuilder<Scalar>::ApplyBlockBoundaryConditionForLayer(const EThermalBoundaryCondition & bc, size_t layer, const ESize2D & ll, const ESize2D & ur, Network & network) const
 {
     if (not bc.isValid()) return;
     auto value = bc.value;
@@ -193,25 +193,25 @@ ECAD_INLINE void EGridThermalNetworkBuilder<Scalar>::ApplyBlockBoundaryCondition
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetMetalComposite(const ESize3D & index) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetMetalComposite(const ESize3D & index) const
 {
     return m_model.GetLayers().at(index.z).GetMetalFraction(index.x, index.y);
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetCap(EFloat c, EFloat rho, EFloat z, EFloat area) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetCap(EFloat c, EFloat rho, EFloat z, EFloat area) const
 {
     return c * rho * z * area;
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetRes(EFloat k1, EFloat z1, EFloat k2, EFloat z2, EFloat area) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetRes(EFloat k1, EFloat z1, EFloat k2, EFloat z2, EFloat area) const
 {
     return (z1 / k1 + z2 / k2) / area;
 }
 
 template <typename Scalar>
-ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetCompositeMatK(const ESize3D & index, EFloat refT) const
+std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetCompositeMatK(const ESize3D & index, EFloat refT) const
 {
     auto mK = GetConductingMatK(index, refT);
     auto dK = GetDielectricMatK(index, refT);
@@ -224,21 +224,21 @@ ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetComposi
 }
 
 template <typename Scalar>
-ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetConductingMatK(const ESize3D & index, EFloat refT) const
+std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetConductingMatK(const ESize3D & index, EFloat refT) const
 {
     ECAD_UNUSED(refT)
     return GetConductingMatK(index.z, refT);
 }
 
 template <typename Scalar>
-ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielectricMatK(const ESize3D & index, EFloat refT) const
+std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielectricMatK(const ESize3D & index, EFloat refT) const
 {
     ECAD_UNUSED(refT)
     return GetDielectricMatK(index.z, refT);
 }
 
 template <typename Scalar>
-ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetConductingMatK(size_t layer, EFloat refT) const
+std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetConductingMatK(size_t layer, EFloat refT) const
 {
     //todo
     ECAD_UNUSED(refT)
@@ -246,7 +246,7 @@ ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetConduct
 }
 
 template <typename Scalar>
-ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielectricMatK(size_t layer, EFloat refT) const
+std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielectricMatK(size_t layer, EFloat refT) const
 {
     //todo
     ECAD_UNUSED(refT)
@@ -254,14 +254,14 @@ ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDielect
 }
 
 template <typename Scalar>
-ECAD_INLINE std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDefaultAirK() const
+std::array<EFloat, 3> EGridThermalNetworkBuilder<Scalar>::GetDefaultAirK() const
 {
     //todo
     return std::array<EFloat, 3>{0.026, 0.026, 0.026};
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetCompositeMatC(const ESize3D & index, EFloat z, EFloat area, EFloat refT) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetCompositeMatC(const ESize3D & index, EFloat z, EFloat area, EFloat refT) const
 {
     auto mCap = GetCap(GetConductingMatC(index, refT), GetConductingMatRho(index, refT), z, area);
     auto dCap = GetCap(GetDielectricMatC(index, refT), GetConductingMatRho(index, refT), z, area);
@@ -270,41 +270,41 @@ ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetCompositeMatC(const ES
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetConductingMatC(const ESize3D & index, EFloat refT) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetConductingMatC(const ESize3D & index, EFloat refT) const
 {
     //todo
     return 380;//J/(KG.K)
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetDielectricMatC(const ESize3D & index, EFloat refT) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetDielectricMatC(const ESize3D & index, EFloat refT) const
 {
     //todo
     return 691;//J(KG.K)
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetConductingMatRho(const ESize3D & index, EFloat refT) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetConductingMatRho(const ESize3D & index, EFloat refT) const
 {
     //todo
     return 8850;//Kg/m^3
 }
 
 template <typename Scalar>
-ECAD_INLINE EFloat EGridThermalNetworkBuilder<Scalar>::GetDielectricMatRho(const ESize3D & index, EFloat refT) const
+EFloat EGridThermalNetworkBuilder<Scalar>::GetDielectricMatRho(const ESize3D & index, EFloat refT) const
 {
     //todo
     return 2400;//Kg/m^3
 }
 
 template <typename Scalar>
-ECAD_INLINE ESize3D EGridThermalNetworkBuilder<Scalar>::GetNeighbor(size_t index, Orientation o) const
+ESize3D EGridThermalNetworkBuilder<Scalar>::GetNeighbor(size_t index, Orientation o) const
 {
     return GetNeighbor(GetGridIndex(index), o);
 }
 
 template <typename Scalar>
-ECAD_INLINE ESize3D EGridThermalNetworkBuilder<Scalar>::GetNeighbor(ESize3D index, Orientation o) const
+ESize3D EGridThermalNetworkBuilder<Scalar>::GetNeighbor(ESize3D index, Orientation o) const
 {
     switch(o) {
         case Orientation::Top : {
@@ -348,19 +348,19 @@ ECAD_INLINE ESize3D EGridThermalNetworkBuilder<Scalar>::GetNeighbor(ESize3D inde
 }
 
 template <typename Scalar>
-ECAD_INLINE size_t EGridThermalNetworkBuilder<Scalar>::GetFlattenNeighbor(size_t index, Orientation o) const
+size_t EGridThermalNetworkBuilder<Scalar>::GetFlattenNeighbor(size_t index, Orientation o) const
 {
     return GetFlattenNeighbor(GetGridIndex(index), o);
 }
 
 template <typename Scalar>
-ECAD_INLINE size_t EGridThermalNetworkBuilder<Scalar>::GetFlattenNeighbor(ESize3D index, Orientation o) const
+size_t EGridThermalNetworkBuilder<Scalar>::GetFlattenNeighbor(ESize3D index, Orientation o) const
 {
     return GetFlattenIndex(GetNeighbor(index, o));
 }
 
-template ECAD_INLINE class EGridThermalNetworkBuilder<Float32>;
-template ECAD_INLINE class EGridThermalNetworkBuilder<Float64>;
+template class EGridThermalNetworkBuilder<Float32>;
+template class EGridThermalNetworkBuilder<Float64>;
 
 }//namespace solver
 }//namespace ecad

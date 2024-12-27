@@ -2,7 +2,7 @@
 #include "model/thermal/EStackupPrismThermalModel.h"
 #include "EDataMgr.h"
 namespace ecad::model::utils {
-ECAD_INLINE EStackupPrismThermalModelQuery::EStackupPrismThermalModelQuery(CPtr<EStackupPrismThermalModel> model, bool lazyBuild)
+EStackupPrismThermalModelQuery::EStackupPrismThermalModelQuery(CPtr<EStackupPrismThermalModel> model, bool lazyBuild)
  : m_model(model)
 {
     if (not lazyBuild) {
@@ -12,19 +12,19 @@ ECAD_INLINE EStackupPrismThermalModelQuery::EStackupPrismThermalModelQuery(CPtr<
     }
 }
 
-ECAD_INLINE EFloat EStackupPrismThermalModelQuery::PrismInstanceTopBotArea(size_t pIndex) const
+EFloat EStackupPrismThermalModelQuery::PrismInstanceTopBotArea(size_t pIndex) const
 {
     return GetPrismInstanceTemplate(pIndex).Area();
 }
 
-ECAD_INLINE ETriangle2D EStackupPrismThermalModelQuery::GetPrismInstanceTemplate(size_t pIndex) const
+ETriangle2D EStackupPrismThermalModelQuery::GetPrismInstanceTemplate(size_t pIndex) const
 {
     const auto & instance = m_model->GetPrism(pIndex);
     const auto & triangulation = *m_model->GetLayerPrismTemplate(instance.layer);
     return tri::TriangulationUtility<EPoint2D>::GetTriangle(triangulation, m_model->GetPrismElement(instance.layer, instance.element).templateId);
 }
 
-ECAD_INLINE void EStackupPrismThermalModelQuery::IntersectsPrismInstances(size_t layer, size_t pIndex, std::vector<RtVal> & results) const
+void EStackupPrismThermalModelQuery::IntersectsPrismInstances(size_t layer, size_t pIndex, std::vector<RtVal> & results) const
 {
     const auto & instance = m_model->GetPrism(pIndex);
     const auto & triangulation = *m_model->GetLayerPrismTemplate(instance.layer);
@@ -32,14 +32,14 @@ ECAD_INLINE void EStackupPrismThermalModelQuery::IntersectsPrismInstances(size_t
     return SearchPrismInstances(layer, area, results);
 }
 
-ECAD_INLINE void EStackupPrismThermalModelQuery::SearchPrismInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const
+void EStackupPrismThermalModelQuery::SearchPrismInstances(size_t layer, const EBox2D & area, std::vector<RtVal> & results) const
 {
     results.clear();
     auto rtree = BuildLayerIndexTree(layer);
     rtree->query(boost::geometry::index::intersects(area), std::back_inserter(results));
 }
 
-ECAD_INLINE CPtr<EStackupPrismThermalModelQuery::Rtree> EStackupPrismThermalModelQuery::BuildLayerIndexTree(size_t layer) const
+CPtr<EStackupPrismThermalModelQuery::Rtree> EStackupPrismThermalModelQuery::BuildLayerIndexTree(size_t layer) const
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     if (auto iter = m_lyrRtrees.find(layer); iter != m_lyrRtrees.cend()) return iter->second.get();
@@ -56,14 +56,14 @@ ECAD_INLINE CPtr<EStackupPrismThermalModelQuery::Rtree> EStackupPrismThermalMode
     return m_lyrRtrees.emplace(layer, rtree).first->second.get();
 }
 
-ECAD_INLINE void EStackupPrismThermalModelQuery::SearchNearestPrismInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const
+void EStackupPrismThermalModelQuery::SearchNearestPrismInstances(size_t layer, const EPoint2D & pt, size_t k, std::vector<RtVal> & results) const
 {
     results.clear();
     auto rtree = BuildLayerIndexTree(layer);
     rtree->query(boost::geometry::index::nearest(pt, k), std::back_inserter(results));
 }
 
-ECAD_INLINE size_t EStackupPrismThermalModelQuery::NearestLayer(EFloat height) const
+size_t EStackupPrismThermalModelQuery::NearestLayer(EFloat height) const
 {
     using namespace generic::math;
     const auto & layers = m_model->layers;
