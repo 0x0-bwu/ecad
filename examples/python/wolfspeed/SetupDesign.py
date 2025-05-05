@@ -122,10 +122,10 @@ def setup_design(name, chip_locations, work_dir, save = True) :
         coord_units = database.coord_units
         pwh = ecad.PolygonWithHolesData()
         pwh.outline = mgr.create_shape_polygon(coord_units, [-52.2, -29.7, 52.2, -29.7, 52.5, 29.7, -52.2, 29.7], 5.3).get_contour()
-        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D(-46.5, -24), 3.85).get_contour())
-        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D( 46.5, -24), 3.85).get_contour())
-        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D( 46.5,  24), 3.85).get_contour())
-        pwh.holes.append(mgr.create_shape_circle(coord_units, ecad.FPoint2D(-46.5,  24), 3.85).get_contour())
+        pwh.add_hole(mgr.create_shape_circle(coord_units, ecad.FPoint2D(-46.5, -24), 3.85).get_contour())
+        pwh.add_hole(mgr.create_shape_circle(coord_units, ecad.FPoint2D( 46.5, -24), 3.85).get_contour())
+        pwh.add_hole(mgr.create_shape_circle(coord_units, ecad.FPoint2D( 46.5,  24), 3.85).get_contour())
+        pwh.add_hole(mgr.create_shape_circle(coord_units, ecad.FPoint2D(-46.5,  24), 3.85).get_contour())
         base_layout.set_boundary(mgr.create_shape_polygon_with_holes(pwh))
         
         mgr.create_net(base_layout, 'Gate')

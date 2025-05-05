@@ -254,7 +254,9 @@ void ecad_init_basic(py::module_ & m)
     py::class_<EPolygonWithHolesData>(m, "PolygonWithHolesData")
         .def(py::init<>())
         .def_readwrite("outline", &EPolygonWithHolesData::outline)
-        .def_readwrite("holes", &EPolygonWithHolesData::holes)
+        .def("add_hole", [](EPolygonWithHolesData & pwh, EPolygonData hole) {
+            pwh.holes.emplace_back(std::move(hole));
+        })
     ;
 
     py::enum_<EMirror2D>(m, "Mirror2D")
