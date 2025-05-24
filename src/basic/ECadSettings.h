@@ -450,6 +450,7 @@ struct EThermalStaticSettings : public EThermalSettings
 {
     bool maximumRes = true;
     bool dumpHotmaps = false;
+    bool dumpMatrices = false;
     EFloat residual = 0.1;
     size_t iteration = 10;
     EThermalNetworkStaticSolverType solverType = EThermalNetworkStaticSolverType::ConjugateGradient;

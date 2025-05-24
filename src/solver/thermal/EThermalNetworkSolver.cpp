@@ -57,9 +57,14 @@ ECAD_INLINE bool EThermalNetworkStaticSolver::Solve(const typename ThermalNetwor
         ECAD_TRACE("intake  heat flow: %1%w", builder.summary.iHeatFlow);
         ECAD_TRACE("outtake heat flow: %1%w", builder.summary.oHeatFlow);
 
+        std::string matDir;
+        if (settings.dumpMatrices) {
+            matDir = settings.workDir + ECAD_SEPS + "iteration_" + std::to_string(iteration);
+        }
+
         using namespace thermal::solver;
         ThermalNetworkSolver<Scalar> solver(*network, static_cast<int>(settings.solverType));
-        solver.Solve(envT, results);
+        solver.Solve(envT, results, matDir);
 
         residual = CalculateResidual(results, prevRes, settings.maximumRes);
         ECAD_TRACE("P-T Iteration: %1%, Residual: %2%.", ++iteration, residual);

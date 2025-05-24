@@ -31,11 +31,28 @@ namespace thermal::solver {
 
         virtual ~ThermalNetworkSolver() = default;
 
-        void Solve(Scalar refT, std::vector<Scalar> & result) const
+        void Solve(Scalar refT, std::vector<Scalar> & result, std::string rptDir) const
         {
             using namespace generic::math::la;
             auto m = makeMNA(m_network, true);
             auto rhs = makeRhs(m_network, true, refT);
+            if (not rptDir.empty()) {
+
+                auto dumpSpMat = [](const auto & filename, auto & mat) {
+                    std::ofstream out(filename);
+                    for (int k = 0; k < mat.outerSize(); ++k)
+                        for (typename SparseMatrix<Scalar>::InnerIterator it(mat, k); it; ++it)
+                            out << it.row() << " " << it.col() << " " << it.value() << "\n";
+                    out.close();
+                };
+                generic::fs::CreateDir(rptDir);
+                dumpSpMat(rptDir + "/G.txt", m.G);
+                dumpSpMat(rptDir + "/B.txt", m.B);
+                dumpSpMat(rptDir + "/C.txt", m.C);
+                dumpSpMat(rptDir + "/L.txt", m.L);
+                std::ofstream osRhs(rptDir + "/rhs.txt");
+                osRhs << rhs; osRhs.close();
+            }
             result.resize(m_network.GetNodes().size(), refT);
             Eigen::Map<DenseVector<Scalar>> x(result.data(), result.size());
             switch (m_solverType) {

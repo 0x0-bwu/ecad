@@ -49,7 +49,7 @@ void TransientThermalFlow(Ptr<ILayoutView> layout, const std::string & workDir, 
     EThermalTransientSimulationSetup setup(workDir, eDataMgr.Threads(), {});
     setup.monitors = GetDieMonitors(layout);
     setup.settings.envTemperature = {25, ETemperatureUnit::Celsius};
-    setup.settings.mor.order = 100;
+    setup.settings.mor.order = 0;
     setup.settings.mor.romLoadFile = workDir + ECAD_SEPS + "rom_source.db";
     setup.settings.mor.romSaveFile = setup.settings.mor.romLoadFile;
     setup.settings.verbose = true;
